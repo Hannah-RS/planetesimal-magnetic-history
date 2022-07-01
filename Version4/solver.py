@@ -11,16 +11,17 @@ import time #use this to time the integration
 #import time constants and initial conditions
 from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa, kappa_c, out_interval
 
+
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
 from stencil import cond_stencil
 dT_mat = cond_stencil(r,rc,dr,kappa,kappa_c)  
 np.savez('Stencil',dT_mat=dT_mat)
 
 # define the run number, start and end times
-run = 22
+run = 23
 
-t_start=1*Myr #start after the end of stage 2
-t_end_m=400 #end time in Myr
+t_start=400*Myr #start after the end of stage 2
+t_end_m=600 #end time in Myr
 t_end=t_end_m*Myr
 t_cond = dr**2/kappa #conductive timestep
 step_m=0.1*t_cond  #max timestep must be smaller than conductive timestep
