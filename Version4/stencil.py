@@ -36,7 +36,7 @@ def cond_stencil(r,rc,dr,kappa_m,kappa_c):
     n_cells = int(r/dr) #number of cells needed to span body
 
     # top value is surface, bottom row is CMB
-    rarr = np.arange(0,r,500) # create values of cell boundaries
+    rarr = np.arange(0,r,dr) # create values of cell boundaries
     rmid = (rarr[:-1]+rarr[1:])/2 #find midpoints of cells
     
     # create matrix for radial steps

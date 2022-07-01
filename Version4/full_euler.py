@@ -49,10 +49,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0):
          
     """
     import numpy as np
-    from parameters import Myr, Rac, B, Tsolidus, dr
+    from parameters import Myr, Rac, B, Tsolidus, dr, out_interval
     
     #initialise arrays for output
-    out_interval = 0.01*Myr
     p = int((tend-tstart)/(out_interval)) #only output temp profiles every 10 Myr
     m = int((tend-tstart)/dt)
     ratio = int(m/p) #use for calculating when to save temp profiles
@@ -60,6 +59,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0):
     n_cells = len(T0) #number of cells
     i_core = int(n_cells/2) # index in array of last core cell
     cond = 0 #flag for when first switch to conductive regime
+    cond_i = np.nan #set as nan and then reset if switches to conduction
     
     #output variables
     Ra = np.zeros([m])
@@ -174,7 +174,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0):
         
         #write Tprofile to file if appropriate
         if i%ratio== 0: #if multiple of 10Myr then save the profile - will need to check if this works as tsolve might not be integer multiples of 10 ever
-            print('t={:.0f}Myr'.format(tsolve[i]/Myr)) #useful to track progress of simulation
+            print('t={:.1f}Myr'.format(tsolve[i]/Myr)) #useful to track progress of simulation
             if i_save >= p: # array is full, pass so don't throw an error
                 pass
             else:

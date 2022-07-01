@@ -23,7 +23,6 @@ def Rayleigh_calc(Tm):
     from viscosity_def import viscosity #import viscosity model
     
     from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, Rac, Ts
-    n=10
     
     eta = viscosity(Tm)
     d0 = (gamma/8)**(4/3)*(Tm-Ts)*((Rac*kappa*eta)/(rhom*g*alpha_m))**(1/3) #upper bl
