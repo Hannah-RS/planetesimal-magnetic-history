@@ -49,6 +49,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0):
          
     """
     import numpy as np
+    import scipy.sparse as sp
     from parameters import Myr, Rac, B, Tsolidus, dr, out_interval
     
     #initialise arrays for output

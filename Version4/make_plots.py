@@ -9,10 +9,10 @@ import numpy as np
 import pandas as pd
 
 #choose your run
-run=22
+run=24
 
 #scale time to Myr
-from parameters import Myr
+from parameters import Myr, r, Tm0, Tsolidus
 
 #import data from npz file
 npzfile = np.load('Results/run_{}.npz'.format(run))
@@ -67,21 +67,22 @@ t_plot = t/Myr
 # f = np.hstack([f,f2])
 # t_plot_comb = np.hstack([t,t2])/Myr
 # t_plot = t_plot_comb
-# #import label info - read in from correct row in csv
-# run_info = pd.read_csv('run_info3.csv',delimiter=',')
 
-# row = run_info[run_info['run']==run]
-# r = row.iloc[0,1] #radius [m]
-# Tsolidus = row.iloc[0,2] #temperature for onset of solidification [K]
-# Tm0 = row.iloc[0,3] # initial mantle and core temp [K]
-# tstart = row.iloc[0,4]
-# tend = row.iloc[0,5] # max possible time of simulation [Myr]
-# tstep = row.iloc[0,6] #max timestep [Myr]
-# tsolid = row.iloc[0,7] #time at which solidifcation finishes [Myr] if tsolid == tend then core may not have finished solidifying
-# cond_i= int(row.iloc[0,8]) #index in array at which mantle started conducting
-# cond_t = t[cond_i]/Myr #time at which mantle switched to conduction
-# dr=row.iloc[0,10] #cell spacing
-# dt =row.iloc[0,11] #T_profile output frequency
+#import label info - read in from correct row in csv
+run_info = pd.read_csv('run_info3.csv',delimiter=',')
+
+row = run_info[run_info['run']==run]
+r = row.iloc[0,1] #radius [m]
+Tsolidus = row.iloc[0,2] #temperature for onset of solidification [K]
+Tm0 = row.iloc[0,3] # initial mantle and core temp [K]
+tstart = row.iloc[0,4]
+tend = row.iloc[0,5] # max possible time of simulation [Myr]
+tstep = row.iloc[0,6] #max timestep [Myr]
+tsolid = row.iloc[0,7] #time at which solidifcation finishes [Myr] if tsolid == tend then core may not have finished solidifying
+cond_i= int(row.iloc[0,8]) #index in array at which mantle started conducting
+cond_t = t[cond_i]/Myr #time at which mantle switched to conduction
+dr=row.iloc[0,10] #cell spacing
+dt =row.iloc[0,11] #T_profile output frequency
 
 ################### Main Plot #########################################
 # make  log-log plot - similar to Bryson 2019
@@ -113,7 +114,7 @@ plt.loglog(t_plot,Frad,label='$F_{rad}$')
 plt.ylim([1e-3,1e2])
 plt.ylabel('Flux/ W$m^{-2}$')
 plt.legend()
-plt.savefig('Plots/Tflux_run{}.png'.format(run),dpi=450)
+#plt.savefig('Plots/Tflux_run{}.png'.format(run),dpi=450)
 
 plt.figure(tight_layout=True)
 plt.suptitle('Thermal evolution of a {:.0f}km asteroid \n Tm0 = {}K, Tsolidus ={}K \n run {}'.format(r/1e3, Tm0, Tsolidus,run))
@@ -131,7 +132,7 @@ plt.semilogx(t_plot,f,label='f')
 plt.xlabel('Time/ Myr')
 plt.ylabel('f')
 
-plt.savefig('Plots/Remf_run{}.png'.format(run),dpi=450)
+#plt.savefig('Plots/Remf_run{}.png'.format(run),dpi=450)
 
 ####################### Exploratory Plots #################################
 #make a plot to check Rayleigh number
@@ -202,7 +203,6 @@ plt.legend(loc='lower right')
 #when is T[-2] zig-zaggy?
 plt.figure(tight_layout=True,figsize=[6,6])
 plt.title('Thermal evolution of a {:.0f}km asteroid \n Tm0 = {}K, Tsolidus ={}K \n run {}'.format(r/1e3, Tm0, Tsolidus,run))
-xmin=tstart
 #plt.plot(t_plot,Tm,label='T$_m$ - base')
 plt.scatter(t_plot,Tm_surf,label='T$_m$ - surface')
 #plt.plot(t_plot,Tc,label='T$_c$')

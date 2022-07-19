@@ -22,11 +22,12 @@ def Tm_cond_calc(dt,T):
     """
     # set up
     import numpy as np
+    import scipy.sparse as sp
          
     # calculate dTdt
     #import stencil
-    npzfile = np.load('Stencil.npz')
-    r_mat = npzfile['dT_mat']
+    r_mat = sp.load_npz('Stencil.npz')
+
         
     #calculate dTdt for conduction
     dTdt = r_mat.dot(T)

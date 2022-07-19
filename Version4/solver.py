@@ -14,14 +14,16 @@ from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa, kappa_c, out_in
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
 from stencil import cond_stencil
+import scipy.sparse as sp
 dT_mat = cond_stencil(r,rc,dr,kappa,kappa_c)  
-np.savez('Stencil',dT_mat=dT_mat)
+sparse_mat =sp.dia_matrix(dT_mat)
+sp.save_npz('Stencil',sparse_mat)
 
 # define the run number, start and end times
-run = 23
+run = 27
 
-t_start=400*Myr #start after the end of stage 2
-t_end_m=600 #end time in Myr
+t_start=1*Myr #start after the end of stage 2
+t_end_m=500 #end time in Myr
 t_end=t_end_m*Myr
 t_cond = dr**2/kappa #conductive timestep
 step_m=0.1*t_cond  #max timestep must be smaller than conductive timestep
