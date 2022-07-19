@@ -77,6 +77,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0):
     from dTmdt_def import dTmdt_calc
     from dTcdt_def import dTcdt_calc #convective CMB heat flux
     from dTcdt_def2 import dTcdt_calc2  #conductive CMB heat flux
+    from Rayleigh_def import Rayleigh_calc
     
     #Step 0. Calculate time
     tsolve[0] = tstart + dt
@@ -85,7 +86,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0):
     T_new = Tm_cond_calc(dt,T0)
     
     # Step 2. Calculate stagnant lid thickness and Rayleigh number
-    from Rayleigh_def import Rayleigh_calc
     Ra[0], d0[0] = Rayleigh_calc(T0[i_core+1]) #use temp at base of mantle 
     nlid_cells = int(d0[0]/dr)
     lid_start = n_cells - nlid_cells - 1 #index in temp array where lid starts
@@ -131,7 +131,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0):
         T_new = Tm_cond_calc(dt,T_old)
         
         # Step 2. Calculate stagnant lid thickness and Rayleigh number
-        from Rayleigh_def import Rayleigh_calc
         Ra[i], d0[i] = Rayleigh_calc(T_old[i_core+1]) #use temp at base of mantle 
         nlid_cells = int(d0[i]/dr)
         lid_start = n_cells - nlid_cells - 1 #index in temp array where lid starts

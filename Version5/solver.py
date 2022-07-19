@@ -20,10 +20,10 @@ sparse_mat =sp.dia_matrix(dT_mat)
 sp.save_npz('Stencil',sparse_mat)
 
 # define the run number, start and end times
-run = 30
+run = 27
 
 t_start=1*Myr #start after the end of stage 2
-t_end_m=100 #end time in Myr
+t_end_m=500 #end time in Myr
 t_end=t_end_m*Myr
 t_cond = dr**2/kappa #conductive timestep
 step_m=0.1*t_cond  #max timestep must be smaller than conductive timestep
