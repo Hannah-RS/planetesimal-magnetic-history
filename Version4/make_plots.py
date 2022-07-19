@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 #choose your run
-run=24
+run=33
 
 #scale time to Myr
 from parameters import Myr, r, Tm0, Tsolidus

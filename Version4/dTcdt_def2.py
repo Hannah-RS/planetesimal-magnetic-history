@@ -10,6 +10,8 @@ This version is for the conductive step, so takes slightly different arguments t
 Fcmb is also k(Tc-Tm)/dr now - eqn 14 in Supplementary materials of Bryson (2019)
 
 """
+from parameters import  km, Ts, Acmb, dr
+
 def dTcdt_calc2(t,Tm,Tc,f,Qr=True,Qs=True,Qg=True,Ql=True):
     """
 
@@ -46,7 +48,7 @@ def dTcdt_calc2(t,Tm,Tc,f,Qr=True,Qs=True,Qg=True,Ql=True):
         den = 0 # create a variable which will be the value of the denominator, will be changed later as the criterion has passed
        
     #import constants and parameters    
-    from parameters import  km, Ts, Acmb, dr
+
         
     #calculate CMB heat flux - eqn 26 in Dodds (2021) or 14 in bryson supplementary materials as flux is equal
 

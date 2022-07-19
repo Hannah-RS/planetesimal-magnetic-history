@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import numpy as np
+
 def viscosity(Tm):
     """
     Viscosity model from Dodds et al (2021)
@@ -14,7 +16,7 @@ def viscosity(Tm):
     Silicate viscosity
 
     """
-    import numpy as np
+
     
     log10_eta = 64 - Tm/29 - 5*np.tanh((Tm-1625)/15)
     

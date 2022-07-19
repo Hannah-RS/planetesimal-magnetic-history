@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from parameters import rhoc, rc, drho, D, Delta, G
+import numpy as np
+    
 def Qgt(Tc,f):
     """
     From Table 1 in Nimmo, F. (2009). Energetics of asteroid dynamos and the role of compositional convection. Qg but divided by dTc/dt
@@ -16,9 +19,7 @@ def Qgt(Tc,f):
     Power contribution due to release of GPE from release of light elements when inner core solidifies
 
     """
-    from parameters import rhoc, rc, drho, D, Delta, G
-    import numpy as np
-    
+
     Mc = 4/3*np.pi*rc**3*rhoc # mass of core [kg]
     
     from F_def import F_calc

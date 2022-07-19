@@ -3,6 +3,10 @@
 """
 Calculate  magnetic Reynolds numbers
 """
+import numpy as np
+from parameters import G, alpha_c, rc, cpc, Omega, lambda_mag, drho, rhoc, f0 #drho here is delta_rho/rho
+
+
 def Rem_therm(Fdrive):
     """
     thermally drived magnetic Reynolds number (equation 16 from Bryson et al. 2019)
@@ -16,12 +20,9 @@ def Rem_therm(Fdrive):
     -------
     Magnetic reynolds number for a thermally driven dynamo
 
-    """
-    import numpy as np
-    
+    """    
     #calculate utherm (eqn 17 in Bryson 2019)
-    from parameters import G, alpha_c, rc, cpc, Omega, lambda_mag
-    
+ 
     utherm = ((2*np.pi*G*alpha_c*rc*Fdrive)/(cpc*Omega))**0.5
     
     return utherm*rc/lambda_mag
@@ -45,8 +46,6 @@ def Rem_comp(t,f):
     Magnetic reynolds number for a compositionally driven dynamo
 
     """
-    import numpy as np
-    from parameters import G,  rc, drho, rhoc, Omega, lambda_mag, f0 #drho here is delta_rho/rho
     
     #calculate dfdt
     "two options here - use analytical expressions in already written functions or numerically take an array of t and f and approximate"

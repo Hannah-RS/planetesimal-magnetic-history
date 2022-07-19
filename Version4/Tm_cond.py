@@ -4,7 +4,11 @@
 Expression for dTm/dt from rearranging 13 in supplementary materials of Bryson (2019)
 Calculates rate of change of conductive profile for the whole body and new temperature profile
 """
-def Tm_cond_calc(dt,T):
+# set up
+import numpy as np
+import scipy.sparse as sp
+    
+def Tm_cond_calc(dt,T,sparse_mat):
     """
 
     Parameters
@@ -13,6 +17,8 @@ def Tm_cond_calc(dt,T):
         time step [s]
     T: array
         temperature profile, first value is r=0, last value is surface
+    sparse_mat: sparse matrix
+        stencil for conductive temperature evolution
 
     Returns
     -------
@@ -20,17 +26,9 @@ def Tm_cond_calc(dt,T):
             new temperature profile
 
     """
-    # set up
-    import numpy as np
-    import scipy.sparse as sp
-         
-    # calculate dTdt
-    #import stencil
-    r_mat = sp.load_npz('Stencil.npz')
 
-        
     #calculate dTdt for conduction
-    dTdt = r_mat.dot(T)
+    dTdt = sparse_mat.dot(T)
     
     Tnew = dTdt*dt + T
         

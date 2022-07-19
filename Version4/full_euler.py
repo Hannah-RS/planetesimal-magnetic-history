@@ -10,7 +10,19 @@ Flow:
     4. Replace r < rc with isothermal core profile
     5. Calculate df/dt and f    
 """
-def thermal_evolution(tstart,tend,dt,T0,f0):
+#import modules
+import numpy as np
+import scipy.sparse as sp
+from parameters import Myr, Rac, B, Tsolidus, dr, out_interval
+
+#import required functions
+from Tm_cond import Tm_cond_calc
+from dTmdt_def import dTmdt_calc
+from dTcdt_def import dTcdt_calc #convective CMB heat flux
+from dTcdt_def2 import dTcdt_calc2  #conductive CMB heat flux
+from Rayleigh_def import Rayleigh_calc
+
+def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat):
     """
     
 
@@ -26,6 +38,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0):
         initial temperature profile
     f0: float
         initial fractional inner core radius
+    sparse_mat: sparse matrix
+        stencil for conductive temperature evolution
 
     Returns
     -------
@@ -48,9 +62,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0):
         index in the array when the mantle switched from conduction to convection, nan if didn't switch
          
     """
-    import numpy as np
-    import scipy.sparse as sp
-    from parameters import Myr, Rac, B, Tsolidus, dr, out_interval
     
     #initialise arrays for output
     p = int((tend-tstart)/(out_interval)) #only output temp profiles every 10 Myr
@@ -71,21 +82,15 @@ def thermal_evolution(tstart,tend,dt,T0,f0):
     Tm_surf = np.zeros([m])
     f = np.zeros([m])
     tsolve = np.zeros([m])
-    
-    #import required functions
-    from Tm_cond import Tm_cond_calc
-    from dTmdt_def import dTmdt_calc
-    from dTcdt_def import dTcdt_calc #convective CMB heat flux
-    from dTcdt_def2 import dTcdt_calc2  #conductive CMB heat flux
+
     
     #Step 0. Calculate time
     tsolve[0] = tstart + dt
     
     # Step 1. Calculate conductive profile for whole body
-    T_new = Tm_cond_calc(dt,T0)
+    T_new = Tm_cond_calc(dt,T0,sparse_mat)
     
     # Step 2. Calculate stagnant lid thickness and Rayleigh number
-    from Rayleigh_def import Rayleigh_calc
     Ra[0], d0[0] = Rayleigh_calc(T0[i_core+1]) #use temp at base of mantle 
     nlid_cells = int(d0[0]/dr)
     lid_start = n_cells - nlid_cells - 1 #index in temp array where lid starts
@@ -128,10 +133,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0):
         tsolve[i] = tsolve[i-1] + dt
         
         # Step 1. Calculate conductive profile for whole body
-        T_new = Tm_cond_calc(dt,T_old)
+        T_new = Tm_cond_calc(dt,T_old,sparse_mat)
         
         # Step 2. Calculate stagnant lid thickness and Rayleigh number
-        from Rayleigh_def import Rayleigh_calc
         Ra[i], d0[i] = Rayleigh_calc(T_old[i_core+1]) #use temp at base of mantle 
         nlid_cells = int(d0[i]/dr)
         lid_start = n_cells - nlid_cells - 1 #index in temp array where lid starts
@@ -140,8 +144,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0):
             if cond == 0: #check if first time it is conductive i.e. the switch
                 cond_i = i
                 cond = 1
-            else: 
-                pass
+
             
             Tm_base[i] = T_new[i_core+1]
             Tm_surf[i] = T_new[-2]
@@ -181,8 +184,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0):
             else:
                 Tprofile[i_save,:] = T_old
                 i_save = i_save +1 #increment so saves in next space
-        else:
-            pass
+
         
         if f[i]>=1: #stop integration if core is solid, truncate arrays to only return non-zero values
             
@@ -196,8 +198,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0):
             tsolve = tsolve[:i]
             Tprofile = Tprofile[:i_save]
             break
-        else:
-            pass
+
               
         
     return Ra, d0, Tprofile, Tc, Tm_base, Tm_surf, f, tsolve, cond_i

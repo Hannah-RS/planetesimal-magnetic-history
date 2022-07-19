@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from parameters import de_fe, de_k, thalf_fe, thalf_k, f60, ppm_k , rc, rhoc, D
+import numpy as np
+
 def Qr(t,Tc):
     """
     From Table 1 in Nimmo, F. (2009). Energetics of asteroid dynamos and the role of compositional convection. 
@@ -17,8 +20,6 @@ def Qr(t,Tc):
     Power source due to radiogenic heat production
 
     """
-    from parameters import de_fe, de_k, thalf_fe, thalf_k, f60, ppm_k , rc, rhoc, D
-    import numpy as np
     
     Mc = 4/3*np.pi*rc**3*rhoc #mass of the core [kg]
     h_fe = de_fe*f60*np.exp(-t/thalf_fe)/thalf_fe #internal heat generation rate from iron [J /kg /s]

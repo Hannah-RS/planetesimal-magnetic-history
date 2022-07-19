@@ -3,6 +3,10 @@
 """
 Expression for dTm/dt from rearranging eqn 9 in supplementary materials of Bryson (2019)
 """
+from parameters import rhom, cpm_p, Vm, As, Ts, h0, Al0, XAl, thalf_al, Acmb, km, gamma, Myr
+import numpy as np
+from Rayleigh_def import Rayleigh_calc
+
 def dTmdt_calc(t,Tm,Tc,Qr=True,Qs=True,Qg=True,Ql=True):
     """
 
@@ -29,11 +33,10 @@ def dTmdt_calc(t,Tm,Tc,Qr=True,Qs=True,Qg=True,Ql=True):
             rate of change of mantle temperature 
 
     """
-    from parameters import rhom, cpm_p, Vm, As, Ts, h0, Al0, XAl, thalf_al, Acmb, km, gamma, Myr
-    import numpy as np
+
     
     #calculate lid thickness
-    from Rayleigh_def import Rayleigh_calc
+    
     Ra, d0 = Rayleigh_calc(Tm)
     
     #calculate radiogenic heating 
