@@ -3,6 +3,9 @@
 """
 Calculate different heat fluxes 
 """
+from parameters import kc, alpha_c, rc, rhoc, G, cpc, Ts, km, gamma, dr, r
+import numpy as np
+
 def Flux_calc(Tm,Tc,cond=False,Tcmb =0):
     """
     
@@ -27,8 +30,7 @@ def Flux_calc(Tm,Tc,cond=False,Tcmb =0):
     Fdrive: float
         heat flux avilable for driving the dynamo
     """
-    from parameters import kc, alpha_c, rc, rhoc, G, cpc, Ts, km, gamma, dr, r
-    import numpy as np
+
   
     if cond == False: #mantle is convecting
         #calculate surface flux as Fcmb is a scaled version

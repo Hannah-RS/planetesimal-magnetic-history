@@ -10,8 +10,10 @@ Definition of f as a function of Tc
 
 :returns f: float, inner core size as a fraction of core radius
 """
+import numpy as np
+
 def f_calc(Tc,Tc0,f0,B):
-    import numpy as np
+
     #print(Tc)
     out = np.sqrt(-2*B*np.log(Tc/Tc0)+f0**2)
 

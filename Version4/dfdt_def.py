@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from parameters import Tsolidus
+from parameters import B
+from dTcdt_def import dTcdt_calc
+
 def dfdt_calc(t,y,Qr=True,Qs=True,Qg=True,Ql=True):
     """
     Calculate df/dt based on Equation 7 in Nimmo 2009
@@ -34,12 +38,11 @@ def dfdt_calc(t,y,Qr=True,Qs=True,Qg=True,Ql=True):
     f = y[2]
     
     
-    from parameters import Tsolidus
+
     if Tc > Tsolidus:
         out = 0 #core not solidifying - based on 3-9 wt% S and phase diagram in Scheinberg 2016 
     else:  
-        from parameters import B
-        from dTcdt_def import dTcdt_calc
+
         out = -B*dTcdt_calc(t,y,Qr,Qs,Qg,Ql)/(Tc*f) 
     
     return out

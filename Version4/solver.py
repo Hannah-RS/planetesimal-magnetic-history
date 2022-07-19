@@ -17,13 +17,13 @@ from stencil import cond_stencil
 import scipy.sparse as sp
 dT_mat = cond_stencil(r,rc,dr,kappa,kappa_c)  
 sparse_mat =sp.dia_matrix(dT_mat)
-sp.save_npz('Stencil',sparse_mat)
+
 
 # define the run number, start and end times
-run = 30
+run = 33
 
 t_start=1*Myr #start after the end of stage 2
-t_end_m=100 #end time in Myr
+t_end_m=1000 #end time in Myr
 t_end=t_end_m*Myr
 t_cond = dr**2/kappa #conductive timestep
 step_m=0.1*t_cond  #max timestep must be smaller than conductive timestep
@@ -63,7 +63,7 @@ from full_euler import thermal_evolution
 
 #integrate
 tic = time.perf_counter()
-Ra, d0, Tprofile, Tc, Tm_base, Tm_surf, f, t, cond_i = thermal_evolution(t_start,t_end,step_m,Tint,f0) #Tm_base is temp at base of mantle, Tmsurf is temp one node below surface
+Ra, d0, Tprofile, Tc, Tm_base, Tm_surf, f, t, cond_i = thermal_evolution(t_start,t_end,step_m,Tint,f0,sparse_mat) #Tm_base is temp at base of mantle, Tmsurf is temp one node below surface
 toc = time.perf_counter()
 int_time = toc - tic    
 print('Integration finished')

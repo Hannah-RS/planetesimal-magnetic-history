@@ -8,6 +8,8 @@ dTc/dt=(Qcmb-Qr)/(Qst+Qgt+Qlt) where Qst, Qgt, QLt are the expressions for Qs, Q
 Written as a function of t, Tm, Tc, f to comply with order expected by vectorised argument in solve_ivp
 
 """
+#import constants and parameters    
+from parameters import gamma, km, Ts, Acmb
 def dTcdt_calc(t,Tm,Tc,f,d0,Qr=True,Qs=True,Qg=True,Ql=True):
     """
 
@@ -45,8 +47,7 @@ def dTcdt_calc(t,Tm,Tc,f,d0,Qr=True,Qs=True,Qg=True,Ql=True):
     else: 
         den = 0 # create a variable which will be the value of the denominator, will be changed later as the criterion has passed
         
-    #import constants and parameters    
-    from parameters import gamma, km, Ts, Acmb
+
         
     #calculate CMB heat flux
     Fcmb = (Tc-Tm)*gamma*km*(Tm-Ts)/d0
