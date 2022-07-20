@@ -59,8 +59,7 @@ drho=0.025 # \delta rho/rho 0.05 Nimmo (2009)
 Delta=1.2 #dTm/dP/dT/dP 1.2 Nimmo (2009)
 Tsolidus = 1450 # solidus temp [K] based on phase diagram from Scheinberg 2016
 eta_c =0.01 # viscosity of core [Pa s] Dodds (2021)
-
-
+bpart = 0.5 #buoyancy partitioning coefficient Nichols (2021) but based on Aubert 2009 - might want to investigate
 #radioactivity
 #assume core is pure iron with ppm amounts of K that has a negligible effect on mass
 # energy generation rate per unit mass iron = de_fe * f60 * e^(-t/thalf_fe) 
@@ -89,7 +88,6 @@ g = G*(Vm*rhom+4/3*np.pi*rc**3*rhoc)/r**2 # surface gravity
 
 #viscosity model used the 1400 < Tm < 1600 in eqn 3 in supplementary materials, but assumed viscosity doesn't vary much
 dt_gamma = Tm0 - T0eta # delta T in viscosity relation
-
 km = kappa*cpm*rhom # thermal conductivity of silicate [W /m /K]
 
 

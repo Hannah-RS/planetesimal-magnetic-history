@@ -20,7 +20,7 @@ sparse_mat =sp.dia_matrix(dT_mat)
 
 
 # define the run number, start and end times
-run = 33
+run = 34
 
 t_start=1*Myr #start after the end of stage 2
 t_end_m=1000 #end time in Myr
@@ -93,7 +93,7 @@ Frad = h*rhom*Vm/As #radiogenic heatflux
 Flux = [Fs, Fcmb, Fad, Frad]
 
 # calculate both magnetic reynolds numbers and merge only keeping the larger value (the larger velocity will dominate)
-from Rem_calc import Rem_comp, Rem_therm
+from Rem_calc import Rem_comp, Rem_therm, ucomp_nimmo, ucomp_aubert, p_nichols
 
 # need Fdrive for Rem_therm
 #only calculate this for Fdrive >0
@@ -101,14 +101,22 @@ Fdrive = Fcmb - Fad
 Fdrive_nn = Fdrive.copy()
 Fdrive_nn[Fdrive<0]=0
 Rem_t = Rem_therm(Fdrive_nn) # magnetic Reynolds number for thermal convection
-Rem_c = Rem_comp(t,f) # magnetic Reynolds number for compositional convection
-Rem = Rem_c
-Rem[Rem_c<Rem_t] = Rem_t[Rem_c<Rem_t] #replace values where Rem_t < Rem_c
+
+#calculate compositional convection two ways
+unimmo = ucomp_nimmo(t,f)
+power = p_nichols(t,f) #convective power density
+uaubert = ucomp_aubert(power,f)
+Rem_cn = Rem_comp(unimmo,f) # magnetic Reynolds number for compositional convection
+Rem_ca = Rem_comp(uaubert,f) # magnetic Reynolds number for compositional convection
+Rem1 = Rem_cn
+Rem2 = Rem_ca
+Rem1[Rem_cn<Rem_t] = Rem_t[Rem_cn<Rem_t] #replace values where Rem_t < Rem_c
+Rem2[Rem_ca<Rem_t] = Rem_t[Rem_ca<Rem_t] #replace values where Rem_t < Rem_c
 
 print('Fluxes and magnetic Reynolds number calculated.')
 
 #save variables to file
-np.savez('Results/run_{}'.format(run), Tm_base = Tm_base, Tm_surf = Tm_surf, Tc = Tc, f = f, T_profile = Tprofile, t=t, Rem = Rem, Flux = Flux, Ra = Ra, d0 = d0 ) 
+np.savez('Results/run_{}'.format(run), Tm_base = Tm_base, Tm_surf = Tm_surf, Tc = Tc, f = f, T_profile = Tprofile, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux, Ra = Ra, d0 = d0 ) 
 
 #write parameters to the run file
 from csv import writer

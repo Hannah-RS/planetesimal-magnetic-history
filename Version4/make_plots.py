@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 #choose your run
-run=33
+run=34
 
 #scale time to Myr
 from parameters import Myr, r, Tm0, Tsolidus
@@ -22,7 +22,8 @@ Tc= npzfile['Tc']
 f = npzfile['f'] 
 T_profile = npzfile['T_profile']
 t = npzfile['t'] #time in s
-Rem = npzfile['Rem'] # magnetic Reynolds number from compositional and thermal convection (whatever is larger at each time step)
+Rem1 = npzfile['Rem1'] # magnetic Reynolds number from compositional (Nimmo) and thermal convection (whatever is larger at each time step)
+Rem2 = npzfile['Rem2'] # magnetic Reynolds number from compositional (Nichols) and thermal convection (whatever is larger at each time step)
 Flux = npzfile['Flux']
 Ra = npzfile['Ra'] 
 d0 = npzfile['d0'] 
@@ -101,7 +102,7 @@ plt.semilogx(t_plot,Tc,label='T$_c$')
 #plt.xlim([xmin,max(t_plot)])
 #plt.xlabel('Time/ Myr')
 plt.ylabel('T/K')
-plt.legend(loc='lower right')
+plt.legend(loc='upper right')
 
 #fluxes as function of time
 plt.subplot(2,1,2)
@@ -110,20 +111,22 @@ plt.loglog(t_plot,Fcmb,label='$F_{CMB}$')
 plt.loglog(t_plot,Fad,label='$F_{ad}$')
 plt.loglog(t_plot,Frad,label='$F_{rad}$')
 #plt.xlabel('Time/ Myr')
-#plt.xlim([xmin,max(t_plot)])
+#plt.xlim([xmin,700])
 plt.ylim([1e-3,1e2])
 plt.ylabel('Flux/ W$m^{-2}$')
-plt.legend()
+plt.legend(loc='upper right',ncol=2)
 #plt.savefig('Plots/Tflux_run{}.png'.format(run),dpi=450)
 
 plt.figure(tight_layout=True)
 plt.suptitle('Thermal evolution of a {:.0f}km asteroid \n Tm0 = {}K, Tsolidus ={}K \n run {}'.format(r/1e3, Tm0, Tsolidus,run))
 plt.subplot(2,1,1)
-plt.loglog(t_plot,Rem)
+plt.loglog(t_plot,Rem1,label='Nimmo')
+plt.loglog(t_plot,Rem2,label='Nichols')
 #plt.xlim([xmin,max(t_plot)])
-plt.hlines(10,xmin=0,xmax=t_plot[len(Rem)-1],color='k',linestyle='--')
+plt.hlines(10,xmin=0,xmax=t_plot[len(Rem1)-1],color='k',linestyle='--')
 #plt.xlabel('Time/Myr')
 plt.ylabel('Rem')
+plt.legend(loc='upper left')
 plt.ylim([1,100])
 
 plt.subplot(2,1,2)
