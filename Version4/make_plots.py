@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 #choose your run
-run=34
+run=36
 
 #scale time to Myr
 from parameters import Myr, r, Tm0, Tsolidus
@@ -80,8 +80,8 @@ tstart = row.iloc[0,4]
 tend = row.iloc[0,5] # max possible time of simulation [Myr]
 tstep = row.iloc[0,6] #max timestep [Myr]
 tsolid = row.iloc[0,7] #time at which solidifcation finishes [Myr] if tsolid == tend then core may not have finished solidifying
-cond_i= int(row.iloc[0,8]) #index in array at which mantle started conducting
-cond_t = t[cond_i]/Myr #time at which mantle switched to conduction
+#cond_i= int(row.iloc[0,8]) #index in array at which mantle started conducting
+#cond_t = t[cond_i]/Myr #time at which mantle switched to conduction
 dr=row.iloc[0,10] #cell spacing
 dt =row.iloc[0,11] #T_profile output frequency
 
@@ -89,7 +89,7 @@ dt =row.iloc[0,11] #T_profile output frequency
 # make  log-log plot - similar to Bryson 2019
 
 plt.figure(tight_layout=True)
-plt.suptitle('Thermal evolution of a {:.0f}km asteroid \n Tm0 = {}K, Tsolidus ={}K \n run {}'.format(r/1e3, Tm0, Tsolidus,run))
+plt.suptitle('Thermal evolution of a {:.0f}km asteroid \n Tm0 = {}K, Tsolidus ={}K \n run {} new viscosity'.format(r/1e3, Tm0, Tsolidus,run))
 
 xmin=tstart
 
@@ -101,6 +101,8 @@ plt.semilogx(t_plot,Tc,label='T$_c$')
 #plt.vlines(cond_t,ymin=min(Tm),ymax=1600,color='black',linestyle='--',label='conduction')
 #plt.xlim([xmin,max(t_plot)])
 #plt.xlabel('Time/ Myr')
+#plt.xlim([xmin,500])  #use these limits when comparing runs
+#plt.ylim([1400,1650]) #use these limits when comparing runs
 plt.ylabel('T/K')
 plt.legend(loc='upper right')
 
@@ -111,14 +113,15 @@ plt.loglog(t_plot,Fcmb,label='$F_{CMB}$')
 plt.loglog(t_plot,Fad,label='$F_{ad}$')
 plt.loglog(t_plot,Frad,label='$F_{rad}$')
 #plt.xlabel('Time/ Myr')
-#plt.xlim([xmin,700])
-plt.ylim([1e-3,1e2])
+
+plt.ylim([1e-3,1e2])   #use these limits when comparing runs
+# plt.xlim([xmin,500])  #use these limits when comparing runs
 plt.ylabel('Flux/ W$m^{-2}$')
 plt.legend(loc='upper right',ncol=2)
 #plt.savefig('Plots/Tflux_run{}.png'.format(run),dpi=450)
 
 plt.figure(tight_layout=True)
-plt.suptitle('Thermal evolution of a {:.0f}km asteroid \n Tm0 = {}K, Tsolidus ={}K \n run {}'.format(r/1e3, Tm0, Tsolidus,run))
+plt.suptitle('Thermal evolution of a {:.0f}km asteroid \n Tm0 = {}K, Tsolidus ={}K \n run {} new viscosity'.format(r/1e3, Tm0, Tsolidus,run))
 plt.subplot(2,1,1)
 plt.loglog(t_plot,Rem1,label='Nimmo')
 plt.loglog(t_plot,Rem2,label='Nichols')

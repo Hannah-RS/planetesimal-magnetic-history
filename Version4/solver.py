@@ -20,7 +20,7 @@ sparse_mat =sp.dia_matrix(dT_mat)
 
 
 # define the run number, start and end times
-run = 34
+run = 36
 
 t_start=1*Myr #start after the end of stage 2
 t_end_m=1000 #end time in Myr

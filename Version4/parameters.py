@@ -39,14 +39,21 @@ Al0 = 5e-5 # 26Al/27Al ratio in accreting material
 XAl = 0.014 # abundance of Al in accreting material [wt % /100]
 thalf_al = 0.717*Myr # half life of Al26 [s]
 alpha_m = 4e-5 # thermal expansivity of mantle [/K]
-eta0 = 1e21 # reference viscosity [Pa s] - assumed constant in this model
-alpha_n = 25 # constant in viscosity model
 kappa = 9e-7 # thermal diffusivity of silicate [m^2 /s] - 4 options are given in Bryson (2019) have picked the one used in the figures
 Rac = 1000  #critical Rayleigh number 
 E = 300e3 # activation energy [J /mol]
 R = 8.31 # gas constant [J /K /mol]
-T0eta = 1400 # reference temperature [K]
 Tm0 = 1600 # intial mantle temp - from beginning of stage 2 in Figure 1 of Bryson (2019)
+
+#viscosity models 
+# Bryson 2019
+eta0 = 1e21 # reference viscosity [Pa s] - assumed constant in this model
+eta0_50 = 1e14 #viscosity of material at 50% melting [Pas]
+alpha_n = 25 # constant in viscosity model
+T0eta = 1400 # reference temperature [K]
+dt_gamma = Tm0 - T0eta # delta T in viscosity relation
+km = kappa*cpm*rhom # thermal conductivity of silicate [W /m /K]
+Tm50 = 1600 # 50% melting temperature [K]
 
 # Core parameters from Bryson (2019)
 #values from Nimmo 2009 are shown after the units in square brackets if they disagree
@@ -60,6 +67,7 @@ Delta=1.2 #dTm/dP/dT/dP 1.2 Nimmo (2009)
 Tsolidus = 1450 # solidus temp [K] based on phase diagram from Scheinberg 2016
 eta_c =0.01 # viscosity of core [Pa s] Dodds (2021)
 bpart = 0.5 #buoyancy partitioning coefficient Nichols (2021) but based on Aubert 2009 - might want to investigate
+
 #radioactivity
 #assume core is pure iron with ppm amounts of K that has a negligible effect on mass
 # energy generation rate per unit mass iron = de_fe * f60 * e^(-t/thalf_fe) 
@@ -85,11 +93,6 @@ cpm_p = cpm*(1+(Lm/(cpm*(Tml-Tms)))) # modified mantle heat capacity accounting 
 Vm = 4/3*np.pi*(r**3-rc**3) # volume of magma ocean, assumed to be same as volume of mantle
 gamma = E/(R*T0eta**2)
 g = G*(Vm*rhom+4/3*np.pi*rc**3*rhoc)/r**2 # surface gravity 
-
-#viscosity model used the 1400 < Tm < 1600 in eqn 3 in supplementary materials, but assumed viscosity doesn't vary much
-dt_gamma = Tm0 - T0eta # delta T in viscosity relation
-km = kappa*cpm*rhom # thermal conductivity of silicate [W /m /K]
-
 
 #Calculated core parameters
 D= np.sqrt(3*cpc/(2*np.pi*alpha_c*rhoc*G)) # scale height [m]
