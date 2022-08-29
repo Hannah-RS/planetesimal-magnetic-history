@@ -55,6 +55,9 @@ dt_gamma = Tm0 - T0eta # delta T in viscosity relation
 km = kappa*cpm*rhom # thermal conductivity of silicate [W /m /K]
 Tm50 = 1600 # 50% melting temperature [K]
 
+#Sterenborg and Crowley 2012
+Tcrit = Tms+(Tml-Tms)/2 #50% melting temperature
+
 # Core parameters from Bryson (2019)
 #values from Nimmo 2009 are shown after the units in square brackets if they disagree
 rhoc=7800 # density of core [kg m^-3] 7019

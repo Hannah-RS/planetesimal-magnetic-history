@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import numpy as np
-from parameters import eta0, gamma, dt_gamma, alpha_n, Tms, Tml, eta0_50, Tm50, E, R
-def viscosity(Tm, model = 'new'):
+from parameters import eta0, gamma, dt_gamma, alpha_n, Tms, Tml, eta0_50, Tm50, E, R, Tcrit
+def viscosity(Tm, model = 'Dodds'):
     """
     Different viscosity models
     
@@ -42,6 +42,21 @@ def viscosity(Tm, model = 'new'):
                eta = eta0_50*np.exp(-gamma*(Tm-Tm50))*np.exp(-alpha_n*(Tm-Tm50)/50)
            elif Tm <= 1600:
                eta = eta0*np.exp(-gamma*dt_gamma)*np.exp(-alpha_n*(Tm-Tms)/(Tml-Tms)) 
+    
+    elif model == 'Sterenborg': #slightly different as use rounded solidus and liquidus temperatures from Bryson (2019)
+        if type(Tm)==np.ndarray: # if an array will need to loop
+            n = len(Tm)
+            eta = np.zeros([n])
+            for i in range(n):
+                if Tm[i] <= Tcrit:
+                    eta[i] = eta0*np.exp(-gamma*dt_gamma)*np.exp(-alpha_n*(Tm[i]-Tms)/(Tml-Tms)) 
+                else:
+                    eta[i] = 1
+        else: #if an integer just do once
+            if Tm <= Tcrit:
+                eta = eta0*np.exp(-gamma*dt_gamma)*np.exp(-alpha_n*(Tm-Tms)/(Tml-Tms)) 
+            else:
+                eta = 1
     
     elif model == 'Arrhenius':   
         # Arrhenius model for viscosity
