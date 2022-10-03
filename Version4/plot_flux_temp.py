@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 #choose your run
-run=37
+run=38
 
 #scale time to Myr
 from parameters import Myr, r, Tm0, Tsolidus
@@ -60,7 +60,8 @@ plt.subplot(2,1,1)
 plt.semilogx(t_plot,Tm,label='T$_m$ - base')
 plt.semilogx(t_plot,Tc,label='T$_c$')
 plt.vlines(cond_t,ymin=min(Tm),ymax=1600,color='black',linestyle='--',label='conduction')
-#plt.xlim([xmin,max(t_plot)])
+plt.xlim([5,10])
+plt.ylim([1580,1610])
 #plt.xlabel('Time/ Myr')
 #plt.xlim([xmin,500])  #use these limits when comparing runs
 #plt.ylim([1400,1650]) #use these limits when comparing runs
@@ -74,7 +75,8 @@ plt.loglog(t_plot,Fcmb,label='$F_{CMB}$')
 plt.loglog(t_plot,Fad,label='$F_{ad}$')
 plt.loglog(t_plot,Frad,label='$F_{rad}$')
 plt.xlabel('Time/ Myr')
-plt.ylim([1e-3,1e2])   #use these limits when comparing runs
+plt.ylim([1e-3,1e2])   
+plt.xlim([5,10])
 # plt.xlim([xmin,500])   #use these limits when comparing runs
 plt.ylabel('Flux/ W$m^{-2}$')
 plt.legend(loc='upper right',ncol=2)

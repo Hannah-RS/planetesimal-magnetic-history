@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 #choose your run
-run=37
+run=38
 
 #scale time to Myr
 from parameters import Myr, r, Tm0, Tsolidus
@@ -104,6 +104,7 @@ plt.semilogx(t_plot,Tc,label='T$_c$')
 #plt.xlim([xmin,500])  #use these limits when comparing runs
 #plt.ylim([1400,1650]) #use these limits when comparing runs
 plt.ylabel('T/K')
+plt.ylim([1600,1650])
 plt.legend(loc='upper right')
 
 #fluxes as function of time
@@ -154,9 +155,10 @@ plt.ylabel('Rayleigh number')
 
 #lid thickness
 plt.figure()
-plt.plot(t_plot[:cond_i],d0[:cond_i]/1e3)
+plt.scatter(t_plot[:cond_i],d0[:cond_i]/1e3)
 #plt.hlines(1,min(t_plot),max(t_plot[:cond_i]),color='k',linestyle='--')
-plt.xlim([xmin,t_plot[cond_i]])
+#plt.xlim([xmin,t_plot[cond_i]])
+plt.xlim([5,8])
 plt.xlabel('Time/Myr')
 plt.ylabel('Lid thickness/ km')
 #plt.savefig('Plots/lid_thickness_run_{}.png'.format(run))

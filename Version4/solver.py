@@ -20,7 +20,7 @@ sparse_mat =sp.dia_matrix(dT_mat)
 
 
 # define the run number, start and end times
-run = 37
+run = 38
 
 t_start=1*Myr #start after the end of stage 2
 t_end_m=1000 #end time in Myr
@@ -56,7 +56,6 @@ plt.ylabel('Temperature/K')
 plt.title('Initial temperature profile')
 
 print('Initial conditions set')
-
 
 # set solver running  
 from full_euler import thermal_evolution

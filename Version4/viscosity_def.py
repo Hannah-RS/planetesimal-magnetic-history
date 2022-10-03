@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import numpy as np
-from parameters import eta0, gamma, alpha_n, Tms, Tml, eta0_50, Tm50, E, R, Tcrit, T0eta
-def viscosity(Tm, model = 'Bryson'):
+from parameters import eta0, gamma, alpha_n, Tms, Tml, eta0_50, eta_r50, Tm50, E, R, Tcrit, T0eta
+def viscosity(Tm, model = 'Robuchon-Bryson'):
     """
     Different viscosity models
     
@@ -44,15 +44,28 @@ def viscosity(Tm, model = 'Bryson'):
                eta = eta0*np.exp(-gamma*(Tm-T0eta))*np.exp(-alpha_n*(Tm-Tms)/(Tml-Tms))
     
     elif model =='Robuchon-Bryson':
-        # arrhenius functional form from Robuchon & Nimmo (2011) with constants from Bryson (2019)
+        # arrhenius functional form from Robuchon & Nimmo (2011) with constants and three piece from Bryson (2019)
         #only applicable for T < 1600 for now
-        if type(Tm) == int: #check if an array before applying the condition
-            if Tm > 1600:
-                raise ValueError('This model is not currently valid for temperatures > 1600K')
-        elif np.any(Tm>1600):
-            raise ValueError('This model is not currently valid for temperatures > 1600K')
+        #use a linear profile for log10(eta) for T>1650 to get same end point as Bryson
+        if type(Tm) == np.ndarray: #check if an array before applying the condition
+            n = len(Tm)
+            eta = np.zeros([n])
+            for i in range(n):
+                if Tm[i] > 1650:
+                    eta[i] = 100
+                elif Tm[i] <= 1650 and Tm[i] > 1600:
+                    eta[i] = 10**((2-np.log10(eta_r50))*(Tm[i]-1600)/50+np.log10(eta_r50))
+                elif Tm[i] <= 1600:
+                    eta[i] = eta0*np.exp(-E/R*(1/Tm[i]-1/T0eta))*np.exp(-alpha_n*(Tm[i]-Tms)/(Tml-Tms))
         
-        eta = eta0*np.exp(-E/R*(1/Tm-1/T0eta))*np.exp(-alpha_n*(Tm-Tms)/(Tml-Tms))
+        else: 
+            if Tm > 1650:
+                    eta = 100
+            elif Tm <= 1650 and Tm > 1600:
+                eta = 10**((2-np.log10(eta_r50))*(Tm-1600)/50+np.log10(eta_r50))
+            elif Tm <= 1600:
+                eta = eta0*np.exp(-E/R*(1/Tm-1/T0eta))*np.exp(-alpha_n*(Tm-Tms)/(Tml-Tms))
+                    
         
     
     elif model == 'Sterenborg': #slightly different as use rounded solidus and liquidus temperatures from Bryson (2019)
