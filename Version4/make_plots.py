@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 #choose your run
-run=36
+run=37
 
 #scale time to Myr
 from parameters import Myr, r, Tm0, Tsolidus
@@ -80,8 +80,8 @@ tstart = row.iloc[0,4]
 tend = row.iloc[0,5] # max possible time of simulation [Myr]
 tstep = row.iloc[0,6] #max timestep [Myr]
 tsolid = row.iloc[0,7] #time at which solidifcation finishes [Myr] if tsolid == tend then core may not have finished solidifying
-#cond_i= int(row.iloc[0,8]) #index in array at which mantle started conducting
-#cond_t = t[cond_i]/Myr #time at which mantle switched to conduction
+cond_i= int(row.iloc[0,8]) #index in array at which mantle started conducting
+cond_t = t[cond_i]/Myr #time at which mantle switched to conduction
 dr=row.iloc[0,10] #cell spacing
 dt =row.iloc[0,11] #T_profile output frequency
 

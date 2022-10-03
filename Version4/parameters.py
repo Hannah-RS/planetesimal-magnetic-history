@@ -45,7 +45,7 @@ E = 300e3 # activation energy [J /mol]
 R = 8.31 # gas constant [J /K /mol]
 Tm0 = 1600 # intial mantle temp - from beginning of stage 2 in Figure 1 of Bryson (2019)
 
-#viscosity models 
+#viscosity models
 # Bryson 2019
 eta0 = 1e21 # reference viscosity [Pa s] - assumed constant in this model
 eta0_50 = 1e14 #viscosity of material at 50% melting [Pas]

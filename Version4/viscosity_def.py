@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from parameters import eta0, gamma, alpha_n, Tms, Tml, eta0_50, Tm50, E, R, Tcrit, T0eta
-def viscosity(Tm, model = 'Dodds'):
+def viscosity(Tm, model = 'Bryson'):
     """
     Different viscosity models
     

@@ -20,7 +20,7 @@ sparse_mat =sp.dia_matrix(dT_mat)
 
 
 # define the run number, start and end times
-run = 36
+run = 37
 
 t_start=1*Myr #start after the end of stage 2
 t_end_m=1000 #end time in Myr
@@ -116,7 +116,7 @@ Rem2[Rem_ca<Rem_t] = Rem_t[Rem_ca<Rem_t] #replace values where Rem_t < Rem_c
 print('Fluxes and magnetic Reynolds number calculated.')
 
 #save variables to file
-#np.savez('Results/run_{}'.format(run), Tm_base = Tm_base, Tm_surf = Tm_surf, Tc = Tc, f = f, T_profile = Tprofile, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux, Ra = Ra, d0 = d0 ) 
+np.savez('Results/run_{}'.format(run), Tm_base = Tm_base, Tm_surf = Tm_surf, Tc = Tc, f = f, T_profile = Tprofile, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux, Ra = Ra, d0 = d0 ) 
 
 #write parameters to the run file
 from csv import writer
@@ -125,9 +125,9 @@ from parameters import r, Tsolidus, Tm0
 var_list = [run, r, Tsolidus, Tm0, t_start/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_i, int_time, dr, out_interval]
 
     
-# with open('run_info3.csv','a') as f_object:
-#     writer_object = writer(f_object) #pass file object to csv.writer
-#     writer_object.writerow(var_list) # pass list as argument into write row
-#     f_object.close() #close file
+with open('run_info3.csv','a') as f_object:
+    writer_object = writer(f_object) #pass file object to csv.writer
+    writer_object.writerow(var_list) # pass list as argument into write row
+    f_object.close() #close file
 
 print('Results and run parameters saved')
