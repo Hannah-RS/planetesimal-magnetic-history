@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 #choose your run
-run=37
+run=38
 
 #scale time to Myr
 from parameters import Myr, r, Tm0, Tsolidus
@@ -48,7 +48,7 @@ for i in range(n_plot):
     plt.plot(rplot/1e3, T_profile[i*int(n/n_plot),:],label='{:.0f} Myr'.format(t_plot[i*int(l/n_plot)])) #approximate temp profile times
 plt.xlabel('Distance from centre of asteroid /km')
 plt.ylabel('Temperature / K')
-plt.xlim([80,100])
+#plt.xlim([80,100])
 plt.title('{:.0f}km asteroid \n Tm0 = {}K, Tsolidus ={}K, run {}'.format(r/1e3, Tm0, Tsolidus, run))
 plt.legend()
 #plt.savefig('Plots/Tprofile_run{}.png'.format(run))

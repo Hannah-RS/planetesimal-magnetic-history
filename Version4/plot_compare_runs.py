@@ -10,8 +10,8 @@ import numpy as np
 import pandas as pd
 
 #choose your runs
-run1 = 37
-run2 = 38
+run1 = 38
+run2 = 39
 
 #scale time to Myr
 from parameters import Myr, r, Tm0, Tsolidus
@@ -83,13 +83,13 @@ plt.semilogx(t_plot1,Tm1,label='T$_m$ - base {}'.format(model1),color='royalblue
 plt.semilogx(t_plot1,Tc1,label='T$_c$',color='firebrick')
 plt.semilogx(t_plot2,Tm2,color='royalblue',linestyle='--',label=model2)
 plt.semilogx(t_plot2,Tc2,color='firebrick',linestyle='--')
-#plt.vlines(cond_t,ymin=min(Tm),ymax=1600,color='black',linestyle='--',label='conduction')
+plt.vlines(cond_t,ymin=min(Tm1),ymax=1600,color='black',linestyle='dotted',label='conduction')
 #plt.xlim([xmin,max(t_plot)])
 #plt.xlabel('Time/ Myr')
 #plt.xlim([xmin,500])  #use these limits when comparing runs
 #plt.ylim([1400,1650]) #use these limits when comparing runs
 plt.ylabel('T/K')
-plt.legend(loc='upper right')
+plt.legend(loc='upper right',ncol=2,fontsize='small')
 
 #fluxes as function of time
 plt.subplot(2,1,2)
@@ -102,12 +102,13 @@ plt.loglog(t_plot2,Fs2,color='royalblue',linestyle='--')
 plt.loglog(t_plot2,Fcmb2,color='firebrick',linestyle='--')
 plt.loglog(t_plot2,Fad2,color='forestgreen',linestyle='--')
 plt.loglog(t_plot2,Frad2,color='orange',linestyle='--')
+plt.vlines(cond_t,ymin=min(Fad1),ymax=max(Frad1),color='black',linestyle='dotted',label='conduction')
 plt.xlabel('Time/ Myr')
 plt.ylim([1e-3,1e2])   #use these limits when comparing runs
 # plt.xlim([xmin,500])   #use these limits when comparing runs
 plt.ylabel('Flux/ W$m^{-2}$')
-plt.legend(loc='upper right',ncol=2)
-plt.savefig('Plots/Tflux_comp.png',dpi=450)
+plt.legend(loc='upper right',ncol=2,fontsize='small')
+#plt.savefig('Plots/Tflux_comp.png',dpi=450)
 
 ### Do same thing for Rem and f 
 plt.figure(tight_layout=True)
@@ -130,4 +131,4 @@ plt.xlabel('Time/ Myr')
 plt.ylabel('f')
 plt.legend()
 
-plt.savefig('Plots/Remf_comp.png',dpi=450)
+#plt.savefig('Plots/Remf_comp.png',dpi=450)
