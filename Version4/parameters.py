@@ -45,13 +45,14 @@ E = 300e3 # activation energy [J /mol]
 R = 8.31 # gas constant [J /K /mol]
 Tm0 = 1600 # intial mantle temp - from beginning of stage 2 in Figure 1 of Bryson (2019)
 
-#viscosity models 
+#viscosity models
+default ='Robuchon-Bryson' #default viscosity model
 # Bryson 2019
 eta0 = 1e21 # reference viscosity [Pa s] - assumed constant in this model
 eta0_50 = 1e14 #viscosity of material at 50% melting [Pas]
+eta_r50 = 9.358045457250838e+16 #viscosity of material at 50% melting [Pas] for Arrhenius model
 alpha_n = 25 # constant in viscosity model
 T0eta = 1400 # reference temperature [K]
-dt_gamma = Tm0 - T0eta # delta T in viscosity relation
 km = kappa*cpm*rhom # thermal conductivity of silicate [W /m /K]
 Tm50 = 1600 # 50% melting temperature [K]
 

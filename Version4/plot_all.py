@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 #choose your run
-run=36
+run=38
 
 #scale time to Myr
 from parameters import Myr, r, Tm0, Tsolidus
@@ -80,8 +80,8 @@ tstart = row.iloc[0,4]
 tend = row.iloc[0,5] # max possible time of simulation [Myr]
 tstep = row.iloc[0,6] #max timestep [Myr]
 tsolid = row.iloc[0,7] #time at which solidifcation finishes [Myr] if tsolid == tend then core may not have finished solidifying
-#cond_i= int(row.iloc[0,8]) #index in array at which mantle started conducting
-#cond_t = t[cond_i]/Myr #time at which mantle switched to conduction
+cond_i= int(row.iloc[0,8]) #index in array at which mantle started conducting
+cond_t = t[cond_i]/Myr #time at which mantle switched to conduction
 dr=row.iloc[0,10] #cell spacing
 dt =row.iloc[0,11] #T_profile output frequency
 
@@ -104,6 +104,7 @@ plt.semilogx(t_plot,Tc,label='T$_c$')
 #plt.xlim([xmin,500])  #use these limits when comparing runs
 #plt.ylim([1400,1650]) #use these limits when comparing runs
 plt.ylabel('T/K')
+plt.ylim([1600,1650])
 plt.legend(loc='upper right')
 
 #fluxes as function of time
@@ -154,9 +155,10 @@ plt.ylabel('Rayleigh number')
 
 #lid thickness
 plt.figure()
-plt.plot(t_plot[:cond_i],d0[:cond_i]/1e3)
+plt.scatter(t_plot[:cond_i],d0[:cond_i]/1e3)
 #plt.hlines(1,min(t_plot),max(t_plot[:cond_i]),color='k',linestyle='--')
-plt.xlim([xmin,t_plot[cond_i]])
+#plt.xlim([xmin,t_plot[cond_i]])
+plt.xlim([5,8])
 plt.xlabel('Time/Myr')
 plt.ylabel('Lid thickness/ km')
 #plt.savefig('Plots/lid_thickness_run_{}.png'.format(run))

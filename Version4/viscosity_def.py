@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import numpy as np
-from parameters import eta0, gamma, dt_gamma, alpha_n, Tms, Tml, eta0_50, Tm50, E, R, Tcrit
-def viscosity(Tm, model = 'Dodds'):
+from parameters import eta0, gamma, alpha_n, Tms, Tml, eta0_50, eta_r50, Tm50, E, R, Tcrit, T0eta
+def viscosity(Tm, model = 'Robuchon-Bryson'):
     """
     Different viscosity models
     
@@ -34,14 +34,39 @@ def viscosity(Tm, model = 'Dodds'):
                 elif Tm[i] <= 1650 and Tm[i] > 1600:
                     eta[i] = eta0_50*np.exp(-gamma*(Tm[i]-Tm50))*np.exp(-alpha_n*(Tm[i]-Tm50)/50)
                 elif Tm[i] <= 1600:
-                    eta[i] = eta0*np.exp(-gamma*dt_gamma)*np.exp(-alpha_n*(Tm[i]-Tms)/(Tml-Tms))
+                    eta[i] = eta0*np.exp(-gamma*(Tm[i]-T0eta))*np.exp(-alpha_n*(Tm[i]-Tms)/(Tml-Tms))
         else: #just an integer perform once
            if Tm > 1650:
                eta = 100
            elif Tm <= 1650 and Tm > 1600:
                eta = eta0_50*np.exp(-gamma*(Tm-Tm50))*np.exp(-alpha_n*(Tm-Tm50)/50)
            elif Tm <= 1600:
-               eta = eta0*np.exp(-gamma*dt_gamma)*np.exp(-alpha_n*(Tm-Tms)/(Tml-Tms)) 
+               eta = eta0*np.exp(-gamma*(Tm-T0eta))*np.exp(-alpha_n*(Tm-Tms)/(Tml-Tms))
+    
+    elif model =='Robuchon-Bryson':
+        # arrhenius functional form from Robuchon & Nimmo (2011) with constants and three piece from Bryson (2019)
+        #only applicable for T < 1600 for now
+        #use a linear profile for log10(eta) for T>1650 to get same end point as Bryson
+        if type(Tm) == np.ndarray: #check if an array before applying the condition
+            n = len(Tm)
+            eta = np.zeros([n])
+            for i in range(n):
+                if Tm[i] > 1650:
+                    eta[i] = 100
+                elif Tm[i] <= 1650 and Tm[i] > 1600:
+                    eta[i] = 10**((2-np.log10(eta_r50))*(Tm[i]-1600)/50+np.log10(eta_r50))
+                elif Tm[i] <= 1600:
+                    eta[i] = eta0*np.exp(-E/R*(1/Tm[i]-1/T0eta))*np.exp(-alpha_n*(Tm[i]-Tms)/(Tml-Tms))
+        
+        else: 
+            if Tm > 1650:
+                    eta = 100
+            elif Tm <= 1650 and Tm > 1600:
+                eta = 10**((2-np.log10(eta_r50))*(Tm-1600)/50+np.log10(eta_r50))
+            elif Tm <= 1600:
+                eta = eta0*np.exp(-E/R*(1/Tm-1/T0eta))*np.exp(-alpha_n*(Tm-Tms)/(Tml-Tms))
+                    
+        
     
     elif model == 'Sterenborg': #slightly different as use rounded solidus and liquidus temperatures from Bryson (2019)
         if type(Tm)==np.ndarray: # if an array will need to loop
@@ -49,12 +74,12 @@ def viscosity(Tm, model = 'Dodds'):
             eta = np.zeros([n])
             for i in range(n):
                 if Tm[i] <= Tcrit:
-                    eta[i] = eta0*np.exp(-gamma*dt_gamma)*np.exp(-alpha_n*(Tm[i]-Tms)/(Tml-Tms)) 
+                    eta[i] = eta0*np.exp(-gamma*(Tm[i]-T0eta))*np.exp(-alpha_n*(Tm[i]-Tms)/(Tml-Tms)) 
                 else:
                     eta[i] = 1
         else: #if an integer just do once
             if Tm <= Tcrit:
-                eta = eta0*np.exp(-gamma*dt_gamma)*np.exp(-alpha_n*(Tm-Tms)/(Tml-Tms)) 
+                eta = eta0*np.exp(-gamma*(Tm-T0eta))*np.exp(-alpha_n*(Tm-Tms)/(Tml-Tms)) 
             else:
                 eta = 1
     

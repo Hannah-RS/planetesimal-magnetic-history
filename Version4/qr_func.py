@@ -6,7 +6,7 @@ import numpy as np
 def Qr(t,Tc):
     """
     From Table 1 in Nimmo, F. (2009). Energetics of asteroid dynamos and the role of compositional convection. 
-    For source of radioactive parameters see calculation sin yellow folder and refereences in parameters file
+    For source of radioactive parameters see calculations in yellow folder and refereences in parameters file
 
     Parameters
     ----------

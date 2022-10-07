@@ -23,14 +23,14 @@ eta_Steren = viscosity(Tm, 'Sterenborg')
 #plot models
 plt.figure()
 plt.semilogy(Tm, eta_Dodds, label='Dodds et al.')
-plt.semilogy(Tm, eta_Bryson, label='Bryson et al.')
+plt.semilogy(Tm, eta_Bryson, label='Bryson et al. - FK')
 plt.semilogy(Tm, eta_Steren, label='Sterenborg and Crowley')
 #plt.semilogy(Tm, eta_Arr, label='Arrhenius', linestyle = '--', color ='red')
 #plt.semilogy(Tm, eta_Dodds2, label='new')
 plt.xlabel('Tm/K')
 plt.ylabel('Viscosity/Pas')
 plt.legend()
-plt.savefig('Plots/viscosity_comparison_T.png')
+#plt.savefig('Plots/viscosity_comparison_T.png')
 
 #melt fraction version
 #plot models

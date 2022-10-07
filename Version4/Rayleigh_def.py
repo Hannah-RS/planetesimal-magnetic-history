@@ -7,9 +7,9 @@ so that length of the domain cancels
 import numpy as np
 from viscosity_def import viscosity #import viscosity model
 
-from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, Rac, Ts
+from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, Rac, Ts, default
 
-def Rayleigh_calc(Tm):
+def Rayleigh_calc(Tm,model=default):
     """
     
 
@@ -24,7 +24,7 @@ def Rayleigh_calc(Tm):
 
     """
          
-    eta = viscosity(Tm)
+    eta = viscosity(Tm,model)
     d0 = (gamma/8)**(4/3)*(Tm-Ts)*((Rac*kappa*eta)/(rhom*g*alpha_m))**(1/3) #upper bl
     drh = d0/(gamma*(Tm-Ts)) #lower bl
     Ram= rhom*g*alpha_m*(Tm-Ts)*(r-rc-(d0-drh))**3/(kappa*eta) 

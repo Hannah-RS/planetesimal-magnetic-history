@@ -20,9 +20,9 @@ sparse_mat =sp.dia_matrix(dT_mat)
 
 
 # define the run number, start and end times
-run = 36
+run = 39
 
-t_start=1*Myr #start after the end of stage 2
+t_start=3*Myr #start after the end of stage 2
 t_end_m=1000 #end time in Myr
 t_end=t_end_m*Myr
 t_cond = dr**2/kappa #conductive timestep
@@ -56,7 +56,6 @@ plt.ylabel('Temperature/K')
 plt.title('Initial temperature profile')
 
 print('Initial conditions set')
-
 
 # set solver running  
 from full_euler import thermal_evolution
