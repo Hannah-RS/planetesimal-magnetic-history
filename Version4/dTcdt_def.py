@@ -5,7 +5,6 @@ Expression for dTc/dt using Equation 70 from Vol 8, Treatise on Geophysics (Nimm
 Can toggle on and off effects of gravitational potential energy release, radiogenic heating, secular cooling, latent heat. 
 
 dTc/dt=(Qcmb-Qr)/(Qst+Qgt+Qlt) where Qst, Qgt, QLt are the expressions for Qs, Qg, Ql divided by dTc/dt
-Written as a function of t, Tm, Tc, f to comply with order expected by vectorised argument in solve_ivp
 
 """
 #import constants and parameters    

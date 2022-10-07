@@ -44,6 +44,7 @@ Rac = 1000  #critical Rayleigh number
 E = 300e3 # activation energy [J /mol]
 R = 8.31 # gas constant [J /K /mol]
 Tm0 = 1600 # intial mantle temp - from beginning of stage 2 in Figure 1 of Bryson (2019)
+c1 = 8 # constant in boundary layer thickness Dodds (2021)
 
 #viscosity models
 default ='Robuchon-Bryson' #default viscosity model

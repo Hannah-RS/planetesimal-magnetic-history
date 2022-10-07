@@ -13,16 +13,16 @@ Flow:
 #import modules
 import numpy as np
 import scipy.sparse as sp
-from parameters import Myr, Rac, B, Tsolidus, dr, out_interval
+from parameters import Myr, Rac, B, Tsolidus, dr, out_interval, km, kc
 
 #import required functions
-from Tm_cond import Tm_cond_calc
+from Tm_cond import T_cond_calc
 from dTmdt_def import dTmdt_calc
 from dTcdt_def import dTcdt_calc #convective CMB heat flux
 from dTcdt_def2 import dTcdt_calc2  #conductive CMB heat flux
 from Rayleigh_def import Rayleigh_calc
 
-def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat):
+def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     """
     
 
@@ -38,9 +38,11 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat):
         initial temperature profile
     f0: float
         initial fractional inner core radius
-    sparse_mat: sparse matrix
-        stencil for conductive temperature evolution
-
+    sparse_mat_c: sparse matrix
+        stencil for conductive temperature evolution of core
+    sparse_mat_m: sparse matrix
+        stencil for conductive temperature evolution of mantle
+        
     Returns
     -------
     Ra: array
@@ -69,7 +71,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat):
     ratio = int(m/p) #use for calculating when to save temp profiles
     i_save=0
     n_cells = len(T0) #number of cells
-    i_core = int(n_cells/2) # index in array of last core cell
+    i_core = int(n_cells/2)-1 # index in array of last core cell (-1 as indexing starts at 0)
     cond = 0 #flag for when first switch to conductive regime
     cond_i = np.nan #set as nan and then reset if switches to conduction
     
@@ -88,16 +90,30 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat):
     tsolve[0] = tstart + dt
     
     # Step 1. Calculate conductive profile for whole body
-    T_new = Tm_cond_calc(dt,T0,sparse_mat)
+    # the last cell of the core array is the same as the first cell of the mantle array
+    T0_core = T0[:i_core+1] #include last core cell
+    print(len(T0_core))
+    T0_mantle = T0[i_core:]
+    
+    T_new_core = T_cond_calc(dt,T0_core,sparse_mat_c)
+    T_new_mantle = T_cond_calc(dt,T0_mantle,sparse_mat_m)
+    
+    #balance flux at CMB
+    Tcmb = ((km/kc)*T_new_mantle[1]+T_new_core[-2])/(1+(km/kc))
+    
+    #replace CMB values in array
+    T_new_core[-1] = Tcmb
+    T_new_mantle[0] = Tcmb
     
     # Step 2. Calculate stagnant lid thickness and Rayleigh number
-    Ra[0], d0[0] = Rayleigh_calc(T0[i_core+1]) #use temp at base of mantle 
+    Ra[0], d0[0] = Rayleigh_calc(T0_mantle[1]) #use temp at base of mantle 
     nlid_cells = int(d0[0]/dr)
     lid_start = n_cells - nlid_cells - 1 #index in temp array where lid starts
 
     if Ra[0] < Rac:
-        Tm_base[0] = T_new[i_core+1]
-        Tm_surf[0] = T_new[-2]
+        Tm_base[0] = T_new_mantle[1]
+        Tm_surf[0] = T_new_mantle[-2]
+        
         # don't replace any of the mantle temperature, just replace the core
         # Step 4. Replace core with isothermal profile
         dTcdt = dTcdt_calc2(tsolve[0],T0[i_core+1],T0[i_core],f0) #save dTcdt seperately as need for f
@@ -124,7 +140,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat):
         dfdt = -B*dTcdt/(T0[i_core]*f0)
         f[0] = f0 + dfdt*dt
     
-    T_old = T_new 
+    T_old_core = T_new_core
+    T_old_mantle = T_new_mantle
 
     
     for i in range(1,m):
@@ -132,11 +149,21 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat):
         #Step 0. Calculate time
         tsolve[i] = tsolve[i-1] + dt
         
-        # Step 1. Calculate conductive profile for whole body
-        T_new = Tm_cond_calc(dt,T_old,sparse_mat)
+        # Step 1. Calculate conductive profile for whole body      
+        T_new_core = T_cond_calc(dt,T_old_core,sparse_mat_c)
+        T_new_mantle = T_cond_calc(dt,T_old_mantle,sparse_mat_m)
+        
+        #balance flux at CMB
+        Tcmb = ((km/kc)*T_new_mantle[1]+T_new_core[-2])/(1+(km/kc))
+        
+        #replace CMB values in array
+        T_new_core[-1] = Tcmb
+        T_new_mantle[0] = Tcmb
+        
+
         
         # Step 2. Calculate stagnant lid thickness and Rayleigh number
-        Ra[i], d0[i] = Rayleigh_calc(T_old[i_core+1]) #use temp at base of mantle 
+        Ra[i], d0[i] = Rayleigh_calc(T_mantle_old[1]) #use temp at base of mantle 
         nlid_cells = int(d0[i]/dr)
         lid_start = n_cells - nlid_cells - 1 #index in temp array where lid starts
 
@@ -174,7 +201,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat):
             dfdt = -B*dTcdt/(Tc[i-1]*f[i-1])
             f[i] = f[i-1] + dfdt*dt
         
-        T_old = T_new 
+        T_mantle_old = T_mantle_new 
+        T_core_old = T_core_new
         
         #write Tprofile to file if appropriate
         if i%ratio== 0: #if multiple of 10Myr then save the profile - will need to check if this works as tsolve might not be integer multiples of 10 ever
@@ -182,6 +210,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat):
             if i_save >= p: # array is full, pass so don't throw an error
                 pass
             else:
+                T_old = np.hstack([T_core_old,T_mantle_old[1:]])
                 Tprofile[i_save,:] = T_old
                 i_save = i_save +1 #increment so saves in next space
 

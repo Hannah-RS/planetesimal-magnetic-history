@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Expression for dTm/dt from rearranging 13 in supplementary materials of Bryson (2019)
+Expression for dT/dt from rearranging 13 in supplementary materials of Bryson (2019)
 Calculates rate of change of conductive profile for the whole body and new temperature profile
 """
 # set up
 import numpy as np
 import scipy.sparse as sp
     
-def Tm_cond_calc(dt,T,sparse_mat):
+def T_cond_calc(dt,T,sparse_mat):
     """
 
     Parameters
@@ -28,6 +28,7 @@ def Tm_cond_calc(dt,T,sparse_mat):
     """
 
     #calculate dTdt for conduction
+
     dTdt = sparse_mat.dot(T)
     
     Tnew = dTdt*dt + T
