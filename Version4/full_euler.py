@@ -13,6 +13,7 @@ Flow:
 #import modules
 import numpy as np
 import scipy.sparse as sp
+import scipy.optimize as sco
 from parameters import Myr, Rac, B, Tsolidus, dr, out_interval, km, kc
 
 #import required functions
@@ -21,6 +22,7 @@ from dTmdt_def import dTmdt_calc
 from dTcdt_def import dTcdt_calc #convective CMB heat flux
 from dTcdt_def2 import dTcdt_calc2  #conductive CMB heat flux
 from Rayleigh_def import Rayleigh_calc
+from flux_definitions import f1_conductive, f1_convective, f2_conductive, f2_convective, flux_balance
 
 def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     """
@@ -92,7 +94,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     # Step 1. Calculate conductive profile for whole body
     # the last cell of the core array is the same as the first cell of the mantle array
     T0_core = T0[:i_core+1] #include last core cell
-    print(len(T0_core))
+
     T0_mantle = T0[i_core:]
     
     T_new_core = T_cond_calc(dt,T0_core,sparse_mat_c)
@@ -105,33 +107,45 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     T_new_core[-1] = Tcmb
     T_new_mantle[0] = Tcmb
     
-    # Step 2. Calculate stagnant lid thickness and Rayleigh number
+    # Step 2. Is the mantle convecting? Calculate stagnant lid thickness and Rayleigh number
     Ra[0], d0[0] = Rayleigh_calc(T0_mantle[1]) #use temp at base of mantle 
     nlid_cells = int(d0[0]/dr)
     lid_start = n_cells - nlid_cells - 1 #index in temp array where lid starts
 
-    if Ra[0] < Rac:
+    if Ra[0] < Rac:# not convecting
         Tm_base[0] = T_new_mantle[1]
         Tm_surf[0] = T_new_mantle[-2]
+        f1 = f1_conductive #assign f1 to conductive mantle flux
+       
+    else: #mantle is convecting replace mantke below stagnant lid with isothermal convective profile
+        Tm = T0_mantle[1] + dTmdt_calc(tsolve[0],T0_mantle[1],T0_core[-2])*dt
+        T_new_mantle[:lid_start] = Tm
         
-        # don't replace any of the mantle temperature, just replace the core
-        # Step 4. Replace core with isothermal profile
-        dTcdt = dTcdt_calc2(tsolve[0],T0[i_core+1],T0[i_core],f0) #save dTcdt seperately as need for f
-        Tc[0] = T0[i_core]+dTcdt*dt
-        T_new[:i_core+1] = Tc[0] #replace core including core cell
-    else: 
-        # Step 3. Replace mantle below stagnant lid with isothermal convective profile
-        Tm = T0[i_core+1] + dTmdt_calc(tsolve[0],T0[i_core+1],T0[i_core])*dt
-        T_new[:lid_start] = Tm
+        Tm_base[0] = T_new_mantle[1] # temperature at the base of the mantle above the CMB
+        Tm_surf[0] = T_new_mantle[-2] #temperature one cell above surface pinned to 200K
         
-        Tm_base[0] = T_new[i_core+1]
-        Tm_surf[0] = T_new[-2]
+        f1 = f1_convective # assign f1 to convective mantle flux 
         
-        # Step 4. Replace core with isothermal profile
-        dTcdt = dTcdt_calc(tsolve[0],T0[i_core+1],T0[i_core],f0,d0[0])
-        Tc[0] = T0[i_core]+ dTcdt*dt
-        T_new[:i_core+1] = Tc[0] #replace core including core cell
+    "rewrite this section"
+    # Step 3. Is the core convecting? Replace convecting part of core with isothermal profile
+
+    # dTcdt = dTcdt_calc2(tsolve[0],T0[i_core+1],T0[i_core],f0) #save dTcdt seperately as need for f
+    # Tc[0] = T0[i_core]+dTcdt*dt
+    # T_new[:i_core+1] = Tc[0] #replace core including core cell
     
+    f2 = f2_conductive
+    
+    # dTcdt = dTcdt_calc(tsolve[0],T0[i_core+1],T0[i_core],f0,d0[0])
+    # Tc[0] = T0[i_core]+ dTcdt*dt
+    # T_new[:i_core+1] = Tc[0] #replace core including core cell
+    
+    #f2 = f2_convective
+    # Step 4: Calculate new Tcmb
+    Tcmb = sco.root_scalar(flux_balance,args=(T_new_core[-2],T_new_mantle[1],f1,f2),bracket=[T_new_core[-2],T_new_mantle[1]],xtol=1e-3,method='brenth')
+    print(Tcmb)
+    print(T_new_mantle[1])
+    print(T_new_core[-2])
+    raise ValueError('We made it!') "I reach this point, but I am getting convergence errors"
     # Step 5. Calculate f
     if Tc[0] > Tsolidus:
         f[0]=f0  #core not solidifying - based on 3-9 wt% S and phase diagram in Scheinberg 2016 
@@ -201,8 +215,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             dfdt = -B*dTcdt/(Tc[i-1]*f[i-1])
             f[i] = f[i-1] + dfdt*dt
         
-        T_mantle_old = T_mantle_new 
-        T_core_old = T_core_new
+        T_old_mantle = T_new_mantle
+        T_old_core = T_new_core
         
         #write Tprofile to file if appropriate
         if i%ratio== 0: #if multiple of 10Myr then save the profile - will need to check if this works as tsolve might not be integer multiples of 10 ever
