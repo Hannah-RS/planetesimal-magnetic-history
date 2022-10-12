@@ -14,7 +14,7 @@ Flow:
 import numpy as np
 import scipy.sparse as sp
 import scipy.optimize as sco
-from parameters import Myr, Rac, B, Tsolidus, dr, out_interval, km, kc
+from parameters import Myr, Rac, B, Tsolidus, dr, out_interval, km, kc, alpha_c, rhoc, eta_c, gc, cpc
 
 #import required functions
 from Tm_cond import T_cond_calc
@@ -22,7 +22,7 @@ from dTmdt_def import dTmdt_calc
 from dTcdt_def import dTcdt_calc #convective CMB heat flux
 from dTcdt_def2 import dTcdt_calc2  #conductive CMB heat flux
 from Rayleigh_def import Rayleigh_calc
-from flux_definitions import f1_conductive, f1_convective, f2_conductive, f2_convective, flux_balance
+from cmb_bl import delta_l, delta_c
 
 def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     """
@@ -73,80 +73,89 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     ratio = int(m/p) #use for calculating when to save temp profiles
     i_save=0
     n_cells = len(T0) #number of cells
-    i_core = int(n_cells/2)-1 # index in array of last core cell (-1 as indexing starts at 0)
+    i_core = round(n_cells/2)-1 # index in array of last core cell (-1 as indexing starts at 0)
     cond = 0 #flag for when first switch to conductive regime
     cond_i = np.nan #set as nan and then reset if switches to conduction
     
     #output variables
     Ra = np.zeros([m])
     d0 = np.zeros([m])
+    bl = np.zeros([m])
     Tprofile= np.zeros([p,n_cells])
     Tc = np.zeros([m])
-    Tm_base = np.zeros([m])
+    Tcmb = np.zeros([m])
+    Tm_conv = np.zeros([m])
+    Tm_mid = np.zeros([m])
     Tm_surf = np.zeros([m])
     f = np.zeros([m])
     tsolve = np.zeros([m])
 
     
-    #Step 0. Calculate time
-    tsolve[0] = tstart + dt
-    
-    # Step 1. Calculate conductive profile for whole body
+    #Step 0. Calculate time, get two separate temperature arrays
     # the last cell of the core array is the same as the first cell of the mantle array
+    tsolve[0] = tstart + dt
     T0_core = T0[:i_core+1] #include last core cell
-
     T0_mantle = T0[i_core:]
+    nmantle_cells = len(T0_mantle)
+    ncore_cells = len(T0_core)
     
-    T_new_core = T_cond_calc(dt,T0_core,sparse_mat_c)
+    # Step 1. Calculate conductive profile for mantle
     T_new_mantle = T_cond_calc(dt,T0_mantle,sparse_mat_m)
-    
-    #balance flux at CMB
-    Tcmb = ((km/kc)*T_new_mantle[1]+T_new_core[-2])/(1+(km/kc))
-    
-    #replace CMB values in array
-    T_new_core[-1] = Tcmb
-    T_new_mantle[0] = Tcmb
-    
-    # Step 2. Is the mantle convecting? Calculate stagnant lid thickness and Rayleigh number
+ 
+    # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
     Ra[0], d0[0] = Rayleigh_calc(T0_mantle[1]) #use temp at base of mantle 
-    nlid_cells = int(d0[0]/dr)
-    lid_start = n_cells - nlid_cells - 1 #index in temp array where lid starts
-
+    nlid_cells = round(d0[0]/dr)
+    lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
+    base = delta_l(T0_mantle[1],T0_mantle[0])
+    nbase_cells = round(base/dr)
+    
     if Ra[0] < Rac:# not convecting
-        Tm_base[0] = T_new_mantle[1]
-        Tm_surf[0] = T_new_mantle[-2]
-        f1 = f1_conductive #assign f1 to conductive mantle flux
-       
-    else: #mantle is convecting replace mantke below stagnant lid with isothermal convective profile
-        Tm = T0_mantle[1] + dTmdt_calc(tsolve[0],T0_mantle[1],T0_core[-2])*dt
-        T_new_mantle[:lid_start] = Tm
+       pass 
+    else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile
+        Tm = T0_mantle[nbase_cells] + dTmdt_calc(tsolve[0],T0_mantle[nbase_cells],T0_mantle[0])*dt
+        T_new_mantle[nbase_cells:lid_start] = Tm
+    
+    #store values
+    Tcmb[0] = T_new_mantle[0]
+    Tm_conv[0] = Tm #temperature of convecting region
+    Tm_mid[0] = T_new_mantle[round(nmantle_cells/2)] # temperature at the mid mantle
+    Tm_surf[0] = T_new_mantle[-2] #temperature one cell above surface pinned to 200K
+                
+    # Step 3. Calculate conductive profile for the core
+    T_new_core = T_cond_calc(dt,T0_core,sparse_mat_c)
+    
+    # Step 4. Is the core convecting? 
+    # check if heat flux is super adiabatic 
+    Fcmb = -km*(T_new_mantle[1]-T_new_mantle[0])/dr # CMB heat flux eqn 23 in Dodds 2020
+    Fad = kc*T0_core[-2]*alpha_c*gc/cpc
+    
+    if Fcmb > Fad: #super adiabatic, core convects
+        bl[0] = delta_c(T0_core[-2],T0_mantle[0]) #second input is CMB temp
+        nbl_cells = round(bl[0]/dr)
+        bl_start = ncore_cells - nlid_cells - 1 #index in temp array where lid starts
+        dTcdt = dTcdt_calc2(tsolve[0],T0_mantle[1],T0_core[bl_start-1],f0) #save dTcdt seperately as need for f
+        Tc[0] = T0_core[bl_start-1] + dTcdt*dt
+        T_new_core[:bl_start] = Tc[0]
         
-        Tm_base[0] = T_new_mantle[1] # temperature at the base of the mantle above the CMB
-        Tm_surf[0] = T_new_mantle[-2] #temperature one cell above surface pinned to 200K
+    else: 
+        #find where the thermal stratification ends
+        #calculate dT/dr
+        dTdr = np.gradient(T_new_core,dr)
+        if np.all(dTdr)>0: #whole core is thermally stratified
+            pass
+        else:
+            lnb = np.max(np.where(dTdr <= 0)) #level of neutral buoyancy
+            dTcdt = dTcdt_calc2(tsolve[0],T0_mantle[1],T0_core[lnb],f0) #save dTcdt seperately as need for f
+            Tc[0] = T0_core[lnb] + dTcdt*dt
+            T_new_core[:lnb] = Tc[0]
         
-        f1 = f1_convective # assign f1 to convective mantle flux 
-        
-    "rewrite this section"
-    # Step 3. Is the core convecting? Replace convecting part of core with isothermal profile
+    # Step 5. Set the CMB temperature in the core array to be the same as the mantle, mantle determines core cooling
+    T_new_core[-1] = T_new_mantle[0]
+    
+    
 
-    # dTcdt = dTcdt_calc2(tsolve[0],T0[i_core+1],T0[i_core],f0) #save dTcdt seperately as need for f
-    # Tc[0] = T0[i_core]+dTcdt*dt
-    # T_new[:i_core+1] = Tc[0] #replace core including core cell
-    
-    f2 = f2_conductive
-    
-    # dTcdt = dTcdt_calc(tsolve[0],T0[i_core+1],T0[i_core],f0,d0[0])
-    # Tc[0] = T0[i_core]+ dTcdt*dt
-    # T_new[:i_core+1] = Tc[0] #replace core including core cell
-    
-    #f2 = f2_convective
-    # Step 4: Calculate new Tcmb
-    Tcmb = sco.root_scalar(flux_balance,args=(T_new_core[-2],T_new_mantle[1],f1,f2),bracket=[T_new_core[-2],T_new_mantle[1]],xtol=1e-3,method='brenth')
-    print(Tcmb)
-    print(T_new_mantle[1])
-    print(T_new_core[-2])
-    raise ValueError('We made it!') "I reach this point, but I am getting convergence errors"
-    # Step 5. Calculate f
+    raise ValueError('We made it!') 
+    # Step 6. Calculate f
     if Tc[0] > Tsolidus:
         f[0]=f0  #core not solidifying - based on 3-9 wt% S and phase diagram in Scheinberg 2016 
     else:  

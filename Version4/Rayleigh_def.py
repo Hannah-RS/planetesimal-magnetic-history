@@ -26,7 +26,7 @@ def Rayleigh_calc(Tm,model=default):
          
     eta = viscosity(Tm,model)
     d0 = (gamma/c1)**(4/3)*(Tm-Ts)*((Rac*kappa*eta)/(rhom*g*alpha_m))**(1/3) #upper bl
-    drh = d0/(gamma*(Tm-Ts)) #lower bl
+    drh = d0/(gamma*(Tm-Ts)) #lower bl in Bryson 2019
     Ram= rhom*g*alpha_m*(Tm-Ts)*(r-rc-(d0-drh))**3/(kappa*eta) 
     
     return Ram, d0
