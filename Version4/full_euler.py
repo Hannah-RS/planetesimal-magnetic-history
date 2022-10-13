@@ -142,7 +142,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             dTcdt = dTcdt_calc2(tsolve[0],T0_mantle[1],T0_core[bl_start-1],f0) #save dTcdt seperately as need for f
             dfdt = -B*dTcdt/(T0_core[-2]*f0)
             f[0] = f0 + dfdt*dt
-            Xs[0] = f[0]**(-3)*Xs_0 #update sulfur content
+            Xs[0] = (1-f[0])**(-3)*Xs_0 #update sulfur content
         
         else: # core not solidifying
             dTcdt = dTcdt_calc2(tsolve[0],T0_mantle[1],T0_core[bl_start-1],f0, Qg = False, Ql = False) #Qg, Ql are false as no core solidification
@@ -173,7 +173,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 dTcdt = dTcdt_calc2(tsolve[0],T0_mantle[1],T0_core[lnb-1],f0) #save dTcdt seperately as need for f
                 dfdt = -B*dTcdt/(T0_core[lnb-1]*f0)
                 f[0] = f0 + dfdt*dt
-                Xs[0] = f[0]**(-3)*Xs_0 #update sulfur content
+                Xs[0] = (1-f[0])**(-3)*Xs_0 #update sulfur content
             
             else: # core not solidifying
                 dTcdt = dTcdt_calc2(tsolve[0],T0_mantle[1],T0_core[bl_start-1],f0, Qg = False, Ql = False) #Qg, Ql are false as no core solidification
