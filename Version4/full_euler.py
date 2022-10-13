@@ -14,7 +14,7 @@ Flow:
 import numpy as np
 import scipy.sparse as sp
 import scipy.optimize as sco
-from parameters import Myr, Rac, B, Tsolidus, dr, out_interval, km, kc, alpha_c, rhoc, eta_c, gc, cpc
+from parameters import Myr, Rac, B, dr, out_interval, km, kc, alpha_c, rhoc, eta_c, gc, cpc, Xs_0
 
 #import required functions
 from Tm_cond import T_cond_calc
@@ -23,6 +23,7 @@ from dTcdt_def import dTcdt_calc #convective CMB heat flux
 from dTcdt_def2 import dTcdt_calc2  #conductive CMB heat flux
 from Rayleigh_def import Rayleigh_calc
 from cmb_bl import delta_l, delta_c
+from fe_fes_liquidus import fe_fes_liquidus 
 
 def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     """
@@ -78,6 +79,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     cond_i = np.nan #set as nan and then reset if switches to conduction
     
     #output variables
+    Xs = np.zeros([m]) #core sulfur fraction
     Ra = np.zeros([m])
     d0 = np.zeros([m])
     bl = np.zeros([m])
@@ -123,7 +125,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 
     # Step 3. Calculate conductive profile for the core
     T_new_core = T_cond_calc(dt,T0_core,sparse_mat_c)
-    
+        
     # Step 4. Is the core convecting? 
     # check if heat flux is super adiabatic 
     Fcmb = -km*(T_new_mantle[1]-T_new_mantle[0])/dr # CMB heat flux eqn 23 in Dodds 2020
@@ -133,39 +135,65 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         bl[0] = delta_c(T0_core[-2],T0_mantle[0]) #second input is CMB temp
         nbl_cells = round(bl[0]/dr)
         bl_start = ncore_cells - nlid_cells - 1 #index in temp array where lid starts
-        dTcdt = dTcdt_calc2(tsolve[0],T0_mantle[1],T0_core[bl_start-1],f0) #save dTcdt seperately as need for f
-        Tc[0] = T0_core[bl_start-1] + dTcdt*dt
-        T_new_core[:bl_start] = Tc[0]
         
-    else: 
-        #find where the thermal stratification ends
+        # is the core solidifying?
+        Tliquidus = fe_fes_liquidus(Xs_0)
+        if T0_core[-2] < Tliquidus: #core solidifies
+            dTcdt = dTcdt_calc2(tsolve[0],T0_mantle[1],T0_core[bl_start-1],f0) #save dTcdt seperately as need for f
+            dfdt = -B*dTcdt/(T0_core[-2]*f0)
+            f[0] = f0 + dfdt*dt
+            Xs[0] = f[0]**(-3)*Xs_0 #update sulfur content
+        
+        else: # core not solidifying
+            dTcdt = dTcdt_calc2(tsolve[0],T0_mantle[1],T0_core[bl_start-1],f0, Qg = False, Ql = False) #Qg, Ql are false as no core solidification
+            f[0]=f0
+            Xs[0]=Xs_0
+        
+        #find number of cells which are solid
+        nic_cells = round(f[0]/dr)
+        Tc[0] = T0_core[bl_start-1] + dTcdt*dt
+        T_new_core[nic_cells:bl_start] = Tc[0] #replace everything above the solid core
+        
+    else: # don't have whole core convection, 
+        #check if there is thermal stratification
         #calculate dT/dr
         dTdr = np.gradient(T_new_core,dr)
         if np.all(dTdr)>0: #whole core is thermally stratified
+            # is the core solidifying?
+            Tliquidus = fe_fes_liquidus(Xs_0)
+            if np.any(T0_core) < Tliquidus: #core solidifies
+                raise NotImplementedError('Purely conductive core solidification has not been developed.')
             pass
-        else:
-            lnb = np.max(np.where(dTdr <= 0)) #level of neutral buoyancy
-            dTcdt = dTcdt_calc2(tsolve[0],T0_mantle[1],T0_core[lnb],f0) #save dTcdt seperately as need for f
-            Tc[0] = T0_core[lnb] + dTcdt*dt
-            T_new_core[:lnb] = Tc[0]
+        else: #only part of the core is stably stratified
+            lnb = np.max(np.where(dTdr <= 0)) #index for level of neutral buoyancy
+            
+            # is the core solidifying?
+            Tliquidus = fe_fes_liquidus(Xs_0)
+            if T0_core[lnb-1] < Tliquidus: #core solidifies
+                dTcdt = dTcdt_calc2(tsolve[0],T0_mantle[1],T0_core[lnb-1],f0) #save dTcdt seperately as need for f
+                dfdt = -B*dTcdt/(T0_core[lnb-1]*f0)
+                f[0] = f0 + dfdt*dt
+                Xs[0] = f[0]**(-3)*Xs_0 #update sulfur content
+            
+            else: # core not solidifying
+                dTcdt = dTcdt_calc2(tsolve[0],T0_mantle[1],T0_core[bl_start-1],f0, Qg = False, Ql = False) #Qg, Ql are false as no core solidification
+                f[0]=f0
+                Xs[0]=Xs_0
+            
+            #find number of cells which are solid
+            nic_cells = round(f[0]/dr)
+            Tc[0] = T0_core[lnb-1] + dTcdt*dt
+            T_new_core[nic_cells:lnb] = Tc[0] #replace everything above the solid core
+            
         
     # Step 5. Set the CMB temperature in the core array to be the same as the mantle, mantle determines core cooling
     T_new_core[-1] = T_new_mantle[0]
     
-    
-
-    raise ValueError('We made it!') 
-    # Step 6. Calculate f
-    if Tc[0] > Tsolidus:
-        f[0]=f0  #core not solidifying - based on 3-9 wt% S and phase diagram in Scheinberg 2016 
-    else:  
-    
-        dfdt = -B*dTcdt/(T0[i_core]*f0)
-        f[0] = f0 + dfdt*dt
-    
+    # Step 6. Replace old array with new ready for next step
     T_old_core = T_new_core
     T_old_mantle = T_new_mantle
 
+    raise NotImplementedError('We made it!') 
     
     for i in range(1,m):
       
