@@ -72,7 +72,7 @@ Delta=1.2 #dTm/dP/dT/dP 1.2 Nimmo (2009)
 Tsolidus = 1450 # solidus temp [K] based on phase diagram from Scheinberg 2016
 eta_c =0.01 # viscosity of core [Pa s] Dodds (2021)
 bpart = 0.5 #buoyancy partitioning coefficient Nichols (2021) but based on Aubert 2009 - might want to investigate
-Xs_0 = 9 # initial wt % sulfur in core (needs a citation)
+Xs_0 = 10 # initial wt % sulfur in core (needs a citation)
 #radioactivity
 #assume core is pure iron with ppm amounts of K that has a negligible effect on mass
 # energy generation rate per unit mass iron = de_fe * f60 * e^(-t/thalf_fe) 

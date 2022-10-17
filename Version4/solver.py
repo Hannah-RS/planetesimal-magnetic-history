@@ -25,7 +25,7 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 run = 40
 
 t_start=1*Myr #start after the end of stage 2
-t_end_m=100 #end time in Myr
+t_end_m=1000 #end time in Myr
 t_end=t_end_m*Myr
 t_cond = dr**2/kappa #conductive timestep
 step_m=0.1*t_cond  #max timestep must be smaller than conductive timestep
@@ -64,7 +64,7 @@ from full_euler import thermal_evolution
 
 #integrate
 tic = time.perf_counter()
-Tc, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, bl, d0, Ra, t, cond_i = thermal_evolution(t_start,t_end,step_m,Tint,f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, bl, d0, Ra, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_start,t_end,step_m,Tint,f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time = toc - tic    
 print('Integration finished')
@@ -74,16 +74,6 @@ print('Integration finished')
 
 from parameters import km, kc, G, rhoc, alpha_c, cpc, gamma
 
-#calculate Fs
-Fs = km*(Tm_base - Ts)/d0
-
-#Fcmb
-Fcmb = km*(Tc - Tm_base)/dr #expression for CMB flux in conductive regime
-Fcmb[:cond_i] = Fs[:cond_i]*(Tc[:cond_i] - Tm_base[:cond_i])*gamma #expression for CMB flux in convective regime
-
-# Fad
-gc = G*4/3*np.pi*rc*rhoc #g at CMB
-Fad = kc*Tc*alpha_c*gc/cpc
 
 # Frad - radiogenic heat flux, normalised to surface of body
 from parameters import h0, Al0, XAl, thalf_al, rhom, Vm, As
@@ -117,7 +107,7 @@ Rem2[Rem_ca<Rem_t] = Rem_t[Rem_ca<Rem_t] #replace values where Rem_t < Rem_c
 print('Fluxes and magnetic Reynolds number calculated.')
 
 #save variables to file
-np.savez('Results/run_{}'.format(run), Tm_base = Tm_base, Tm_surf = Tm_surf, Tc = Tc, f = f, T_profile = Tprofile, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux, Ra = Ra, d0 = d0 ) 
+np.savez('Results/run_{}'.format(run), Tc = Tc, Tcmb = Tcmb, Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, bl = bl, d0 = d0, Ra = Ra, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
 
 #write parameters to the run file
 from csv import writer

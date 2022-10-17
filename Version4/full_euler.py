@@ -70,6 +70,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         stagnant lid thickness for convecting mantle
     Ra: array
         Rayleigh number for convecting mantle
+    Fs: array
+        surface heat flux [W m^-2]
+    Fad: array
+        adiabatic CMB heat flux [W m^-2]
+    Fcmb: array
+        CMB heat flux [W m^-2]
     tsolve: array
         time points corresponding to each of the values above
     cond_i: integer
@@ -99,6 +105,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Tm_mid = np.zeros([m])
     Tm_surf = np.zeros([m])
     f = np.zeros([m])
+    Fs = np.zeros([m])
+    Fad = np.zeros([m])
+    Fcmb = np.zeros([m])
     tsolve = np.zeros([m])
 
     
@@ -112,7 +121,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     
     # Step 1. Calculate conductive profile for mantle
     T_new_mantle = T_cond_calc(dt,T0_mantle,sparse_mat_m)
- 
+    Fs[0] = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
+    
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
     Ra[0], d0[0] = Rayleigh_calc(T0_mantle[1]) #use temp at base of mantle 
     nlid_cells = round(d0[0]/dr)
@@ -138,10 +148,10 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         
     # Step 4. Is the core convecting? 
     # check if heat flux is super adiabatic 
-    Fcmb = -km*(T_new_mantle[1]-T_new_mantle[0])/dr # CMB heat flux eqn 23 in Dodds 2020
-    Fad = kc*T0_core[-2]*alpha_c*gc/cpc
+    Fcmb[0] = -km*(T_new_mantle[1]-T_new_mantle[0])/dr # CMB heat flux eqn 23 in Dodds 2020
+    Fad[0] = kc*T0_core[-2]*alpha_c*gc/cpc
     
-    if Fcmb > Fad: #super adiabatic, core convects
+    if Fcmb[0] > Fad[0]: #super adiabatic, core convects
         bl[0] = delta_c(T0_core[-2],T0_mantle[0]) #second input is CMB temp
         nbl_cells = round(bl[0]/dr)
         bl_start = ncore_cells - nlid_cells - 1 #index in temp array where lid starts
@@ -204,15 +214,17 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     T_old_core = T_new_core
     T_old_mantle = T_new_mantle
  
+    print('Moving to loop')
     
     for i in range(1,m):
-      
+
         #Step 0. Calculate time
         tsolve[i] = tsolve[i-1] + dt
         
         # Step 1. Calculate conductive profile for mantle
         T_new_mantle = T_cond_calc(dt,T_old_mantle,sparse_mat_m)
-     
+        Fs[i] = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
+        
         # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
         Ra[i], d0[i] = Rayleigh_calc(T_old_mantle[1]) #use temp at base of mantle 
         nlid_cells = round(d0[i]/dr)
@@ -244,10 +256,10 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             
         # Step 4. Is the core convecting? 
         # check if heat flux is super adiabatic 
-        Fcmb = -km*(T_new_mantle[1]-T_new_mantle[0])/dr # CMB heat flux eqn 23 in Dodds 2020
-        Fad = kc*T_old_core[-2]*alpha_c*gc/cpc
+        Fcmb[i] = -km*(T_new_mantle[1]-T_new_mantle[0])/dr # CMB heat flux eqn 23 in Dodds 2020
+        Fad[i] = kc*T_old_core[-2]*alpha_c*gc/cpc
         
-        if Fcmb > Fad: #super adiabatic, core convects
+        if Fcmb[i] > Fad[i]: #super adiabatic, core convects
             bl[i] = delta_c(T_old_core[-2],T_old_mantle[0]) #second input is CMB temp
             nbl_cells = round(bl[i]/dr)
             bl_start = ncore_cells - nlid_cells - 1 #index in temp array where lid starts
@@ -285,9 +297,10 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 lnb = np.max(np.where(dTdr <= 0)) #index for level of neutral buoyancy
                 
                 # is the core solidifying?
-                Tliquidus = fe_fes_liquidus(Xs[i])
-                if T0_core[lnb-1] < Tliquidus: #core solidifies
+                Tliquidus = fe_fes_liquidus(Xs[i-1])
+                if T_old_core[lnb-1] < Tliquidus: #core solidifies
                     dTcdt = dTcdt_calc2(tsolve[i],T_old_mantle[1],T_old_core[lnb-1],f[i-1]) #save dTcdt seperately as need for f
+                    print(dTcdt)
                     dfdt = -B*dTcdt/(T_old_core[lnb-1]*f[i-1])
                     f[i] = f[i-1] + dfdt*dt
                     Xs[i] = (1-f[i])**(-3)*Xs_0 #update sulfur content
@@ -319,26 +332,31 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 T_old = np.hstack([T_old_core,T_old_mantle[1:]])
                 Tprofile[i_save,:] = T_old
                 i_save = i_save + 1 #increment so saves in next space
-
-        
+        else: 
+            pass
+        print(f[i])
         if f[i]>=1: #stop integration if core is solid, truncate arrays to only return non-zero values
             
             
-            Tc = Tc[:i]
-            Tcmb = Tcmb[:i]
-            Tm_mid = Tm_mid[:i]
-            Tm_conv = Tm_conv[:i]
-            Tm_surf = Tm_surf[:i]
-            Tprofile = Tprofile[:i_save]
-            f=f[:i]
-            Xs = Xs[:i]
-            bl = bl[:i]
-            d0 = d0[:i]
-            Ra = Ra[:i]   
-            tsolve = tsolve[:i]
+            Tc = Tc[:i+1]
+            Tcmb = Tcmb[:i+1]
+            Tm_mid = Tm_mid[:i+1]
+            Tm_conv = Tm_conv[:i+1]
+            Tm_surf = Tm_surf[:i+1]
+            Tprofile = Tprofile[:i_save+1]
+            f=f[:i+1]
+            Xs = Xs[:i+1]
+            bl = bl[:i+1]
+            d0 = d0[:i+1]
+            Ra = Ra[:i+1] 
+            Fs = Fs[:i+1]
+            Fad = Fad[:i+1]
+            Fcmb = Fcmb[:i+1]
+            tsolve = tsolve[:i+1]
             
             break
-
+        else: 
+            pass
               
         
-    return Tc, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, bl, d0, Ra, tsolve, cond_i
+    return Tc, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, bl, d0, Ra,  Fs, Fad, Fcmb, tsolve, cond_i
