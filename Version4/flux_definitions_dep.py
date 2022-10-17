@@ -89,7 +89,7 @@ def f2_convective(Tm,Tc,Tcmb):
 
     Returns
     -------
-    f2 - eqn 24 of Dodds et al. (2020)
+    f2 - eqn 26 of Dodds et al. (2020)
 
     """
     delta_c = ((kappa_c*eta_c)/(rhoc*alpha_c*gc*abs(Tc-Tcmb)))**(1/3) #use absolute value as just interested in thickness

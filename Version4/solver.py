@@ -64,7 +64,7 @@ from full_euler import thermal_evolution
 
 #integrate
 tic = time.perf_counter()
-Ra, d0, Tprofile, Tc, Tm_base, Tm_surf, f, t, cond_i = thermal_evolution(t_start,t_end,step_m,Tint,f0,sparse_mat_c,sparse_mat_m) #Tm_base is temp at base of mantle, Tmsurf is temp one node below surface
+Tc, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, bl, d0, Ra, t, cond_i = thermal_evolution(t_start,t_end,step_m,Tint,f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time = toc - tic    
 print('Integration finished')
