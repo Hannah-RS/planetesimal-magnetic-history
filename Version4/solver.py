@@ -25,9 +25,9 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 run = 40
 
 t_start=1*Myr #start after the end of stage 2
-t_end_m=1000 #end time in Myr
+t_end_m=100 #end time in Myr
 t_end=t_end_m*Myr
-t_cond = dr**2/kappa #conductive timestep
+t_cond = dr**2/kappa_c #conductive timestep for core
 step_m=0.1*t_cond  #max timestep must be smaller than conductive timestep
 
 # set initial temperature profile

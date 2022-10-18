@@ -44,4 +44,4 @@ def delta_c(Tc,Tcmb):
     core cmb boundary layer thickness
 
     """
-    return ((kappa_c*etac)/(rhoc*alpha_c*gc*abs(Tc-Tcmb)))**(1/3)
+    return ((kappa_c*eta_c)/(rhoc*alpha_c*gc*abs(Tc-Tcmb)))**(1/3)

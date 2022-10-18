@@ -45,7 +45,7 @@ def viscosity(Tm, model = 'Robuchon-Bryson'):
     
     elif model =='Robuchon-Bryson':
         # arrhenius functional form from Robuchon & Nimmo (2011) with constants and three piece from Bryson (2019)
-        #only applicable for T < 1600 for now
+
         #use a linear profile for log10(eta) for T>1650 to get same end point as Bryson
         if type(Tm) == np.ndarray: #check if an array before applying the condition
             n = len(Tm)
