@@ -9,16 +9,16 @@ import numpy as np
 import pandas as pd
 
 #choose your run
-run=42
+run=44
 conduction = True # does the mantle switch to conduction?
-save = False # do you want to save your figures?
+save = True # do you want to save your figures?
 #scale time to Myr
 from parameters import Myr, r, Tm0, Tsolidus
 
 #import data from npz file
 npzfile = np.load('Results/run_{}.npz'.format(run))
 Tc= npzfile['Tc'] 
-#Tc_conv = npzfile['Tc_conv']
+Tc_conv = npzfile['Tc_conv']
 Tcmb = npzfile['Tcmb']
 Tm_mid = npzfile['Tm_mid']
 Tm_conv = npzfile['Tm_conv']
@@ -65,7 +65,7 @@ dt =row.iloc[0,11] #T_profile output frequency
 ##################### Temperature and Flux Plot ###############################
 # make  log-log plot - similar to Bryson 2019
 
-plt.figure(tight_layout=True)
+plt.figure(tight_layout=True,figsize=[10,5])
 plt.suptitle('Thermal evolution of a {:.0f}km asteroid \n Tm0 = {}K, Tsolidus ={}K \n run {} new viscosity'.format(r/1e3, Tm0, Tsolidus,run))
 
 xmin=tstart
@@ -73,7 +73,7 @@ xmin=tstart
 #temperatures as function of time
 plt.subplot(2,1,1)
 plt.semilogx(t_plot,Tc,label='T$_c$')
-#plt.semilogx(t_plot[Tc_conv!=0],Tc_conv[Tc_conv!=0],label='convective T$_c$')
+plt.semilogx(t_plot[Tc_conv!=0],Tc_conv[Tc_conv!=0],label='convective T$_c$')
 plt.semilogx(t_plot,Tcmb,label='T$_{cmb}$')
 plt.semilogx(t_plot,Tm_mid,label='T$_m$')
 plt.semilogx(t_plot[Tm_conv!=0],Tm_conv[Tm_conv!=0],label='convective T$_m$')
@@ -83,7 +83,7 @@ if conduction == True:
 plt.xlim([xmin,max(t_plot)])
 #plt.ylim([1400,1650]) #use these limits when comparing runs
 plt.ylabel('T/K')
-plt.legend(loc='upper right', ncol= 2)
+plt.legend(loc='lower left', ncol= 2)
 
 #fluxes as function of time
 plt.subplot(2,1,2)
@@ -101,13 +101,21 @@ plt.legend(loc='upper right',ncol=2)
 if save == True:
     plt.savefig('Plots/run_{}_Tflux.png'.format(run),dpi=450)
 
+################### Temperature gradient - plot in progress ###################
+Tgrad = np.gradient(Tc_conv)
+plt.figure()
+#plt.semilogy(t_plot[Tgrad>0],Tgrad[Tgrad>0])
+plt.semilogy(t_plot,Tgrad)
+#plt.xlim([200,300])
+#plt.ylim([-0.1,0.1])
+
 ################### Magnetic Reynolds number and core size plots ##############
 plt.figure(tight_layout=True)
 plt.suptitle('Thermal evolution of a {:.0f}km asteroid \n Tm0 = {}K, Tsolidus ={}K \n run {} new viscosity'.format(r/1e3, Tm0, Tsolidus,run))
 plt.subplot(2,1,1)
 plt.loglog(t_plot,Rem1,label='Nimmo')
 plt.loglog(t_plot,Rem2,label='Nichols')
-#plt.xlim([xmin,max(t_plot)])
+plt.xlim([200,300])
 plt.hlines(10,xmin=0,xmax=t_plot[len(Rem1)-1],color='k',linestyle='--')
 #plt.xlabel('Time/Myr')
 plt.ylabel('Rem')
@@ -116,7 +124,7 @@ plt.ylim([1,100])
 
 plt.subplot(2,1,2)
 plt.semilogx(t_plot,f,label='f')
-#plt.xlim([xmin,max(t_plot)])
+plt.xlim([200,300])
 plt.xlabel('Time/ Myr')
 plt.ylabel('f')
 
@@ -162,7 +170,7 @@ plt.figure()
 
 if conduction == True:
     plt.plot(t_plot[:cond_i],2*bl[:cond_i]/r)
-    plt.hlines(1,min(t_plot),max(t_plot[:cond_i]),color='k',linestyle='--')
+    #plt.hlines(1,min(t_plot),max(t_plot[:cond_i]),color='k',linestyle='--')
     plt.xlim([xmin,t_plot[cond_i]])
 else:
     plt.plot(t_plot,2*bl/r)
@@ -173,8 +181,10 @@ if save == True:
 
 ################## Sulfur fraction in liquid part of the core #################
 plt.figure()
-plt.loglog(t_plot,Xs)
-plt.xlim([xmin,max(t_plot)])
+#plt.loglog(t_plot,Xs)
+plt.scatter(t_plot,Xs)
+#plt.xlim([297.5,299.5])
+#plt.xlim([xmin,max(t_plot)])
 plt.xlabel('Time/Myr')
 plt.ylabel('Liquid core sulfur content/ wt%')
 

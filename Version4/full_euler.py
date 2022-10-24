@@ -14,7 +14,7 @@ Flow:
 import numpy as np
 import scipy.sparse as sp
 import scipy.optimize as sco
-from parameters import Myr, Rac, B, dr, out_interval, km, kc, alpha_c, rhoc, eta_c, gc, cpc, Xs_0, default
+from parameters import Myr, Rac, B, dr, out_interval, km, kc, alpha_c, rc, rhoc, eta_c, gc, cpc, Xs_0, default
 
 #import required functions
 from Tm_cond import T_cond_calc
@@ -170,11 +170,11 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         
         # is the core solidifying?
         Tliquidus = fe_fes_liquidus(Xs_0)
-        if T0_core[-2] < Tliquidus: #core solidifies
+        if np.any(T0_core < Tliquidus) == True: #core solidifies
             dTcdt = dTcdt_calc(tsolve[0], Fcmb[0], T0_core, f0, solidification = True) #save dTcdt seperately as need for f
             dfdt = -B*dTcdt/(T0_core[-2]*f0)
             f[0] = f0 + dfdt*dt
-            Xs[0] = (1-f[0])**(-3)*Xs_0 #update sulfur content
+            Xs[0] = (1-(f[0]**3))*Xs_0 #update sulfur content
         
         else: # core not solidifying
             dTcdt = dTcdt_calc(tsolve[0], Fcmb[0], T0_core, f0, solidification = False) 
@@ -182,7 +182,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Xs[0]=Xs_0
         
         #find number of cells which are solid
-        nic_cells = round(f[0]/dr)
+        nic_cells = round(f[0]*rc/dr)
         Tc_conv[0] = T0_core[bl_start-1] + dTcdt*dt
         T_new_core[nic_cells:bl_start] = Tc_conv[0] #replace everything above the solid core
          
@@ -196,7 +196,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             core_conv = False
             # is the core solidifying?
             Tliquidus = fe_fes_liquidus(Xs_0)
-            if np.any(T0_core) < Tliquidus: #core solidifies
+
+            if np.any(T0_core < Tliquidus) == True: #core solidifies
                 raise NotImplementedError('Purely conductive core solidification has not been developed.')
             pass
         else: #only part of the core is stably stratified
@@ -210,7 +211,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 dTcdt = dTcdt_calc(Fcmb[0], T0_core, f0, solidification = True) #save dTcdt seperately as need for f
                 dfdt = -B*dTcdt/(T0_core[lnb-1]*f0)
                 f[0] = f0 + dfdt*dt
-                Xs[0] = (1-f[0])**(-3)*Xs_0 #update sulfur content
+                Xs[0] = (1-(f[0])**3)*Xs_0 #update sulfur content
             
             else: # core not solidifying
                 dTcdt = dTcdt_calc(Fcmb[0], T0_core, f0, solidification = False)
@@ -218,7 +219,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 Xs[0]=Xs_0
             
             #find number of cells which are solid
-            nic_cells = round(f[0]/dr)
+            nic_cells = round(f[0]*rc/dr)
             Tc_conv[0] = T0_core[lnb-1] + dTcdt*dt
             T_new_core[nic_cells:lnb] = Tc_conv[0] #replace everything above the solid core
             
@@ -291,19 +292,19 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             
             # is the core solidifying?
             Tliquidus = fe_fes_liquidus(Xs[i-1])
-            if T_old_core[-2] < Tliquidus: #core solidifies
+            if np.any(T_old_core < Tliquidus) == True: #core solidifies
                 dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
                 dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
                 f[i] = f[i-1] + dfdt*dt
-                Xs[i] = (1-f[i])**(-3)*Xs_0 #update sulfur content
+                Xs[i] = (1-(f[i]**3))*Xs_0 #update sulfur content
             
             else: # core not solidifying
                 dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = False)
-                f[i]=f0
-                Xs[i]=Xs_0
+                f[i]=f[i-1] #keep the original core size
+                Xs[i]=Xs[i-1]
             
             #find number of cells which are solid
-            nic_cells = round(f[i]/dr)
+            nic_cells = round(f[i]*rc/dr)
             Tc_conv[i] = T_old_core[bl_start-1] + dTcdt*dt 
             T_new_core[nic_cells:bl_start] = Tc_conv[i] #replace everything above the solid core
             bl[i] = delta_c(T_new_core[-2],T_new_mantle[0]) #second input is CMB temp - save for next timestep
@@ -317,7 +318,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 core_conv = False
                 # is the core solidifying?
                 Tliquidus = fe_fes_liquidus(Xs[i-1])
-                if np.any(T_old_core) < Tliquidus: #core solidifies
+                if np.any(T_old_core < Tliquidus) == True: #core solidifies
                     raise NotImplementedError('Purely conductive core solidification has not been developed.')
                 pass
             else: #only part of the core is stably stratified
@@ -325,20 +326,20 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 core_conv = True
                 # is the core solidifying?
                 Tliquidus = fe_fes_liquidus(Xs[i-1])
-                if T_old_core[lnb-1] < Tliquidus: #core solidifies
+                if np.any(T_old_core < Tliquidus) == True: #core solidifies
 
                     dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
                     dfdt = -B*dTcdt/(T_old_core[lnb-1]*f[i-1])
                     f[i] = f[i-1] + dfdt*dt
-                    Xs[i] = (1-f[i])**(-3)*Xs_0 #update sulfur content
+                    Xs[i] = (1-(f[i]**3))*Xs_0 #update sulfur content
                     
                 else: # core not solidifying
                     dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = False)
-                    f[i]=f0
-                    Xs[i]=Xs_0
+                    f[i]=f[i-1]
+                    Xs[i]=Xs[i-1]
                 
                 #find number of cells which are solid
-                nic_cells = round(f[i]/dr)
+                nic_cells = round(f[i]*rc/dr)
                 Tc_conv[i] = T_old_core[lnb-1] + dTcdt*dt
                 T_new_core[nic_cells:lnb] = Tc_conv[i] #replace everything above the solid core
                 
@@ -348,10 +349,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         # Step 5. Find the CMB temperature, how you do this depends on if core and mantle are convecting
         if mantle_conv == True:
             if core_conv == True:
+                
                 # eqn 26 and 29 in Dodds 2020
                 Tcmb[i] = sco.root_scalar(convective_flux_balance,args=(Tc_conv[i],Tm_conv[i]),x0=Tc[i]-1e-5,x1=Tm_conv[i]+1e-5).root
                 Fcmb[i] = f1_convective(Tm_conv[i],Tc_conv[i],Tcmb[i])
             else: #eqn 23 = 24
+                
                 Tcmb[i] = (km/kc*T_new_mantle[1]+T_new_core[-2])/(km/kc+1)
                 Fcmb[i] = -km*(T_new_mantle[1]-Tcmb[i])/dr # CMB heat flux eqn 23 in Dodds 2020
         else:
@@ -360,6 +363,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 Tcmb[i] = T_new_mantle[0]
                 Fcmb[i] = -km*(T_new_mantle[1]-Tcmb[i])/dr # CMB heat flux eqn 23 in Dodds 2020
             else: # eqn 23 = 24
+                
                 Tcmb[i] = (km/kc*T_new_mantle[1]+T_new_core[-2])/(km/kc+1)
                 Fcmb[i] = -km*(T_new_mantle[1]-Tcmb[i])/dr # CMB heat flux eqn 23 in Dodds 2020
         Fcmb[i] = -km*(T_new_mantle[1]-Tcmb[i])/dr # CMB heat flux eqn 23 in Dodds 2020        
@@ -382,7 +386,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 i_save = i_save + 1 #increment so saves in next space
         else: 
             pass
-
+ 
         if f[i]>=1: #stop integration if core is solid, truncate arrays to only return non-zero values
             
             

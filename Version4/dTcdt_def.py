@@ -38,7 +38,7 @@ def dTcdt_calc(Fcmb,Tcore,f,solidification = False):
 
     """
     #calculate f3 - eqn 28 in Dodds (2020)
-    nic_cells = round(f/dr)
+    nic_cells = round(f*rc/dr)
     f3 = -kc*(Tcore[nic_cells]-Tcore[nic_cells-1])/dr
     
     #calculate Vconv - volume of cmb boundary layer has negligiblee volume 
