@@ -98,3 +98,18 @@ def f2_convective(Tm,Tc,Tcmb):
 
 def flux_balance(Tcmb,Tc, Tm, f1,f2):
     return f1(Tm,Tc,Tcmb)-f2(Tm,Tc,Tcmb) #returns 0 when fluxes balance
+
+def convective_flux_balance(Tcmb,Tc,Tm):
+    
+    #convective flux from mantle to CMB eqn 29 of Dodds et al.
+    eta_m = viscosity(Tm)
+    Ra, d_lid = Rayleigh_calc(Tm)
+    d = r/2-d_lid #length scale for convection = length of mantle - lid thickness
+    delta_l = d*(gamma*abs(Tcmb-Tm)/c1)**(4/3)*(Ra/Rac)**(-1/3) #eqn 21 #use absolute value as just interested in thickness
+    f1=-km*(Tm-Tcmb)/delta_l
+    
+    #convective flux from core to CMB - equation 26 of Dodds
+    delta_c = ((kappa_c*eta_c)/(rhoc*alpha_c*gc*abs(Tc-Tcmb)))**(1/3) #use absolute value as just interested in thickness
+    f2= -kc*(Tcmb-Tc)/delta_c
+    
+    return f1-f2 #returns 0 when fluxes balance

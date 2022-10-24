@@ -22,10 +22,10 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run = 40
+run = 43
 
 t_start=1*Myr #start after the end of stage 2
-t_end_m=100 #end time in Myr
+t_end_m=1000 #end time in Myr
 t_end=t_end_m*Myr
 t_cond = dr**2/kappa_c #conductive timestep for core
 step_m=0.1*t_cond  #max timestep must be smaller than conductive timestep
@@ -64,10 +64,11 @@ from full_euler import thermal_evolution
 
 #integrate
 tic = time.perf_counter()
-Tc, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, bl, d0, Ra, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_start,t_end,step_m,Tint,f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, bl, d0, Ra, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_start,t_end,step_m,Tint,f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time = toc - tic    
 print('Integration finished')
+print('Time taken = {:.0f} minutes'.format(int_time/60))
 
 # calculate Fs, Fcmb, Fad, Frad, Rem
 
@@ -107,7 +108,7 @@ Rem2[Rem_ca<Rem_t] = Rem_t[Rem_ca<Rem_t] #replace values where Rem_t < Rem_c
 print('Fluxes and magnetic Reynolds number calculated.')
 
 #save variables to file
-np.savez('Results/run_{}'.format(run), Tc = Tc, Tcmb = Tcmb, Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, bl = bl, d0 = d0, Ra = Ra, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
+np.savez('Results/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, bl = bl, d0 = d0, Ra = Ra, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
 
 #write parameters to the run file
 from csv import writer
