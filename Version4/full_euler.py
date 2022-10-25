@@ -208,13 +208,13 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             # is the core solidifying?
             Tliquidus = fe_fes_liquidus(Xs_0)
             if T0_core[lnb-1] < Tliquidus: #core solidifies
-                dTcdt = dTcdt_calc(Fcmb[0], T0_core, f0, solidification = True) #save dTcdt seperately as need for f
+                dTcdt = dTcdt_calc(Fcmb[0], T0_core, f0, solidification = True, stratification = True) #save dTcdt seperately as need for f
                 dfdt = -B*dTcdt/(T0_core[lnb-1]*f0)
                 f[0] = f0 + dfdt*dt
                 Xs[0] = (1-(f[0])**3)*Xs_0 #update sulfur content
             
             else: # core not solidifying
-                dTcdt = dTcdt_calc(Fcmb[0], T0_core, f0, solidification = False)
+                dTcdt = dTcdt_calc(Fcmb[0], T0_core, f0, solidification = False, stratification = True)
                 f[0]=f0
                 Xs[0]=Xs_0
             
@@ -328,13 +328,13 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 Tliquidus = fe_fes_liquidus(Xs[i-1])
                 if np.any(T_old_core < Tliquidus) == True: #core solidifies
 
-                    dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
+                    dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True, stratification = True) #save dTcdt seperately as need for f
                     dfdt = -B*dTcdt/(T_old_core[lnb-1]*f[i-1])
                     f[i] = f[i-1] + dfdt*dt
                     Xs[i] = (1-(f[i]**3))*Xs_0 #update sulfur content
                     
                 else: # core not solidifying
-                    dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = False)
+                    dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = False, stratification = True)
                     f[i]=f[i-1]
                     Xs[i]=Xs[i-1]
                 

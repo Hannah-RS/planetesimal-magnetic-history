@@ -17,7 +17,7 @@ from cmb_bl import delta_c
 from q_funcs import Qlt, Qgt
 import numpy as np
 
-def dTcdt_calc(Fcmb,Tcore,f,solidification = False):
+def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = False):
     """
 
     Parameters
@@ -37,21 +37,28 @@ def dTcdt_calc(Fcmb,Tcore,f,solidification = False):
             rate of change of core temperature (if negative core is cooling)
 
     """
-    #calculate f3 - eqn 28 in Dodds (2020)
-    nic_cells = round(f*rc/dr)
-    f3 = -kc*(Tcore[nic_cells]-Tcore[nic_cells-1])/dr
     
-    #calculate Vconv - volume of cmb boundary layer has negligiblee volume 
-    Vconv = 4/3*np.pi*rc**3*(1-f**3)
+    if stratification == True:
+        dTdr = np.gradient(Tcore,dr)
+        lnb = np.max(np.where(dTdr <= 0))
+        f3 = -kc*(Tcore[lnb]-Tcore[lnb-1])/dr #calculate f3 - eqn 28 in Dodds (2020)
+        rstrat = lnb*dr
+        Vconv = 4/3*np.pi*(rc**3-rstrat**3) #calculate Vconv - volume of cmb boundary layer has negligible volume 
+        Tc = Tcore[lnb]
+    else:
+        f3 = 0 #if there is an inner core treat as isothermal
+        rstrat = 0
+        Vconv = 4/3*np.pi*rc**3*(1-f**3)
+        nic_cells = round(f*rc/dr)
+        Tc = Tcore[nic_cells] #take temperature just above ICB as core convective temp
+    
     Qst = rhoc*cpc*Vconv
-    
-    Tc = Tcore[nic_cells] #take temperature just above ICB as core convective temp
-    
+       
     if solidification == True: #core solidifying so consider buoyancy, latent heat
-        dTcdt = (f3*4*np.pi*(f*rc)**2-Fcmb*Acmb)/(Qst+Qlt(Tc,f)+Qgt(Tc,f))
+        dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb)/(Qst+Qlt(Tc,f)+Qgt(Tc,f))
    
     else:
-        dTcdt = (f3*4*np.pi*(f*rc)**2-Fcmb*Acmb)/Qst
+        dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb)/Qst
      
  
         

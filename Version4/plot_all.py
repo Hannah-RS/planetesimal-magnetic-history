@@ -9,9 +9,9 @@ import numpy as np
 import pandas as pd
 
 #choose your run
-run=44
+run=46
 conduction = True # does the mantle switch to conduction?
-save = True # do you want to save your figures?
+save = False # do you want to save your figures?
 #scale time to Myr
 from parameters import Myr, r, Tm0, Tsolidus
 
@@ -97,6 +97,7 @@ plt.ylim([1e-3,1e2])   #use these limits when comparing runs
 plt.xlim([xmin,max(t_plot)])
 plt.ylabel('Flux/ W$m^{-2}$')
 plt.legend(loc='upper right',ncol=2)
+
 
 if save == True:
     plt.savefig('Plots/run_{}_Tflux.png'.format(run),dpi=450)
