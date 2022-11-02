@@ -368,8 +368,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 Fcmb[i] = -km*(T_new_mantle[1]-Tcmb[i])/dr # CMB heat flux eqn 23 in Dodds 2020
         Fcmb[i] = -km*(T_new_mantle[1]-Tcmb[i])/dr # CMB heat flux eqn 23 in Dodds 2020        
         #replace CMB nodes
-        T_new_mantle[0] = Tcmb[0]
-        T_new_core[-1] = Tcmb[0]
+        T_new_mantle[0] = Tcmb[i]
+        T_new_core[-1] = Tcmb[i]
                       
         # Step 6. Replace old array with new ready for next step
         T_old_core = T_new_core
