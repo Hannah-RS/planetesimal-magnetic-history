@@ -261,16 +261,22 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 cond = 1
             else: #mantle already conducting
                 pass
-            Fcmb[i] = -km*(T_new_mantle[1]-T_new_mantle[0])/dr 
             Tm_conv[i] = 0 # convective mantle temperature is 0 if mantle not convecting
 
         else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile 
             mantle_conv = True
-            base = delta_l(Tm_conv[i-1],Tcmb[i-1])
+            if Tm_conv[i-1]!=0: #mantle already convecting
+                Tm_old = Tm_conv[i-1]
+            else: #mantle just started convecting
+                Tm_old = T_old_mantle[lid_start-1] # take temperature below stagnant lid as mantle temp
+
+            base = delta_l(Tm_old,Tcmb[i-1])
+            
             nbase_cells = round(base/dr)
-            Tm_conv[i] = Tm_conv[i-1] + dTmdt_calc(tsolve[i-1],Fs[i-1],Fcmb[i-1])*dt #temperature of convecting region 
+            Tm_conv[i] = Tm_old + dTmdt_calc(tsolve[i-1],Fs[i-1],Fcmb[i-1])*dt #temperature of convecting region 
             T_new_mantle[nbase_cells:lid_start] = Tm_conv[i]
-            Fcmb[i] = -km*(Tm_conv[i]-T_new_mantle[0])/base # CMB heat flux eqn 23 in Dodds 2020
+           
+            
             
         #store values
         Tcmb[i] = T_new_mantle[0]
