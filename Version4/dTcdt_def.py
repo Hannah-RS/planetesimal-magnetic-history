@@ -45,6 +45,11 @@ def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = False):
         rstrat = lnb*dr
         Vconv = 4/3*np.pi*(rc**3-rstrat**3) #calculate Vconv - volume of cmb boundary layer has negligible volume 
         Tc = Tcore[lnb]
+        #print(Vconv)
+        #print(f3)
+        #print(Fcmb)
+        f3=0
+
     else:
         f3 = 0 #if there is an inner core treat as isothermal
         rstrat = 0
@@ -53,13 +58,15 @@ def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = False):
         Tc = Tcore[nic_cells] #take temperature just above ICB as core convective temp
     
     Qst = rhoc*cpc*Vconv
+
        
     if solidification == True: #core solidifying so consider buoyancy, latent heat
         dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb)/(Qst+Qlt(Tc,f)+Qgt(Tc,f))
    
     else:
+        
         dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb)/Qst
-     
+        print(dTcdt)
  
         
     return dTcdt
