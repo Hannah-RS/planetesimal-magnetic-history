@@ -151,7 +151,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile
         mantle_conv = True
         Tm_conv[0] = T0_mantle[nbase_cells] + dTmdt_calc(tsolve[0],Fs[0],Fcmb[0])*dt
-        T_new_mantle[nbase_cells:lid_start] = Tm_conv[0]
+        T_new_mantle[nbase_cells:lid_start+1] = Tm_conv[0]
         
     #store values   
     Tm_mid[0] = T_new_mantle[round(nmantle_cells/2)] # temperature at the mid mantle
@@ -170,7 +170,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         bl[0] = delta_c(T0_core[-2],T0_mantle[0]) #second input is CMB temp
         nbl_cells = round(bl[0]/dr)
         bl_start = ncore_cells - nbl_cells - 1 #index in temp array where lid starts
-        
+
         # is the core solidifying?
         Tliquidus = fe_fes_liquidus(Xs_0)
         if np.any(T0_core < Tliquidus) == True: #core solidifies
@@ -187,7 +187,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         #find number of cells which are solid
         nic_cells = round(f[0]*rc/dr)
         Tc_conv[0] = T0_core[bl_start-1] + dTcdt*dt
-        T_new_core[:bl_start] = Tc_conv[0] #replace everything above the solid core
+        T_new_core[:] = Tc_conv[0] #replace everything inside the core with the convective temperature
         
         
         
@@ -224,7 +224,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             #find number of cells which are solid
             nic_cells = round(f[0]*rc/dr)
             Tc_conv[0] = T0_core[lnb-1] + dTcdt*dt
-            T_new_core[:lnb] = Tc_conv[0] #replace everything above the solid core
+            T_new_core[:lnb+1] = Tc_conv[0] #replace everything above the solid core
             
         
     # Step 5. Recalculate the CMB temperature so now it is determined by the end of the step as it will be in subsequent steps
@@ -279,13 +279,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             
             
         #store values
-        Tcmb[i] = T_new_mantle[0]
         Tm_mid[i] = T_new_mantle[round(nmantle_cells/2)] # temperature at the mid mantle
         Tm_surf[i] = T_new_mantle[-2] #temperature one cell above surface pinned to 200K
           
         # Step 3. Calculate conductive profile for the core
         T_new_core = T_cond_calc(dt,T_old_core,sparse_mat_c)
-            
+        print(T_new_core[-3:])   
         # Step 4. Is the core convecting? 
         # check if heat flux is super adiabatic 
         
@@ -312,9 +311,10 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             
             #find number of cells which are solid
             nic_cells = round(f[i]*rc/dr)
+            #find new convective temperature
             Tc_conv[i] = T_old_core[bl_start-1] + dTcdt*dt 
-            T_new_core[:bl_start] = Tc_conv[i] #replace everything above the solid core
-            bl[i] = delta_c(T_new_core[-2],T_new_mantle[0]) #second input is CMB temp - save for next timestep
+            T_new_core[:] = Tc_conv[i] #replace everything with the convective temperature
+            bl[i] = delta_c(Tc_conv[i],T_new_mantle[0]) #find new boundary layer thickness, second input is CMB temp - save for next timestep
             
             
         else: # don't have whole core convection, 
@@ -351,11 +351,11 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 #find number of cells which are solid
                 nic_cells = round(f[i]*rc/dr)
                 Tc_conv[i] = T_old_core[lnb-1] + dTcdt*dt
-                T_new_core[:lnb] = Tc_conv[i] #replace everything above the solid core
+                T_new_core[:lnb+1] = Tc_conv[i] #replace everything below stratified layer
                 
         Tc[i] = T_new_core[nic_cells] #temperature of core is always taken at inner core boundary (or centre)
         Fad[i] = kc*T_new_core[-2]*alpha_c*gc/cpc   
-        
+        print(T_new_core[-3:])
         # Step 5. Find the CMB temperature, how you do this depends on if core and mantle are convecting
         if mantle_conv == True:
             if core_conv == True:
@@ -384,7 +384,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         #replace CMB nodes
         T_new_mantle[0] = Tcmb[i]
         T_new_core[-1] = Tcmb[i]
-                      
+        print(T_new_core[-3:])
+        print('Next run')
         # Step 6. Replace old array with new ready for next step
         T_old_core = T_new_core
         T_old_mantle = T_new_mantle
