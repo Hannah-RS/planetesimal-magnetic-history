@@ -73,16 +73,16 @@ model2='Arrhenius'
 # make  log-log plot - similar to Bryson 2019
 
 plt.figure(tight_layout=True)
-plt.suptitle('Thermal evolution of a {:.0f}km asteroid \n Tm0 = {}K, Tsolidus ={}K '.format(r/1e3, Tm0, Tsolidus))
+plt.suptitle('Thermal evolution of a {:.0f}km asteroid '.format(r/1e3, Tm0, Tsolidus))#\n Tm0 = {}K, Tsolidus ={}K 
 
 xmin=tstart
 
 #temperatures as function of time
 plt.subplot(2,1,1)
-plt.semilogx(t_plot1,Tm1,label='T$_m$ - base {}'.format(model1),color='royalblue')
-plt.semilogx(t_plot1,Tc1,label='T$_c$',color='firebrick')
-plt.semilogx(t_plot2,Tm2,color='royalblue',linestyle='--',label=model2)
-plt.semilogx(t_plot2,Tc2,color='firebrick',linestyle='--')
+plt.semilogx(t_plot1,Tm1,label='mantle'.format(model1),color='red')
+plt.semilogx(t_plot1,Tc1,label='core',color='black')
+plt.semilogx(t_plot2,Tm2,color='red',linestyle='--',label=model2)
+plt.semilogx(t_plot2,Tc2,color='black',linestyle='--')
 plt.vlines(cond_t,ymin=min(Tm1),ymax=1600,color='black',linestyle='dotted',label='conduction')
 #plt.xlim([xmin,max(t_plot)])
 #plt.xlabel('Time/ Myr')
