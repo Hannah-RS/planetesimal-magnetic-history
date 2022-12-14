@@ -199,7 +199,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     pass # use already calculated condctive profile, don't do anything
             else: #scenario 2 - erosion of stratification, convective layer at top of core
                 
-                b_ind = np.where(Tcmb[0] > T0_core) #indices of unstable layer
+                b_ind = np.where(Tcmb[0] <= T0_core) #indices of unstable layer
                 min_unstable_old = b_ind[0] #just in first step these are the same
                 min_unstable_new = b_ind[0]
 
@@ -229,7 +229,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             """Below here needs rewriting for conductive core solidification/compositional convection"""
             # is the core solidifying?
             Tliquidus = fe_fes_liquidus(Xs_0)
-            if T0_core[lnb-1] < Tliquidus: #core solidifies
+            if T0_core[-2] < Tliquidus: #core solidifies
                 dTcdt = dTcdt_calc(Fcmb[0], T0_core, f0, solidification = True , stratification = False) #save dTcdt seperately as need for f
                 dfdt = -B*dTcdt/(T0_core[lnb-1]*f0)
                 f[0] = f0 + dfdt*dt
@@ -325,8 +325,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 f[i]=f[i-1] #keep the original core size
                 Xs[i]=Xs[i-1]
             
-            #find number of cells which are solid
-            nic_cells = round(f[i]*rc/dr)
             #find new convective temperature
             Tc_conv[i] = T_old_core[bl_start-1] + dTcdt*dt 
             T_new_core[:] = Tc_conv[i] #replace everything with the convective temperature
@@ -335,44 +333,56 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             
         else: # don't have whole core convection, 
             #check if there is thermal stratification
-            #calculate dT/dr
-            dTdr = np.gradient(T_old_core,dr)
-            if np.all(dTdr)>0: #whole core is thermally stratified
-                core_conv = False
-                # is the core solidifying?
-                Tliquidus = fe_fes_liquidus(Xs[i-1])
-                if np.any(T_old_core < Tliquidus) == True: #core solidifies
-                    raise NotImplementedError('Purely conductive core solidification has not been developed.')
-                pass
-            else: #only part of the core is stably stratified
-                lnb = np.max(np.where(dTdr <= 0)) #index for level of neutral buoyancy
-                print(lnb)
-                core_conv = True
-                # is the core solidifying?
-                Tliquidus = fe_fes_liquidus(Xs[i-1])
-                if np.any(T_old_core < Tliquidus) == True: #core solidifies
-                    print('Solid - 3')
-                    dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = False, stratification = True) #save dTcdt seperately as need for f
-                    print(dTcdt)
-                    print(len(T_old_core[np.where(T_old_core < Tliquidus)]))
-                    dfdt = -B*dTcdt/(T_old_core[lnb-1]*f[i-1])
-                    print(dfdt)
-                    f[i] = f[i-1] + dfdt*dt
-                    Xs[i] = (1-(f[i]**3))*Xs_0 #update sulfur content
+            
+            if Tcmb[i-1] > np.any(T_old_core): #there is thermal stratification
+                
+                if Tcmb[i-1] > np.all(T_old_core):
+                        # scenario 1 - just conduction in the core
+                        pass # use already calculated condctive profile, don't do anything
+                else: #scenario 2 - erosion of stratification, convective layer at top of core
+                    core_conv = True
+                    b_ind = np.where(Tcmb[i-1] <= T_old_core) #indices of unstable layer
                     
-                else: # core not solidifying
-                    dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = False, stratification = True)
-                    f[i]=f[i-1]
-                    Xs[i]=Xs[i-1]
+                    min_unstable_new = b_ind[0]
+
+                    Tc_conv[i] = T_old_core[min_unstable_old]
+                    # is the core solidifying?
+                    Tliquidus = fe_fes_liquidus(Xs[i-1])
+                    if np.any(T_old_core) < Tliquidus: #core solidifies
+                        raise NotImplementedError('Core solidification erodes thermal stratification - write this code!')
+                    
+                    else: # core not solidifying
+                        dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = False, stratification = True)
+                        f[i]=f0
+                        Xs[i]=Xs_0
+                        
+                        Tc_conv[i] = Tc_conv[i-1]+dTcdt*dt #replace convecting layer from last timestep with new temp - in later steps use i-1 and i
+                        T_new_core[min_unstable_old:-1] = Tc_conv[i]
+                                                 
+                        #now perform volume average over unstable layer
+                        Tlayer = volume_average(T_new_core, b_ind)
+                        T_new_core[min_unstable_new:-1] = Tlayer #replace unstable layer with average temp
+                        min_unstable_old = min_unstable_new #replace for next step
+                        
+            
+            else: #there is no stratification and the core is not thermally convecting 
                 
-                #find number of cells which are solid
-                nic_cells = round(f[i]*rc/dr)
-                Tc_conv[i] = T_old_core[lnb-1] + dTcdt*dt
-                T_new_core[:lnb+1] = Tc_conv[i] #replace everything below stratified layer
-                
-        Tc[i] = T_new_core[nic_cells] #temperature of core is always taken at inner core boundary (or centre)
+                """Below here needs rewriting for conductive core solidification/compositional convection"""
+                # is the core solidifying?
+                Tliquidus = fe_fes_liquidus(Xs[i-1])
+                if T_old_core[-2] < Tliquidus: #core solidifies
+                    dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True , stratification = False) #save dTcdt seperately as need for f
+                    dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
+                    f[i] = f[i-1] + dfdt*dt
+                    Xs[i] = (1-(f[i])**3)*Xs_0 #update sulfur content
+                    #Tc_conv[0] = T0_core[lnb-1] + dTcdt*dt
+                    #T_new_core[:lnb+1] = Tc_conv[0] #replace everything above the solid core
+                else: # core not solidifying or convecting keep conductive profile
+                    pass 
+                 
+        Tc[i] = T_new_core[0] #temperature of core is always taken at centre
         Fad[i] = kc*T_new_core[-2]*alpha_c*gc/cpc   
-        print(T_new_core[-3:])
+
         # Step 5. Find the CMB temperature, how you do this depends on if core and mantle are convecting
         if mantle_conv == True:
             if core_conv == True:
@@ -401,8 +411,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         #replace CMB nodes
         T_new_mantle[0] = Tcmb[i]
         T_new_core[-1] = Tcmb[i]
-        print(T_new_core[-3:])
-        print('Next run')
+ 
         # Step 6. Replace old array with new ready for next step
         T_old_core = T_new_core
         T_old_mantle = T_new_mantle
