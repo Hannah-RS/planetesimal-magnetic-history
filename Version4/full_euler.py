@@ -100,6 +100,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     cond_i = 'nan' #set as string and then reset if switches to conduction
     mantle_conv = False #flag for mantle convection
     core_conv = False #flag for core convection
+    min_unstable_old = i_core-1 #smallest index of cells in the core that are convectively unstable - as a minimum it is the one below the CMB
     
     #output variables
     Xs = np.zeros([m]) #core sulfur fraction
@@ -200,7 +201,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             else: #scenario 2 - erosion of stratification, convective layer at top of core
                 
                 b_ind = np.where(Tcmb[0] <= T0_core) #indices of unstable layer
-                min_unstable_old = b_ind[0] #just in first step these are the same
                 min_unstable_new = b_ind[0]
 
                 Tc_conv[0] = T0_core[min_unstable_old]
@@ -210,7 +210,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     raise NotImplementedError('Core solidification erodes thermal stratification - write this code!')
                 
                 else: # core not solidifying
-                    dTcdt = dTcdt_calc(Fcmb[0], T0_core, f0, solidification = False, stratification = True)
+                    dTcdt = dTcdt_calc(Fcmb[0], T0_core, f0, solidification = False, stratification = [True, min_unstable_old])
                     f[0]=f0
                     Xs[0]=Xs_0
                     
@@ -230,7 +230,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             # is the core solidifying?
             Tliquidus = fe_fes_liquidus(Xs_0)
             if T0_core[-2] < Tliquidus: #core solidifies
-                dTcdt = dTcdt_calc(Fcmb[0], T0_core, f0, solidification = True , stratification = False) #save dTcdt seperately as need for f
+                dTcdt = dTcdt_calc(Fcmb[0], T0_core, f0, solidification = True) #save dTcdt seperately as need for f
                 dfdt = -B*dTcdt/(T0_core[lnb-1]*f0)
                 f[0] = f0 + dfdt*dt
                 Xs[0] = (1-(f[0])**3)*Xs_0 #update sulfur content
@@ -352,7 +352,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                         raise NotImplementedError('Core solidification erodes thermal stratification - write this code!')
                     
                     else: # core not solidifying
-                        dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = False, stratification = True)
+                        dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = False, stratification = [True, min_unstable_old])
                         f[i]=f0
                         Xs[i]=Xs_0
                         
@@ -371,7 +371,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 # is the core solidifying?
                 Tliquidus = fe_fes_liquidus(Xs[i-1])
                 if T_old_core[-2] < Tliquidus: #core solidifies
-                    dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True , stratification = False) #save dTcdt seperately as need for f
+                    dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
                     dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
                     f[i] = f[i-1] + dfdt*dt
                     Xs[i] = (1-(f[i])**3)*Xs_0 #update sulfur content
@@ -452,5 +452,5 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         else: 
             pass
               
-    print(ncore_cells)   
+  
     return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, bl, d0, Ra,  Fs, Fad, Fcmb, tsolve, cond_i

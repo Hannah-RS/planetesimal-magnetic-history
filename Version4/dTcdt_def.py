@@ -17,7 +17,7 @@ from cmb_bl import delta_c
 from q_funcs import Qlt, Qgt
 import numpy as np
 
-def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = False):
+def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = [False,0]):
     """
 
     Parameters
@@ -30,7 +30,9 @@ def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = False):
         fractional inner core radius 
     solidification: bool
         is the core solidifying, default is False
-
+    stratification: list
+        is the unstably core stratified: bool
+        index of lowest unstable cell 
     Returns
     -------
     dTcdt : float
@@ -38,17 +40,13 @@ def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = False):
 
     """
     
-    if stratification == True:
-        dTdr = np.gradient(Tcore,dr)
-        lnb = np.max(np.where(dTdr <= 0))
-        f3 = -kc*(Tcore[lnb]-Tcore[lnb-1])/dr #calculate f3 - eqn 28 in Dodds (2020)
-        rstrat = lnb*dr
-        Vconv = 4/3*np.pi*(rc**3-rstrat**3) #calculate Vconv - volume of cmb boundary layer has negligible volume 
-        Tc = Tcore[lnb]
-        #print(Vconv)
-        #print(f3)
-        #print(Fcmb)
-        f3=0
+    if stratification[0] == True:
+        stratification[1] = min_unstable_ind
+        f3 = -kc*(Tcore[min_unstable_ind]-Tcore[min_unstable_ind-1])/dr #calculate f3 - eqn 28 in Dodds (2020)
+        rconv = min_unstable_ind*dr
+        Vconv = 4/3*np.pi*(rc**3-rconv**3) #calculate Vconv - volume of cmb boundary layer has negligible volume 
+        Tc = Tcore[min_unstable_ind]
+
 
     else:
         f3 = 0 #if there is an inner core treat as isothermal
@@ -66,7 +64,7 @@ def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = False):
     else:
         
         dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb)/Qst
-        print(dTcdt)
+
  
         
     return dTcdt
