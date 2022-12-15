@@ -289,7 +289,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 Tm_old = Tm_conv[i-1]
             else: #mantle just started convecting
                 Tm_old = T_old_mantle[lid_start-1] # take temperature below stagnant lid as mantle temp
-            print(Tm_conv[i-1])
+            
             
             
             nbase_cells = round(dl[i]/dr)
@@ -318,7 +318,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Tliquidus = fe_fes_liquidus(Xs[i-1])
             if np.any(T_old_core < Tliquidus) == True: #core solidifies
                 print(T_old_core[np.where(T_old_core<Tliquidus)])
-                print('Core solidifying')
+                raise ValueError('Core solidifying')
+            
                 dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
                 dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
                 f[i] = f[i-1] + dfdt*dt
@@ -342,7 +343,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 
                 if Tcmb[i-1] > np.all(T_old_core):
                         # scenario 1 - just conduction in the core
-                        pass # use already calculated condctive profile, don't do anything
+                        # use already calculated condctive profile and keep core in current state
+                        f[i] = f[i-1]
+                        Xs[i] = Xs[i-1]
                 else: #scenario 2 - erosion of stratification, convective layer at top of core
                     core_conv = True
                     b_ind = np.where(Tcmb[i-1] <= T_old_core) #indices of unstable layer
@@ -358,8 +361,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     
                     else: # core not solidifying
                         dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = False, stratification = [True, min_unstable_old])
-                        f[i]=f0
-                        Xs[i]=Xs_0
+                        f[i]=f[i-1]
+                        Xs[i]=Xs[i-1]
                         
                         Tc_conv[i] = Tc_conv[i-1]+dTcdt*dt #replace convecting layer from last timestep with new temp - in later steps use i-1 and i
                         T_new_core[min_unstable_old:-1] = Tc_conv[i]
@@ -384,7 +387,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     #Tc_conv[0] = T0_core[lnb-1] + dTcdt*dt
                     #T_new_core[:lnb+1] = Tc_conv[0] #replace everything above the solid core
                 else: # core not solidifying or convecting keep conductive profile
-                    pass 
+                    f[i] = f[i-1]
+                    Xs = Xs[i-1]
                  
         Tc[i] = T_new_core[0] #temperature of core is always taken at centre
         Fad[i] = kc*T_new_core[-2]*alpha_c*gc/cpc   
