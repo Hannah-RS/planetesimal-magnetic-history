@@ -117,7 +117,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Tm_conv = np.zeros([m])
     Tm_mid = np.zeros([m])
     Tm_surf = np.zeros([m])
-    f = np.zeros([m])
+    f = np.ones([m])*f0 #set as initial core size by default and only override if core starts to change
     Fs = np.zeros([m])
     Fad = np.zeros([m])
     Fcmb = np.zeros([m])
@@ -157,7 +157,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         nbase_cells = round(dl[0]/dr)
         Tm_conv[0] = T0_mantle[nbase_cells] + dTmdt_calc(tsolve[0],Fs[0],Fcmb[0])*dt
         T_new_mantle[nbase_cells:lid_start+1] = Tm_conv[0]
-        Fs[0] = -km(Ts-Tm_conv[0])/d0[0] #replace Fs with convective version
+        Fs[0] = -km*(Ts-Tm_conv[0])/d0[0] #replace Fs with convective version
         
     #store values   
     Tm_mid[0] = T_new_mantle[round(nmantle_cells/2)] # temperature at the mid mantle
@@ -318,7 +318,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             # is the core solidifying?
             Tliquidus = fe_fes_liquidus(Xs[i-1])
             if np.any(T_old_core < Tliquidus) == True: #core solidifies
-
+                print(T_old_core[np.where(T_old_core<Tliquidus)])
+                print('Core solidifying')
                 dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
                 dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
                 f[i] = f[i-1] + dfdt*dt
@@ -326,7 +327,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             
             else: # core not solidifying
                 dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = False)
-                f[i]=f[i-1] #keep the original core size
+                f[i]=f[i-1] #keep the current core size
                 Xs[i]=Xs[i-1]
             
             #find new convective temperature
