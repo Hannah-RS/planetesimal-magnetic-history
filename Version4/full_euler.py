@@ -105,7 +105,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     min_unstable_old = i_core-1 #smallest index of cells in the core that are convectively unstable - as a minimum it is the one below the CMB
     
     #output variables
-    Xs = np.zeros([m]) #core sulfur fraction
+    Xs = np.ones([m])*Xs_0 #core sulfur fraction
     Ra = np.zeros([m])
     d0 = np.zeros([m])
     dl = np.zeros([m])
