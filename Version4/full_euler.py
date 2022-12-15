@@ -14,7 +14,7 @@ Flow:
 import numpy as np
 import scipy.sparse as sp
 import scipy.optimize as sco
-from parameters import Myr, Rac, B, dr, out_interval, km, kc, alpha_m, alpha_c, rc, rhoc, rhom, eta_c, g, gc, cpc, Xs_0, default, kappa, kappa_c, c1, gamma
+from parameters import Ts, Myr, Rac, B, dr, out_interval, km, kc, alpha_m, alpha_c, rc, rhoc, rhom, eta_c, g, gc, cpc, Xs_0, default, kappa, kappa_c, c1, gamma
 
 #import required functions
 from Tm_cond import T_cond_calc
@@ -90,11 +90,11 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     """
     
     #initialise arrays for output
-    #p = int((tend-tstart)/(out_interval)) #only output temp profiles every 10 Myr
+    p = int((tend-tstart)/(out_interval)) #only output temp profiles every 10 Myr
     m = int((tend-tstart)/dt)
-    #ratio = int(m/p) #use for calculating when to save temp profiles
-    ratio =100
-    p = 1000
+    ratio = int(m/p) #use for calculating when to save temp profiles
+    #ratio =100
+    #p = 1000
     i_save=0
     n_cells = len(T0) #number of cells
     i_core = round(n_cells/2)-1 # index in array of last core cell (-1 as indexing starts at 0)
@@ -157,6 +157,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         nbase_cells = round(dl[0]/dr)
         Tm_conv[0] = T0_mantle[nbase_cells] + dTmdt_calc(tsolve[0],Fs[0],Fcmb[0])*dt
         T_new_mantle[nbase_cells:lid_start+1] = Tm_conv[0]
+        Fs[0] = -km(Ts-Tm_conv[0])/d0[0] #replace Fs with convective version
         
     #store values   
     Tm_mid[0] = T_new_mantle[round(nmantle_cells/2)] # temperature at the mid mantle
@@ -284,6 +285,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
 
         else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile 
             mantle_conv = True
+            
             if Tm_conv[i-1]!=0: #mantle already convecting
                 Tm_old = Tm_conv[i-1]
             else: #mantle just started convecting
@@ -294,7 +296,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             nbase_cells = round(dl[i]/dr)
             Tm_conv[i] = Tm_old + dTmdt_calc(tsolve[i-1],Fs[i-1],Fcmb[i-1])*dt #temperature of convecting region 
             T_new_mantle[nbase_cells:lid_start] = Tm_conv[i]
-           
+            Fs[i] = -km*(Ts-Tm_conv[i])/d0[i]
             
             
         #store values
@@ -447,7 +449,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Tprofile = Tprofile[:i_save+1]
             f=f[:i+1]
             Xs = Xs[:i+1]
-            bl = bl[:i+1]
+            dl = dl[:i+1]
+            dc = dc[:i+1]
             d0 = d0[:i+1]
             Ra = Ra[:i+1] 
             Fs = Fs[:i+1]
