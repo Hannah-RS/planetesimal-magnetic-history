@@ -22,13 +22,13 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run = 46
+run = 52
 
 t_start=1*Myr #start after the end of stage 2
-t_end_m=5000 #end time in Myr
+t_end_m=2#end time in Myr
 t_end=t_end_m*Myr
 t_cond = dr**2/kappa_c #conductive timestep for core
-step_m=0.1*t_cond  #max timestep must be smaller than conductive timestep
+step_m=0.01*t_cond  #max timestep must be smaller than conductive timestep
 
 # set initial temperature profile
 n_cells = int(r/dr) #number of cells needed to span body
@@ -51,24 +51,24 @@ for i in range(nlid_cells):
 # update user on progress and plot initial temperature profile so can check
 rplot= np.arange(0,r,dr)/1e3
 
-plt.figure()
-plt.plot(rplot,Tint)
-plt.xlabel('r/km')
-plt.ylabel('Temperature/K')
-plt.title('Initial temperature profile')
+# plt.figure()
+# plt.plot(rplot,Tint)
+# plt.xlabel('r/km')
+# plt.ylabel('Temperature/K')
+# plt.title('Initial temperature profile')
 
-print('Initial conditions set')
+# print('Initial conditions set')
 
 # set solver running  
 from full_euler import thermal_evolution
 
 #integrate
 tic = time.perf_counter()
-Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, bl, d0, Ra, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_start,t_end,step_m,Tint,f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, Ra, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_start,t_end,step_m,Tint,f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time = toc - tic    
 print('Integration finished')
-print('Time taken = {:.0f} minutes'.format(int_time/60))
+print(f"Time taken = {int_time/60:.0f} minutes {(int_time/60-round(int_time/60))*60:.2f} seconds")
 
 # calculate Fs, Fcmb, Fad, Frad, Rem
 
@@ -108,7 +108,7 @@ Rem2[Rem_ca<Rem_t] = Rem_t[Rem_ca<Rem_t] #replace values where Rem_t < Rem_c
 print('Fluxes and magnetic Reynolds number calculated.')
 
 #save variables to file
-np.savez('Results/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, bl = bl, d0 = d0, Ra = Ra, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
+np.savez('Results/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, Ra = Ra, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
 
 #write parameters to the run file
 from csv import writer

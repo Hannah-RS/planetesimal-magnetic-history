@@ -51,7 +51,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Returns
     -------
     Tc: array
-        core temperature, measured at inner core boundary (or centre) [K]
+        core temperature, measured at centre [K]
     Tc_conv: array
         temperature of convecting core (0 if not convecting) [K]
     Tcmb: array
@@ -68,8 +68,10 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         fractional inner core radius [m]
     Xs: array
         wt % S in core 
-    bl: array
-        thickness of mantle CMB boundary layer
+    dl: array
+        thickness of mantle CMB boundary layer (0 if mantle not convecting)
+    dc: array
+        thickness of core CMB boundary layer (0 if core not thermally convecting)
     d0: array
         stagnant lid thickness for convecting mantle
     Ra: array
@@ -106,7 +108,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Xs = np.zeros([m]) #core sulfur fraction
     Ra = np.zeros([m])
     d0 = np.zeros([m])
-    bl = np.zeros([m])
+    dl = np.zeros([m])
+    dc = np.zeros([m])
     Tprofile= np.zeros([p,n_cells])
     Tc = np.zeros([m])
     Tc_conv = np.zeros([m])
@@ -138,8 +141,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Ra[0], d0[0] = Rayleigh_calc(T0_mantle[1],default) #use temp at base of mantle 
     nlid_cells = round(d0[0]/dr)
     lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
-    base = delta_l(T0_mantle[1],T0_mantle[0])
-    nbase_cells = round(base/dr)
+    
     
     # in initial step use balance of eqn 23 and 24 to find Tcmb
     Tcmb[0] = (km/kc*T0_mantle[0]+T0_core[0])/(km/kc+1)
@@ -151,7 +153,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Tm_conv[0] = 0 # convective mantle temperature is 0 if mantle not convecting
        
     else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile
-
+        dl[0] = delta_l(T0_mantle[1],T0_mantle[0])
+        nbase_cells = round(dl[0]/dr)
         Tm_conv[0] = T0_mantle[nbase_cells] + dTmdt_calc(tsolve[0],Fs[0],Fcmb[0])*dt
         T_new_mantle[nbase_cells:lid_start+1] = Tm_conv[0]
         
@@ -169,7 +172,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     
     if Fcmb[0] > Fad[0]: #super adiabatic, core convects
 
-        bl[0] = delta_c(T0_core[-2],T0_mantle[0]) #second input is CMB temp
+        dc[0] = delta_c(T0_core[-2],T0_mantle[0]) #second input is CMB temp
 
         # is the core solidifying?
         Tliquidus = fe_fes_liquidus(Xs_0)
@@ -199,7 +202,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     # scenario 1 - just conduction in the core
                     pass # use already calculated condctive profile, don't do anything
             else: #scenario 2 - erosion of stratification, convective layer at top of core
-                
+                dc[0] = delta_c(T0_core[-2],T0_mantle[0]) #second input is CMB temp
                 b_ind = np.where(Tcmb[0] <= T0_core) #indices of unstable layer
                 min_unstable_new = b_ind[0]
 
@@ -249,7 +252,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     T_new_mantle[0] = Tcmb[0]
     T_new_core[-1] = Tcmb[0]
     Fcmb[0] = -km*(T_new_mantle[0]-Tcmb[0])/dr # CMB heat flux eqn 23 in Dodds 2020
-    Tc[0] = T_new_core[0] #temperature of core is always taken at inner core boundary (or centre)
+    Tc[0] = T_new_core[0] #temperature of core is always taken at centre
     
     # Step 6. Replace old array with new ready for next step
     T_old_core = T_new_core
@@ -286,9 +289,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             else: #mantle just started convecting
                 Tm_old = T_old_mantle[lid_start-1] # take temperature below stagnant lid as mantle temp
 
-            base = delta_l(Tm_old,Tcmb[i-1])
+            dl[i] = delta_l(Tm_old,Tcmb[i-1])
             
-            nbase_cells = round(base/dr)
+            nbase_cells = round(dl[i]/dr)
             Tm_conv[i] = Tm_old + dTmdt_calc(tsolve[i-1],Fs[i-1],Fcmb[i-1])*dt #temperature of convecting region 
             T_new_mantle[nbase_cells:lid_start] = Tm_conv[i]
            
@@ -300,15 +303,14 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
           
         # Step 3. Calculate conductive profile for the core
         T_new_core = T_cond_calc(dt,T_old_core,sparse_mat_c)
-        print(T_new_core[-3:])   
+   
         # Step 4. Is the core convecting? 
         # check if heat flux is super adiabatic 
         
-
-        
         if Fcmb[i-1] > Fad[i-1]: #super adiabatic, core convects
             core_conv = True
-            nbl_cells = round(bl[i-1]/dr)
+            
+            nbl_cells = round(dc[i-1]/dr)
             bl_start = ncore_cells - nbl_cells - 1 #index in temp array where lid starts
             
             # is the core solidifying?
@@ -328,7 +330,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             #find new convective temperature
             Tc_conv[i] = T_old_core[bl_start-1] + dTcdt*dt 
             T_new_core[:] = Tc_conv[i] #replace everything with the convective temperature
-            bl[i] = delta_c(Tc_conv[i],T_new_mantle[0]) #find new boundary layer thickness, second input is CMB temp - save for next timestep
+            dc[i] = delta_c(Tc_conv[i],T_new_mantle[0]) #find new boundary layer thickness, second input is CMB temp - save for next timestep
             
             
         else: # don't have whole core convection, 
@@ -346,6 +348,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     min_unstable_new = b_ind[0]
 
                     Tc_conv[i] = T_old_core[min_unstable_old]
+                    
                     # is the core solidifying?
                     Tliquidus = fe_fes_liquidus(Xs[i-1])
                     if np.any(T_old_core) < Tliquidus: #core solidifies
@@ -362,6 +365,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                         #now perform volume average over unstable layer
                         Tlayer = volume_average(T_new_core, b_ind)
                         T_new_core[min_unstable_new:-1] = Tlayer #replace unstable layer with average temp
+                        dc[i] = delta_c(Tc_conv[i],T_new_mantle[0]) #find b.l. thickness
                         min_unstable_old = min_unstable_new #replace for next step
                         
             
@@ -386,17 +390,20 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         # Step 5. Find the CMB temperature, how you do this depends on if core and mantle are convecting
         if mantle_conv == True:
             if core_conv == True:
-                # eqn 26 and 29 in Dodds 2020
-                etam = viscosity(Tm_conv[i])
-                factor = (km/kc)**(3/4)*(c1/gamma)*((rhom*alpha_m*g*kappa_c*eta_c)/(rhoc*alpha_c*gc*kappa*etam*Rac))**(1/4)
-                if Tc_conv[i] > Tm_conv[i]:
-                    Tcmb[i] = Tc_conv[i] - factor
-                else: 
-                    Tcmb[i] = Tc_conv[i] + factor
-    
+                # eqn 26 and 29 in Dodds 2020 - use bl from previous timestep
+                # check if non zero if just switched to convection b.l. at previous timestep = 0
+                if dl[i-1] == 0 and dc[i-1] == 0:
+                    factor = (kc*dr)/(km*dr)
+                elif dl[i-1] != 0 and dc[i-1] == 0:
+                    factor = (kc*dl[i-1])/(km*dr)
+                elif dl[i-1] == 0 and dc[i-1] != 0:
+                    factor = (kc*dr)/(km*dc[i-1])
+                else: #both convective b.l. are non zero
+                    factor = (kc*dl[i-1])/(km*dc[i-1])
+                Tcmb[i] = (Tm_conv[i] + factor*Tc_conv[i])/(1+factor)    
                 Fcmb[i] = f1_convective(Tm_conv[i],Tc_conv[i],Tcmb[i])
             else: #eqn 23 = 24                
-                Tcmb[i] = (km/kc*T_new_mantle[1]+T_new_core[-2])/(km/kc+1)
+                Tcmb[i] = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
                 Fcmb[i] = -km*(T_new_mantle[1]-Tcmb[i])/dr # CMB heat flux eqn 23 in Dodds 2020
         else:
             if core_conv == True:
@@ -405,7 +412,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 Fcmb[i] = -km*(T_new_mantle[1]-Tcmb[i])/dr # CMB heat flux eqn 23 in Dodds 2020
             else: # eqn 23 = 24
                 
-                Tcmb[i] = (km/kc*T_new_mantle[1]+T_new_core[-2])/(km/kc+1)
+                Tcmb[i] = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
                 Fcmb[i] = -km*(T_new_mantle[1]-Tcmb[i])/dr # CMB heat flux eqn 23 in Dodds 2020
                
         #replace CMB nodes
@@ -453,4 +460,4 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             pass
               
   
-    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, bl, d0, Ra,  Fs, Fad, Fcmb, tsolve, cond_i
+    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, Ra,  Fs, Fad, Fcmb, tsolve, cond_i
