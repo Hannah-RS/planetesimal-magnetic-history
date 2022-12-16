@@ -4,8 +4,9 @@
 Functions for calculating CMB boundary layer thicknesses
 """
 import numpy as np
-from parameters import gamma, c1, kappa, Rac, g, alpha_m, rhom, Ts, kappa_c, eta_c, rhoc, alpha_c, gc
+from parameters import gamma, c1, kappa, Rac, g, alpha_m, rhom, Ts, kappa_c, eta_c, rhoc, alpha_c, gc, r, rc
 from viscosity_def import viscosity
+from Rayleigh_def import Rayleigh_calc
 
 def delta_l(Tm,Tcmb):
     """
@@ -24,7 +25,8 @@ def delta_l(Tm,Tcmb):
 
     """
     eta = viscosity(Tm)
-    delta_l = (gamma*abs(Tcmb-Tm)/c1)**(4/3)*((kappa*eta*Rac)/(rhom*g*alpha_m*(Tm-Ts)))**(-1/3)
+    Ra, d0 = Rayleigh_calc(Tm)
+    delta_l = (r-rc-d0)*(gamma*abs(Tcmb-Tm)/c1)**(4/3)*(Ra/Rac)**(-1/3)
     
     return delta_l
 
@@ -45,3 +47,4 @@ def delta_c(Tc,Tcmb):
 
     """
     return ((kappa_c*eta_c)/(rhoc*alpha_c*gc*abs(Tc-Tcmb)))**(1/3)
+
