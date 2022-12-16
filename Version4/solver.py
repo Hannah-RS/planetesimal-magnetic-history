@@ -9,23 +9,24 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa, kappa_c, out_interval
+from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, cpm_p, rhom
 
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
 from stencil import cond_stencil_core, cond_stencil_mantle
 import scipy.sparse as sp
+kappa_m = km/(rhom*cpm_p) #use modified specific heat capacity to account for mantle melting
 dT_mat_c = cond_stencil_core(r,rc,dr,kappa_c) 
-dT_mat_m = cond_stencil_mantle(r,rc,dr,kappa)  
+dT_mat_m = cond_stencil_mantle(r,rc,dr,kappa_m)  
 sparse_mat_m = sp.dia_matrix(dT_mat_m)
 sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run = 52
+run = 56
 
 t_start=1*Myr #start after the end of stage 2
-t_end_m=2#end time in Myr
+t_end_m=10#end time in Myr
 t_end=t_end_m*Myr
 t_cond = dr**2/kappa_c #conductive timestep for core
 step_m=0.01*t_cond  #max timestep must be smaller than conductive timestep
@@ -68,8 +69,7 @@ Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, Ra, Fs
 toc = time.perf_counter()
 int_time = toc - tic    
 print('Integration finished')
-print(f"Time taken = {int_time/60:.0f} minutes {(int_time/60-round(int_time/60))*60:.2f} seconds")
-
+print(time.strftime("%Hh%Mm%Ss", time.gmtime(int_time)))
 # calculate Fs, Fcmb, Fad, Frad, Rem
 
 
