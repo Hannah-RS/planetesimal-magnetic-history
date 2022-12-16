@@ -7,18 +7,23 @@ Calculates rate of change of conductive profile for the whole body and new tempe
 # set up
 import numpy as np
 import scipy.sparse as sp
+from parameters import h0, Al0, XAl, thalf_al, cpm_p
     
-def T_cond_calc(dt,T,sparse_mat):
+def T_cond_calc(t,dt,T,sparse_mat,radio=False):
     """
 
     Parameters
     ----------
+    t: float
+        time [s]
     dt : float
         time step [s]
     T: array
         temperature profile, first value is r=0, last value is surface
     sparse_mat: sparse matrix
         stencil for conductive temperature evolution
+    radio: bool
+        is there radiogenic heating, default false
 
     Returns
     -------
@@ -30,6 +35,13 @@ def T_cond_calc(dt,T,sparse_mat):
     #calculate dTdt for conduction
 
     dTdt = sparse_mat.dot(T)
+    
+    if radio == True:
+        
+        h = h0*Al0*XAl*np.exp(-np.log(2)*t/thalf_al) 
+        dTdt = dTdt + h/cpm_p
+    else: 
+        pass
     
     Tnew = dTdt*dt + T
         

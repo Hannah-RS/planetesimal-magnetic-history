@@ -32,7 +32,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
 
     Parameters
     ----------
-    tstart : float  dl =
+    tstart : float  
         start time
     tend : float
         end time
@@ -133,7 +133,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     
     ##################    Initial step    #########################
     # Step 1. Calculate conductive profile for mantle
-    T_new_mantle = T_cond_calc(dt,T0_mantle,sparse_mat_m)
+    T_new_mantle = T_cond_calc(tsolve[0],dt,T0_mantle,sparse_mat_m,True)
     Fs[0] = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
     
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
@@ -163,7 +163,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Tm_surf[0] = T_new_mantle[-2] #temperature one cell above surface pinned to 200K
                 
     # Step 3. Calculate conductive profile for the core
-    T_new_core = T_cond_calc(dt,T0_core,sparse_mat_c)
+    T_new_core = T_cond_calc(tsolve[0],dt,T0_core,sparse_mat_c,False)
         
     # Step 4. Is the core convecting? 
     # check if heat flux is super adiabatic 
@@ -264,7 +264,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         tsolve[i] = tsolve[i-1] + dt
         
         # Step 1. Calculate conductive profile for mantle
-        T_new_mantle = T_cond_calc(dt,T_old_mantle,sparse_mat_m)
+        T_new_mantle = T_cond_calc(tsolve[i],dt,T_old_mantle,sparse_mat_m,False)
         Fs[i] = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
         
         # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
@@ -303,7 +303,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Tm_surf[i] = T_new_mantle[-2] #temperature one cell above surface pinned to 200K
           
         # Step 3. Calculate conductive profile for the core
-        T_new_core = T_cond_calc(dt,T_old_core,sparse_mat_c)
+        T_new_core = T_cond_calc(tsolve[i],dt,T_old_core,sparse_mat_c,False)
    
         # Step 4. Is the core convecting? 
         # check if heat flux is super adiabatic 
