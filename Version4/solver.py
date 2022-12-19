@@ -23,10 +23,10 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run = 56
+run = 58
 
 t_start=1*Myr #start after the end of stage 2
-t_end_m=10#end time in Myr
+t_end_m=15#end time in Myr
 t_end=t_end_m*Myr
 t_cond = dr**2/kappa_c #conductive timestep for core
 step_m=0.01*t_cond  #max timestep must be smaller than conductive timestep
@@ -112,9 +112,9 @@ np.savez('Results/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb, 
 
 #write parameters to the run file
 from csv import writer
-from parameters import r, Tsolidus, Tm0
+from parameters import r, Tsolidus, Tm0, default
 
-var_list = [run, r, Tsolidus, Tm0, t_start/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_i, int_time, dr, out_interval]
+var_list = [run, r, Tsolidus, Tm0, t_start/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_i, int_time, dr, out_interval, default]
 
     
 with open('run_info3.csv','a') as f_object:
