@@ -44,6 +44,7 @@ Rac = 1000  #critical Rayleigh number
 E = 300e3 # activation energy [J /mol]
 R = 8.31 # gas constant [J /K /mol]
 Tm0 = 1600 # intial mantle temp - from beginning of stage 2 in Figure 1 of Bryson (2019)
+c1 = 8 # constant in boundary layer thickness Dodds (2021)
 
 #viscosity models
 default ='Robuchon-Bryson' #default viscosity model
@@ -71,7 +72,7 @@ Delta=1.2 #dTm/dP/dT/dP 1.2 Nimmo (2009)
 Tsolidus = 1450 # solidus temp [K] based on phase diagram from Scheinberg 2016
 eta_c =0.01 # viscosity of core [Pa s] Dodds (2021)
 bpart = 0.5 #buoyancy partitioning coefficient Nichols (2021) but based on Aubert 2009 - might want to investigate
-
+Xs_0 = 20 # initial wt % sulfur in core (needs a citation)
 #radioactivity
 #assume core is pure iron with ppm amounts of K that has a negligible effect on mass
 # energy generation rate per unit mass iron = de_fe * f60 * e^(-t/thalf_fe) 

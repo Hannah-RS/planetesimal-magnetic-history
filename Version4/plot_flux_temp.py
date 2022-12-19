@@ -10,14 +10,15 @@ import numpy as np
 import pandas as pd
 
 #choose your run
-run=38
+run=40
+conduction = False #did the mantle start conducting before the core solidified
 
 #scale time to Myr
 from parameters import Myr, r, Tm0, Tsolidus
 
 #import data from npz file
 npzfile = np.load('Results/run_{}.npz'.format(run))
-Tm = npzfile['Tm_base'] 
+Tm = npzfile['Tm_mid'] 
 Tm_surf = npzfile['Tm_surf'] 
 Tc= npzfile['Tc'] 
 t = npzfile['t'] #time in s
@@ -42,8 +43,9 @@ tstart = row.iloc[0,4]
 tend = row.iloc[0,5] # max possible time of simulation [Myr]
 tstep = row.iloc[0,6] #max timestep [Myr]
 tsolid = row.iloc[0,7] #time at which solidifcation finishes [Myr] if tsolid == tend then core may not have finished solidifying
-cond_i= int(row.iloc[0,8]) #index in array at which mantle started conducting
-cond_t = t[cond_i]/Myr #time at which mantle switched to conduction
+if conduction == True:
+    cond_i= int(row.iloc[0,8]) #index in array at which mantle started conducting
+    cond_t = t[cond_i]/Myr #time at which mantle switched to conduction
 dr=row.iloc[0,10] #cell spacing
 dt =row.iloc[0,11] #T_profile output frequency
 
@@ -59,9 +61,10 @@ xmin=tstart
 plt.subplot(2,1,1)
 plt.semilogx(t_plot,Tm,label='T$_m$ - base')
 plt.semilogx(t_plot,Tc,label='T$_c$')
-plt.vlines(cond_t,ymin=min(Tm),ymax=1600,color='black',linestyle='--',label='conduction')
-plt.xlim([5,10])
-plt.ylim([1580,1610])
+if conduction == True:
+    plt.vlines(cond_t,ymin=min(Tm),ymax=1600,color='black',linestyle='--',label='conduction')
+#plt.xlim([5,10])
+#plt.ylim([1580,1610])
 #plt.xlabel('Time/ Myr')
 #plt.xlim([xmin,500])  #use these limits when comparing runs
 #plt.ylim([1400,1650]) #use these limits when comparing runs
@@ -76,7 +79,7 @@ plt.loglog(t_plot,Fad,label='$F_{ad}$')
 plt.loglog(t_plot,Frad,label='$F_{rad}$')
 plt.xlabel('Time/ Myr')
 plt.ylim([1e-3,1e2])   
-plt.xlim([5,10])
+#plt.xlim([5,10])
 # plt.xlim([xmin,500])   #use these limits when comparing runs
 plt.ylabel('Flux/ W$m^{-2}$')
 plt.legend(loc='upper right',ncol=2)

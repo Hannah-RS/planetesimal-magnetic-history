@@ -1,82 +1,70 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Expression for dTc/dt using Equation 70 from Vol 8, Treatise on Geophysics (Nimmo 2007) and Table 1 from Nimmo, F. (2009). Qnergetics of asteroid dynamos and the role of compositional convection. 
-Can toggle on and off effects of gravitational potential energy release, radiogenic heating, secular cooling, latent heat. 
-
-dTc/dt=(Qcmb-Qr)/(Qst+Qgt+Qlt) where Qst, Qgt, QLt are the expressions for Qs, Qg, Ql divided by dTc/dt
-Written as a function of t, Tm, Tc, f to comply with order expected by vectorised argument in solve_ivp
+When not solidifying:
+    dTc/dt  equation 27 of Dodds et al. (2020)
+    
+When solidiying:
+    Uses expressions for Ql and Qg from Nimmo (2009)
+    
+Neglects heating due to radioacitivity in core    
+Can toggle on and off solidification
 
 """
 #import constants and parameters    
-from parameters import gamma, km, Ts, Acmb
-def dTcdt_calc(t,Tm,Tc,f,d0,Qr=True,Qs=True,Qg=True,Ql=True):
+from parameters import gamma, Ts, Acmb, dr, kc, rc, rhoc, cpc
+from cmb_bl import delta_c
+from q_funcs import Qlt, Qgt
+import numpy as np
+
+def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = [False,0]):
     """
 
     Parameters
     ----------
-    t : float
-        time, s
-    Tm: float
-        base of mantle temperature
-    Tc : float
-        core temperature
+    Fcmb: float
+        CMB heat flux [W m^-2]
+    Tcore : array
+        core temperature array [K]
     f : float
         fractional inner core radius 
-    d0: float
-        stagnant lid thickness
-    Qr : boolean, optional
-        power contribution from radiogenic heating. The default is True.
-    Qs : boolean, optional
-        power contribution from secular cooling The default is True.
-    Qg : boolean, optional
-        power contribution from compositional buoyancy. The default is True.
-    Ql : boolean, optional
-        power contribution from latent heat. The default is True.
-
+    solidification: bool
+        is the core solidifying, default is False
+    stratification: list
+        is the unstably core stratified: bool
+        index of lowest unstable cell 
     Returns
     -------
     dTcdt : float
             rate of change of core temperature (if negative core is cooling)
 
     """
-
-    #check at least one term containing dTc/dt is non zero
-    if Qs == False and Qg == False and Ql == False:
-        raise ValueError('At least one source of power production due to core cooling must be non-zero')
-    else: 
-        den = 0 # create a variable which will be the value of the denominator, will be changed later as the criterion has passed
-        
-
-        
-    #calculate CMB heat flux
-    Fcmb = (Tc-Tm)*gamma*km*(Tm-Ts)/d0
-    Qcmb = Acmb*Fcmb
     
-    num = Qcmb #create a variable which has the value of the numerator, assign Qcmb
+    if stratification[0] == True:
+        stratification[1] = min_unstable_ind
+        f3 = -kc*(Tcore[min_unstable_ind]-Tcore[min_unstable_ind-1])/dr #calculate f3 - eqn 28 in Dodds (2020)
+        rconv = min_unstable_ind*dr
+        Vconv = 4/3*np.pi*(rc**3-rconv**3) #calculate Vconv - volume of cmb boundary layer has negligible volume 
+        Tc = Tcore[min_unstable_ind]
 
 
-    if Qr == True:
-        from qr_func import Qr
-        num = num - Qr(t,Tc) #add radiogenic contribution
-    else: pass
+    else:
+        f3 = 0 #if there is an inner core treat as isothermal
+        rstrat = 0
+        Vconv = 4/3*np.pi*rc**3*(1-f**3)
+        nic_cells = round(f*rc/dr)
+        Tc = Tcore[nic_cells] #take temperature just above ICB as core convective temp
     
-    
-    if Qs == True:
-        from qs_func import Qst
-        den = den + Qst(Tc) #add secular heating contribution
-    else: pass
+    Qst = rhoc*cpc*Vconv
+
+       
+    if solidification == True: #core solidifying so consider buoyancy, latent heat
+        dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb)/(Qst+Qlt(Tc,f)+Qgt(Tc,f))
+   
+    else:
         
-    if Qg == True:
-        from qg_func import Qgt
-        den = den + Qgt(Tc,f) #add compositional buoyancy contribution
-    else: pass   
-    
-    if Ql == True:
-        from ql_func import Qlt
-        den = den + Qlt(Tc,f) #add latent heat contribution
-    else: pass
-    
-    #now have added all terms calculate dTc/dt  
+        dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb)/Qst
+
+ 
         
-    return num/den
+    return dTcdt

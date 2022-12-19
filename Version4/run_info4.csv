@@ -1,0 +1,2 @@
+run,r/m,Tm0/K,tstart/Myr,tend/Myr,tstep/Myr,maxt /Myr,cond_i,int_time/s,dr/m,out_interval/Myr,viscosity
+57,400000,1600,1,10,1.75196600710299E-05,9.99998953576865,nan,30.7225883170001,500,63072000000000,Dodds
