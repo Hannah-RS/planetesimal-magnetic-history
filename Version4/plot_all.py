@@ -9,8 +9,8 @@ import numpy as np
 import pandas as pd
 
 #choose your run
-run=46
-conduction = True # does the mantle switch to conduction?
+run=51
+conduction = False # does the mantle switch to conduction?
 save = False # do you want to save your figures?
 #scale time to Myr
 from parameters import Myr, r, Tm0, Tsolidus
@@ -72,12 +72,18 @@ xmin=tstart
 
 #temperatures as function of time
 plt.subplot(2,1,1)
-plt.semilogx(t_plot,Tc,label='T$_c$')
-plt.semilogx(t_plot[Tc_conv!=0],Tc_conv[Tc_conv!=0],label='convective T$_c$')
-plt.semilogx(t_plot,Tcmb,label='T$_{cmb}$')
-plt.semilogx(t_plot,Tm_mid,label='T$_m$')
-plt.semilogx(t_plot[Tm_conv!=0],Tm_conv[Tm_conv!=0],label='convective T$_m$')
-plt.semilogx(t_plot,Tm_surf,label='T$_m$ - surface')
+# plt.semilogx(t_plot,Tc,label='T$_c$')
+# plt.semilogx(t_plot[Tc_conv!=0],Tc_conv[Tc_conv!=0],label='convective T$_c$')
+# plt.semilogx(t_plot,Tcmb,label='T$_{cmb}$')
+# plt.semilogx(t_plot,Tm_mid,label='T$_m$')
+# plt.semilogx(t_plot[Tm_conv!=0],Tm_conv[Tm_conv!=0],label='convective T$_m$')
+# plt.semilogx(t_plot,Tm_surf,label='T$_m$ - surface')
+plt.plot(t_plot,Tc,label='T$_c$')
+plt.plot(t_plot[Tc_conv!=0],Tc_conv[Tc_conv!=0],label='convective T$_c$')
+plt.plot(t_plot,Tcmb,label='T$_{cmb}$')
+plt.plot(t_plot,Tm_mid,label='T$_m$')
+plt.plot(t_plot[Tm_conv!=0],Tm_conv[Tm_conv!=0],label='convective T$_m$')
+plt.plot(t_plot,Tm_surf,label='T$_m$ - surface')
 if conduction == True:
     plt.vlines(cond_t,ymin=min(Tm_surf),ymax=1600,color='black',linestyle='--',label='conduction')
 plt.xlim([xmin,max(t_plot)])
@@ -102,13 +108,6 @@ plt.legend(loc='upper right',ncol=2)
 if save == True:
     plt.savefig('Plots/run_{}_Tflux.png'.format(run),dpi=450)
 
-################### Temperature gradient - plot in progress ###################
-Tgrad = np.gradient(Tc_conv)
-plt.figure()
-#plt.semilogy(t_plot[Tgrad>0],Tgrad[Tgrad>0])
-plt.semilogy(t_plot,Tgrad)
-#plt.xlim([200,300])
-#plt.ylim([-0.1,0.1])
 
 ################### Magnetic Reynolds number and core size plots ##############
 plt.figure(tight_layout=True)
@@ -170,13 +169,13 @@ if save == True:
 plt.figure()
 
 if conduction == True:
-    plt.plot(t_plot[:cond_i],2*bl[:cond_i]/r)
+    plt.plot(t_plot[:cond_i],2*bl[:cond_i]/dr)
     #plt.hlines(1,min(t_plot),max(t_plot[:cond_i]),color='k',linestyle='--')
     plt.xlim([xmin,t_plot[cond_i]])
 else:
-    plt.plot(t_plot,2*bl/r)
+    plt.plot(t_plot,2*bl/dr)
 plt.xlabel('Time/Myr')
-plt.ylabel('CMB boundary layer thickness/ mantle thickness')
+plt.ylabel('CMB boundary layer thickness/ cell thickness')
 if save == True:
     plt.savefig('Plots/run_{}_cmb_thickness.png'.format(run))
 
@@ -210,12 +209,17 @@ plt.figure()
 rplot= np.arange(0,r,dr)
 n = np.shape(T_profile)[0]
 l = len(t_plot)
-n_plot = 5 #how many plots do you want
-for i in range(n_plot):
-    plt.plot(rplot/1e3, T_profile[i*int(n/n_plot),:],label='{:.0f} Myr'.format(t_plot[i*int(l/n_plot)])) #approximate temp profile times
+n_plot = n #how many plots do you want
+#for i in range(n_plot):
+for i in range(5):
+    plt.scatter(rplot/1e3, T_profile[i*int(n/n_plot),:],label='{:.2f} Myr'.format(t_plot[i*int(l/n_plot)])) #approximate temp profile times
 plt.xlabel('Distance from centre of asteroid /km')
 plt.ylabel('Temperature / K')
 plt.title('{:.0f}km asteroid \n Tm0 = {}K, Tsolidus ={}K, run {}'.format(r/1e3, Tm0, Tsolidus, run))
-plt.legend()
+plt.legend(ncol=2,loc='lower left')
+#plt.vlines(2,ymin=1590,ymax=1625,linestyle='--',color='black')
+plt.xlim([175,225])
+#plt.xlim([0,25])
+plt.ylim([1590,1630])
 if save == True:
     plt.savefig('Plots/run{}_Tprofile.png'.format(run))

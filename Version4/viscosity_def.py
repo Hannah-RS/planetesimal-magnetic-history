@@ -60,12 +60,12 @@ def viscosity(Tm, model = 'Robuchon-Bryson'):
         
         else: 
             if Tm > 1650:
-                    eta = 100
+                eta = 100
             elif Tm <= 1650 and Tm > 1600:
                 eta = 10**((2-np.log10(eta_r50))*(Tm-1600)/50+np.log10(eta_r50))
             elif Tm <= 1600:
                 eta = eta0*np.exp(-E/R*(1/Tm-1/T0eta))*np.exp(-alpha_n*(Tm-Tms)/(Tml-Tms))
-                    
+                  
         
     
     elif model == 'Sterenborg': #slightly different as use rounded solidus and liquidus temperatures from Bryson (2019)
@@ -94,5 +94,5 @@ def viscosity(Tm, model = 'Robuchon-Bryson'):
 
     else: 
          raise ValueError('Invalid viscosity model chosen')
-         
+     
     return eta

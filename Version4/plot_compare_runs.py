@@ -8,10 +8,10 @@ as well as magnetic Reynolds number and solid core fraction
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
+import seaborn as sns
 #choose your runs
-run1 = 38
-run2 = 39
+run1 = 34 #38
+run2 = 35 #39
 
 #scale time to Myr
 from parameters import Myr, r, Tm0, Tsolidus
@@ -68,8 +68,8 @@ dt =row.iloc[0,11] #T_profile output frequency
 
 ################### Main Plot #########################################
 #choose model labels
-model1='FK approx.'
-model2='Arrhenius'
+model1= 'Dodds et. al. (2021)'#'FK approx.'
+model2='Bryson et. al. (2019)'#'Arrhenius'
 # make  log-log plot - similar to Bryson 2019
 
 plt.figure(tight_layout=True)
@@ -132,3 +132,37 @@ plt.ylabel('f')
 plt.legend()
 
 #plt.savefig('Plots/Remf_comp.png',dpi=450)
+
+################# Plot for transfer ##########################################
+with sns.plotting_context('talk'):
+    plt.figure(tight_layout=True,figsize=[10,7])
+    plt.title(f'Thermal evolution of a {r/1e3:.0f}km asteroid ')#\n Tm0 = {}K, Tsolidus ={}K 
+    xmin=tstart
+    #temperatures as function of time
+    plt.semilogx(t_plot1,Tm1,label='mantle',color='red')  
+    plt.semilogx(t_plot1,Tc1,label='core',color='black')
+    plt.semilogx(t_plot2,Tm2,color='red',linestyle='--')
+    plt.semilogx(t_plot2,Tc2,color='black',linestyle='--',label=model2)
+    plt.semilogx(t_plot1,Tc1,label=model1,color='black')
+    plt.ylabel('T/K')
+    plt.xlabel('Time/Myr')
+    plt.legend(loc='upper right',ncol=2,fontsize='small')
+    #plt.savefig('Plots/viscosity_bryson_dodds_talk.png',dpi=600)
+
+##################### Flux plot ######################################    
+plt.figure()
+plt.subplot(2,1,1)
+plt.loglog(t_plot2,Fcmb2,color='blue',linestyle='--',label=model2)
+plt.loglog(t_plot1,Fcmb1,label=model1,color='black')
+plt.xlabel('Time/ Myr')
+plt.ylim([1e-3,1e2])   #use these limits when comparing runs
+plt.ylabel('CMB Flux/ W$m^{-2}$')
+plt.legend(loc='upper right')
+
+plt.subplot(2,1,2)
+plt.semilogx(t_plot2,f2,label=model2,color='blue',linestyle='--')
+plt.semilogx(t_plot1,f1,label=model1,color='black')
+plt.xlabel('Time/ Myr')
+plt.ylabel('Fractional of \n core solidified')
+plt.legend()
+#plt.savefig('Plots/viscosity_flux_comp.pdf',dpi=600)

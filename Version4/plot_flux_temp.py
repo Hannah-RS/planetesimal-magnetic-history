@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 #choose your run
-run=40
+run=33
 conduction = False #did the mantle start conducting before the core solidified
 
 #scale time to Myr
