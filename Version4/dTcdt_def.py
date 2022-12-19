@@ -52,8 +52,8 @@ def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = [False,0]):
         f3 = 0 #if there is an inner core treat as isothermal
         rstrat = 0
         Vconv = 4/3*np.pi*rc**3*(1-f**3)
-        nic_cells = round(f*rc/dr)
-        Tc = Tcore[nic_cells] #take temperature just above ICB as core convective temp
+        #nic_cells = round(f*rc/dr)
+        Tc = Tcore[-2] #take temperature just below CMB as core convective temp
     
     Qst = rhoc*cpc*Vconv
 
@@ -62,7 +62,6 @@ def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = [False,0]):
         dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb)/(Qst+Qlt(Tc,f)+Qgt(Tc,f))
    
     else:
-        
         dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb)/Qst
 
  

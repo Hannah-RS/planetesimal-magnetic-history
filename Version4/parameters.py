@@ -22,7 +22,7 @@ Myr=1e6*year
 r = 400e3 # radius of asteroid [m]
 rc = r/2 #radius of core [m]
 dr = 500 # size of cells [m]
-out_interval = 10*Myr #how often do you want temp profiles to be output
+out_interval =2*Myr #how often do you want temp profiles to be output
 
 #Surface parameters
 Ts=200 # surface temperature, modelled as fixed [K]
@@ -47,7 +47,7 @@ Tm0 = 1600 # intial mantle temp - from beginning of stage 2 in Figure 1 of Bryso
 c1 = 8 # constant in boundary layer thickness Dodds (2021)
 
 #viscosity models
-default ='Robuchon-Bryson' #default viscosity model
+default ='Dodds' #default viscosity model
 # Bryson 2019
 eta0 = 1e21 # reference viscosity [Pa s] - assumed constant in this model
 eta0_50 = 1e14 #viscosity of material at 50% melting [Pas]

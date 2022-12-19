@@ -44,25 +44,25 @@ def volume_average(Tprofile, unstable_ind, dr):
     
     return Tave
 
-# test the function - should return 1
-#single unstable point
-Tprofile = np.ones([10])
-unstable_ind = [2]
-if volume_average(Tprofile,unstable_ind,1)==1:
-    pass
-else: raiseValueError('Test failed')
+# # test the function - should return 1
+# #single unstable point
+# Tprofile = np.ones([10])
+# unstable_ind = [2]
+# if volume_average(Tprofile,unstable_ind,1)==1:
+#     pass
+# else: raiseValueError('Test failed')
 
-#multiple points
-Tprofile = np.ones([10])
-unstable_ind = [2,3]
-if volume_average(Tprofile,unstable_ind,1)==1:
-    pass
-else: raiseValueError('Test failed')
+# #multiple points
+# Tprofile = np.ones([10])
+# unstable_ind = [2,3]
+# if volume_average(Tprofile,unstable_ind,1)==1:
+#     pass
+# else: raiseValueError('Test failed')
 
-#including the base
-Tprofile = np.ones([10])
-unstable_ind = [0,1]
-if volume_average(Tprofile,unstable_ind,1)==1:
-    pass
-else: raiseValueError('Test failed')
+# #including the base
+# Tprofile = np.ones([10])
+# unstable_ind = [0,1]
+# if volume_average(Tprofile,unstable_ind,1)==1:
+#     pass
+# else: raiseValueError('Test failed')
 

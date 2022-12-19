@@ -60,7 +60,7 @@ with sns.plotting_context('talk'):
     xmin=tstart
     
     #temperatures as function of time
-    plt.subplot(2,1,1)
+
     plt.semilogx(t_plot,Tm,label='mantle',color='red')
     plt.semilogx(t_plot,Tc,label='core',color='black')
     if conduction == True:
@@ -76,20 +76,21 @@ with sns.plotting_context('talk'):
     ax=plt.gca()
     ax.xaxis.set_major_formatter(ScalarFormatter())
     plt.legend(loc='upper right')
-    
-    #fluxes as function of time
-    plt.subplot(2,1,2)
-    plt.loglog(t_plot,Fs,label='$F_s$',color='green')
-    plt.loglog(t_plot,Fcmb,label='$F_{CMB}$',color='navy',linestyle='dashed')
-    plt.loglog(t_plot,Fad,label='$F_{ad}$',color='orange',linestyle='dotted')
-    plt.loglog(t_plot,Frad,label='$F_{rad}$',color='purple',linestyle='dashdot')
     plt.xlabel('Time/ Myr')
-    plt.ylim([1e-3,1e2])   
-    #plt.xlim([5,10])
-    # plt.xlim([xmin,500])   #use these limits when comparing runs
-    plt.ylabel('Flux/ W$m^{-2}$')
-    plt.legend(loc='upper right',ncol=2)
-    ax=plt.gca()
-    ax.xaxis.set_major_formatter(ScalarFormatter())
-    plt.savefig('Plots/transfer_run{}.png'.format(run),dpi=600)
+   # plt.savefig('Plots/transfer_run{}.png'.format(run),dpi=600)
+    # #fluxes as function of time
+    # plt.subplot(2,1,2)
+    # plt.loglog(t_plot,Fs,label='$F_s$',color='green')
+    # plt.loglog(t_plot,Fcmb,label='$F_{CMB}$',color='navy',linestyle='dashed')
+    # plt.loglog(t_plot,Fad,label='$F_{ad}$',color='orange',linestyle='dotted')
+    # plt.loglog(t_plot,Frad,label='$F_{rad}$',color='purple',linestyle='dashdot')
+    # plt.xlabel('Time/ Myr')
+    # plt.ylim([1e-3,1e2])   
+    # #plt.xlim([5,10])
+    # # plt.xlim([xmin,500])   #use these limits when comparing runs
+    # plt.ylabel('Flux/ W$m^{-2}$')
+    # plt.legend(loc='upper right',ncol=2)
+    # ax=plt.gca()
+    # ax.xaxis.set_major_formatter(ScalarFormatter())
+    #plt.savefig('Plots/transfer_run{}.png'.format(run),dpi=600)
     

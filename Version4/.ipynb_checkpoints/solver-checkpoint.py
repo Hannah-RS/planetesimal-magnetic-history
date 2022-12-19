@@ -9,24 +9,23 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, cpm_p, rhom
+from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa, kappa_c, out_interval
 
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
 from stencil import cond_stencil_core, cond_stencil_mantle
 import scipy.sparse as sp
-kappa_m = km/(rhom*cpm_p) #use modified specific heat capacity to account for mantle melting
 dT_mat_c = cond_stencil_core(r,rc,dr,kappa_c) 
-dT_mat_m = cond_stencil_mantle(r,rc,dr,kappa_m)  
+dT_mat_m = cond_stencil_mantle(r,rc,dr,kappa)  
 sparse_mat_m = sp.dia_matrix(dT_mat_m)
 sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run = 57
+run = 51
 
 t_start=1*Myr #start after the end of stage 2
-t_end_m=300#end time in Myr
+t_end_m=1.01 #end time in Myr
 t_end=t_end_m*Myr
 t_cond = dr**2/kappa_c #conductive timestep for core
 step_m=0.01*t_cond  #max timestep must be smaller than conductive timestep
@@ -65,11 +64,12 @@ from full_euler import thermal_evolution
 
 #integrate
 tic = time.perf_counter()
-Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, Ra, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_start,t_end,step_m,Tint,f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, bl, d0, Ra, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_start,t_end,step_m,Tint,f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time = toc - tic    
 print('Integration finished')
-print(time.strftime("%Hh%Mm%Ss", time.gmtime(int_time)))
+print(f"Time taken = {int_time/60:.0f} minutes {(int_time/60-round(int_time/60))*60:.2f} seconds")
+
 # calculate Fs, Fcmb, Fad, Frad, Rem
 
 
@@ -108,16 +108,16 @@ Rem2[Rem_ca<Rem_t] = Rem_t[Rem_ca<Rem_t] #replace values where Rem_t < Rem_c
 print('Fluxes and magnetic Reynolds number calculated.')
 
 #save variables to file
-np.savez('Results/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, Ra = Ra, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
+np.savez('Results/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, bl = bl, d0 = d0, Ra = Ra, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
 
 #write parameters to the run file
 from csv import writer
-from parameters import r, Tm0, default
+from parameters import r, Tsolidus, Tm0
 
-var_list = [run, r, Tm0, t_start/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_i, int_time, dr, out_interval/Myr, default]
+var_list = [run, r, Tsolidus, Tm0, t_start/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_i, int_time, dr, out_interval]
 
     
-with open('run_info4.csv','a') as f_object:
+with open('run_info3.csv','a') as f_object:
     writer_object = writer(f_object) #pass file object to csv.writer
     writer_object.writerow(var_list) # pass list as argument into write row
     f_object.close() #close file
