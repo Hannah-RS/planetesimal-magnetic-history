@@ -269,9 +269,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         
         # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
         Ra[i], d0[i] = Rayleigh_calc(T_old_mantle[1],default) #use temp at base of mantle 
-        nlid_cells = round(d0[i]/dr)
-        lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
-    
+            
         
         if Ra[i] < Rac or cond==1: #once Rayleigh number subcritical don't want to use that criterion anymore
             mantle_conv = False
@@ -284,7 +282,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
 
         else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile 
             mantle_conv = True
-            
+            nlid_cells = round(d0[i]/dr)
+            lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
             if Tm_conv[i-1]!=0: #mantle already convecting
                 Tm_old = Tm_conv[i-1]
             else: #mantle just started convecting
@@ -319,7 +318,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             if np.any(T_old_core < Tliquidus) == True: #core solidifies
                 if Xs[i-1]>= Xs_eutectic:
                     dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
-                    dfdt = Fcmb[i-1]*Acmb/(4*np.pi*rc**2*f[i-1]**2*Lc*rhoc)                    
+                    dfdt = Fcmb[i-1]*Acmb/(4*np.pi*rc**3*f[i-1]**2*Lc*rhoc)                    
                     f[i] = f[i-1] + dfdt*dt
                     Xs[i] = Xs[i-1] #sulfur concentration unchanged in eutectic solidification
                 else:
@@ -386,7 +385,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 if T_old_core[-2] < Tliquidus: #core solidifies
                     if Xs[i-1]>= Xs_eutectic: #eutectic solidification
                         dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
-                        dfdt = Fcmb[i-1]*Acmb/(4*np.pi*rc**2*f[i-1]**2*Lc*rhoc)                    
+                        dfdt = Fcmb[i-1]*Acmb/(4*np.pi*rc**3*f[i-1]**2*Lc*rhoc)                    
                         f[i] = f[i-1] + dfdt*dt
                         Xs[i] = Xs[i-1] #sulfur concentration unchanged in eutectic solidification
                     else:
@@ -435,7 +434,11 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         else:
             if core_conv == True:
                 #mantle sets CMB temp
-                Tcmb[i] = T_new_mantle[0]
+                #Tcmb[i] = T_new_mantle[0]
+                if dc[i-1] == 0:
+                    dc[i-1] = delta_c(Tc_conv[i],Tcmb[i-1]) #find approximate core cmb b.l. thickness
+                factor = (kc*dr)/(km*dc[i-1])
+                Tcmb[i] = (T_new_mantle[1]+factor*T_new_core[-2])/(1+factor)
                 dc[i] = delta_c(Tc_conv[i],Tcmb[i]) #find core cmb b.l. thickness
                 Fcmb[i] = -km*(T_new_mantle[1]-Tcmb[i])/dr # CMB heat flux eqn 23 in Dodds 2020
             else: # eqn 23 = 24
