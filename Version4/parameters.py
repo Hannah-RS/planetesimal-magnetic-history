@@ -23,6 +23,7 @@ r = 400e3 # radius of asteroid [m]
 rc = r/2 #radius of core [m]
 dr = 500 # size of cells [m]
 out_interval =2*Myr #how often do you want temp profiles to be output
+save_interval = 0.01*Myr # how often do you want each variable to be saved
 
 #Surface parameters
 Ts=200 # surface temperature, modelled as fixed [K]

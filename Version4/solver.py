@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, cpm_p, rhom
+from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, cpm_p, rhom, save_interval
 
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
@@ -26,10 +26,11 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 run = 57
 
 t_start=1*Myr #start after the end of stage 2
-t_end_m=300#end time in Myr
+t_end_m=10#end time in Myr
 t_end=t_end_m*Myr
 t_cond = dr**2/kappa_c #conductive timestep for core
 step_m=0.01*t_cond  #max timestep must be smaller than conductive timestep
+n_save = int(save_interval/step_m)
 
 # set initial temperature profile
 n_cells = int(r/dr) #number of cells needed to span body
@@ -70,9 +71,27 @@ toc = time.perf_counter()
 int_time = toc - tic    
 print('Integration finished')
 print(time.strftime("%Hh%Mm%Ss", time.gmtime(int_time)))
-# calculate Fs, Fcmb, Fad, Frad, Rem
 
+#Reduce data points - as model saves more often than needed
 
+Tc= Tc[0::n_save]
+Tc_conv = Tc_conv[0::n_save]
+Tcmb = Tcmb[0::n_save]
+Tm_mid = Tm_mid[0::n_save]
+Tm_conv = Tm_conv[0::n_save]
+Tm_surf = Tm_surf[0::n_save] 
+f = f[0::n_save]
+Xs = Xs[0::n_save]
+dl = dl[0::n_save]
+dc = dc[0::n_save]
+d0 = d0[0::n_save]
+Ra = Ra[0::n_save]
+Fs = Fs[0::n_save]
+Fad = Fad[0::n_save]
+Fcmb = Fcmb[0::n_save]
+t = t[0::n_save] 
+
+# calculate Frad, Rem
 from parameters import km, kc, G, rhoc, alpha_c, cpc, gamma
 
 
