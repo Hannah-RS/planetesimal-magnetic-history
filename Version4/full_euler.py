@@ -14,7 +14,7 @@ Flow:
 import numpy as np
 import scipy.sparse as sp
 import scipy.optimize as sco
-from parameters import Ts, Myr, Rac, B, dr, out_interval, km, kc, alpha_m, alpha_c, rc, rhoc, rhom, eta_c, g, gc, cpc, Xs_0, default, kappa, kappa_c, c1, gamma
+from parameters import Ts, Myr, Rac, B, dr, out_interval, km, kc, alpha_m, alpha_c, rc, rhoc, rhom, eta_c, g, gc, cpc, Xs_0, default, kappa, kappa_c, c1, gamma, Xs_eutectic, Acmb, Lc
 
 #import required functions
 from Tm_cond import T_cond_calc
@@ -317,11 +317,16 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             # is the core solidifying?
             Tliquidus = fe_fes_liquidus(Xs[i-1])
             if np.any(T_old_core < Tliquidus) == True: #core solidifies
-
-                dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
-                dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
-                f[i] = f[i-1] + dfdt*dt
-                Xs[i] = (1-(f[i]**3))*Xs_0 #update sulfur content
+                if Xs[i-1]>= Xs_eutectic:
+                    dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
+                    dfdt = Fcmb[i-1]*Acmb/(4*np.pi*rc**2*f[i-1]**2*Lc*rhoc)                    
+                    f[i] = f[i-1] + dfdt*dt
+                    Xs[i] = Xs[i-1] #sulfur concentration unchanged in eutectic solidification
+                else:
+                    dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
+                    dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
+                    f[i] = f[i-1] + dfdt*dt
+                    Xs[i] = (1-(f[i]**3))*Xs_0 #update sulfur content
             
             else: # core not solidifying
                 dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = False)
@@ -379,12 +384,17 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 # is the core solidifying?
                 Tliquidus = fe_fes_liquidus(Xs[i-1])
                 if T_old_core[-2] < Tliquidus: #core solidifies
-                    dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
-                    dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
-                    f[i] = f[i-1] + dfdt*dt
-                    Xs[i] = (1-(f[i])**3)*Xs_0 #update sulfur content
-                    #Tc_conv[0] = T0_core[lnb-1] + dTcdt*dt
-                    #T_new_core[:lnb+1] = Tc_conv[0] #replace everything above the solid core
+                    if Xs[i-1]>= Xs_eutectic: #eutectic solidification
+                        dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
+                        dfdt = Fcmb[i-1]*Acmb/(4*np.pi*rc**2*f[i-1]**2*Lc*rhoc)                    
+                        f[i] = f[i-1] + dfdt*dt
+                        Xs[i] = Xs[i-1] #sulfur concentration unchanged in eutectic solidification
+                    else:
+                        dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
+                        dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
+                        f[i] = f[i-1] + dfdt*dt
+                        Xs[i] = (1-(f[i])**3)*Xs_0 #update sulfur content
+                    
                 else: # core not solidifying or convecting keep conductive profile
                     f[i] = f[i-1]
                     Xs[i] = Xs[i-1]
