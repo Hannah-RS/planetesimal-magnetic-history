@@ -73,7 +73,7 @@ print('Integration finished')
 print(time.strftime("%Hh%Mm%Ss", time.gmtime(int_time)))
 
 #Reduce data points - as model saves more often than needed
-
+# take every nth point at an interval specified by save_interval in parameters.py
 Tc= Tc[0::n_save]
 Tc_conv = Tc_conv[0::n_save]
 Tcmb = Tcmb[0::n_save]
