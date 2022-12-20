@@ -24,18 +24,18 @@ sk_gbs = sk_data[sk_data['regime']=='GBS'] #get gbs points
 #sk_gbs = sk_gbs[sk_gbs['source']=='sk'] # get scott and kohlstedt points
 
 #choose models
-# model1 = 'Bryson et. al. (2019)'
-# model2 = 'Bryson $\phi$=0.3'
-# model3 = 'Bryson $\eta_0$=10$^{14}$Pas'
-# eta1 = viscosity(Tm, 'Bryson')
-# eta2 = viscosity(Tm, 'Bryson2')
-# eta3 = viscosity(Tm, 'Bryson3')
-model1 = 'Sterenborg & Crowley (2013)'
-model2 = 'Bryson et. al. (2019)'
-model3 = 'Dodds et al. (2021)'
-eta1 = viscosity(Tm, 'Sterenborg')
-eta2 = viscosity(Tm, 'Bryson')
-eta3 = viscosity(Tm, 'Dodds')
+model1 = 'Bryson et. al. (2019)'
+model2 = 'Bryson $\phi$=0.3'
+model3 = 'Bryson $\eta_0$=10$^{14}$Pas'
+eta1 = viscosity(Tm, 'Bryson')
+eta2 = viscosity(Tm, 'Bryson2')
+eta3 = viscosity(Tm, 'Bryson3')
+# model1 = 'Sterenborg & Crowley (2013)'
+# model2 = 'Bryson et. al. (2019)'
+# model3 = 'Dodds et al. (2021)'
+# eta1 = viscosity(Tm, 'Sterenborg')
+# eta2 = viscosity(Tm, 'Bryson')
+# eta3 = viscosity(Tm, 'Dodds')
 
 #plot models
 plt.figure()
@@ -76,19 +76,19 @@ fig.legend(loc=(0.15,0.15))
 #plt.savefig('Plots/viscosity_comparison2.png')
 
 ######################### Version with all experiments ########################
-plt.figure()
-plt.semilogy(phi, eta1,color='cornflowerblue')
-plt.semilogy(phi, eta2,linestyle='--',color='green')
-plt.semilogy(phi, eta3,linestyle='dotted',color='navy')
-plt.scatter(sk_diff['melt fraction'],sk_diff['viscosity (Pas)'],marker = 'x',color = 'black',label='diffusion creep - Scott & Kohlstedt (2006)')
+plt.figure(tight_layout=True)
+plt.semilogy(phi, eta1,color='cornflowerblue',label=model1)
+plt.semilogy(phi, eta2,linestyle='--',color='mediumblue',label=model2)
+plt.semilogy(phi, eta3,linestyle='dotted',color='navy',label=model3)
+plt.scatter(sk_diff['melt fraction'],sk_diff['viscosity (Pas)'],marker = 'x',color = 'black',label='diffusion creep experiment')
 #plt.scatter(hk_diff['melt fraction'],hk_diff['viscosity (Pas)'],marker = '+',color = 'black')
-plt.scatter(sk_gbs['melt fraction'],sk_gbs['viscosity (Pas)'],marker = 'x',color = 'red',label='dislocation creep - Scott & Kohlstedt (2006)')
+plt.scatter(sk_gbs['melt fraction'],sk_gbs['viscosity (Pas)'],marker = 'x',color = 'red',label='dislocation creep experiment')
 #plt.scatter(hk_gbs['melt fraction'],hk_gbs['viscosity (Pas)'],marker = '+',color = 'red')
 plt.arrow(x=0.3, y=1e4, dx = 0, dy = 1e7,head_width=0.02,head_length=5e7,color='black')#,text='upper bound') #start here
 plt.xlabel('Melt fraction')
 plt.ylabel('Viscosity/Pas')
-plt.legend()
-plt.savefig('Plots/experiments.png')
+plt.legend(loc='upper right',ncol=1,fontsize='small')
+#plt.savefig('Plots/experiments2.png',dpi=600)
 
 ################# plot Bryson model sequentially  #############################
 plt.figure()

@@ -155,7 +155,35 @@ with sns.plotting_context('talk',font_scale=0.8):
     plt.xlabel('Time/ Myr')
     plt.ylabel('f')
     plt.legend()
-    plt.savefig('Plots/Remf_comp_bbb.png',dpi=600)
+    #plt.savefig('Plots/Remf_comp_bbb.png',dpi=600)
+
+############# Just Rem ###################################################
+with sns.plotting_context('talk',font_scale=0.8):
+    plt.figure(tight_layout=True,figsize=[10,3.5])
+    plt.title('Thermal evolution of a {:.0f}km asteroid '.format(r/1e3))
+    plt.loglog(t_plot1,Rem1,label=model1,color='cornflowerblue',alpha=0.7)
+    plt.loglog(t_plot2,Rem2,label=model2,color='mediumblue',linestyle='dashed')
+    plt.loglog(t_plot3,Rem3,label=model3,color='navy',linestyle='dotted')
+    #plt.xlim([xmin,max(t_plot)])
+    plt.hlines(10,xmin=0,xmax=t_plot2[-1],color='k',linestyle='--')
+    plt.xlabel('Time/Myr')
+    plt.ylabel('Rem')
+    plt.legend(loc='upper left',ncol=2)
+    plt.ylim([1,100])
+    plt.savefig('Plots/Rem_transfer.png',dpi=600)
+##################### Just f ################################################
+with sns.plotting_context('talk',font_scale=0.8):
+    plt.figure(tight_layout=True,figsize=[10,3.5])
+    plt.title('Thermal evolution of a {:.0f}km asteroid '.format(r/1e3))
+    plt.semilogx(t_plot1,f1,label=model1,color='cornflowerblue',alpha=0.7)
+    plt.semilogx(t_plot2,f2,label=model2,color='mediumblue',linestyle='dashed')
+    plt.semilogx(t_plot3,f3,label=model3,color='navy',linestyle='dotted')
+    #plt.xlim([xmin,max(t_plot)])
+    plt.xlabel('Time/ Myr')
+    plt.ylabel('f')
+    plt.legend()
+    plt.savefig('Plots/f_transfer.png',dpi=600)
+
 
 ################# Core and mantle temp plot for transfer ##########################################
 with sns.plotting_context('talk'):
