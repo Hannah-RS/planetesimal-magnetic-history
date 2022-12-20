@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, cpm_p, rhom, save_interval
+from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, cpm_p, rhom, save_interval, default
 
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
@@ -23,13 +23,15 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run = 57
+run = 65
 
 t_start=1*Myr #start after the end of stage 2
-t_end_m=10#end time in Myr
+t_end_m=1000#end time in Myr
 t_end=t_end_m*Myr
-t_cond = dr**2/kappa_c #conductive timestep for core
-step_m=0.01*t_cond  #max timestep must be smaller than conductive timestep
+t_cond_core = dr**2/kappa_c #conductive timestep for core
+#t_cond_mantle = dr**2/kappa #conductive timestep for mantle
+step_m=0.1*t_cond_core  #max timestep must be smaller than conductive timestep
+#step_m=0.01*t_cond  #max timestep must be smaller than conductive timestep
 n_save = int(save_interval/step_m)
 
 # set initial temperature profile
@@ -45,21 +47,26 @@ Tint[n_core:] =Tm0
 
 #find initial stagnant lid
 from Rayleigh_def import Rayleigh_calc
-Ram, d0 = Rayleigh_calc(Tm0)
+Ram, d0 = Rayleigh_calc(Tm0,default)
 nlid_cells = int(d0/dr)
-for i in range(nlid_cells):
-    Tint[-i-1]=Ts+(Tm0-Ts)*i*dr/d0 #surface at Ts, initial linear profile in small lid
+print(nlid_cells)
+if nlid_cells ==0:
+    Tint[-1]=Ts
+else:
+    for i in range(nlid_cells):
+        Tint[-i-1]=Ts+(Tm0-Ts)*i*dr/d0 #surface at Ts, initial linear profile in small lid
+
 
 # update user on progress and plot initial temperature profile so can check
 rplot= np.arange(0,r,dr)/1e3
 
-# plt.figure()
-# plt.plot(rplot,Tint)
-# plt.xlabel('r/km')
-# plt.ylabel('Temperature/K')
-# plt.title('Initial temperature profile')
+plt.figure()
+plt.plot(rplot,Tint)
+plt.xlabel('r/km')
+plt.ylabel('Temperature/K')
+plt.title('Initial temperature profile')
 
-# print('Initial conditions set')
+print('Initial conditions set')
 
 # set solver running  
 from full_euler import thermal_evolution

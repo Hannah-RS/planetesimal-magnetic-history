@@ -139,7 +139,10 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
     Ra[0], d0[0] = Rayleigh_calc(T0_mantle[1],default) #use temp at base of mantle 
     nlid_cells = round(d0[0]/dr)
-    lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
+    if nlid_cells ==0:
+        lid_start = nmantle_cells -2
+    else:
+        lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
     
     
     # in initial step use balance of eqn 23 and 24 to find Tcmb
@@ -283,7 +286,11 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile 
             mantle_conv = True
             nlid_cells = round(d0[i]/dr)
-            lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
+            
+            if nlid_cells ==0:
+                lid_start = nmantle_cells -2
+            else:
+                lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
             if Tm_conv[i-1]!=0: #mantle already convecting
                 Tm_old = Tm_conv[i-1]
             else: #mantle just started convecting
