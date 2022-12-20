@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import numpy as np
-from parameters import eta0, gamma, alpha_n, Tms, Tml, eta0_50, eta_r50, Tm50, E, R, Tcrit, T0eta
-def viscosity(Tm, model = 'Robuchon-Bryson'):
+from parameters import eta0, gamma, alpha_n, Tms, Tml, eta0_50, eta_r50, Tm50, E, R, Tcrit, T0eta, default
+def viscosity(Tm, model = default):
     """
     Different viscosity models
     
@@ -42,7 +42,45 @@ def viscosity(Tm, model = 'Robuchon-Bryson'):
                eta = eta0_50*np.exp(-gamma*(Tm-Tm50))*np.exp(-alpha_n*(Tm-Tm50)/50)
            elif Tm <= 1600:
                eta = eta0*np.exp(-gamma*(Tm-T0eta))*np.exp(-alpha_n*(Tm-Tms)/(Tml-Tms))
-    
+    elif model == 'Bryson2':
+        # Viscosity model from Bryson et al. (2019)
+        if type(Tm)==np.ndarray: # if an array will need to loop
+            n = len(Tm)
+            eta = np.zeros([n])
+            for i in range(n):
+                if Tm[i] > 1550:
+                    eta[i] = 100
+                elif Tm[i] <= 1550 and Tm[i] > 1500:
+                    eta[i] = 3e17*np.exp(-gamma*(Tm[i]-1500))*np.exp(-alpha_n*(Tm[i]-1500)/38)
+                elif Tm[i] <= 1500:
+                    eta[i] = eta0*np.exp(-gamma*(Tm[i]-T0eta))*np.exp(-alpha_n*(Tm[i]-Tms)/(Tml-Tms))
+
+        else: #just an integer perform once
+           if Tm > 1550:
+               eta = 100
+           elif Tm <= 1550 and Tm > 1500:
+               eta = 3e17*np.exp(-gamma*(Tm-1500))*np.exp(-alpha_n*(Tm-1500)/38)
+           elif Tm <= 1500:
+               eta = eta0*np.exp(-gamma*(Tm-T0eta))*np.exp(-alpha_n*(Tm-Tms)/(Tml-Tms))
+    elif model == 'Bryson3':
+        # Viscosity model from Bryson et al. (2019)
+        if type(Tm)==np.ndarray: # if an array will need to loop
+            n = len(Tm)
+            eta = np.zeros([n])
+            for i in range(n):
+                if Tm[i] > 1650:
+                    eta[i] = 100
+                elif Tm[i] <= 1650 and Tm[i] > 1600:
+                    eta[i] = 9e6*np.exp(-gamma*(Tm[i]-1600))*np.exp(-alpha_n*(Tm[i]-1600)/120)
+                elif Tm[i] <= 1600:
+                    eta[i] = 1e14*np.exp(-gamma*(Tm[i]-T0eta))*np.exp(-alpha_n*(Tm[i]-Tms)/(Tml-Tms))
+        else: #just an integer perform once
+           if Tm > 1650:
+               eta = 100
+           elif Tm <= 1650 and Tm > 1600:
+               eta = 9e6*np.exp(-gamma*(Tm-1600))*np.exp(-alpha_n*(Tm-1600)/120)
+           elif Tm <= 1600:
+               eta = 1e14*np.exp(-gamma*(Tm-T0eta))*np.exp(-alpha_n*(Tm-Tms)/(Tml-Tms))
     elif model =='Robuchon-Bryson':
         # arrhenius functional form from Robuchon & Nimmo (2011) with constants and three piece from Bryson (2019)
 
