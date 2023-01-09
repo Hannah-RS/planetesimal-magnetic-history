@@ -116,3 +116,16 @@ plt.ylabel('Viscosity/Pas')
 plt.ylim([1,1e22])
 plt.xlim([0,0.8])
 #plt.savefig('Plots/Bryson_3.png')
+
+fig = plt.figure()
+ax1 = fig.add_subplot(111)
+ax2 = ax1.twiny()
+ax1.semilogy(phi, eta1,color='cornflowerblue')
+ax2.semilogy(Tm, eta1,color='cornflowerblue')
+
+
+ax1.set_ylabel('Viscosity/Pas')
+ax2.set_xlabel('T$_m$/K')
+ax1.set_xlabel('Melt fraction, $\phi$')
+
+plt.savefig('Plots/bryson_two_axes.png')
