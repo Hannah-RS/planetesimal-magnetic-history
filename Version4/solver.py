@@ -14,6 +14,9 @@ from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa_c, out_interval,
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
 from stencil import cond_stencil_core, cond_stencil_mantle
+from diff_function import differentiation
+from full_euler import thermal_evolution
+
 import scipy.sparse as sp
 kappa_m = km/(rhom*cpm_p) #use modified specific heat capacity to account for mantle melting
 dT_mat_c = cond_stencil_core(r,rc,dr,kappa_c) 
@@ -23,9 +26,9 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run = 65
+run = 64
 
-t_start=1*Myr #start after the end of stage 2
+t_acc=0.5*Myr  #Accretion time
 t_end_m=1000#end time in Myr
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
@@ -36,48 +39,39 @@ n_save = int(save_interval/step_m)
 
 # set initial temperature profile
 n_cells = int(r/dr) #number of cells needed to span body
-Tint = np.ones([n_cells]) #first element in the array is at r=0 
-
-#set core temperature
-n_core = int(rc/dr)
-Tint[:n_core] = Tc0 #core initially isothermal
-
-#set mantle temperature - assume isothermal below stagnant lid
-Tint[n_core:] =Tm0
-
-#find initial stagnant lid
-from Rayleigh_def import Rayleigh_calc
-Ram, d0 = Rayleigh_calc(Tm0,default)
-nlid_cells = int(d0/dr)
-print(nlid_cells)
-if nlid_cells ==0:
-    Tint[-1]=Ts
-else:
-    for i in range(nlid_cells):
-        Tint[-i-1]=Ts+(Tm0-Ts)*i*dr/d0 #surface at Ts, initial linear profile in small lid
-
-
-# update user on progress and plot initial temperature profile so can check
-rplot= np.arange(0,r,dr)/1e3
-
-plt.figure()
-plt.plot(rplot,Tint)
-plt.xlabel('r/km')
-plt.ylabel('Temperature/K')
-plt.title('Initial temperature profile')
+Tint = np.ones([n_cells])*Ts #first element in the array is at r=0, accrete cold at surface temp 
 
 print('Initial conditions set')
 
-# set solver running  
-from full_euler import thermal_evolution
+#sintering and compaction code will go here
+
+########################### Differentiation ###################################
+tic = time.perf_counter()
+Tdiff, Tdiff_profile, k_profile, t_diff = differentiation(Tint,t_acc,r)
+toc = time.perf_counter()
+diff_time = toc - tic  
+
+# update user on progress and plot differentiated temperature profile 
+rplot= np.arange(0,r,dr)/1e3
+
+plt.figure()
+plt.plot(rplot,Tdiff)
+plt.xlabel('r/km')
+plt.ylabel('Temperature/K')
+plt.title('Temperature profile post differentiation')
+
+print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(diff_time)))
+
+######################## Thermal evolution ####################################
 
 #integrate
 tic = time.perf_counter()
-Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, Ra, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_start,t_end,step_m,Tint,f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, Ra, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff,f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time = toc - tic    
-print('Integration finished')
-print(time.strftime("%Hh%Mm%Ss", time.gmtime(int_time)))
+print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time)))
+
+############################# Process data ####################################
 
 #Reduce data points - as model saves more often than needed
 # take every nth point at an interval specified by save_interval in parameters.py
@@ -133,8 +127,9 @@ Rem2[Rem_ca<Rem_t] = Rem_t[Rem_ca<Rem_t] #replace values where Rem_t < Rem_c
 
 print('Fluxes and magnetic Reynolds number calculated.')
 
-#save variables to file
-np.savez('Results/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, Ra = Ra, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
+############################ Save results #####################################
+# save variables to file
+np.savez('Results/run_{}'.format(run), Tdiff = Tdiff, t_diff = t_diff, k_profile = k_profile, Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, Ra = Ra, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
 
 #write parameters to the run file
 from csv import writer
