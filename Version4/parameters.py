@@ -29,6 +29,10 @@ save_interval = 0.01*Myr # how often do you want each variable to be saved
 Ts=200 # surface temperature, modelled as fixed [K]
 As = 4*np.pi*r**2 # surface area [m^2]
 
+#Undifferentiated parameters
+ka = 2.16 # [W /m /K] currently same as mantle
+rho_a = 3000 # kg m^-3 density of undifferentiated material
+
 # Mantle parameters
 cpm = 800 # heat capacity [J /kg /K]
 Lm = 400e3 #latent heat of mantle [J /kg]
@@ -48,7 +52,7 @@ Tm0 = 1600 # intial mantle temp - from beginning of stage 2 in Figure 1 of Bryso
 c1 = 8 # constant in boundary layer thickness Dodds (2021)
 
 #viscosity models
-default ='Dodds' #default viscosity model
+default ='Bryson2' #default viscosity model
 # Bryson 2019
 eta0 = 1e21 # reference viscosity [Pa s] - assumed constant in this model
 eta0_50 = 1e14 #viscosity of material at 50% melting [Pas]
