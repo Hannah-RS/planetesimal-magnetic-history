@@ -14,7 +14,7 @@ Flow:
 import numpy as np
 import scipy.sparse as sp
 import scipy.optimize as sco
-from parameters import Ts, Myr, Rac, B, dr, out_interval, km, kc, alpha_m, alpha_c, rc, rhoc, rhom, eta_c, g, gc, cpc, Xs_0, default, kappa, kappa_c, c1, gamma
+from parameters import Ts, Myr, Rac, B, dr, out_interval, km, kc, alpha_m, alpha_c, rc, rhoc, rhom, eta_c, g, gc, cpc, Xs_0, default, kappa, kappa_c, c1, gamma, Xs_eutectic, Acmb, Lc
 
 #import required functions
 from Tm_cond import T_cond_calc
@@ -139,7 +139,10 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
     Ra[0], d0[0] = Rayleigh_calc(T0_mantle[1],default) #use temp at base of mantle 
     nlid_cells = round(d0[0]/dr)
-    lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
+    if nlid_cells ==0:
+        lid_start = nmantle_cells -2
+    else:
+        lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
     
     
     # in initial step use balance of eqn 23 and 24 to find Tcmb
@@ -269,9 +272,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         
         # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
         Ra[i], d0[i] = Rayleigh_calc(T_old_mantle[1],default) #use temp at base of mantle 
-        nlid_cells = round(d0[i]/dr)
-        lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
-    
+            
         
         if Ra[i] < Rac or cond==1: #once Rayleigh number subcritical don't want to use that criterion anymore
             mantle_conv = False
@@ -284,7 +285,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
 
         else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile 
             mantle_conv = True
+            nlid_cells = round(d0[i]/dr)
             
+            if nlid_cells ==0:
+                lid_start = nmantle_cells -2
+            else:
+                lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
             if Tm_conv[i-1]!=0: #mantle already convecting
                 Tm_old = Tm_conv[i-1]
             else: #mantle just started convecting
@@ -317,11 +323,16 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             # is the core solidifying?
             Tliquidus = fe_fes_liquidus(Xs[i-1])
             if np.any(T_old_core < Tliquidus) == True: #core solidifies
-
-                dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
-                dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
-                f[i] = f[i-1] + dfdt*dt
-                Xs[i] = (1-(f[i]**3))*Xs_0 #update sulfur content
+                if Xs[i-1]>= Xs_eutectic:
+                    dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
+                    dfdt = Fcmb[i-1]*Acmb/(4*np.pi*rc**3*f[i-1]**2*Lc*rhoc)                    
+                    f[i] = f[i-1] + dfdt*dt
+                    Xs[i] = Xs[i-1] #sulfur concentration unchanged in eutectic solidification
+                else:
+                    dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
+                    dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
+                    f[i] = f[i-1] + dfdt*dt
+                    Xs[i] = (1-(f[i]**3))*Xs_0 #update sulfur content
             
             else: # core not solidifying
                 dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = False)
@@ -379,12 +390,17 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 # is the core solidifying?
                 Tliquidus = fe_fes_liquidus(Xs[i-1])
                 if T_old_core[-2] < Tliquidus: #core solidifies
-                    dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
-                    dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
-                    f[i] = f[i-1] + dfdt*dt
-                    Xs[i] = (1-(f[i])**3)*Xs_0 #update sulfur content
-                    #Tc_conv[0] = T0_core[lnb-1] + dTcdt*dt
-                    #T_new_core[:lnb+1] = Tc_conv[0] #replace everything above the solid core
+                    if Xs[i-1]>= Xs_eutectic: #eutectic solidification
+                        dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
+                        dfdt = Fcmb[i-1]*Acmb/(4*np.pi*rc**3*f[i-1]**2*Lc*rhoc)                    
+                        f[i] = f[i-1] + dfdt*dt
+                        Xs[i] = Xs[i-1] #sulfur concentration unchanged in eutectic solidification
+                    else:
+                        dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
+                        dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
+                        f[i] = f[i-1] + dfdt*dt
+                        Xs[i] = (1-(f[i])**3)*Xs_0 #update sulfur content
+                    
                 else: # core not solidifying or convecting keep conductive profile
                     f[i] = f[i-1]
                     Xs[i] = Xs[i-1]
@@ -425,7 +441,11 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         else:
             if core_conv == True:
                 #mantle sets CMB temp
-                Tcmb[i] = T_new_mantle[0]
+                #Tcmb[i] = T_new_mantle[0]
+                if dc[i-1] == 0:
+                    dc[i-1] = delta_c(Tc_conv[i],Tcmb[i-1]) #find approximate core cmb b.l. thickness
+                factor = (kc*dr)/(km*dc[i-1])
+                Tcmb[i] = (T_new_mantle[1]+factor*T_new_core[-2])/(1+factor)
                 dc[i] = delta_c(Tc_conv[i],Tcmb[i]) #find core cmb b.l. thickness
                 Fcmb[i] = -km*(T_new_mantle[1]-Tcmb[i])/dr # CMB heat flux eqn 23 in Dodds 2020
             else: # eqn 23 = 24
