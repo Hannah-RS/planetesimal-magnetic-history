@@ -47,10 +47,10 @@ print('Initial conditions set')
 
 ########################### Differentiation ###################################
 tic = time.perf_counter()
-Tdiff, Tdiff_profile, k_profile, t_diff = differentiation(Tint,t_acc,r)
+Tdiff, Tdiff_profile, k_profile, t_diff = differentiation(Tint,t_acc,r, dr, step_m)
 toc = time.perf_counter()
 diff_time = toc - tic  
-
+raise ValueError('Differentiation passed')
 # update user on progress and plot differentiated temperature profile 
 rplot= np.arange(0,r,dr)/1e3
 

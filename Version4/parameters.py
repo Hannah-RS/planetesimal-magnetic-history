@@ -31,7 +31,8 @@ As = 4*np.pi*r**2 # surface area [m^2]
 
 #Undifferentiated parameters
 ka = 2.16 # [W /m /K] currently same as mantle
-rho_a = 3000 # kg m^-3 density of undifferentiated material
+rhoa = 3000 # kg m^-3 density of undifferentiated material
+cpa = 800 # heat capacity [J /kg /K]
 
 # Mantle parameters
 cpm = 800 # heat capacity [J /kg /K]
@@ -74,7 +75,6 @@ alpha_c=9.2e-5 #[K^-1] 9.2e-5
 Lc = 270e3 # latent heat of core [J kg^-1] 750,000
 drho=0.025 # \delta rho/rho 0.05 Nimmo (2009)
 Delta=1.2 #dTm/dP/dT/dP 1.2 Nimmo (2009)
-Tsolidus = 1450 # solidus temp [K] based on phase diagram from Scheinberg 2016
 eta_c =0.01 # viscosity of core [Pa s] Dodds (2021)
 bpart = 0.5 #buoyancy partitioning coefficient Nichols (2021) but based on Aubert 2009 - might want to investigate
 Xs_0 = 32 # initial wt % sulfur in core (needs a citation)

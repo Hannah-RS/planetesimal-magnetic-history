@@ -130,10 +130,10 @@ def cond_stencil_general(r,dr):
     
     
     #create a temperature array same length as half
-    n_cells = int(r/(2*dr)) #number of cells needed to span half body 
+    n_cells = int(r/dr) #number of cells needed to span body 
 
     # top value is CMB, bottom row is centre
-    rarr = np.arange(0,r/2,dr) # create values of cell boundaries
+    rarr = np.arange(0,r,dr) # create values of cell boundaries
     rmid = (rarr[:-1]+rarr[1:])/2 #find midpoints of cells
     
     # create matrix for radial steps
