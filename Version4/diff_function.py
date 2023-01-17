@@ -60,7 +60,7 @@ def differentiation(Tint,tacc,r,dr,dt):
     H = h0*Al0*XAl*np.exp(-np.log(2)*t/thalf_al)
 
     #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
-    rhs = sparse_mat.dot(Tk) + H*heating[:,0]*rho_profile[:,0]
+    rhs = sparse_mat.dot(Tk) #+ H*heating[:,0]*rho_profile[:,0]
     
     #Calculate temperature change or melt change
     if np.any(Tint >= Tliquidus):
@@ -88,7 +88,7 @@ def differentiation(Tint,tacc,r,dr,dt):
     #while np.any(rho_profile[:-1]==rhoa): #whilst any part except the top cell is not differentiated
     while i < 100:
         # make all the arrays one column bigger
-        app_array = np.ones([ncells,1])
+        app_array = np.zeros([ncells,1])
         T = np.append(T,app_array,1)
         k_profile = np.append(k_profile,app_array,1)
         rho_profile = np.append(rho_profile, app_array, 1)
@@ -102,7 +102,7 @@ def differentiation(Tint,tacc,r,dr,dt):
  
         #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
         Tk = k_profile[:,i-1]*T[:,i-1]
-        rhs = sparse_mat.dot(Tk) + H*heating[:,i-1]*rho_profile[:,i-1]
+        rhs = sparse_mat.dot(Tk) #+ H*heating[:,i-1]*rho_profile[:,i-1]
  
         #Calculate temperature change or melt change
         if np.any(T[:,i-1] >= Tliquidus):
@@ -112,9 +112,9 @@ def differentiation(Tint,tacc,r,dr,dt):
             #no temp change where iron is melting
             T[Xfe[:,i-1] < 1,i] = T[Xfe[:,i-1] < 1,i-1]
             Xfe[Xfe[:,i-1] < 1,i] = Xfe[Xfe[:,i-1] < 1,i-1] + dXfedt[Xfe[:,i-1] < 1]*dt
-        
+            print(Xfe)
             #iron already melted increase the temperature
-            T[Xfe[:,i-1] >= 1,i] = T[Xfe[:,i-1] >= 1,i-1] + dTdt[Xfe[:,i-1] >= 1]*dt
+            #T[Xfe[:,i-1] >= 1,i] = T[Xfe[:,i-1] >= 1,i-1] + dTdt[Xfe[:,i-1] >= 1]*dt
             Xfe[Xfe[:,0] >= 1,i] = Xfe[Xfe[:,0] >= 1,0]
 
         else: #no nodes are melting
