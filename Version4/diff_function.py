@@ -28,14 +28,18 @@ def differentiation(Tint,tacc,r,dr,dt):
     Returns
     -------
     Tdiff: float
-        final temperature profile after differentiation
+        final temperature profile after differentiation [K]
     Tdiff_profile: float
-        temperature profiles at each step in differentiation
+        temperature profiles at each step in differentiation [K]
     k_profile: float
         thermal conductivity profiles at each step in differentiation. Can be kc 
-        (core), km (mantle), ka (undifferentiated)
+        (core), km (mantle), ka (undifferentiated) [W /m /K]
+    Xfe: float
+        proportion of iron each cell which is melted in differentiation [0 to 1]
+    rho_profile: float
+        density of each cell at each step in differentiation [kg m^-3]
     t_diff: float
-        array of timesteps during differentiation
+        array of timesteps during differentiation [s]
 
     """
     sparse_mat = sp.dia_matrix(cond_stencil_general(r,dr))
@@ -92,11 +96,12 @@ def differentiation(Tint,tacc,r,dr,dt):
         Xfe = np.append(Xfe, app_array, 1)
 
         t = np.append(t,t[i-1]+dt)
-
-        Tk = k_profile[:,i-1]*T[:,i-1]
+        
+        #Calculate radiogenic heating
         H = h0*Al0*XAl*np.exp(-np.log(2)*t[i]/thalf_al)
  
         #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
+        Tk = k_profile[:,i-1]*T[:,i-1]
         rhs = sparse_mat.dot(Tk) + H*heating[:,i-1]*rho_profile[:,i-1]
  
         #Calculate temperature change or melt change
@@ -127,4 +132,4 @@ def differentiation(Tint,tacc,r,dr,dt):
     Tdiff_profile = T[:,-1]
     t_diff = t
     
-    return Tdiff, Tdiff_profile, k_profile, t_diff
+    return Tdiff, Tdiff_profile, k_profile, Xfe, rho_profile, t_diff

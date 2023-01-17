@@ -26,7 +26,7 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run = 64
+run = 1
 
 t_acc=0.5*Myr  #Accretion time
 t_end_m=1000#end time in Myr
@@ -47,10 +47,10 @@ print('Initial conditions set')
 
 ########################### Differentiation ###################################
 tic = time.perf_counter()
-Tdiff, Tdiff_profile, k_profile, t_diff = differentiation(Tint,t_acc,r, dr, step_m)
+Tdiff, Tdiff_profile, k_profile, Xfe, rho_profile, t_diff = differentiation(Tint,t_acc,r, dr, step_m)
 toc = time.perf_counter()
 diff_time = toc - tic  
-raise ValueError('Differentiation passed')
+
 # update user on progress and plot differentiated temperature profile 
 rplot= np.arange(0,r,dr)/1e3
 
@@ -61,7 +61,8 @@ plt.ylabel('Temperature/K')
 plt.title('Temperature profile post differentiation')
 
 print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(diff_time)))
-
+np.savez(f'Results/diff_run_{run}', Tdiff = Tdiff, Tdiff_profile = Tdiff_profile, k_profile = k_profile, Xfe = Xfe, rho_profile = rho_profile, t_diff = t_diff)
+raise ValueError('Differentiation passed')
 ######################## Thermal evolution ####################################
 
 #integrate
@@ -129,7 +130,7 @@ print('Fluxes and magnetic Reynolds number calculated.')
 
 ############################ Save results #####################################
 # save variables to file
-np.savez('Results/run_{}'.format(run), Tdiff = Tdiff, t_diff = t_diff, k_profile = k_profile, Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, Ra = Ra, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
+np.savez('Results/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, Ra = Ra, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
 
 #write parameters to the run file
 from csv import writer
