@@ -51,7 +51,7 @@ def differentiation(Tint,tacc,r,dr,dt):
     k_profile = np.ones([ncells,1])*ka #don't know how long differentiation will last so append at each step
     rho_profile = np.ones([ncells,1])*rhoa
     heating = np.ones([ncells,1]) #1 if radiogenic heating i.e. mantle or undifferentiated, 0 if core
-    Xfe = np.ones([ncells,1]) #fraction of iron melted
+    Xfe = np.zeros([ncells,1]) #fraction of iron melted
     T = np.ones([ncells,1]) #temperature
     
     t = np.asarray([tacc])
