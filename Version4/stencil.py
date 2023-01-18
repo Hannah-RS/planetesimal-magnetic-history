@@ -121,7 +121,7 @@ def cond_stencil_general(r,dr):
 
     Returns
     -------
-    r_mat : matrix (2d np array)
+    r_mat_g : matrix (2d np array)
         stencil used for conductive dTdt 
 
     """
@@ -149,5 +149,6 @@ def cond_stencil_general(r,dr):
         r_mat[i,i-1] = 1 - dr/rmid[i]
         r_mat[i,i] = -2
         r_mat[i,i+1] = 1 + dr/rmid[i]
+    r_mat_g = r_mat/dr**2
     
-    return r_mat
+    return r_mat_g
