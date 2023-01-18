@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, cpm_p, rhom, save_interval, default
+from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, cpm_p, rhom, save_interval, default, kappa
 
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
@@ -26,14 +26,14 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run = 1
+run =7
 
 t_acc=0.5*Myr  #Accretion time
 t_end_m=1000#end time in Myr
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
-#t_cond_mantle = dr**2/kappa #conductive timestep for mantle
-step_m=0.1*t_cond_core  #max timestep must be smaller than conductive timestep
+t_cond_mantle = dr**2/kappa #conductive timestep for mantle
+step_m=0.1*t_cond_mantle  #max timestep must be smaller than conductive timestep
 #step_m=0.01*t_cond  #max timestep must be smaller than conductive timestep
 n_save = int(save_interval/step_m)
 
@@ -43,11 +43,11 @@ Tint = np.ones([n_cells])*Ts #first element in the array is at r=0, accrete cold
 
 print('Initial conditions set')
 
-#sintering and compaction code will go here
+###############  sintering and compaction code will go here  ##################
 
 ########################### Differentiation ###################################
 tic = time.perf_counter()
-Tdiff, Tdiff_profile, k_profile, Xfe, rho_profile, t_diff = differentiation(Tint,t_acc,r, dr, step_m)
+Tdiff, Tdiff_profile, k_profile, Xfe, rho_profile, Ra, Ra_crit, convect, t_diff = differentiation(Tint,t_acc,r, dr, step_m)
 toc = time.perf_counter()
 diff_time = toc - tic  
 
@@ -61,7 +61,7 @@ plt.ylabel('Temperature/K')
 plt.title('Temperature profile post differentiation')
 
 print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(diff_time)))
-np.savez(f'Results/diff_run_{run}', Tdiff = Tdiff, Tdiff_profile = Tdiff_profile, k_profile = k_profile, Xfe = Xfe, rho_profile = rho_profile, t_diff = t_diff)
+np.savez(f'Results/diff_run_{run}', Tdiff = Tdiff, Tdiff_profile = Tdiff_profile, k_profile = k_profile, Xfe = Xfe, rho_profile = rho_profile, Ra = Ra, Ra_crit = Ra_crit, convect = convect, t_diff = t_diff)
 raise ValueError('Differentiation passed')
 ######################## Thermal evolution ####################################
 

@@ -5,6 +5,7 @@ Function for differentiating an asteroid. Based on the process in Dodds et. al. 
 """
 from stencil import cond_stencil_general
 from fe_fes_liquidus import fe_fes_liquidus
+from Rayleigh_def import Rayleigh_differentiate
 from scipy import sparse as sp
 import numpy as np
 from parameters import kc, km, ka, h0, Al0, XAl, thalf_al, rhoa, rhoc, rhom, Xs_0, cpa, Lc, Myr
@@ -53,6 +54,9 @@ def differentiation(Tint,tacc,r,dr,dt):
     heating = np.ones([ncells,1]) #1 if radiogenic heating i.e. mantle or undifferentiated, 0 if core
     Xfe = np.zeros([ncells,1]) #fraction of iron melted
     T = np.ones([ncells,1]) #temperature
+    Ra = np.ones([ncells,1]) #Rayleigh number
+    Ra_crit = np.ones([ncells,1]) # critical Rayleigh number
+    convect = np.ones([ncells,1]) # is anything convecting
     
     t = np.asarray([tacc])
 
@@ -82,12 +86,13 @@ def differentiation(Tint,tacc,r,dr,dt):
     
     # Add composition check and movement here
     #overwrite heating array?
-     
+    #check for convection
+    Ra[0:,0], Ra_crit[0:,0], convect[0:,0] = Rayleigh_differentiate(T[0:,0],T[0,0],ncells,dr)
      
     #Now loop
     i = 1
-    #while np.any(rho_profile[:-1]==rhoa): #whilst any part except the top cell is not differentiated
-    while t[i-1]<1*Myr:
+    #while np.any(convect[0:-1,i-1]==False): #whilst any part except the top cell is not differentiated
+    while t[i-1]<2*Myr:
         # make all the arrays one column bigger
         app_array = np.zeros([ncells,1])
         T = np.append(T,app_array,1)
@@ -95,7 +100,10 @@ def differentiation(Tint,tacc,r,dr,dt):
         rho_profile = np.append(rho_profile, app_array, 1)
         heating = np.append(heating, app_array,1) 
         Xfe = np.append(Xfe, app_array, 1)
-
+        Ra = np.append(Ra, app_array, 1)
+        Ra_crit = np.append(Ra_crit, app_array, 1)
+        convect = np.append(convect, app_array, 1)
+        
         t = np.append(t,t[i-1]+dt)
         
         #Calculate radiogenic heating
@@ -133,12 +141,13 @@ def differentiation(Tint,tacc,r,dr,dt):
         k_profile[:,i] = k_new
         rho_profile[:,i] = rho_profile[:,0]
         heating[:,i] = heating[:,0]
+        Ra[0:,i], Ra_crit[0:,i], convect[0:,i] = Rayleigh_differentiate(T[0:,i],T[0,i],ncells,dr)
         #increment i
         i +=1
-        
+
     #relabel for returning
     Tdiff = T
     Tdiff_profile = T[:,-1]
     t_diff = t
     
-    return Tdiff, Tdiff_profile, k_profile, Xfe, rho_profile, t_diff
+    return Tdiff, Tdiff_profile, k_profile, Xfe, rho_profile, Ra, Ra_crit, convect, t_diff
