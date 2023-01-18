@@ -114,25 +114,23 @@ def differentiation(Tint,tacc,r,dr,dt):
 
         rhs = sparse_mat.dot(Tk) + H*heating[:,i-1]*rho_profile[:,i-1]
 
-        #print(rhs)
         #Calculate temperature change or melt change
-        #if np.any(T[:,i-1] >= Tliquidus):
-            #dXfedt = rhs/(rhoc*Lc)
-            #dTdt = rhs/(rhoa*cpa)
-        
+        if np.any(T[:,i-1] >= Tliquidus):
+            dXfedt = rhs/(rhoc*Lc)
+            dTdt = rhs/(rhoa*cpa)
+            
             #no temp change where iron is melting
-            #T[Xfe[:,i-1] < 1,i] = T[Xfe[:,i-1] < 1,i-1]
-            #Xfe[Xfe[:,i-1] < 1,i] = Xfe[Xfe[:,i-1] < 1,i-1] + dXfedt[Xfe[:,i-1] < 1]*dt
-
+            T[Xfe[:,i-1] < 1,i] = T[Xfe[:,i-1] < 1,i-1]
+            Xfe[Xfe[:,i-1] < 1,i] = Xfe[Xfe[:,i-1] < 1,i-1] + dXfedt[Xfe[:,i-1] < 1]*dt
             #iron already melted increase the temperature
-            #T[Xfe[:,i-1] >= 1,i] = T[Xfe[:,i-1] >= 1,i-1] + dTdt[Xfe[:,i-1] >= 1]*dt
-            #Xfe[Xfe[:,0] >= 1,i] = Xfe[Xfe[:,0] >= 1,0]
+            T[Xfe[:,i-1] >= 1,i] = T[Xfe[:,i-1] >= 1,i-1] + dTdt[Xfe[:,i-1] >= 1]*dt
+            Xfe[Xfe[:,i-1] >= 1,i] = Xfe[Xfe[:,i-1] >= 1,i-1]
 
-        #else: #no nodes are melting
-        dTdt = rhs/(rhoa*cpa)
+        else: #no nodes are melting
+            dTdt = rhs/(rhoa*cpa)
 
-        T[:-1,i] = T[:-1,i-1] + dt*dTdt[:-1] #top cell of the body is pinned to 200K
-        T[-1,i] = T[-1,i-1]
+            T[:-1,i] = T[:-1,i-1] + dt*dTdt[:-1] #top cell of the body is pinned to 200K
+            T[-1,i] = T[-1,i-1]
 
         # Add composition check and movement here
         #overwrite heating array?
@@ -141,6 +139,7 @@ def differentiation(Tint,tacc,r,dr,dt):
         k_profile[:,i] = k_new
         rho_profile[:,i] = rho_profile[:,0]
         heating[:,i] = heating[:,0]
+        
         Ra[0:,i], Ra_crit[0:,i], convect[0:,i] = Rayleigh_differentiate(T[0:,i],T[0,i],ncells,dr)
         #increment i
         i +=1
