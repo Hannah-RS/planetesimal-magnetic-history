@@ -77,7 +77,7 @@ def differentiation(Tint,tacc,r,dr,dt):
         
     else: #no nodes are melting
         dTdt = rhs/(rhoa*cpa)
-        T[:-1,0] = Tint + dt*dTdt
+        T[:-1,0] = Tint[:-1] + dt*dTdt[:-1]
         T[-1,0] = Tint[-1] #pin top cell to 200K
     
     # Add composition check and movement here
@@ -87,7 +87,7 @@ def differentiation(Tint,tacc,r,dr,dt):
     #Now loop
     i = 1
     #while np.any(rho_profile[:-1]==rhoa): #whilst any part except the top cell is not differentiated
-    while t[i-1]<5*Myr:
+    while t[i-1]<1*Myr:
         # make all the arrays one column bigger
         app_array = np.zeros([ncells,1])
         T = np.append(T,app_array,1)
