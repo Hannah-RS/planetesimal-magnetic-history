@@ -7,7 +7,7 @@ from stencil import cond_stencil_general
 from fe_fes_liquidus import fe_fes_liquidus
 from scipy import sparse as sp
 import numpy as np
-from parameters import kc, km, ka, h0, Al0, XAl, thalf_al, rhoa, rhoc, rhom, Xs_0, cpa, Lc
+from parameters import kc, km, ka, h0, Al0, XAl, thalf_al, rhoa, rhoc, rhom, Xs_0, cpa, Lc, Myr
 def differentiation(Tint,tacc,r,dr,dt):
     """
     
@@ -60,7 +60,7 @@ def differentiation(Tint,tacc,r,dr,dt):
     H = h0*Al0*XAl*np.exp(-np.log(2)*t/thalf_al)
 
     #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
-    rhs = sparse_mat.dot(Tk) #+ H*heating[:,0]*rho_profile[:,0]
+    rhs = sparse_mat.dot(Tk) + H*heating[:,0]*rho_profile[:,0]
     
     #Calculate temperature change or melt change
     if np.any(Tint >= Tliquidus):
@@ -77,7 +77,8 @@ def differentiation(Tint,tacc,r,dr,dt):
         
     else: #no nodes are melting
         dTdt = rhs/(rhoa*cpa)
-        T[:,0] = Tint + dt*dTdt
+        T[:-1,0] = Tint + dt*dTdt
+        T[-1,0] = Tint[-1] #pin top cell to 200K
     
     # Add composition check and movement here
     #overwrite heating array?
@@ -86,7 +87,7 @@ def differentiation(Tint,tacc,r,dr,dt):
     #Now loop
     i = 1
     #while np.any(rho_profile[:-1]==rhoa): #whilst any part except the top cell is not differentiated
-    while i < 100:
+    while t[i-1]<5*Myr:
         # make all the arrays one column bigger
         app_array = np.zeros([ncells,1])
         T = np.append(T,app_array,1)
@@ -102,31 +103,39 @@ def differentiation(Tint,tacc,r,dr,dt):
  
         #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
         Tk = k_profile[:,i-1]*T[:,i-1]
-        rhs = sparse_mat.dot(Tk) #+ H*heating[:,i-1]*rho_profile[:,i-1]
- 
+
+        rhs = sparse_mat.dot(Tk) + H*heating[:,i-1]*rho_profile[:,i-1]
+
+        #print(rhs)
         #Calculate temperature change or melt change
-        if np.any(T[:,i-1] >= Tliquidus):
-            dXfedt = rhs/(rhoc*Lc)
-            dTdt = rhs/(rhoa*cpa)
+        #if np.any(T[:,i-1] >= Tliquidus):
+            #dXfedt = rhs/(rhoc*Lc)
+            #dTdt = rhs/(rhoa*cpa)
         
             #no temp change where iron is melting
-            T[Xfe[:,i-1] < 1,i] = T[Xfe[:,i-1] < 1,i-1]
-            Xfe[Xfe[:,i-1] < 1,i] = Xfe[Xfe[:,i-1] < 1,i-1] + dXfedt[Xfe[:,i-1] < 1]*dt
-            print(Xfe)
+            #T[Xfe[:,i-1] < 1,i] = T[Xfe[:,i-1] < 1,i-1]
+            #Xfe[Xfe[:,i-1] < 1,i] = Xfe[Xfe[:,i-1] < 1,i-1] + dXfedt[Xfe[:,i-1] < 1]*dt
+
             #iron already melted increase the temperature
             #T[Xfe[:,i-1] >= 1,i] = T[Xfe[:,i-1] >= 1,i-1] + dTdt[Xfe[:,i-1] >= 1]*dt
-            Xfe[Xfe[:,0] >= 1,i] = Xfe[Xfe[:,0] >= 1,0]
+            #Xfe[Xfe[:,0] >= 1,i] = Xfe[Xfe[:,0] >= 1,0]
 
-        else: #no nodes are melting
-            dTdt = rhs/(rhoa*cpa)
-            T[:,i] = T[:,i-1] + dt*dTdt
+        #else: #no nodes are melting
+        dTdt = rhs/(rhoa*cpa)
 
+        T[:-1,i] = T[:-1,i-1] + dt*dTdt[:-1] #top cell of the body is pinned to 200K
+        T[-1,i] = T[-1,i-1]
 
         # Add composition check and movement here
         #overwrite heating array?
+        
+        k_new = k_profile[:,0] #update k properly later, for now just up date with current profile
+        k_profile[:,i] = k_new
+        rho_profile[:,i] = rho_profile[:,0]
+        heating[:,i] = heating[:,0]
+        #increment i
         i +=1
-
-
+        
     #relabel for returning
     Tdiff = T
     Tdiff_profile = T[:,-1]
