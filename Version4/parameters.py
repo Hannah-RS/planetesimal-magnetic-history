@@ -32,10 +32,11 @@ As = 4*np.pi*r**2 # surface area [m^2]
 #Undifferentiated parameters
 ka = 2.16 # [W /m /K] currently same as mantle
 rhoa = 3000 # kg m^-3 density of undifferentiated material
-cpa = 800 # heat capacity [J /kg /K]
+cpa = 850 # heat capacity [J /kg /K]
+Tref = 1800 # viscosity reference temperature (Dodds 2021) [K] 
 
 # Mantle parameters
-cpm = 800 # heat capacity [J /kg /K]
+cpm = 850 # heat capacity [J /kg /K] (Dodds et al.)
 Lm = 400e3 #latent heat of mantle [J /kg]
 Tml = 1800 # liquidus [K]
 Tms = 1400 # solidus [K]
