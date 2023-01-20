@@ -8,7 +8,7 @@ Also script for Rayleigh number and critical Rayleigh number for differentiation
 import numpy as np
 from viscosity_def import viscosity #import viscosity model
 
-from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, Rac, Ts, default, c1, G, E, R, Tref
+from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, km, Rac, Ts, default, c1, G, E, R, Tref, h0
 
 def Rayleigh_calc(Tm,model=default):
     """
@@ -62,7 +62,9 @@ def Rayleigh_differentiate(T,Tb,ncells,dr,model=default):
     #r = np.linspace(dr,ncells*dr,ncells)
     eta = viscosity(Tb,model)
     g = 4*np.pi*r*rhom*G/3
-    Ra = rhom*alpha_m*r**3*g*(Tb-Ts)/(kappa*eta)
+    #Ra = rhom*alpha_m*r**3*g*(Tb-Ts)/(kappa*eta) #Robuchon & Nimmo 2011
+    #Ra = rhom**2*alpha_m*h0*r**5/(km*kappa*eta) #Plane layer heated from within (Schubert 2001)
+    Ra = rhom**3*alpha_m*h0*G*r**6/(km*kappa*eta) #Internally heated sphere (Schubert 2001)
     
     Ra_crit = 20.9*((E/(R*Tref**2))*(Tb-Ts))**4 #2.18 Dodds thesis 
     
