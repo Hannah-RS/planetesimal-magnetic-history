@@ -59,13 +59,13 @@ def Rayleigh_differentiate(T,Tb,ncells,dr,model=default):
         True if cell convects, false if not
 
     """
-    r = np.linspace(dr,ncells*dr,ncells)
-    eta = viscosity(T,model)
+    #r = np.linspace(dr,ncells*dr,ncells)
+    eta = viscosity(Tb,model)
     g = 4*np.pi*r*rhom*G/3
-    Ra = rhom*alpha_m*r**3*g*abs(T-Tb)/(kappa*eta)
+    Ra = rhom*alpha_m*r**3*g*(Tb-Ts)/(kappa*eta)
     
-    Ra_crit = 20.9*((E/(R*Tref**2))*(T-Tref))**4 #2.18 Dodds thesis 
+    Ra_crit = 20.9*((E/(R*Tref**2))*(Tb-Ts))**4 #2.18 Dodds thesis 
     
-    convect = Ra>Ra_crit 
-    
+    #convect = (Ra-Ra_crit) >= -0.0001*Ra 
+    convect = Ra>Ra_crit
     return Ra, Ra_crit, convect
