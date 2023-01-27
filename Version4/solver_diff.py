@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script for solving the thermal evolution of an asteroid. Doesn't include differentiation (i.e commented out)'
+Script for solving the thermal evolution of an asteroid
 """
 # import modules
 import numpy as np
@@ -33,40 +33,41 @@ t_end_m=200#end time in Myr
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle
-step_m=0.1*t_cond_core  #max timestep must be smaller than conductive timestep
+step_m=0.1*t_cond_mantle  #max timestep must be smaller than conductive timestep
+#step_m=0.01*t_cond  #max timestep must be smaller than conductive timestep
 n_save = int(save_interval/step_m)
 
 # set initial temperature profile
 n_cells = int(r/dr) #number of cells needed to span body
-Tint = np.ones([n_cells])*1600 #first element in the array is at r=0, accrete cold at surface temp 
-Tint[-1]=Ts
+Tint = np.ones([n_cells])*Ts #first element in the array is at r=0, accrete cold at surface temp 
+
 print('Initial conditions set')
 
 ###############  sintering and compaction code will go here  ##################
 
 ########################### Differentiation ###################################
-# tic = time.perf_counter()
-# Tdiff, Tdiff_profile, k_profile, Xfe, rho_profile, Ra, Ra_crit, convect, t_diff = differentiation(Tint,t_acc,r, dr, step_m)
-# toc = time.perf_counter()
-# diff_time = toc - tic  
+tic = time.perf_counter()
+Tdiff, Tdiff_profile, k_profile, Xfe, rho_profile, Ra, Ra_crit, convect, t_diff = differentiation(Tint,t_acc,r, dr, step_m)
+toc = time.perf_counter()
+diff_time = toc - tic  
 
-# # update user on progress and plot differentiated temperature profile 
-# rplot= np.arange(0,r,dr)/1e3
+# update user on progress and plot differentiated temperature profile 
+rplot= np.arange(0,r,dr)/1e3
 
-# plt.figure()
-# plt.plot(rplot,Tdiff_profile)
-# plt.xlabel('r/km')
-# plt.ylabel('Temperature/K')
-# plt.title('Temperature profile post differentiation')
+plt.figure()
+plt.plot(rplot,Tdiff_profile)
+plt.xlabel('r/km')
+plt.ylabel('Temperature/K')
+plt.title('Temperature profile post differentiation')
 
-# print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(diff_time)))
-# np.savez(f'Results/diff_run_{run}', Tdiff = Tdiff, Tdiff_profile = Tdiff_profile, k_profile = k_profile, Xfe = Xfe, rho_profile = rho_profile, Ra = Ra, Ra_crit = Ra_crit, convect = convect, t_diff = t_diff)
-# raise ValueError('Differentiation passed')
+print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(diff_time)))
+np.savez(f'Results/diff_run_{run}', Tdiff = Tdiff, Tdiff_profile = Tdiff_profile, k_profile = k_profile, Xfe = Xfe, rho_profile = rho_profile, Ra = Ra, Ra_crit = Ra_crit, convect = convect, t_diff = t_diff)
+raise ValueError('Differentiation passed')
 ######################## Thermal evolution ####################################
-
+#t_diff[-1]
 #integrate
 tic = time.perf_counter()
-Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, Ra, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_acc,t_end,step_m,Tint,f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, Ra, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff,f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time = toc - tic    
 print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time)))
