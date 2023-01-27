@@ -92,7 +92,9 @@ Fs = Fs[0::n_save]
 Fad = Fad[0::n_save]
 Fcmb = Fcmb[0::n_save]
 t = t[0::n_save] 
-
+if cond_i != 'nan':
+    cond_i = int(cond_i/n_save) #scale cond_i too
+    
 # calculate Frad, Rem
 from parameters import km, kc, G, rhoc, alpha_c, cpc, gamma
 
