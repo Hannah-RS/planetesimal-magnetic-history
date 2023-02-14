@@ -10,6 +10,24 @@ from viscosity_def import viscosity #import viscosity model
 
 from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, km, Rac, Ts, default, c1, G, E, R, Tref, h0, Al0, XAl, thalf_al
 
+def Rayleigh_crit(Tb):
+    """
+    Critical Rayleigh number from eqn 26 of Solomatov 1995
+
+    Parameters
+    ----------
+    Tb : float
+        temperature at base of convecting region
+
+    Returns
+    -------
+    Ra_crit : float
+        critical Rayleigh number
+
+    """
+    Ra_crit = 20.9*(gamma*(Tb-Ts))**4 
+    return Ra_crit
+    
 def Rayleigh_calc(Tm,model=default):
     """
     
@@ -68,9 +86,7 @@ def Rayleigh_differentiate(t,T,Tb,ncells,dr,model=default):
     #Ra = rhom*alpha_m*r**3*g*(Tb-Ts)/(kappa*eta) #Robuchon & Nimmo 2011
     #Ra = rhom**2*alpha_m*h*r**5/(km*kappa*eta) #Plane layer heated from within (Schubert 2001)
     Ra = rhom**3*alpha_m*h*G*r**6/(km*kappa*eta) #Internally heated sphere (Schubert 2001)
-    
-    Ra_crit = 20.9*((E/(R*Tref**2))*(Tb-Ts))**4 #2.18 Dodds thesis 
-    
-    #convect = (Ra-Ra_crit) >= -0.0001*Ra 
+    Ra_crit = Rayleigh_crit(Tb)
     convect = Ra>Ra_crit
+    
     return Ra, Ra_crit, convect

@@ -20,7 +20,7 @@ from parameters import Ts, Myr, Rac, B, dr, out_interval, km, kc, alpha_m, alpha
 from Tm_cond import T_cond_calc
 from dTmdt_def import dTmdt_calc
 from dTcdt_def import dTcdt_calc 
-from Rayleigh_def import Rayleigh_calc
+from Rayleigh_def import Rayleigh_calc, Rayleigh_crit
 from viscosity_def import viscosity
 from cmb_bl import delta_l, delta_c
 from fe_fes_liquidus import fe_fes_liquidus 
@@ -138,6 +138,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
     Ra[0], d0[0] = Rayleigh_calc(T0_mantle[1],default) #use temp at base of mantle 
+    Rac = Rayleigh_crit(T0_mantle[1])   
     nlid_cells = round(d0[0]/dr)
     if nlid_cells ==0:
         lid_start = nmantle_cells -2
@@ -272,7 +273,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         
         # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
         Ra[i], d0[i] = Rayleigh_calc(T_old_mantle[1],default) #use temp at base of mantle 
-            
+        Rac = Rayleigh_crit(T_old_mantle[1])   
         
         if Ra[i] < Rac or cond==1: #once Rayleigh number subcritical don't want to use that criterion anymore
             mantle_conv = False
