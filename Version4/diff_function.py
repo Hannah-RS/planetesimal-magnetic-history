@@ -87,12 +87,12 @@ def differentiation(Tint,tacc,r,dr,dt):
     # Add composition check and movement here
     #overwrite heating array?
     #check for convection
-    Ra[0:,0], Ra_crit[0:,0], convect[0:,0] = Rayleigh_differentiate(T[0:,0],T[0,0],ncells,dr)
+    Ra[0:,0], Ra_crit[0:,0], convect[0:,0] = Rayleigh_differentiate(t[0],T[0:,0],T[0,0],ncells,dr)
      
     #Now loop
     i = 1
-    #while np.any(convect[0:-1,i-1]==False): #whilst any part except the top cell is not differentiated
-    while t[i-1]<2*Myr:
+    while np.any(convect[0:-1,i-1]==False) or np.any(Xfe[:-1,i-1]<1): #whilst any part except the top cell is not differentiated
+    #while t[i-1]<2*Myr:
         # make all the arrays one column bigger
         app_array = np.zeros([ncells,1])
         T = np.append(T,app_array,1)
@@ -140,7 +140,7 @@ def differentiation(Tint,tacc,r,dr,dt):
         rho_profile[:,i] = rho_profile[:,0]
         heating[:,i] = heating[:,0]
         
-        Ra[0:,i], Ra_crit[0:,i], convect[0:,i] = Rayleigh_differentiate(T[0:,i],T[0,i],ncells,dr)
+        Ra[0:,i], Ra_crit[0:,i], convect[0:,i] = Rayleigh_differentiate(t[i],T[0:,i],T[0,i],ncells,dr)
         #increment i
         i +=1
 
