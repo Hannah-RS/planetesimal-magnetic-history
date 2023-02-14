@@ -89,11 +89,11 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     """
 
     #initialise arrays for output
-    p = int((tend-tstart)/(out_interval)) #only output temp profiles every 10 Myr
+    #p = int((tend-tstart)/(out_interval)) #only output temp profiles every 10 Myr
     m = int((tend-tstart)/dt)
-    ratio = int(m/p) #use for calculating when to save temp profiles
-    #ratio =100
-    #p = 1000
+    #ratio = int(m/p) #use for calculating when to save temp profiles
+    ratio =100
+    p = 1000
     i_save=0
     n_cells = len(T0) #number of cells
     i_core = round(n_cells/2)-1 # index in array of last core cell (-1 as indexing starts at 0)
