@@ -8,11 +8,13 @@ from parameters import gamma, c1, kappa, Rac, g, alpha_m, rhom, Ts, kappa_c, eta
 from viscosity_def import viscosity
 from Rayleigh_def import Rayleigh_calc
 
-def delta_l(Tm,Tcmb):
+def delta_l(t,Tm,Tcmb):
     """
     Eqn 21 in Dodds 2020 simplified to cancel out length-scale of conduction
     Parameters
     ----------
+    t : float
+        time [s]
     Tm : float
         mantle temperature [K]
     Tcmb : float
@@ -22,7 +24,7 @@ def delta_l(Tm,Tcmb):
     mantle bottom boundary layer thickness
     """
     eta = viscosity(Tm)
-    Ra, d0 = Rayleigh_calc(Tm)
+    Ra, d0 = Rayleigh_calc(t,Tm)
     delta_l = (r-rc-d0)*(gamma*abs(Tcmb-Tm)/c1)**(4/3)*(Ra/Rac)**(-1/3)
 
     return delta_l

@@ -137,7 +137,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Fs[0] = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
     
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
-    Ra[0], d0[0] = Rayleigh_calc(T0_mantle[1],default) #use temp at base of mantle 
+    Ra[0], d0[0] = Rayleigh_calc(tsolve[0],T0_mantle[1],default) #use temp at base of mantle 
     Rac = Rayleigh_crit(T0_mantle[1])   
     nlid_cells = round(d0[0]/dr)
     if nlid_cells ==0:
@@ -156,7 +156,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Tm_conv[0] = 0 # convective mantle temperature is 0 if mantle not convecting
        
     else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile
-        dl[0] = delta_l(T0_mantle[1],T0_mantle[0])
+        dl[0] = delta_l(tsolve[0],T0_mantle[1],T0_mantle[0])
         nbase_cells = round(dl[0]/dr)
         Tm_conv[0] = T0_mantle[nbase_cells] + dTmdt_calc(tsolve[0],Fs[0],Fcmb[0])*dt
         T_new_mantle[nbase_cells:lid_start+1] = Tm_conv[0]
@@ -272,7 +272,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Fs[i] = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
         
         # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
-        Ra[i], d0[i] = Rayleigh_calc(T_old_mantle[1],default) #use temp at base of mantle 
+        Ra[i], d0[i] = Rayleigh_calc(tsolve[i],T_old_mantle[1],default) #use temp at base of mantle 
         Rac = Rayleigh_crit(T_old_mantle[1])   
         
         if Ra[i] < Rac or cond==1: #once Rayleigh number subcritical don't want to use that criterion anymore
@@ -416,7 +416,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 # check if non zero if just switched to convection b.l. at previous timestep = 0
                 if dl[i-1] == 0 and dc[i-1] == 0:
                     dc[i-1] = delta_c(Tc_conv[i],Tcmb[i-1]) #find approximate core cmb b.l. thickness
-                    dl[i-1] = delta_l(Tm_conv[i],Tcmb[i-1]) #find approximate mantle cmb b.l. thickness
+                    dl[i-1] = delta_l(tsolve[i],Tm_conv[i],Tcmb[i-1]) #find approximate mantle cmb b.l. thickness
                     factor = (kc*dl[i-1])/(km*dc[i-1])
                     
                 elif dl[i-1] != 0 and dc[i-1] == 0:
@@ -424,7 +424,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                      factor = (kc*dl[i-1])/(km*dc[i-1])
                      
                 elif dl[i-1] == 0 and dc[i-1] != 0:
-                     dl[i-1] = delta_l(Tm_conv[i],Tcmb[i-1]) #find approximate mantle cmb b.l. thickness
+                     dl[i-1] = delta_l(tsolve[i],Tm_conv[i],Tcmb[i-1]) #find approximate mantle cmb b.l. thickness
                      factor = (kc*dl[i-1])/(km*dc[i-1])
                      
                 else: #both convective b.l. are non zero
@@ -432,12 +432,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     
                 Tcmb[i] = (Tm_conv[i] + factor*Tc_conv[i])/(1+factor) 
                 dc[i] = delta_c(Tc_conv[i],Tcmb[i]) #find core cmb b.l. thickness
-                dl[i] = delta_l(Tm_conv[i],Tcmb[i]) #find mantle cmb b.l. thickness
+                dl[i] = delta_l(tsolve[i],Tm_conv[i],Tcmb[i]) #find mantle cmb b.l. thickness
                 Fcmb[i] = -km*(Tm_conv[i]-Tcmb[i])/dr#dl[i]
             else: #eqn 23 = 24  
                 
                 Tcmb[i] = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
-                dl[i] = delta_l(Tm_conv[i],Tcmb[i]) #find mantle cmb b.l. thickness
+                dl[i] = delta_l(tsolve[i],Tm_conv[i],Tcmb[i]) #find mantle cmb b.l. thickness
                 Fcmb[i] = -km*(T_new_mantle[1]-Tcmb[i])/dr # CMB heat flux eqn 23 in Dodds 2020 - until core starts to convect heat transport is modelled as diffusive
         else:
             if core_conv == True:

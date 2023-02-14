@@ -53,7 +53,7 @@ E = 300e3 # activation energy [J /mol]
 R = 8.31 # gas constant [J /K /mol]
 Tm0 = 1600 # intial mantle temp - from beginning of stage 2 in Figure 1 of Bryson (2019)
 c1 = 8 # constant in boundary layer thickness Dodds (2021)
-
+t_transition = 17*Myr #time to transition from RaH to normal Ra
 #viscosity models
 default ='Bryson2' #default viscosity model
 # Bryson 2019
