@@ -20,6 +20,7 @@ Myr=1e6*year
 
 # Size of body
 r = 400e3 # radius of asteroid [m]
+V = 4/3*np.pi*r**3
 rc = r/2 #radius of core [m]
 dr = 500 # size of cells [m]
 out_interval =10*Myr #how often do you want temp profiles to be output
