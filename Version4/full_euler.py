@@ -75,6 +75,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         stagnant lid thickness for convecting mantle
     Ra: array
         Rayleigh number for convecting mantle
+    Racrit: array
+        critical Rayleigh number for convecting mantle
     Fs: array
         surface heat flux [W m^-2]
     Fad: array
@@ -106,6 +108,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     #output variables
     Xs = np.ones([m])*Xs_0 #core sulfur fraction
     Ra = np.zeros([m])
+    Racrit = np.zeros([m])
     d0 = np.zeros([m])
     dl = np.zeros([m])
     dc = np.zeros([m])
@@ -138,7 +141,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
     Ra[0], d0[0] = Rayleigh_calc(tsolve[0],T0_mantle[1],default) #use temp at base of mantle 
-    Rac = Rayleigh_crit(T0_mantle[1])   
+    Racrit[0] = Rayleigh_crit(T0_mantle[1])   
     nlid_cells = round(d0[0]/dr)
     if nlid_cells ==0:
         lid_start = nmantle_cells -2
@@ -151,7 +154,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     T_new_mantle[0] = Tcmb[0]
     Fcmb[0] = -km*(T0_mantle[0]-Tcmb[0])/dr # CMB heat flux eqn 23 in Dodds 2020
     
-    if Ra[0] < Rac:# not convecting
+    if Ra[0] < Racrit[0]:# not convecting
 
         Tm_conv[0] = 0 # convective mantle temperature is 0 if mantle not convecting
        
@@ -273,9 +276,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         
         # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
         Ra[i], d0[i] = Rayleigh_calc(tsolve[i],T_old_mantle[1],default) #use temp at base of mantle 
-        Rac = Rayleigh_crit(T_old_mantle[1])   
+        Racrit[i] = Rayleigh_crit(T_old_mantle[1])   
         
-        if Ra[i] < Rac or cond==1: #once Rayleigh number subcritical don't want to use that criterion anymore
+        if Ra[i] < Racrit[i] or cond==1: #once Rayleigh number subcritical don't want to use that criterion anymore
             mantle_conv = False
             if cond == 0: #check if first time it is conductive i.e. the switch
                 cond_i = i
@@ -488,7 +491,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             dl = dl[:i+1]
             dc = dc[:i+1]
             d0 = d0[:i+1]
-            Ra = Ra[:i+1] 
+            Ra = Ra[:i+1]
+            Racrit = Racrit[:i+1]
             Fs = Fs[:i+1]
             Fad = Fad[:i+1]
             Fcmb = Fcmb[:i+1]
@@ -499,4 +503,4 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             pass
               
   
-    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, Ra,  Fs, Fad, Fcmb, tsolve, cond_i
+    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, Ra, Racrit, Fs, Fad, Fcmb, tsolve, cond_i

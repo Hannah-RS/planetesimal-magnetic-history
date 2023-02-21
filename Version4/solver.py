@@ -26,10 +26,10 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run =66
+run =69
 
 t_acc=1*Myr  #Accretion time
-t_end_m=200#end time in Myr
+t_end_m=20#end time in Myr
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle
@@ -38,7 +38,7 @@ n_save = int(save_interval/step_m)
 
 # set initial temperature profile
 n_cells = int(r/dr) #number of cells needed to span body
-Tint = np.ones([n_cells])*1600 #first element in the array is at r=0, accrete cold at surface temp 
+Tint = np.ones([n_cells])*1500 #first element in the array is at r=0, accrete cold at surface temp 
 Tint[-1]=Ts
 print('Initial conditions set')
 
@@ -66,7 +66,7 @@ print('Initial conditions set')
 
 #integrate
 tic = time.perf_counter()
-Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, Ra, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_acc,t_end,step_m,Tint,f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, Ra, Racrit, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_acc,t_end,step_m,Tint,f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time = toc - tic    
 print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time)))
@@ -87,6 +87,7 @@ dl = dl[0::n_save]
 dc = dc[0::n_save]
 d0 = d0[0::n_save]
 Ra = Ra[0::n_save]
+Racrit = Racrit[0::n_save]
 Fs = Fs[0::n_save]
 Fad = Fad[0::n_save]
 Fcmb = Fcmb[0::n_save]
@@ -131,7 +132,7 @@ print('Fluxes and magnetic Reynolds number calculated.')
 
 ############################ Save results #####################################
 # save variables to file
-np.savez('Results/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, Ra = Ra, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
+np.savez('Results/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, Ra = Ra, Racrit = Racrit, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
 
 #write parameters to the run file
 from csv import writer
