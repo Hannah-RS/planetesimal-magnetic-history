@@ -44,27 +44,16 @@ def Rayleigh_calc(t,Tb,model=default):
     Rayleigh number, stagnant lid thickness
 
     """
-    # if t < t_transition:
-    #     # use radiogenic Ra
-    #     RamH = Rayleigh_H(t,Tb,model=model)
-    #     eta = viscosity(Tb,model)
-    #     Ram= rhom*g*alpha_m*(Tb-Ts)*(r-rc)**3/(kappa*eta)
-    #     d0 = 0.65*(r-rc)*(gamma*(Tb-Ts))**(1.21)*Ram**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
-    # else:
-    #     RamH, d0 = Rayleigh_noH(Tb,model)
+
     RaH = Rayleigh_H(t,Tb,model=model)
     RanoH, d0 = Rayleigh_noH(Tb,model)
     
-    # if RaH > RanoH:
-    #     Ram = RaH
-    #     d0 = 0.65*(r-rc)*(gamma*(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
-    # else:
-    #     Ram = RanoH
-    h = h0*Al0*XAl*np.exp(-np.log(2)*t/thalf_al)
-    eta = viscosity(Tb,model)
-    deltaT = (Tb-Ts)+(rhom*h*(r-rc)**2/km)
-    d0 = (gamma)**(4/3)*deltaT*((Rac*kappa*eta)/(rhom*g*alpha_m))**(1/3) #upper bl
-    Ram = rhom*g*alpha_m*deltaT*(r-rc)**3/(kappa*eta)
+    if RaH > RanoH:
+        Ram = RaH
+        d0 = 0.65*(r-rc)*(gamma*(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
+    else:
+        Ram = RanoH
+
     return Ram, d0, RaH, RanoH
 
 def Rayleigh_noH(Tb,model=default): 
