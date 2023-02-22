@@ -91,11 +91,11 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     """
 
     #initialise arrays for output
-    #p = int((tend-tstart)/(out_interval)) #only output temp profiles every 10 Myr
+    p = int((tend-tstart)/(out_interval)) #only output temp profiles every 10 Myr
     m = int((tend-tstart)/dt)
-    #ratio = int(m/p) #use for calculating when to save temp profiles
-    ratio =100
-    p = 1000
+    ratio = int(m/p) #use for calculating when to save temp profiles
+    #ratio =100
+    #p = 1000
     i_save=0
     n_cells = len(T0) #number of cells
     i_core = round(n_cells/2)-1 # index in array of last core cell (-1 as indexing starts at 0)
@@ -109,6 +109,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Xs = np.ones([m])*Xs_0 #core sulfur fraction
     Ra = np.zeros([m])
     Racrit = np.zeros([m])
+    RaH = np.zeros([m])
+    RanoH = np.zeros([m])
     d0 = np.zeros([m])
     dl = np.zeros([m])
     dc = np.zeros([m])
@@ -140,7 +142,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Fs[0] = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
     
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
-    Ra[0], d0[0] = Rayleigh_calc(tsolve[0],T0_mantle[1],default) #use temp at base of mantle 
+    Ra[0], d0[0], RaH[0], RanoH[0] = Rayleigh_calc(tsolve[0],T0_mantle[1],default) #use temp at base of mantle 
     Racrit[0] = Rayleigh_crit(T0_mantle[1])   
     nlid_cells = round(d0[0]/dr)
     if nlid_cells ==0:
@@ -275,7 +277,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Fs[i] = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
         
         # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
-        Ra[i], d0[i] = Rayleigh_calc(tsolve[i],T_old_mantle[1],default) #use temp at base of mantle 
+        Ra[i], d0[i], RaH[i], RanoH[i] = Rayleigh_calc(tsolve[i],T_old_mantle[1],default) #use temp at base of mantle 
         Racrit[i] = Rayleigh_crit(T_old_mantle[1])   
         
         if Ra[i] < Racrit[i] or cond==1: #once Rayleigh number subcritical don't want to use that criterion anymore
@@ -293,8 +295,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             
             if nlid_cells ==0:
                 lid_start = nmantle_cells -2
+
             else:
-                lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
+                lid_start = nmantle_cells - nlid_cells - 1  #index in temp array where lid starts
             if Tm_conv[i-1]!=0: #mantle already convecting
                 Tm_old = Tm_conv[i-1]
             else: #mantle just started convecting
@@ -303,6 +306,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             
             
             nbase_cells = round(dl[i]/dr)
+            #print(lid_start)
             Tm_conv[i] = Tm_old + dTmdt_calc(tsolve[i-1],Fs[i-1],Fcmb[i-1])*dt #temperature of convecting region 
             T_new_mantle[nbase_cells:lid_start] = Tm_conv[i]
             Fs[i] = -km*(Ts-Tm_conv[i])/d0[i]
@@ -492,6 +496,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             dc = dc[:i+1]
             d0 = d0[:i+1]
             Ra = Ra[:i+1]
+            RaH = RaH[:i+1]
+            RanoH = RanoH[:i+1]
             Racrit = Racrit[:i+1]
             Fs = Fs[:i+1]
             Fad = Fad[:i+1]
@@ -503,4 +509,4 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             pass
               
   
-    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, Ra, Racrit, Fs, Fad, Fcmb, tsolve, cond_i
+    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, Ra, RaH, RanoH, Racrit, Fs, Fad, Fcmb, tsolve, cond_i
