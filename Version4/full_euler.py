@@ -298,7 +298,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             if Tm_conv[i-1]!=0: #mantle already convecting
                 Tm_old = Tm_conv[i-1]
             else: #mantle just started convecting
-                Tm_old = T_old_mantle[lid_start-1] # take temperature below stagnant lid as mantle temp
+                Tm_old = T_old_mantle[1] # take temperature at base of mantle as mantle temp
             
             
             
