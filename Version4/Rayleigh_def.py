@@ -73,9 +73,8 @@ def Rayleigh_noH(Tb,model=default):
     """
     eta = viscosity(Tb,model)
     d0 = (gamma)**(4/3)*(Tb-Ts)*((Rac*kappa*eta)/(rhom*g*alpha_m))**(1/3) #upper bl
+    Ram= rhom*g*alpha_m*(Tb-Ts)*(r-rc)**3/(kappa*eta)
     
-    #Ram= rhom*g*alpha_m*(Tb-Ts)*(r-rc-d0)**3/(kappa*eta)
-    Ram= rhom*g*alpha_m*(Tb-Ts)*(r-rc-d0)**3/(kappa*eta)
     return Ram, d0
     
 def Rayleigh_H(t,Tb,rcore = rc, model=default):
