@@ -7,7 +7,8 @@ Calculates rate of change of conductive profile for the whole body and new tempe
 # set up
 import numpy as np
 import scipy.sparse as sp
-from parameters import h0, Al0, XAl, thalf_al, cpm_p
+from parameters import cpm_p
+from heating import Al_heating
     
 def T_cond_calc(t,dt,T,sparse_mat,radio=False):
     """
@@ -38,7 +39,7 @@ def T_cond_calc(t,dt,T,sparse_mat,radio=False):
     
     if radio == True:
         
-        h = h0*Al0*XAl*np.exp(-np.log(2)*t/thalf_al) 
+        h = Al_heating(t)
         dTdt = dTdt + h/cpm_p
     else: 
         pass

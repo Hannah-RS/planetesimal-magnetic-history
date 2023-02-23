@@ -26,10 +26,10 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run =73
+run =74
 
 t_acc=0.5*Myr  #Accretion time
-t_end_m=100#end time in Myr
+t_end_m=20#end time in Myr
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle
@@ -102,8 +102,9 @@ from parameters import km, kc, G, rhoc, alpha_c, cpc, gamma
 
 
 # Frad - radiogenic heat flux, normalised to surface of body
-from parameters import h0, Al0, XAl, thalf_al, rhom, Vm, As
-h = h0*Al0*XAl*np.exp(-np.log(2)*t/thalf_al) 
+from parameters import rhom, Vm, As
+from heating import Al_heating
+h = Al_heating(t) 
 Frad = h*rhom*Vm/As #radiogenic heatflux
 
 #combine these in a single array

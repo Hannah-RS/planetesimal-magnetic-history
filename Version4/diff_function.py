@@ -6,9 +6,10 @@ Function for differentiating an asteroid. Based on the process in Dodds et. al. 
 from stencil import cond_stencil_general
 from fe_fes_liquidus import fe_fes_liquidus
 from Rayleigh_def import Rayleigh_differentiate
+from heating import Al_heating
 from scipy import sparse as sp
 import numpy as np
-from parameters import kc, km, ka, h0, Al0, XAl, thalf_al, rhoa, rhoc, rhom, Xs_0, cpa, Lc, Myr
+from parameters import kc, km, ka, rhoa, rhoc, rhom, Xs_0, cpa, Lc, Myr
 def differentiation(Tint,tacc,r,dr,dt):
     """
     
@@ -51,7 +52,7 @@ def differentiation(Tint,tacc,r,dr,dt):
     # Create arrays - column is one timestep
     k_profile = np.ones([ncells,1])*ka #don't know how long differentiation will last so append at each step
     rho_profile = np.ones([ncells,1])*rhoa
-    heating = np.ones([ncells,1]) #1 if radiogenic heating i.e. mantle or undifferentiated, 0 if core
+    heat = np.ones([ncells,1]) #1 if radiogenic heating i.e. mantle or undifferentiated, 0 if core
     Xfe = np.zeros([ncells,1]) #fraction of iron melted
     T = np.ones([ncells,1]) #temperature
     Ra = np.ones([ncells,1]) #Rayleigh number
@@ -61,10 +62,10 @@ def differentiation(Tint,tacc,r,dr,dt):
     t = np.asarray([tacc])
 
     Tk = k_profile[:,0]*Tint
-    H = h0*Al0*XAl*np.exp(-np.log(2)*t/thalf_al)
+    H = Al_heating
 
     #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
-    rhs = sparse_mat.dot(Tk) + H*heating[:,0]*rho_profile[:,0]
+    rhs = sparse_mat.dot(Tk) + H*heat[:,0]*rho_profile[:,0]
     
     #Calculate temperature change or melt change
     if np.any(Tint >= Tliquidus):
@@ -98,7 +99,7 @@ def differentiation(Tint,tacc,r,dr,dt):
         T = np.append(T,app_array,1)
         k_profile = np.append(k_profile,app_array,1)
         rho_profile = np.append(rho_profile, app_array, 1)
-        heating = np.append(heating, app_array,1) 
+        heat = np.append(heat, app_array,1) 
         Xfe = np.append(Xfe, app_array, 1)
         Ra = np.append(Ra, app_array, 1)
         Ra_crit = np.append(Ra_crit, app_array, 1)
@@ -107,12 +108,12 @@ def differentiation(Tint,tacc,r,dr,dt):
         t = np.append(t,t[i-1]+dt)
         
         #Calculate radiogenic heating
-        H = h0*Al0*XAl*np.exp(-np.log(2)*t[i]/thalf_al)
+        H = Al_heating(t)
  
         #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
         Tk = k_profile[:,i-1]*T[:,i-1]
 
-        rhs = sparse_mat.dot(Tk) + H*heating[:,i-1]*rho_profile[:,i-1]
+        rhs = sparse_mat.dot(Tk) + H*heat[:,i-1]*rho_profile[:,i-1]
 
         #Calculate temperature change or melt change
         if np.any(T[:,i-1] >= Tliquidus):
@@ -138,7 +139,7 @@ def differentiation(Tint,tacc,r,dr,dt):
         k_new = k_profile[:,0] #update k properly later, for now just up date with current profile
         k_profile[:,i] = k_new
         rho_profile[:,i] = rho_profile[:,0]
-        heating[:,i] = heating[:,0]
+        heat[:,i] = heat[:,0]
         
         Ra[0:,i], Ra_crit[0:,i], convect[0:,i] = Rayleigh_differentiate(t[i],T[0,i])
         #increment i

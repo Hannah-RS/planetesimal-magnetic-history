@@ -3,9 +3,10 @@
 """
 Expression for dTm/dt from rearranging eqn 25 in Dodds (2020) and dTdt for an undifferentiated body
 """
-from parameters import rhom, cpm_p, Vm, As, Ts, h0, Al0, XAl, thalf_al, Acmb, km, gamma, Myr, cpa, rhoa, V
+from parameters import rhom, cpm_p, Vm, As, Ts, Acmb, km, gamma, Myr, cpa, rhoa, V
 import numpy as np
 from Rayleigh_def import Rayleigh_calc
+from heating import Al_heating
 
 def dTmdt_calc(t,Fs,Fcmb):
     """
@@ -27,7 +28,7 @@ def dTmdt_calc(t,Fs,Fcmb):
     """
     
     #calculate radiogenic heating 
-    h = h0*Al0*XAl*np.exp(-np.log(2)*t/thalf_al) 
+    h = Al_heating(t)
     rad = h*rhom*Vm #radiogenic heating contribution
     
     
@@ -51,7 +52,7 @@ def dTadt_calc(t,Fs):
     """
     
     #calculate radiogenic heating 
-    h = h0*Al0*XAl*np.exp(-np.log(2)*t/thalf_al) 
+    h = Al_heating(t) #needs to be combined
     rad = h*rhoa*V #radiogenic heating contribution
     
     
