@@ -6,7 +6,7 @@ Function for differentiating an asteroid. Based on the process in Dodds et. al. 
 from stencil import cond_stencil_general
 from fe_fes_liquidus import fe_fes_liquidus
 from Rayleigh_def import Rayleigh_differentiate
-from heating import Al_heating
+from heating import AlFe_heating
 from scipy import sparse as sp
 import numpy as np
 from parameters import kc, km, ka, rhoa, rhoc, rhom, Xs_0, cpa, Lc, Myr
@@ -62,7 +62,7 @@ def differentiation(Tint,tacc,r,dr,dt):
     t = np.asarray([tacc])
 
     Tk = k_profile[:,0]*Tint
-    H = Al_heating
+    H = AlFe_heating(t)
 
     #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
     rhs = sparse_mat.dot(Tk) + H*heat[:,0]*rho_profile[:,0]
@@ -108,7 +108,7 @@ def differentiation(Tint,tacc,r,dr,dt):
         t = np.append(t,t[i-1]+dt)
         
         #Calculate radiogenic heating
-        H = Al_heating(t)
+        H = AlFe_heating(t[i])
  
         #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
         Tk = k_profile[:,i-1]*T[:,i-1]

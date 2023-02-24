@@ -14,14 +14,16 @@ Can toggle on and off solidification
 #import constants and parameters    
 from parameters import gamma, Ts, Acmb, dr, kc, rc, rhoc, cpc
 from cmb_bl import delta_c
-from q_funcs import Qlt, Qgt
+from q_funcs import Qlt, Qgt, Qr
 import numpy as np
 
-def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = [False,0]):
+def dTcdt_calc(t,Fcmb,Tcore,f,solidification = False, stratification = [False,0]):
     """
 
     Parameters
     ----------
+    t : float
+        time [s]
     Fcmb: float
         CMB heat flux [W m^-2]
     Tcore : array
@@ -56,13 +58,13 @@ def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = [False,0]):
         Tc = Tcore[-2] #take temperature just below CMB as core convective temp
     
     Qst = rhoc*cpc*Vconv
-
+    Qrad = Qr(t)
        
     if solidification == True: #core solidifying so consider buoyancy, latent heat
-        dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb)/(Qst+Qlt(Tc,f)+Qgt(Tc,f))
+        dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb+Qrad)/(Qst+Qlt(Tc,f)+Qgt(Tc,f))
    
     else:
-        dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb)/Qst
+        dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb+Qrad)/Qst
 
  
         

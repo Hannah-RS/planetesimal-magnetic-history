@@ -17,7 +17,7 @@ import scipy.optimize as sco
 from parameters import Ts, Myr, Rac, B, dr, out_interval, km, kc, alpha_m, alpha_c, rc, rhoc, rhom, eta_c, g, gc, cpc, Xs_0, default, kappa, kappa_c, c1, gamma, Xs_eutectic, Acmb, Lc
 
 #import required functions
-from Tm_cond import T_cond_calc
+from T_cond import Tm_cond_calc, Tc_cond_calc
 from dTmdt_def import dTmdt_calc
 from dTcdt_def import dTcdt_calc 
 from Rayleigh_def import Rayleigh_calc, Rayleigh_crit
@@ -138,7 +138,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     
     ##################    Initial step    #########################
     # Step 1. Calculate conductive profile for mantle
-    T_new_mantle = T_cond_calc(tsolve[0],dt,T0_mantle,sparse_mat_m,True)
+    T_new_mantle = Tm_cond_calc(tsolve[0],dt,T0_mantle,sparse_mat_m)
+
     Fs[0] = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
     
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
@@ -172,7 +173,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Tm_surf[0] = T_new_mantle[-2] #temperature one cell above surface pinned to 200K
                 
     # Step 3. Calculate conductive profile for the core
-    T_new_core = T_cond_calc(tsolve[0],dt,T0_core,sparse_mat_c,False)
+    T_new_core = Tc_cond_calc(tsolve[0],dt,T0_core,sparse_mat_c,True)
         
     # Step 4. Is the core convecting? 
     # check if heat flux is super adiabatic 
@@ -222,7 +223,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     raise NotImplementedError('Core solidification erodes thermal stratification - write this code!')
                 
                 else: # core not solidifying
-                    dTcdt = dTcdt_calc(Fcmb[0], T0_core, f0, solidification = False, stratification = [True, min_unstable_old])
+                    dTcdt = dTcdt_calc(tsolve[0],Fcmb[0], T0_core, f0, solidification = False, stratification = [True, min_unstable_old])
                     f[0]=f0
                     Xs[0]=Xs_0
                     
@@ -242,7 +243,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             # is the core solidifying?
             Tliquidus = fe_fes_liquidus(Xs_0)
             if T0_core[-2] < Tliquidus: #core solidifies
-                dTcdt = dTcdt_calc(Fcmb[0], T0_core, f0, solidification = True) #save dTcdt seperately as need for f
+                dTcdt = dTcdt_calc(tsolve[0],Fcmb[0], T0_core, f0, solidification = True) #save dTcdt seperately as need for f
                 dfdt = -B*dTcdt/(T0_core[lnb-1]*f0)
                 f[0] = f0 + dfdt*dt
                 Xs[0] = (1-(f[0])**3)*Xs_0 #update sulfur content
@@ -273,9 +274,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         tsolve[i] = tsolve[i-1] + dt
         
         # Step 1. Calculate conductive profile for mantle
-        T_new_mantle = T_cond_calc(tsolve[i],dt,T_old_mantle,sparse_mat_m,False)
+        T_new_mantle = Tm_cond_calc(tsolve[i],dt,T_old_mantle,sparse_mat_m)
         Fs[i] = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
-        
+
         # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
         Ra[i], d0[i], RaH[i], RanoH[i] = Rayleigh_calc(tsolve[i],T_old_mantle[1],default) #use temp at base of mantle 
         Racrit[i] = Rayleigh_crit(T_old_mantle[1])   
@@ -317,7 +318,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Tm_surf[i] = T_new_mantle[-2] #temperature one cell above surface pinned to 200K
           
         # Step 3. Calculate conductive profile for the core
-        T_new_core = T_cond_calc(tsolve[i],dt,T_old_core,sparse_mat_c,False)
+        T_new_core = Tc_cond_calc(tsolve[i],dt,T_old_core,sparse_mat_c,True)
    
         # Step 4. Is the core convecting? 
         # check if heat flux is super adiabatic 
@@ -337,13 +338,13 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     f[i] = f[i-1] + dfdt*dt
                     Xs[i] = Xs[i-1] #sulfur concentration unchanged in eutectic solidification
                 else:
-                    dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
+                    dTcdt = dTcdt_calc(tsolve[i],Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
                     dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
                     f[i] = f[i-1] + dfdt*dt
                     Xs[i] = (1-(f[i]**3))*Xs_0 #update sulfur content
             
             else: # core not solidifying
-                dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = False)
+                dTcdt = dTcdt_calc(tsolve[i],Fcmb[i-1], T_old_core, f[i-1], solidification = False)
                 f[i]=f[i-1] #keep the current core size
                 Xs[i]=Xs[i-1]
             
@@ -378,7 +379,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                         raise NotImplementedError('Core solidification erodes thermal stratification - write this code!')
                     
                     else: # core not solidifying
-                        dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = False, stratification = [True, min_unstable_old])
+                        dTcdt = dTcdt_calc(tsolve[i],Fcmb[i-1], T_old_core, f[i-1], solidification = False, stratification = [True, min_unstable_old])
                         f[i]=f[i-1]
                         Xs[i]=Xs[i-1]
                         
@@ -404,7 +405,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                         f[i] = f[i-1] + dfdt*dt
                         Xs[i] = Xs[i-1] #sulfur concentration unchanged in eutectic solidification
                     else:
-                        dTcdt = dTcdt_calc(Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
+                        dTcdt = dTcdt_calc(tsolve[i],Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
                         dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
                         f[i] = f[i-1] + dfdt*dt
                         Xs[i] = (1-(f[i])**3)*Xs_0 #update sulfur content

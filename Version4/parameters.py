@@ -42,10 +42,6 @@ Lm = 400e3 #latent heat of mantle [J /kg]
 Tml = 1800 # liquidus [K]
 Tms = 1400 # solidus [K]
 rhom = 3000 # density [kg m^-3]
-h0 = 0.355 # [W/ kg] heating rate of Al^26 at t=0
-Al0 = 5e-5 # 26Al/27Al ratio in accreting material
-XAl = 0.014 # abundance of Al in accreting material [wt % /100]
-thalf_al = 0.717*Myr # half life of Al26 [s]
 alpha_m = 4e-5 # thermal expansivity of mantle [/K]
 kappa = 9e-7 # thermal diffusivity of silicate [m^2 /s] - 4 options are given in Bryson (2019) have picked the one used in the figures
 Rac = 1000  #critical Rayleigh number 
@@ -54,6 +50,21 @@ R = 8.31 # gas constant [J /K /mol]
 Tm0 = 1600 # intial mantle temp - from beginning of stage 2 in Figure 1 of Bryson (2019)
 c1 = 8 # constant in boundary layer thickness Dodds (2021)
 t_transition = 17*Myr #time to transition from RaH to normal Ra
+
+#radiogenic heating
+h0Al = 0.355 # [W/ kg] heating rate of Al^26 at t=0 (Dodds 2021)
+Al0 = 5e-5 # 26Al/27Al ratio in accreting material (Dodds 2021)
+XAl_a = 0.014 # abundance of Al in accreting material [wt % /100] (Dodds 2021)
+thalf_al = 0.717*Myr # half life of Al26 [s] (Dodds 2021)
+h0Fe = 0.04 # [W/ kg] heating rate of 60Fe at t=0 (Neumann 2012, converted)
+Fe0 = 6e-7 # 60Fe/56FE ratio in accreting material (Cook 2021)
+XFe_a = 0.22 # abundance of Fe in accreting material [wt % /100] (Neumann 2012)
+thalf_fe = 2.6*Myr # half life of 60Fe [s] (Neumann 2012)
+
+Xs_0 = 32 # initial wt % sulfur in core (needs a citation)
+XFe_d = 1 - Xs_0/100 #abundance of Fe in core assuming S is only other significant phase [wt %]
+Xs_to_core = XFe_a/(1-Xs_0/100)-XFe_a # wt % of S from accreted body that went into core
+XAl_d = XAl_a/(1-XFe_d-Xs_to_core)
 #viscosity models
 default ='Bryson2' #default viscosity model
 # Bryson 2019
@@ -81,16 +92,6 @@ eta_c =0.01 # viscosity of core [Pa s] Dodds (2021)
 bpart = 0.5 #buoyancy partitioning coefficient Nichols (2021) but based on Aubert 2009 - might want to investigate
 Xs_0 = 32 # initial wt % sulfur in core (needs a citation)
 Xs_eutectic = 32 # eutectic wt% S
-#radioactivity
-#assume core is pure iron with ppm amounts of K that has a negligible effect on mass
-# energy generation rate per unit mass iron = de_fe * f60 * e^(-t/thalf_fe) 
-# energy generation rate per unit mass potassium = de_k * ppm * e^(-t/thalf_k) 
-thalf_fe=2.62*Myr #Henke 2013
-thalf_k = 1.25e9*year #Wikipedia
-f60 = 1e-6 # ratio of Fe60 to Fe56 Tachibana 2006 (Nimmo 2009)
-ppm_k=400 # Nimmo 2004
-de_fe = 4.9e9
-de_k = 0.382
 
 # Initial conditions
 Tc0=Tm0# intial CMB temp [K] is same as intial mantle temp from Fig 1 in Bryson (2019)

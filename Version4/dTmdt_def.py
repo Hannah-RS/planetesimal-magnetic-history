@@ -6,7 +6,7 @@ Expression for dTm/dt from rearranging eqn 25 in Dodds (2020) and dTdt for an un
 from parameters import rhom, cpm_p, Vm, As, Ts, Acmb, km, gamma, Myr, cpa, rhoa, V
 import numpy as np
 from Rayleigh_def import Rayleigh_calc
-from heating import Al_heating
+from heating import Al_heating, AlFe_heating
 
 def dTmdt_calc(t,Fs,Fcmb):
     """
@@ -52,7 +52,7 @@ def dTadt_calc(t,Fs):
     """
     
     #calculate radiogenic heating 
-    h = Al_heating(t) #needs to be combined
+    h = AlFe_heating(t)
     rad = h*rhoa*V #radiogenic heating contribution
     
     

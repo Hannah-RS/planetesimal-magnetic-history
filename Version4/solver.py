@@ -29,7 +29,7 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 run =74
 
 t_acc=0.5*Myr  #Accretion time
-t_end_m=20#end time in Myr
+t_end_m=40#end time in Myr
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle

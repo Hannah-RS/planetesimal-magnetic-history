@@ -7,7 +7,7 @@ Also script for Rayleigh number and critical Rayleigh number for differentiation
 """
 import numpy as np
 from viscosity_def import viscosity #import viscosity model
-from heating import Al_heating
+from heating import Al_heating, AlFe_heating
 
 from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, km, Rac, Ts, default, c1, G, E, R, Tref, t_transition
 
@@ -79,7 +79,7 @@ def Rayleigh_noH(Tb,model=default):
     
     return Ram, d0
     
-def Rayleigh_H(t,Tb,rcore = rc, model=default):
+def Rayleigh_H(t,Tb,rcore = rc, model=default,Fe=False):
     """
     Rayleigh number for radiogenic heating
 
@@ -102,7 +102,11 @@ def Rayleigh_H(t,Tb,rcore = rc, model=default):
     """
     eta = viscosity(Tb,model)
     g = 4*np.pi*r*rhom*G/3
-    h = Al_heating(t)
+    if Fe == False: #exclude radiogenic heating from Fe
+        h = Al_heating(t)
+    else:
+        h = AlFe_heating(t)
+        
     Ra = rhom**3*alpha_m*h*G*(r-rcore)**6/(km*kappa*eta) #Internally heated sphere (Schubert 2001)
     
     return Ra
@@ -132,7 +136,7 @@ def Rayleigh_differentiate(t,Tb,model=default):
 
     """
    
-    Ra = Rayleigh_H(t,Tb,0,model)
+    Ra = Rayleigh_H(t,Tb,0,model,Fe=True)
     Ra_crit = Rayleigh_crit(Tb)
     convect = Ra>Ra_crit
     

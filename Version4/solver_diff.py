@@ -26,7 +26,7 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run =15
+run =16
 
 t_acc=1*Myr  #Accretion time
 t_end_m=2#end time in Myr
