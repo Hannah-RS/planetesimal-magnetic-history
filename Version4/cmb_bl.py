@@ -25,7 +25,7 @@ def delta_l(t,Tm,Tcmb):
     """
     eta = viscosity(Tm)
     Ra, d0, RaH, RanoH = Rayleigh_calc(t,Tm)
-    delta_l = (r-rc-d0)*(gamma*abs(Tcmb-Tm)/c1)**(4/3)*(Ra/Rac)**(-1/3)
+    delta_l = (r-rc)*(gamma*abs(Tcmb-Tm)/c1)**(4/3)*(Ra/Rac)**(-1/3)
 
     return delta_l
 
