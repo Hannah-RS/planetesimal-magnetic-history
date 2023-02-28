@@ -56,17 +56,17 @@ h0Al = 0.355 # [W/ kg] heating rate of Al^26 at t=0 (Dodds 2021)
 Al0 = 5e-5 # 26Al/27Al ratio in accreting material (Dodds 2021)
 XAl_a = 0.014 # abundance of Al in accreting material [wt % /100] (Dodds 2021)
 thalf_al = 0.717*Myr # half life of Al26 [s] (Dodds 2021)
-h0Fe = 0.04 # [W/ kg] heating rate of 60Fe at t=0 (Neumann 2012, converted)
-Fe0 = 6e-7 # 60Fe/56FE ratio in accreting material (Cook 2021)
-XFe_a = 0.22 # abundance of Fe in accreting material [wt % /100] (Neumann 2012)
-thalf_fe = 2.6*Myr # half life of 60Fe [s] (Neumann 2012)
+h0Fe = 0.0366 # [W/ kg] heating rate of 60Fe at t=0 (Dodds thesis)
+Fe0 = 8e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
+XFe_a = 0.224 # abundance of Fe in accreting material [wt % /100] (Dodds thesis - Lodders 2021 for CV chondrites)
+thalf_fe = 2.62*Myr # half life of 60Fe [s] (Dodds thesis - Ruedas 2017)
 
 Xs_0 = 32 # initial wt % sulfur in core (needs a citation)
 XFe_d = 1 - Xs_0/100 #abundance of Fe in core assuming S is only other significant phase [wt %]
 Xs_to_core = XFe_a/(1-Xs_0/100)-XFe_a # wt % of S from accreted body that went into core
 XAl_d = XAl_a/(1-XFe_d-Xs_to_core)
 #viscosity models
-default ='Bryson2' #default viscosity model
+default ='Dodds' #default viscosity model
 # Bryson 2019
 eta0 = 1e21 # reference viscosity [Pa s] - assumed constant in this model
 eta0_50 = 1e14 #viscosity of material at 50% melting [Pas]
