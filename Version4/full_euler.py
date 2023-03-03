@@ -91,11 +91,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     """
 
     #initialise arrays for output
-    p = int((tend-tstart)/(out_interval)) #only output temp profiles every 10 Myr
     m = int((tend-tstart)/dt)
-    #ratio = int(m/p) #use for calculating when to save temp profiles
-    ratio =10
-    #p = 1000
     i_save=0
     n_cells = len(T0) #number of cells
     i_core = round(n_cells/2)-1 # index in array of last core cell (-1 as indexing starts at 0)
@@ -472,7 +468,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Tprofile[i,:] = np.hstack((T_new_core,T_new_mantle[1:])) #top cell of core and bottom cell of mantle are Tcmb
         
         #print time
-        if int(tsolve[i]/Myr)%ratio== 0: #if multiple of 10Myr then print time
+        if i%int(m/out_interval)==0: #every 1/out_interval fraction of the run print the time
             print('t={:.2f}Myr'.format(tsolve[i]/Myr)) #useful to track progress of simulation
         else: 
             pass
