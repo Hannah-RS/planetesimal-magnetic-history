@@ -162,6 +162,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         nbase_cells = round(dl[0]/dr)
         Tm_conv[0] = T0_mantle[nbase_cells] + dTmdt_calc(tsolve[0],Fs[0],Fcmb[0])*dt
         T_new_mantle[nbase_cells:lid_start+1] = Tm_conv[0]
+        T_new_mantle[-1] = Ts #pin surface to 200K
         Fs[0] = -km*(Ts-Tm_conv[0])/d0[0] #replace Fs with convective version
         
     #store values   
@@ -306,7 +307,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             nbase_cells = round(dl[i]/dr)
             #print(lid_start)
             Tm_conv[i] = Tm_old + dTmdt_calc(tsolve[i-1],Fs[i-1],Fcmb[i-1])*dt #temperature of convecting region 
-            T_new_mantle[nbase_cells:lid_start] = Tm_conv[i]
+            T_new_mantle[nbase_cells:lid_start+1] = Tm_conv[i]
+            T_new_mantle[-1] = Ts #pin surface to 200K in case d0 < 1 cell thick
             Fs[i] = -km*(Ts-Tm_conv[i])/d0[i]
             
             
