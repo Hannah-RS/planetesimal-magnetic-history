@@ -159,9 +159,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
        
     else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile
         dl[0] = delta_l(tsolve[0],T0_mantle[1],T0_mantle[0])
-        nbase_cells = round(dl[0]/dr)
-        Tm_conv[0] = T0_mantle[nbase_cells] + dTmdt_calc(tsolve[0],Fs[0],Fcmb[0])*dt
-        T_new_mantle[nbase_cells:lid_start+1] = Tm_conv[0]
+        
+        Tm_conv[0] = T0_mantle[1] + dTmdt_calc(tsolve[0],Fs[0],Fcmb[0])*dt #take temp one above CMB
+        T_new_mantle[:lid_start+1] = Tm_conv[0]
         T_new_mantle[-1] = Ts #pin surface to 200K
         Fs[0] = -km*(Ts-Tm_conv[0])/d0[0] #replace Fs with convective version
         
@@ -301,13 +301,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 Tm_old = Tm_conv[i-1]
             else: #mantle just started convecting
                 Tm_old = T_old_mantle[1] # take temperature at base of mantle as mantle temp
-            
-            
-            
-            nbase_cells = round(dl[i]/dr)
-            #print(lid_start)
+
             Tm_conv[i] = Tm_old + dTmdt_calc(tsolve[i-1],Fs[i-1],Fcmb[i-1])*dt #temperature of convecting region 
-            T_new_mantle[nbase_cells:lid_start+1] = Tm_conv[i]
+            T_new_mantle[:lid_start+1] = Tm_conv[i]
             T_new_mantle[-1] = Ts #pin surface to 200K in case d0 < 1 cell thick
             Fs[i] = -km*(Ts-Tm_conv[i])/d0[i]
             
