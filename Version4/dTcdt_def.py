@@ -43,10 +43,10 @@ def dTcdt_calc(t,Fcmb,Tcore,f,solidification = False, stratification = [False,0]
     """
     
     if stratification[0] == True:
-        stratification[1] = min_unstable_ind
+        min_unstable_ind = int(stratification[1])
         f3 = -kc*(Tcore[min_unstable_ind]-Tcore[min_unstable_ind-1])/dr #calculate f3 - eqn 28 in Dodds (2020)
-        rconv = min_unstable_ind*dr
-        Vconv = 4/3*np.pi*(rc**3-rconv**3) #calculate Vconv - volume of cmb boundary layer has negligible volume 
+        rstrat = min_unstable_ind*dr
+        Vconv = 4/3*np.pi*(rc**3-rstrat**3) #calculate Vconv - volume of cmb boundary layer has negligible volume 
         Tc = Tcore[min_unstable_ind]
 
 
