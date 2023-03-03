@@ -93,8 +93,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     #initialise arrays for output
     p = int((tend-tstart)/(out_interval)) #only output temp profiles every 10 Myr
     m = int((tend-tstart)/dt)
-    ratio = int(m/p) #use for calculating when to save temp profiles
-    #ratio =100
+    #ratio = int(m/p) #use for calculating when to save temp profiles
+    ratio =10
     #p = 1000
     i_save=0
     n_cells = len(T0) #number of cells
@@ -114,7 +114,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     d0 = np.zeros([m])
     dl = np.zeros([m])
     dc = np.zeros([m])
-    Tprofile= np.zeros([p,n_cells])
+    Tprofile= np.zeros([m,n_cells])
     Tc = np.zeros([m])
     Tc_conv = np.zeros([m])
     Tcmb = np.zeros([m])
@@ -267,7 +267,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     # Step 6. Replace old array with new ready for next step
     T_old_core = T_new_core
     T_old_mantle = T_new_mantle
- 
+    Tprofile[0,:] = np.hstack((T_new_core,T_new_mantle[1:]))
+    
     for i in range(1,m):
 
         #Step 0. Calculate time
@@ -468,16 +469,11 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         # Step 6. Replace old array with new ready for next step
         T_old_core = T_new_core
         T_old_mantle = T_new_mantle
-
-        #write Tprofile to file if appropriate
-        if i%ratio== 0: #if multiple of 10Myr then save the profile - will need to check if this works as tsolve might not be integer multiples of 10 ever
+        Tprofile[i,:] = np.hstack((T_new_core,T_new_mantle[1:])) #top cell of core and bottom cell of mantle are Tcmb
+        
+        #print time
+        if int(tsolve[i]/Myr)%ratio== 0: #if multiple of 10Myr then print time
             print('t={:.2f}Myr'.format(tsolve[i]/Myr)) #useful to track progress of simulation
-            if i_save >= p: # array is full, pass so don't throw an error
-                pass
-            else:
-                T_old = np.hstack([T_old_core,T_old_mantle[1:]])
-                Tprofile[i_save,:] = T_old
-                i_save = i_save + 1 #increment so saves in next space
         else: 
             pass
  
