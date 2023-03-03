@@ -9,7 +9,7 @@ import numpy as np
 from viscosity_def import viscosity #import viscosity model
 from heating import Al_heating, AlFe_heating
 
-from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, km, Rac, Ts, default, c1, G, E, R, Tref, t_transition
+from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, km, Rac, Ts, default, c1, G, E, R, Tref, t_transition, rhoa, alpha_a
 
 def Rayleigh_crit(Tb):
     """
@@ -54,7 +54,7 @@ def Rayleigh_calc(t,Tb,model=default):
         d0 = 0.65*(r-rc)*(gamma*(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
     else:
         Ram = RanoH
-
+    
     return Ram, d0, RaH, RanoH
 
 def Rayleigh_noH(Tb,model=default): 
@@ -74,7 +74,7 @@ def Rayleigh_noH(Tb,model=default):
 
     """
     eta = viscosity(Tb,model)
-    d0 = (gamma)**(4/3)*(Tb-Ts)*((Rac*kappa*eta)/(rhom*g*alpha_m))**(1/3) #upper bl
+    d0 = (gamma/8)**(4/3)*(Tb-Ts)*((Rac*kappa*eta)/(rhom*g*alpha_m))**(1/3) #upper bl
     Ram= rhom*g*alpha_m*(Tb-Ts)*(r-rc)**3/(kappa*eta)
     
     return Ram, d0
@@ -129,6 +129,8 @@ def Rayleigh_differentiate(t,Tb,model=default):
     -------
     Ra : float
         Rayleigh number
+    d0 : float
+        stagnant lid thickness
     Ra_crit : float
         critical Rayleigh number
     convect: bool
@@ -137,7 +139,12 @@ def Rayleigh_differentiate(t,Tb,model=default):
     """
    
     Ra = Rayleigh_H(t,Tb,0,model,Fe=True)
+    eta = viscosity(Tb,model)
+    RanoH = rhoa*g*alpha_a*abs(Tb-Ts)*r**3/(kappa*eta)
+    print("RanoH is",RanoH)
+    d0 = 0.65*r*(gamma*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
+    print("d0 is",d0)
     Ra_crit = Rayleigh_crit(Tb)
     convect = Ra>Ra_crit
     
-    return Ra, Ra_crit, convect
+    return Ra, d0,  Ra_crit, convect
