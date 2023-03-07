@@ -141,11 +141,9 @@ def Rayleigh_differentiate(t,Tb,model=default):
     RaH = Rayleigh_H(t,Tb,0,model,Fe=True)
     eta = viscosity(Tb,model)
     RanoH, d0_noH = Rayleigh_noH(Tb,model)
-    print("RanoH is",RanoH)
     d0H = 0.65*r*(gamma*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
-    print(f"d0 is {d0H/r} bodies thick")
     Ra_crit = Rayleigh_crit(Tb)
-    if d0H/r < 0.001 and RaH>Ra_crit:
+    if d0H/r < 0.5 and RaH>Ra_crit: #still working on this criteria
         convect = True
     else: 
         convect = False

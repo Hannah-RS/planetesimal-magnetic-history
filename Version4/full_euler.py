@@ -319,10 +319,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
    
         # Step 4. Is the core convecting? 
         # check if heat flux is super adiabatic 
-        #print(min_unstable_old)
+        
         if (Fcmb[i-1] > Fad[i-1]) and (min_unstable[i-1]==1): #super adiabatic, core convects
             core_conv = True
-            print('convecting')
             min_unstable[i] = 1
             nbl_cells = round(dc[i-1]/dr)
             bl_start = ncore_cells - nbl_cells - 1 #index in temp array where lid starts
@@ -350,11 +349,11 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Tc_conv[i] = T_old_core[bl_start-1] + dTcdt*dt 
             #print(f"Tc_conv[i] is {Tc_conv[i]:.2f}")
             T_new_core[:] = Tc_conv[i] #replace everything with the convective temperature
-            print(i)
+
             
             
         else: # don't have whole core convection, 
-            print('not whole core convection')
+
             #check if there is thermal stratification
             core_conv = False 
             if Tcmb[i-1] > np.any(T_old_core): #there is thermal stratification
@@ -364,11 +363,10 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                         # use already calculated condctive profile and keep core in current state
                         f[i] = f[i-1]
                         Xs[i] = Xs[i-1]
-                        print('strat')
+
                 else: #scenario 2 - erosion of stratification, convective layer at top of core
                     core_conv = True
                     b_ind = np.where( T_old_core >= Tcmb[i-1])[0] #indices of unstable layer as array
-                    print(b_ind[0])
                     min_unstable[i] = b_ind[0]
                     
                     
@@ -393,7 +391,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         
             
             else: #there is no stratification and the core is not thermally convecting 
-                print('booo')
+
                 """Below here needs rewriting for conductive core solidification/compositional convection"""
                 # is the core solidifying?
                 Tliquidus = fe_fes_liquidus(Xs[i-1])
@@ -469,7 +467,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         T_old_mantle = T_new_mantle
         Tprofile[i,:] = np.hstack((T_new_core,T_new_mantle[1:])) #top cell of core and bottom cell of mantle are Tcmb
         
-        #print time
+        
         if i%int(m/out_interval)==0: #every 1/out_interval fraction of the run print the time
             print('t={:.2f}Myr'.format(tsolve[i]/Myr)) #useful to track progress of simulation
         else: 

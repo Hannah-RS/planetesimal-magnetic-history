@@ -156,13 +156,13 @@ def differentiation(Tint,tacc,r,dr,dt):
                         lid_start = ncells -2
                     else:
                         lid_start = ncells - nlid_cells - 1 #index in temp array where lid starts
-                    print(lid_start)
+                    
                     Fs = -ka*(Ts-T[lid_start,i-1])/d0[i]
                     dTdt = (rhoa*H[i]-Fs)/(rhoa*cp[0,i])
                     T[:lid_start,i] = T[:lid_start,i-1] + dTdt*0.01*dt 
                        
                 cond_i =1        
-                print('delta T is',dTdt*0.01*dt)
+                
 
 
                 
