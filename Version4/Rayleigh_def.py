@@ -127,9 +127,9 @@ def Rayleigh_differentiate(t,Tb,model=default):
 
     Returns
     -------
-    Ra : float
+    RaH : float
         Rayleigh number
-    d0 : float
+    d0H : float
         stagnant lid thickness
     Ra_crit : float
         critical Rayleigh number
@@ -138,13 +138,17 @@ def Rayleigh_differentiate(t,Tb,model=default):
 
     """
    
-    Ra = Rayleigh_H(t,Tb,0,model,Fe=True)
+    RaH = Rayleigh_H(t,Tb,0,model,Fe=True)
     eta = viscosity(Tb,model)
-    RanoH = rhoa*g*alpha_a*abs(Tb-Ts)*r**3/(kappa*eta)
+    RanoH, d0_noH = Rayleigh_noH(Tb,model)
     print("RanoH is",RanoH)
-    d0 = 0.65*r*(gamma*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
-    print("d0 is",d0)
+    d0H = 0.65*r*(gamma*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
+    print(f"d0 is {d0H/r} bodies thick")
     Ra_crit = Rayleigh_crit(Tb)
-    convect = Ra>Ra_crit
+    if d0H/r < 0.001 and RaH>Ra_crit:
+        convect = True
+    else: 
+        convect = False
+    #convect = RanoH>Ra_crit
     
-    return Ra, d0,  Ra_crit, convect
+    return RaH, d0H,  Ra_crit, convect
