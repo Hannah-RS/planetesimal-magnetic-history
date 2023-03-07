@@ -26,9 +26,9 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run =16
+run =18
 
-t_acc=1*Myr  #Accretion time
+t_acc=0.8*Myr  #Accretion time
 t_end_m=2#end time in Myr
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
@@ -47,7 +47,7 @@ print('Initial conditions set')
 
 ########################### Differentiation ###################################
 tic = time.perf_counter()
-Tdiff, Tdiff_profile, k_profile, Xfe, rho_profile, Ra, Ra_crit, convect, t_diff = differentiation(Tint,t_acc,r, dr, step_m)
+Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, t_diff, H  = differentiation(Tint,t_acc,r, dr, step_m)
 toc = time.perf_counter()
 diff_time = toc - tic  
 
@@ -55,13 +55,21 @@ diff_time = toc - tic
 rplot= np.arange(0,r,dr)/1e3
 
 plt.figure()
-plt.plot(rplot,Tdiff_profile)
+plt.scatter(rplot,Tdiff[:,-1])
 plt.xlabel('r/km')
 plt.ylabel('Temperature/K')
 plt.title('Temperature profile post differentiation')
+var_list = [t_diff[-1],Tdiff[0,-1]]
 
+from csv import writer   
+with open('lid_test.csv','a') as f_object:
+    writer_object = writer(f_object) #pass file object to csv.writer
+    writer_object.writerow(var_list) # pass list as argument into write row
+    f_object.close() #close file
+
+print('Results and run parameters saved')
 print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(diff_time)))
-np.savez(f'Results/diff_run_{run}', Tdiff = Tdiff, Tdiff_profile = Tdiff_profile, k_profile = k_profile, Xfe = Xfe, rho_profile = rho_profile, Ra = Ra, Ra_crit = Ra_crit, convect = convect, t_diff = t_diff)
+np.savez(f'Results/diff_run_{run}', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, t_diff = t_diff, H=H)
 raise ValueError('Differentiation passed')
 ######################## Thermal evolution ####################################
 #t_diff[-1]

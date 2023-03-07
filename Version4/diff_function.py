@@ -8,8 +8,9 @@ from fe_fes_liquidus import fe_fes_liquidus
 from Rayleigh_def import Rayleigh_differentiate
 from heating import AlFe_heating
 from scipy import sparse as sp
+from cp_func import cp_calc_arr, cp_calc_int
 import numpy as np
-from parameters import kc, km, ka, rhoa, rhoc, rhom, Xs_0, cpa, Lc, Myr
+from parameters import kc, km, ka, rhoa, rhoc, rhom, Xs_0, Xs_eutectic, cpa, Lc, Myr, Ts_fe, Tl_fe, Tml, Tms, Ts
 def differentiation(Tint,tacc,r,dr,dt):
     """
     
@@ -33,121 +34,156 @@ def differentiation(Tint,tacc,r,dr,dt):
         final temperature profile after differentiation [K]
     Tdiff_profile: float
         temperature profiles at each step in differentiation [K]
-    k_profile: float
-        thermal conductivity profiles at each step in differentiation. Can be kc 
-        (core), km (mantle), ka (undifferentiated) [W /m /K]
     Xfe: float
-        proportion of iron each cell which is melted in differentiation [0 to 1]
-    rho_profile: float
-        density of each cell at each step in differentiation [kg m^-3]
+        proportion of iron in each cell which is melted in differentiation [0 to 1]
+    Xsi: float
+        proportion of silicate in each cell which is melted in differentiation [0 to 1]
+    cp : float
+        effective specific heat capacity of each cell
     t_diff: float
         array of timesteps during differentiation [s]
 
     """
     sparse_mat = sp.dia_matrix(cond_stencil_general(r,dr))
     ncells = int(r/dr)
-    Tliquidus = fe_fes_liquidus(Xs_0)
+    dTphase_fe = Tl_fe - Ts_fe
+    dTphase_si = Tml - Tms
 
     #Initial step
     # Create arrays - column is one timestep
-    k_profile = np.ones([ncells,1])*ka #don't know how long differentiation will last so append at each step
-    rho_profile = np.ones([ncells,1])*rhoa
-    heat = np.ones([ncells,1]) #1 if radiogenic heating i.e. mantle or undifferentiated, 0 if core
     Xfe = np.zeros([ncells,1]) #fraction of iron melted
-    T = np.ones([ncells,1]) #temperature
-    Ra = np.ones([ncells,1]) #Rayleigh number
-    Ra_crit = np.ones([ncells,1]) # critical Rayleigh number
-    convect = np.ones([ncells,1]) # is anything convecting
+    Xsi = np.zeros([ncells,1]) #fraction of silicate melted
+    cp = np.zeros([ncells,1]) #specific heat capacity of each cell
+    T = np.zeros([ncells,1]) #temperature
+    Ra = np.ones([1]) #Rayleigh number
+    d0 = np.ones([1]) #stagnant lid thickness
+    Ra_crit = np.ones([1]) # critical Rayleigh number
+    convect = np.ones([1]) # is anything convecting
     
     t = np.asarray([tacc])
-
-    Tk = k_profile[:,0]*Tint
-    H = AlFe_heating(t)
-
-    #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
-    rhs = sparse_mat.dot(Tk) + H*heat[:,0]*rho_profile[:,0]
     
-    #Calculate temperature change or melt change
-    if np.any(Tint >= Tliquidus):
-        dXfedt = rhs/(rhoc*Lc)
-        dTdt = rhs/(rhoa*cpa)
+    if Xs_0 != Xs_eutectic:
+        #Initial step 
+        # check for convection
+        Ra[0], d0[0], Ra_crit[0], convect[0] = Rayleigh_differentiate(t[0],T[0,0])
         
-        #no temp change where iron is melting
-        T[Xfe[:,0] < 1,0] = Tint[Xfe[:,0] < 1]
-        Xfe[Xfe[:,0] < 1,0] = dXfedt[Xfe[:,0] < 1]*dt
+        #calculate radiogenic heating
+        H = np.array([AlFe_heating(t[0])])
         
-        #iron already melted increase the temperature
-        T[Xfe[:,0] >= 1,0] = Tint[Xfe[:,0] >= 1,0] + dTdt[Xfe[:,0] >= 1]*dt
-        Xfe[Xfe[:,0] >= 1,0] = Xfe[Xfe[:,0] >= 1,0]
-        
-    else: #no nodes are melting
-        dTdt = rhs/(rhoa*cpa)
-        T[:-1,0] = Tint[:-1] + dt*dTdt[:-1]
-        T[-1,0] = Tint[-1] #pin top cell to 200K
-    
-    # Add composition check and movement here
-    #overwrite heating array?
-    #check for convection
-    Ra[0:,0], Ra_crit[0:,0], convect[0:,0] = Rayleigh_differentiate(t[0],T[0,0])
-     
-    #Now loop
-    i = 1
-    while np.any(convect[0:-1,i-1]==False) or np.any(Xfe[:-1,i-1]<1): #whilst any part except the top cell is not differentiated
-    #while t[i-1]<2*Myr:
-        # make all the arrays one column bigger
-        app_array = np.zeros([ncells,1])
-        T = np.append(T,app_array,1)
-        k_profile = np.append(k_profile,app_array,1)
-        rho_profile = np.append(rho_profile, app_array, 1)
-        heat = np.append(heat, app_array,1) 
-        Xfe = np.append(Xfe, app_array, 1)
-        Ra = np.append(Ra, app_array, 1)
-        Ra_crit = np.append(Ra_crit, app_array, 1)
-        convect = np.append(convect, app_array, 1)
-        
-        t = np.append(t,t[i-1]+dt)
-        
-        #Calculate radiogenic heating
-        H = AlFe_heating(t[i])
- 
-        #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
-        Tk = k_profile[:,i-1]*T[:,i-1]
-
-        rhs = sparse_mat.dot(Tk) + H*heat[:,i-1]*rho_profile[:,i-1]
-
-        #Calculate temperature change or melt change
-        if np.any(T[:,i-1] >= Tliquidus):
-            dXfedt = rhs/(rhoc*Lc)
-            dTdt = rhs/(rhoa*cpa)
+        if convect[0] == True: 
+            cp[:1,0] = cp_calc_int(Tint[0],True)
+            cp[-1,0] = cpa
+            nlid_cells = round(d0[0]/dr)
+            if nlid_cells ==0:
+                lid_start = ncells -2
+            else:
+                lid_start = ncells - nlid_cells - 1 #index in temp array where lid starts
+            Fs = -ka*(Ts-Tint[lid_start])/d0[0]
             
-            #no temp change where iron is melting
-            T[Xfe[:,i-1] < 1,i] = T[Xfe[:,i-1] < 1,i-1]
-            Xfe[Xfe[:,i-1] < 1,i] = Xfe[Xfe[:,i-1] < 1,i-1] + dXfedt[Xfe[:,i-1] < 1]*dt
-            #iron already melted increase the temperature
-            T[Xfe[:,i-1] >= 1,i] = T[Xfe[:,i-1] >= 1,i-1] + dTdt[Xfe[:,i-1] >= 1]*dt
-            Xfe[Xfe[:,i-1] >= 1,i] = Xfe[Xfe[:,i-1] >= 1,i-1]
+            dTdt = (rhoa*H-Fs)/(rhoa*cp[0,0])
+            T[:-1,0] = Tint[:-1] + dTdt*dt
+            T[-1,0] = Ts
+        else:
+            Tk = ka*Tint
+            #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
+            rhs = sparse_mat.dot(Tk) + H*rhoa
+            cp[:,0] = cp_calc_arr(Tint,True) #calculate cp
+            
+            #calculate temperature change
+            dTdt = rhs/(rhoa*cp[:,0])
+            T[:-1,0] = Tint[:-1] + dt*dTdt[:-1]
+            T[-1,0] = Tint[-1] #pin top cell to 200K
 
-        else: #no nodes are melting
-            dTdt = rhs/(rhoa*cpa)
-
-            T[:-1,i] = T[:-1,i-1] + dt*dTdt[:-1] #top cell of the body is pinned to 200K
-            T[-1,i] = T[-1,i-1]
-
-        # Add composition check and movement here
-        #overwrite heating array?
+        #calculate melting
+        #iron
+        Xfe[T[:,0]<Ts_fe,0] = 0 #subsolidus
+        Xfe[((T[:,0]>=Ts_fe) & (T[:,0]<Tl_fe)),0] = (T[((T[:,0]>=Ts_fe) & (T[:,0]<Tl_fe)),0]-Ts_fe)/dTphase_fe #melting
+        Xfe[T[:,0]>=Tl_fe,0] = 1 #above liquidus
         
-        k_new = k_profile[:,0] #update k properly later, for now just up date with current profile
-        k_profile[:,i] = k_new
-        rho_profile[:,i] = rho_profile[:,0]
-        heat[:,i] = heat[:,0]
+        #silicate
+        Xsi[T[:,0]<Tms,0] = 0 #subsolidus
+        Xsi[((T[:,0]>=Tms) & (T[:,0]<Tml)),0] = (T[((T[:,0]>=Tms) & (T[:,0]<Tml)),0]-Tms)/dTphase_si #melting
+        Xsi[T[:,0]>=Tml,0] = 1 #above liquidus
         
-        Ra[0:,i], Ra_crit[0:,i], convect[0:,i] = Rayleigh_differentiate(t[i],T[0,i])
-        #increment i
-        i +=1
+        #now loop
+        i = 1
+        cond_i = 0 #convective switch
+        while (convect[i-1]==False) or (Xsi[int(ncells/2),i-1]<0.05): #whilst any part except the top cell is not convecting and less than 5% silicate melted
+        #while t[i-1]<1.16*Myr: 
+        #while convect[i-1]==False:
+        #while Xsi[int(ncells/2),i-1]<0.2625: #wait for middle to be melted enough
+        #while (Xsi[int(ncells/2),i-1]<0.05):
+            
+            app_array = np.zeros([ncells,1])
+            T = np.append(T,app_array,1)
+            Xfe = np.append(Xfe, app_array, 1)
+            Xsi = np.append(Xsi, app_array, 1)
+            cp = np.append(cp, app_array, 1)
+            Ra = np.append(Ra, 0)
+            d0 = np.append(d0, 0)
+            Ra_crit = np.append(Ra_crit, 0)
+            convect = np.append(convect, 0)
+            
+            if cond_i == 0:
+                t = np.append(t,t[i-1]+dt)
+            else: 
+                t = np.append(t,t[i-1]+0.01*dt) #adaptive timestep smaller when convecting
+                
+            Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1])
+            
+            #calculate radiogenic heating
+            H = np.append(H,AlFe_heating(t[i]))
+            Tk = ka*T[:,i-1]
+            #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
+            rhs = sparse_mat.dot(Tk) + H[i]*rhoa
+            cp[:,i] = cp_calc_arr(T[:,i-1],True) #calculate cp
 
+            #calculate temperature change
+            dTdt = rhs/(rhoa*cp[:,i])
+            T[:-1,i] = T[:-1,i-1] + dt*dTdt[:-1]
+            T[-1,i] = Ts
+            
+            if convect[i] == True or cond_i==1: #overwrite convecting portion
+                print('Convecting')
+                cp[:-1,i] = cp_calc_int(T[0,i-1],True)
+                cp[-1,i] = cpa
+                
+                if cond_i == 0:
+            
+                    print('Convecting, changing timestep')             
+                    nlid_cells = round(d0[i]/dr)
+                    if nlid_cells ==0:
+                        lid_start = ncells -2
+                    else:
+                        lid_start = ncells - nlid_cells - 1 #index in temp array where lid starts
+                    print(lid_start)
+                    Fs = -ka*(Ts-T[lid_start,i-1])/d0[i]
+                    dTdt = (rhoa*H[i]-Fs)/(rhoa*cp[0,i])
+                    T[:lid_start,i] = T[:lid_start,i-1] + dTdt*0.01*dt 
+                       
+                cond_i =1        
+                print('delta T is',dTdt*0.01*dt)
+
+
+                
+                
+            #calculate melting
+            #iron
+            Xfe[T[:,i]<Ts_fe,i] = 0 #subsolidus
+            Xfe[((T[:,i]>=Ts_fe) & (T[:,i]<Tl_fe)),i] = (T[((T[:,i]>=Ts_fe) & (T[:,i]<Tl_fe)),i]-Ts_fe)/dTphase_fe #melting
+            Xfe[T[:,i]>=Tl_fe,i] = 1 #above liquidus
+            
+            #silicate
+            Xsi[T[:,i]<Tms,i] = 0 #subsolidus
+            Xsi[((T[:,i]>=Tms) & (T[:,i]<Tml)),i] = (T[((T[:,i]>=Tms) & (T[:,i]<Tml)),i]-Tms)/dTphase_si #melting
+            Xsi[T[:,i]>=Tml,i] = 1 #above liquidus
+            
+            i = i+1
+            
+    #need to add eutectic edge case
+    
     #relabel for returning
     Tdiff = T
-    Tdiff_profile = T[:,-1]
     t_diff = t
     
-    return Tdiff, Tdiff_profile, k_profile, Xfe, rho_profile, Ra, Ra_crit, convect, t_diff
+    return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, t_diff, H
