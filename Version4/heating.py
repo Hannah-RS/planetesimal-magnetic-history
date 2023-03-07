@@ -8,7 +8,7 @@ from parameters import h0Al, Al0, XAl_a, XAl_d, thalf_al, h0Fe, Fe0, XFe_a, XFe_
 
 def Al_heating(t):
     """
-    Radiogenic heating by 26Al
+    Radiogenic heating by 26Al in a silicate mantle
 
     Parameters
     ----------
@@ -27,7 +27,7 @@ def Al_heating(t):
 
 def Fe_heating(t):
     """
-    Radiogenic heating by 60Fe
+    Radiogenic heating by 60Fe in an iron core
 
     Parameters
     ----------
