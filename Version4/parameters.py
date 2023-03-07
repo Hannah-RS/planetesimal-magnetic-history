@@ -19,12 +19,13 @@ year=60*60*24*365 #number of seconds in a year
 Myr=1e6*year
 
 # Size of body
-r = 400e3 # radius of asteroid [m]
+r = 500e3 # radius of asteroid [m]
 V = 4/3*np.pi*r**3
 rc = r/2 #radius of core [m]
 dr = 500 # size of cells [m]
 out_interval =20 #how many times do you want t to be printed in the whole run
-save_interval = 0.01*Myr # how often do you want each variable to be saved
+save_interval_d = 0.01*Myr # how often do you want each variable to be saved during differentiation
+save_interval_t = 0.1*Myr # how often do you want each variable to be saved during thermal evolution
 
 #Surface parameters
 Ts=200 # surface temperature, modelled as fixed [K]
