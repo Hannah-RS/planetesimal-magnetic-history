@@ -7,7 +7,8 @@ Calculates rate of change of conductive profile for the whole body and new tempe
 # set up
 import numpy as np
 import scipy.sparse as sp
-from parameters import cpm_p, cpc
+from parameters import cpc
+from cp_func import cp_calc_arr
 from heating import Al_heating, Fe_heating
     
 def Tm_cond_calc(t,dt,T,sparse_mat):
@@ -34,9 +35,9 @@ def Tm_cond_calc(t,dt,T,sparse_mat):
     #calculate dTdt for conduction
 
     dTdt = sparse_mat.dot(T)
-        
+    cp = cp_calc_arr(T,False)   
     h = Al_heating(t)
-    dTdt = dTdt + h/cpm_p
+    dTdt = dTdt + h/cp
 
     Tnew = dTdt*dt + T
     Tnew[-1] = T[-1]   #top cell of mantle is always at surface temp so need to overwrite so radiogenic heating term doesn't heat it up 

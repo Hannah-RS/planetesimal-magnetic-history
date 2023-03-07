@@ -3,18 +3,21 @@
 """
 Expression for dTm/dt from rearranging eqn 25 in Dodds (2020) and dTdt for an undifferentiated body
 """
-from parameters import rhom, cpm_p, Vm, As, Ts, Acmb, km, gamma, Myr, cpa, rhoa, V
+from parameters import rhom, Vm, As, Ts, Acmb, km, gamma, Myr, cpa, rhoa, V
 import numpy as np
 from Rayleigh_def import Rayleigh_calc
 from heating import Al_heating, AlFe_heating
+from cp_func import cp_calc_int
 
-def dTmdt_calc(t,Fs,Fcmb):
+def dTmdt_calc(t,Tconv,Fs,Fcmb):
     """
 
     Parameters
     ----------
     t : float
         time, s
+    Tconv : float
+        convective temp [K]
     Fs: float
         surface heat flux [W m^-2]
     Fcmb : float
@@ -30,17 +33,19 @@ def dTmdt_calc(t,Fs,Fcmb):
     #calculate radiogenic heating 
     h = Al_heating(t)
     rad = h*rhom*Vm #radiogenic heating contribution
+    cp = cp_calc_int(Tconv,False)
     
-    
-    return 1/(rhom*cpm_p*Vm)*(rad-Fs*As+Fcmb*Acmb)
+    return 1/(rhom*cp*Vm)*(rad-Fs*As+Fcmb*Acmb)
 
-def dTadt_calc(t,Fs):
+def dTadt_calc(t,Tconv,Fs): #not sure if this is called anywhere
     """
 
     Parameters
     ----------
     t : float
         time, s
+    Tconv : float
+        convective temp [K]
     Fs: float
         surface heat flux [W m^-2]
 
@@ -54,6 +59,6 @@ def dTadt_calc(t,Fs):
     #calculate radiogenic heating 
     h = AlFe_heating(t)
     rad = h*rhoa*V #radiogenic heating contribution
-    
+    cp = cp_calc_int(Tconv, True)
     
     return 1/(rhoa*cpa*V)*(rad-Fs*As)
