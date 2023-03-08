@@ -32,10 +32,9 @@ Ts=200 # surface temperature, modelled as fixed [K]
 As = 4*np.pi*r**2 # surface area [m^2]
 
 #Undifferentiated parameters
-ka = 2.295 # [W /m /K] currently same as mantle
-rhoa = 3000 # kg m^-3 density of undifferentiated material
-cpa = 850 # heat capacity [J /kg /K]
-Tref = 1800 # viscosity reference temperature (Dodds 2021) [K] 
+ka = 2.295 # [W /m /K] same as mantle (correct for post sintering - Dodds 2021)
+rhoa = 3500 # kg m^-3 density of undifferentiated material (Dodds 2021 rho_b)
+cpa = 850 # heat capacity [J /kg /K] (Elkins-Tanton 2011, Bryson 2019 use silicate value)
 alpha_a = 4e-5 # thermal expansivity of mantle [/K]
 # Mantle parameters
 cpm = 850 # heat capacity [J /kg /K] (Dodds et al.)
@@ -48,6 +47,7 @@ kappa = 9e-7 # thermal diffusivity of silicate [m^2 /s] - 4 options are given in
 Rac = 1000  #critical Rayleigh number 
 E = 300e3 # activation energy [J /mol]
 R = 8.31 # gas constant [J /K /mol]
+Tref = 1800 # viscosity reference temperature (Dodds 2021) [K] 
 Tm0 = 1600 # intial mantle temp - from beginning of stage 2 in Figure 1 of Bryson (2019)
 c1 = 8 # constant in boundary layer thickness Dodds (2021)
 t_transition = 17*Myr #time to transition from RaH to normal Ra
