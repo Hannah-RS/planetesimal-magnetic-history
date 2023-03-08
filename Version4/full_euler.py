@@ -206,9 +206,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     else: # don't have whole core convection, 
         #check if there is thermal stratification
         
-        if Tcmb[0] > np.any(T0_core): #there is thermal stratification
+        if np.any(T0_core < Tcmb[0]): #there is thermal stratification
             
-            if Tcmb[0] > np.all(T0_core):
+            if np.all(T0_core < Tcmb[0]):
                     # scenario 1 - just conduction in the core
                     pass # use already calculated condctive profile, don't do anything
             else: #scenario 2 - erosion of stratification, convective layer at top of core
@@ -219,7 +219,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 Tc_conv[0] = T0_core[min_unstable[0]]
                 # is the core solidifying?
                 Tliquidus = fe_fes_liquidus(Xs_0)
-                if np.any(T0_core) < Tliquidus: #core solidifies
+                if np.any(T0_core < Tliquidus): #core solidifies
                     raise NotImplementedError('Core solidification erodes thermal stratification - write this code!')
                 
                 else: # core not solidifying
@@ -356,7 +356,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
 
             #check if there is thermal stratification
             core_conv = False 
-            if Tcmb[i-1] > np.any(T_old_core): #there is thermal stratification
+            if np.any(T_old_core < Tcmb[i-1]): #there is thermal stratification
                   
                 if np.all(T_old_core < Tcmb[i-1]):
                         # scenario 1 - just conduction in the core
