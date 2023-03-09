@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, cpm_p, rhom, save_interval, default, kappa
+from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, cpm_p, rhom, save_interval_d, default, kappa
 
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
@@ -35,7 +35,7 @@ t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle
 step_m=0.1*t_cond_mantle  #max timestep must be smaller than conductive timestep
 #step_m=0.01*t_cond  #max timestep must be smaller than conductive timestep
-n_save = int(save_interval/step_m)
+n_save = int(save_interval_d/step_m)
 
 # set initial temperature profile
 n_cells = int(r/dr) #number of cells needed to span body
@@ -61,13 +61,13 @@ plt.ylabel('Temperature/K')
 plt.title('Temperature profile post differentiation')
 var_list = [t_diff[-1],Tdiff[0,-1]]
 
-from csv import writer   
-with open('lid_test.csv','a') as f_object:
-    writer_object = writer(f_object) #pass file object to csv.writer
-    writer_object.writerow(var_list) # pass list as argument into write row
-    f_object.close() #close file
+# from csv import writer   
+# with open('lid_test.csv','a') as f_object:
+#     writer_object = writer(f_object) #pass file object to csv.writer
+#     writer_object.writerow(var_list) # pass list as argument into write row
+#     f_object.close() #close file
 
-print('Results and run parameters saved')
+# print('Results and run parameters saved')
 print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(diff_time)))
 np.savez(f'Results/diff_run_{run}', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, t_diff = t_diff, H=H)
 raise ValueError('Differentiation passed')

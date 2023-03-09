@@ -25,7 +25,7 @@ rc = r/2 #radius of core [m]
 dr = 500 # size of cells [m]
 out_interval =20 #how many times do you want t to be printed in the whole run
 save_interval_d = 0.01*Myr # how often do you want each variable to be saved during differentiation
-save_interval_t = 0.1*Myr # how often do you want each variable to be saved during thermal evolution
+save_interval_t = 1*Myr # how often do you want each variable to be saved during thermal evolution
 
 #Surface parameters
 Ts=200 # surface temperature, modelled as fixed [K]
@@ -62,7 +62,7 @@ Fe0 = 0#1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 202
 XFe_a = 0.224 # abundance of Fe in accreting material [wt % /100] (Dodds thesis - Lodders 2021 for CV chondrites)
 thalf_fe = 2.62*Myr # half life of 60Fe [s] (Dodds thesis - Ruedas 2017)
 
-Xs_0 = 28 # initial wt % sulfur in core (needs a citation)
+Xs_0 = 32 # initial wt % sulfur in core (needs a citation)
 XFe_d =0# 1 - Xs_0/100 #abundance of Fe in core assuming S is only other significant phase [wt %]
 Xs_to_core = XFe_a/(1-Xs_0/100)-XFe_a # wt % of S from accreted body that went into core
 XAl_d = XAl_a/(1-XFe_d-Xs_to_core)
@@ -110,6 +110,10 @@ Tl_fe = fe_fes_liquidus(Xs_0)
 if Xs_0 != Xs_eutectic:
     cpa_fe = cpa + XFe_a*Lc/(Tl_fe-Ts_fe) #cp for Tfe_s < T < Tsi_s
     cpa_fesi = cpa + XFe_a*Lc/(Tl_fe-Ts_fe) + (1-XFe_a)*Lm/(Tml-Tms) #cp for Tms < T < Tfe_s
+else:
+    cpa_fe = None
+    cpa_fesi = None
+    
 cpa_si = cpa + (1-XFe_a)*Lm/(Tml-Tms) #cp for Tfe_l < T < Tml
 #after differentiation
 cpm_p = cpm*(1+(Lm/(cpm*(Tml-Tms)))) # modified mantle heat capacity accounting for latent heat Tms < Tm <Tml

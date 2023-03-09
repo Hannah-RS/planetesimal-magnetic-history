@@ -94,3 +94,73 @@ def cp_calc_arr(Tarr,differentiate):
                 cp[i] = cpm
     return cp
 
+def cp_calc_eut_arr(Tarr,differentiate):
+    """
+    
+    Calculate specific heat capacity for a temperature array for eutectic Fe,FeS 
+    
+    Parameters
+    ----------
+    T : float
+        temperature array [K]
+    differentiate : bool
+        is the body differentiated
+    Returns
+    -------
+    cp : float
+        array of heat capacities
+
+    """
+    cp = np.zeros([len(Tarr)])
+    if differentiate == True:
+        for i, T in enumerate(Tarr):
+            if T < Tms:
+                cp[i] = cpa
+            elif T <= Tml and T >= Tms:
+                cp[i] = cpa_si
+            else:
+                cp[i] = cpa
+                 
+    else:
+        for i, T in enumerate(Tarr):
+            if T <= Tml and T >= Tms: #mantle is melting
+                cp[i] = cpm_p
+            else: #mantle is solid or melted
+                cp[i] = cpm
+    return cp
+
+def cp_calc_eut_int(T,differentiate):
+    """
+    
+    Calculate specific heat capacity for a temperature for eutectic Fe,FeS 
+    
+    Parameters
+    ----------
+    T : float
+        temperature array [K]
+    differentiate : bool
+        is the body differentiated
+    Returns
+    -------
+    cp : float
+        array of heat capacities
+
+    """
+    
+    if differentiate == True:
+        
+        if T < Tms:
+            cp = cpa
+        elif T <= Tml and T >= Tms:
+            cp = cpa_si
+        else:
+            cp = cpa
+                 
+    else:
+        
+        if T <= Tml and T >= Tms: #mantle is melting
+            cp = cpm_p
+        else: #mantle is solid or melted
+            cp = cpm
+            
+    return cp
