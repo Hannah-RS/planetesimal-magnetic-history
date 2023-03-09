@@ -14,7 +14,7 @@ Flow:
 import numpy as np
 import scipy.sparse as sp
 import scipy.optimize as sco
-from parameters import Ts, Myr, Rac, B, dr, out_interval, km, kc, alpha_m, alpha_c, rc, rhoc, rhom, eta_c, g, gc, cpc, Xs_0, default, kappa, kappa_c, c1, gamma, Xs_eutectic, Acmb, Lc
+from parameters import Ts, Myr, Rac, B, dr, out_interval, km, kc, alpha_m, alpha_c, r, rc, rhoc, rhom, eta_c, g, gc, cpc, Xs_0, default, kappa, kappa_c, c1, gamma, Xs_eutectic, Acmb, Lc
 
 #import required functions
 from T_cond import Tm_cond_calc, Tc_cond_calc
@@ -97,7 +97,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     i_save=0
     n_cells = len(T0) #number of cells
     i_core = round(n_cells/2)-1 # index in array of last core cell (-1 as indexing starts at 0)
-    cond = 0 #flag for when first switch to conductive regime
     cond_i = 'nan' #set as string and then reset if switches to conduction
     mantle_conv = False #flag for mantle convection
     core_conv = False #flag for core convection
@@ -139,17 +138,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     # Step 1. Calculate conductive profile for mantle
     T_new_mantle = Tm_cond_calc(tsolve[0],dt,T0_mantle,sparse_mat_m)
 
-    Fs[0] = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
+    Fs[0] = -km*(T_new_mantle[-1]-T_new_mantle[-5])/(4*dr)
     
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
     Ra[0], d0[0], RaH[0], RanoH[0] = Rayleigh_calc(tsolve[0],T0_mantle[1],default) #use temp at base of mantle 
     Racrit[0] = Rayleigh_crit(T0_mantle[1])   
-    nlid_cells = round(d0[0]/dr)
-    if nlid_cells ==0:
-        lid_start = nmantle_cells -2
-    else:
-        lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
-    
+      
     
     # in initial step use balance of eqn 23 and 24 to find Tcmb
     Tcmb[0] = (km/kc*T0_mantle[0]+T0_core[0])/(km/kc+1)
@@ -162,11 +156,17 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
        
     else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile
         dl[0] = delta_l(tsolve[0],T0_mantle[1],T0_mantle[0])
-        
+        nlid_cells = round(d0[0]/dr)
+        if nlid_cells ==0:
+            lid_start = nmantle_cells -2
+        else:
+            lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
         Tm_conv[0] = T0_mantle[1] + dTmdt_calc(tsolve[0],T0_mantle[1],d0[0],Fs[0],Fcmb[0])*dt #take temp one above CMB
         T_new_mantle[:lid_start+1] = Tm_conv[0]
         T_new_mantle[-1] = Ts #pin surface to 200K
-        Fs[0] = -km*(Ts-Tm_conv[0])/d0[0] #replace Fs with convective version
+        if d0[0]<(r-rc): #make sure lid thickness less than mantle if using in heat flux
+            Fs[0] = -km*(Ts-Tm_conv[0])/d0[0] #replace Fs with convective version
+        
         
     #store values   
     Tm_mid[0] = T_new_mantle[round(nmantle_cells/2)] # temperature at the mid mantle
@@ -280,12 +280,11 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
         Ra[i], d0[i], RaH[i], RanoH[i] = Rayleigh_calc(tsolve[i],T_old_mantle[1],default) #use temp at base of mantle 
         Racrit[i] = Rayleigh_crit(T_old_mantle[1])   
-        Racrit[i]=Rac
-        if Ra[i] <= Racrit[i] or cond==1: #once Rayleigh number subcritical don't want to use that criterion anymore
+        #Racrit[i]=Rac
+        if Ra[i] <= Racrit[i]:
             mantle_conv = False
-            if cond == 0: #check if first time it is conductive i.e. the switch
-                cond_i = i
-                cond = 1
+            if Tm_conv[i-1]!=0: #check if first time it is conductive i.e. the switch
+                cond_i = i #record time for switch to conduction
             else: #mantle already conducting
                 pass
             Tm_conv[i] = 0 # convective mantle temperature is 0 if mantle not convecting
@@ -296,7 +295,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             
             if nlid_cells ==0:
                 lid_start = nmantle_cells -2
-
             else:
                 lid_start = nmantle_cells - nlid_cells - 1  #index in temp array where lid starts
             if Tm_conv[i-1]!=0: #mantle already convecting
@@ -307,7 +305,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Tm_conv[i] = Tm_old + dTmdt_calc(tsolve[i-1],Tm_old,d0[i-1],Fs[i-1],Fcmb[i-1])*dt #temperature of convecting region 
             T_new_mantle[:lid_start+1] = Tm_conv[i]
             T_new_mantle[-1] = Ts #pin surface to 200K in case d0 < 1 cell thick
-            Fs[i] = -km*(Ts-Tm_conv[i])/d0[i]
+            if d0[i]<(r-rc):
+                Fs[i] = -km*(Ts-Tm_conv[i])/d0[i]
             
             
         #store values
@@ -347,7 +346,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             
             #find new convective temperature
             Tc_conv[i] = T_old_core[bl_start-1] + dTcdt*dt 
-            #print(f"Tc_conv[i] is {Tc_conv[i]:.2f}")
+            
             T_new_core[:] = Tc_conv[i] #replace everything with the convective temperature
 
             
