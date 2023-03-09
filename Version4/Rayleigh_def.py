@@ -75,7 +75,7 @@ def Rayleigh_noH(Tb,model=default):
     """
     eta = viscosity(Tb,model)
     d0 = (gamma/c1)**(4/3)*(Tb-Ts)*((Rac*kappa*eta)/(rhom*g*alpha_m))**(1/3) #upper bl
-    Ram= rhom*g*alpha_m*(Tb-Ts)*(r-rc)**3/(kappa*eta)
+    Ram= rhom*g*alpha_m*abs(Tb-Ts)*(r-rc)**3/(kappa*eta)
     
     return Ram, d0
     
@@ -141,7 +141,11 @@ def Rayleigh_differentiate(t,Tb,model=default):
     RaH = Rayleigh_H(t,Tb,0,model,Fe=True)
     eta = viscosity(Tb,model)
     RanoH, d0_noH = Rayleigh_noH(Tb,model)
-    d0H = 0.65*r*(gamma*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
+    if RanoH == 0: #for first step where there is no temp difference
+        d0H = 1000*r #artificially big value
+    else:
+        d0H = 0.65*r*(gamma*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
+    
     Ra_crit = Rayleigh_crit(Tb)
     if d0H/r < 0.5 and RaH>Ra_crit: #still working on this criteria
         convect = True
