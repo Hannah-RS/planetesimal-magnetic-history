@@ -69,31 +69,31 @@ def differentiation(Tint,tacc,r,dr,dt):
         
         #calculate radiogenic heating
         H = np.array([AlFe_heating(t[0])])
+        Tk = ka*Tint
+        #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
+        rhs = sparse_mat.dot(Tk) + H*rhoa
+        cp[:,0] = cp_calc_arr(Tint,True) #calculate cp
         
-        if convect[0] == True: 
-            cp[:1,0] = cp_calc_int(Tint[0],True)
-            cp[-1,0] = cpa
+        #calculate temperature change
+        dTdt = rhs/(rhoa*cp[:,0])
+        T[:-1,0] = Tint[:-1] + dt*dTdt[:-1]
+        T[-1,0] = Tint[-1] #pin top cell to 200
+        
+        if convect[0] == True: #replace convecting portion with convecting profile
+            
             nlid_cells = round(d0[0]/dr)
             if nlid_cells ==0:
                 lid_start = ncells -2
             else:
                 lid_start = ncells - nlid_cells - 1 #index in temp array where lid starts
+            cp[:lid_start,0] = cp_calc_int(Tint[0],True) #replace heat capacity below lid
+            cp[-1,0] = cpa            
             Fs = -ka*(Ts-Tint[lid_start])/d0[0]
             
             dTdt = (rhoa*H-Fs)/(rhoa*cp[0,0])
-            T[:-1,0] = Tint[:-1] + dTdt*dt
+            T[:lid_start,0] = Tint[:lid_start] + dTdt*dt
             T[-1,0] = Ts
-        else:
-            Tk = ka*Tint
-            #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
-            rhs = sparse_mat.dot(Tk) + H*rhoa
-            cp[:,0] = cp_calc_arr(Tint,True) #calculate cp
-            
-            #calculate temperature change
-            dTdt = rhs/(rhoa*cp[:,0])
-            T[:-1,0] = Tint[:-1] + dt*dTdt[:-1]
-            T[-1,0] = Tint[-1] #pin top cell to 200K
-
+        
         #calculate melting
         #iron
         Xfe[T[:,0]<Ts_fe,0] = 0 #subsolidus
@@ -144,28 +144,22 @@ def differentiation(Tint,tacc,r,dr,dt):
             T[-1,i] = Ts
             
             if convect[i] == True or cond_i==1: #overwrite convecting portion
-                print('Convecting')
-                cp[:-1,i] = cp_calc_int(T[0,i-1],True)
-                cp[-1,i] = cpa
-                
                 if cond_i == 0:
-            
-                    print('Convecting, changing timestep')             
-                    nlid_cells = round(d0[i]/dr)
-                    if nlid_cells ==0:
-                        lid_start = ncells -2
-                    else:
-                        lid_start = ncells - nlid_cells - 1 #index in temp array where lid starts
+                    cond_i =1 
+                    print('Convecting, changing timestep')
                     
-                    Fs = -ka*(Ts-T[lid_start,i-1])/d0[i]
-                    dTdt = (rhoa*H[i]-Fs)/(rhoa*cp[0,i])
-                    T[:lid_start,i] = T[:lid_start,i-1] + dTdt*0.01*dt 
-                       
-                cond_i =1        
+                nlid_cells = round(d0[i]/dr)
+                if nlid_cells ==0:
+                    lid_start = ncells -2
+                else:
+                    lid_start = ncells - nlid_cells - 1 #index in temp array where lid starts
                 
-
-
-                
+                cp[:lid_start,i] = cp_calc_int(T[0,i-1],True)
+                cp[-1,i] = cpa
+                Fs = -ka*(Ts-T[lid_start,i-1])/d0[i]
+                dTdt = (rhoa*H[i]-Fs)/(rhoa*cp[0,i])
+                T[:lid_start,i] = T[:lid_start,i-1] + dTdt*0.01*dt 
+                T[-1,i] = Ts   
                 
             #calculate melting
             #iron
