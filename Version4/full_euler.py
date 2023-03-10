@@ -181,7 +181,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Fad[0] = kc*T0_core[-2]*alpha_c*gc/cpc
     
     if Fcmb[0] > Fad[0]: #super adiabatic, core convects
-
+        min_unstable[0] = 1
         dc[0] = delta_c(T0_core[-2],T0_mantle[0]) #second input is CMB temp
 
         # is the core solidifying?
@@ -208,12 +208,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         
         if np.any(T0_core < Tcmb[0]): #there is thermal stratification
             
-            if np.all(T0_core < Tcmb[0]):
+            if np.all(T0_core < 1.001*Tcmb[0]): # add the *1.001 criterion as otherwise rounding errors cause this to be true in the first step
                     # scenario 1 - just conduction in the core
                     pass # use already calculated condctive profile, don't do anything
             else: #scenario 2 - erosion of stratification, convective layer at top of core
                 dc[0] = delta_c(T0_core[-2],T0_mantle[0]) #second input is CMB temp
-                b_ind = np.where(Tcmb[0] <= T0_core)[0] #indices of unstable layer
+                b_ind = np.where(T0_core >= (1.001*Tcmb[0]))[0] #indices of unstable layer - add the *1.001 criterion as otherwise rounding errors cause this to be true in the first step
                 min_unstable[0] = b_ind[0]
 
                 Tc_conv[0] = T0_core[min_unstable[0]]
@@ -320,6 +320,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         # check if heat flux is super adiabatic 
         
         if (Fcmb[i-1] > Fad[i-1]) and (min_unstable[i-1]==1): #super adiabatic, core convects
+            
             core_conv = True
             min_unstable[i] = 1
             nbl_cells = round(dc[i-1]/dr)
