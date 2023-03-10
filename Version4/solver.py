@@ -26,7 +26,7 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run =1
+run =5
 
 t_acc=0.8*Myr  #Accretion time
 t_end_m=50#end time in Myr
@@ -85,7 +85,7 @@ int_time = toc - tic
 
 #update on progress
 plt.figure()
-plt.scatter(rplot,Tprofile[:,-1])
+plt.scatter(rplot,Tprofile[-1,:])
 plt.xlabel('r/km')
 plt.ylabel('Temperature/K')
 plt.title('Temperature profile post thermal evolution')
@@ -168,6 +168,27 @@ var_list = [run, r, Tm0, t_acc/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_i, int
 
     
 with open('run_info4.csv','a') as f_object:
+    writer_object = writer(f_object) #pass file object to csv.writer
+    writer_object.writerow(var_list) # pass list as argument into write row
+    f_object.close() #close file
+  
+########## Current comparitive parameters ####################
+from parameters import convect_ratio
+nmantle = int((r/dr)/2)
+diff_time = t_diff[-1]/Myr
+peakT = np.amax(Tprofile[nmantle:,:])
+loc_max = np.where(Tprofile[nmantle:,:]==peakT)[1][0] #take the set of time coordinates and first value (they should all be the same)
+tmax = t[loc_max]/Myr
+if np.all(Tprofile[:,int(nmantle)-2]<Tcmb):
+    tstrat_end = np.inf
+    tc_conv = np.inf
+else:
+    tstrat_end = t[Tcmb < Tprofile[:,int(nmantle)-2]][0]/Myr
+    tc_conv = t[min_unstable==1][0]/Myr
+
+var_list2 = [convect_ratio, diff_time, peakT, tmax, tstrat_end, tc_conv]
+
+with open('lid_test.csv','a') as f_object:
     writer_object = writer(f_object) #pass file object to csv.writer
     writer_object.writerow(var_list) # pass list as argument into write row
     f_object.close() #close file
