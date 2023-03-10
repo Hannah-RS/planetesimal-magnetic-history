@@ -50,7 +50,7 @@ R = 8.31 # gas constant [J /K /mol]
 Tref = 1800 # viscosity reference temperature (Dodds 2021) [K] 
 Tm0 = 1600 # intial mantle temp - from beginning of stage 2 in Figure 1 of Bryson (2019)
 c1 = 8 # constant in boundary layer thickness Dodds (2021)
-t_transition = 17*Myr #time to transition from RaH to normal Ra
+convect_ratio = 0.001 #ratio of d0/r for onset of convection in differentiation
 
 #radiogenic heating
 h0Al = 0.355 # [W/ kg] heating rate of Al^26 at t=0 (Dodds 2021)
@@ -62,7 +62,7 @@ Fe0 = 0#1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 202
 XFe_a = 0.224 # abundance of Fe in accreting material [wt % /100] (Dodds thesis - Lodders 2021 for CV chondrites)
 thalf_fe = 2.62*Myr # half life of 60Fe [s] (Dodds thesis - Ruedas 2017)
 
-Xs_0 = 32 # initial wt % sulfur in core (needs a citation)
+Xs_0 = 30 # initial wt % sulfur in core (needs a citation)
 XFe_d =0# 1 - Xs_0/100 #abundance of Fe in core assuming S is only other significant phase [wt %]
 Xs_to_core = XFe_a/(1-Xs_0/100)-XFe_a # wt % of S from accreted body that went into core
 XAl_d = XAl_a/(1-XFe_d-Xs_to_core)
