@@ -176,19 +176,26 @@ with open('run_info4.csv','a') as f_object:
 from parameters import convect_ratio
 nmantle = int((r/dr)/2)
 diff_time = t_diff[-1]/Myr
+diff_T = Tdiff[int(nmantle),-1]
 peakT = np.amax(Tprofile[:,nmantle:])
 loc_max = np.where(Tprofile[:,nmantle:]==peakT)[1][0] #take the set of time coordinates and first value (they should all be the same)
 tmax = t[loc_max]/Myr
 if np.all(Tprofile[:,int(nmantle)-2]<Tcmb):
-    tstrat_end = np.inf
+    tstrat_remove = np.inf
 else:
-    tstrat_end = t[Tcmb < Tprofile[:,int(nmantle)-2]][0]/Myr
-if np.all(min_unstable >1):
+    tstrat_remove = t[Tcmb < Tprofile[:,int(nmantle)-2]][0]/Myr
+    
+if np.any(min_unstable==0):
+     strat_end = t[np.where(min_unstable==0)[0]][0]/Myr
+else:
+    strat_end = np.inf
+    
+if np.all((Fcmb < Fad) | (min_unstable>=0)):
     tc_conv = np.inf
 else:
-    tc_conv = t[min_unstable==1][0]/Myr
+    tc_conv = t[np.where((Fcmb>Fad) & (min_unstable==0))[0]][0]/Myr
 
-var_list2 = [convect_ratio, diff_time, peakT, tmax, tstrat_end, tc_conv]
+var_list2 = [convect_ratio, diff_time, peakT, tmax, tstrat_remove, strat_end, tc_conv, diff_T, run]
 
 with open('lid_test.csv','a') as f_object:
     writer_object = writer(f_object) #pass file object to csv.writer
