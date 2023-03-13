@@ -318,11 +318,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
    
         # Step 4. Is the core convecting? 
         # check if heat flux is super adiabatic 
+        min_unstable[i] = min_unstable[i-1] #continuity of mixed layer thickness by default
         
-        if (Fcmb[i-1] > Fad[i-1]) and (min_unstable[i-1]==1): #super adiabatic, core convects
+        if (Fcmb[i-1] > Fad[i-1]) and (min_unstable[i-1]==0): #super adiabatic and no stratification, core convects
             
             core_conv = True
-            min_unstable[i] = 1
+            min_unstable[i] = 0
             nbl_cells = round(dc[i-1]/dr)
             bl_start = ncore_cells - nbl_cells - 1 #index in temp array where lid starts
 
@@ -356,8 +357,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
 
             #check if there is thermal stratification
             core_conv = False 
-            if np.any(T_old_core < Tcmb[i-1]): #there is thermal stratification
-                  
+            
+            if min_unstable[i-1]>0:  #there is thermal stratification 
+                
                 if np.all(T_old_core < Tcmb[i-1]):
                         # scenario 1 - just conduction in the core
                         # use already calculated condctive profile and keep core in current state
@@ -368,8 +370,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     core_conv = True
                     b_ind = np.where( T_old_core >= Tcmb[i-1])[0] #indices of unstable layer as array
                     min_unstable[i] = b_ind[0]
-                    
-                    
                     
                     # is the core solidifying?
                     Tliquidus = fe_fes_liquidus(Xs[i-1])
@@ -390,8 +390,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                         
         
             
-            else: #there is no stratification and the core is not thermally convecting 
-
+            else: #there is no stratification (min_unstable ==0) and the core is not thermally convecting 
+                
                 """Below here needs rewriting for conductive core solidification/compositional convection"""
                 # is the core solidifying?
                 Tliquidus = fe_fes_liquidus(Xs[i-1])

@@ -26,7 +26,10 @@ def volume_average(Tprofile, unstable_ind, dr):
 
     """
     rcore = np.arange(0,rc,dr)    
-    min_unstable = int(min(unstable_ind))
+    min_unstable = int(min(unstable_ind)) 
+    if min_unstable ==0: #amend unstable indices so layer mass works
+        min_unstable = 1
+        unstable_ind = unstable_ind[1:]
     max_unstable = int(max(unstable_ind))
     r = rcore[unstable_ind]
     
