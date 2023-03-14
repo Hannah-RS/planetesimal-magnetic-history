@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script for solving the thermal evolution of an asteroid. Doesn't include differentiation (i.e commented out)'
+Script for solving the thermal evolution of an asteroid
 """
 # import modules
 import numpy as np
@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, cpm_p, rhom, save_interval_t, save_interval_d, default, kappa
+from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, cpm_p, rhom, save_interval_d, default, kappa
 
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
@@ -26,21 +26,20 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run =1
+run =18
 
 t_acc=0.8*Myr  #Accretion time
-t_end_m=50#end time in Myr
+t_end_m=2#end time in Myr
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle
-step_m=0.1*t_cond_core  #max timestep must be smaller than conductive timestep
-n_save_d = int(save_interval_d/step_m)
-n_save_t = int(save_interval_t/step_m)
+step_m=0.1*t_cond_mantle  #max timestep must be smaller than conductive timestep
+#step_m=0.01*t_cond  #max timestep must be smaller than conductive timestep
+n_save = int(save_interval_d/step_m)
 
 # set initial temperature profile
 n_cells = int(r/dr) #number of cells needed to span body
-Tint = np.ones([n_cells])*Ts#first element in the array is at r=0, accrete cold at surface temp 
-Tint[-1]=Ts
+Tint = np.ones([n_cells])*Ts #first element in the array is at r=0, accrete cold at surface temp 
 
 print('Initial conditions set')
 
@@ -60,91 +59,50 @@ plt.scatter(rplot,Tdiff[:,-1])
 plt.xlabel('r/km')
 plt.ylabel('Temperature/K')
 plt.title('Temperature profile post differentiation')
+var_list = [t_diff[-1],Tdiff[0,-1]]
 
+# from csv import writer   
+# with open('lid_test.csv','a') as f_object:
+#     writer_object = writer(f_object) #pass file object to csv.writer
+#     writer_object.writerow(var_list) # pass list as argument into write row
+#     f_object.close() #close file
+
+# print('Results and run parameters saved')
 print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(diff_time)))
-#rescale data and save here in case thermal evolution crashes
-Tdiff = Tdiff[:,0::n_save_d]
-Xfe = Xfe[:,0::n_save_d]
-Xsi = Xsi[:,0::n_save_d]
-cp = cp[:,0::n_save_d]
-Ra = Ra[0::n_save_d]
-Ra_crit = Ra_crit[0::n_save_d]
-convect = convect[0::n_save_d]
-t_diff = t_diff[0::n_save_d]
-H = H[0::n_save_d]
-
-np.savez(f'Results_combined/run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, t_diff = t_diff, H=H)
-
+np.savez(f'Results/diff_run_{run}', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, t_diff = t_diff, H=H)
+raise ValueError('Differentiation passed')
 ######################## Thermal evolution ####################################
-
+#t_diff[-1]
 #integrate
 tic = time.perf_counter()
-Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ra, RaH, RanoH, Racrit, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, Ra, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff,f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time = toc - tic    
-
-#update on progress
-plt.figure()
-plt.scatter(rplot,Tprofile[-1,:])
-plt.xlabel('r/km')
-plt.ylabel('Temperature/K')
-plt.title('Temperature profile post thermal evolution')
-
 print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time)))
 
 ############################# Process data ####################################
-########## Current comparitive parameters ####################
-#do before lose resolution
-from parameters import convect_ratio
-nmantle = int((r/dr)/2)
-diff_time = t_diff[-1]/Myr
-diff_T = Tdiff[int(nmantle),-1]
-peakT = np.amax(Tprofile[:,nmantle:])
-loc_max = np.where(Tprofile[:,nmantle:]==peakT)[1][0] #take the set of time coordinates and first value (they should all be the same)
-tmax = t[loc_max]/Myr
-if np.all(Tprofile[:,int(nmantle)-2]<Tcmb):
-    tstrat_remove = np.inf
-else:
-    tstrat_remove = t[Tcmb < Tprofile[:,int(nmantle)-2]][0]/Myr
-    
-if np.any(min_unstable==0):
-     strat_end = t[np.where(min_unstable==0)[0]][0]/Myr
-else:
-    strat_end = np.inf
-    
-if np.all(Fcmb < Fad):
-    super_ad_start = np.inf
-    super_ad_end = np.inf
-else:
-    super_ad_start = t[np.where(Fcmb>Fad)[0]][0]/Myr
-    super_ad_end = t[np.where(Fcmb>Fad)[0]][-1]/Myr
 
 #Reduce data points - as model saves more often than needed
 # take every nth point at an interval specified by save_interval in parameters.py
-Tc= Tc[0::n_save_t]
-Tc_conv = Tc_conv[0::n_save_t]
-Tcmb = Tcmb[0::n_save_t]
-Tm_mid = Tm_mid[0::n_save_t]
-Tm_conv = Tm_conv[0::n_save_t]
-Tm_surf = Tm_surf[0::n_save_t] 
-Tprofile = Tprofile[0::n_save_t,:]
-f = f[0::n_save_t]
-Xs = Xs[0::n_save_t]
-dl = dl[0::n_save_t]
-dc = dc[0::n_save_t]
-d0 = d0[0::n_save_t]
-min_unstable = min_unstable[0::n_save_t]
-Ra = Ra[0::n_save_t]
-RaH = RaH[0::n_save_t]
-RanoH = RanoH[0::n_save_t]
-Racrit = Racrit[0::n_save_t]
-Fs = Fs[0::n_save_t]
-Fad = Fad[0::n_save_t]
-Fcmb = Fcmb[0::n_save_t]
-t = t[0::n_save_t] 
+Tc= Tc[0::n_save]
+Tc_conv = Tc_conv[0::n_save]
+Tcmb = Tcmb[0::n_save]
+Tm_mid = Tm_mid[0::n_save]
+Tm_conv = Tm_conv[0::n_save]
+Tm_surf = Tm_surf[0::n_save] 
+f = f[0::n_save]
+Xs = Xs[0::n_save]
+dl = dl[0::n_save]
+dc = dc[0::n_save]
+d0 = d0[0::n_save]
+Ra = Ra[0::n_save]
+Fs = Fs[0::n_save]
+Fad = Fad[0::n_save]
+Fcmb = Fcmb[0::n_save]
+t = t[0::n_save] 
 if cond_i != 'nan':
-    cond_i = int(cond_i/n_save_t) #scale cond_i too
-
+    cond_i = int(cond_i/n_save) #scale cond_i too
+    
 # calculate Frad, Rem
 from parameters import km, kc, G, rhoc, alpha_c, cpc, gamma
 
@@ -183,7 +141,7 @@ print('Fluxes and magnetic Reynolds number calculated.')
 
 ############################ Save results #####################################
 # save variables to file
-np.savez('Results_combined/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
+np.savez('Results/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, Ra = Ra, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
 
 #write parameters to the run file
 from csv import writer
@@ -195,14 +153,6 @@ var_list = [run, r, Tm0, t_acc/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_i, int
 with open('run_info4.csv','a') as f_object:
     writer_object = writer(f_object) #pass file object to csv.writer
     writer_object.writerow(var_list) # pass list as argument into write row
-    f_object.close() #close file
-  
-#comparative parameters
-var_list2 = [convect_ratio, diff_time, peakT, tmax, tstrat_remove, strat_end, super_ad_start, super_ad_end, diff_T, run]
-
-with open('lid_test.csv','a') as f_object:
-    writer_object = writer(f_object) #pass file object to csv.writer
-    writer_object.writerow(var_list2) # pass list as argument into write row
     f_object.close() #close file
 
 print('Results and run parameters saved')

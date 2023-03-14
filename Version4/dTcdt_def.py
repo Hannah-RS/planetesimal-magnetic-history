@@ -14,14 +14,16 @@ Can toggle on and off solidification
 #import constants and parameters    
 from parameters import gamma, Ts, Acmb, dr, kc, rc, rhoc, cpc
 from cmb_bl import delta_c
-from q_funcs import Qlt, Qgt
+from q_funcs import Qlt, Qgt, Qr
 import numpy as np
 
-def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = [False,0]):
+def dTcdt_calc(t,Fcmb,Tcore,f,solidification = False, stratification = [False,0]):
     """
 
     Parameters
     ----------
+    t : float
+        time [s]
     Fcmb: float
         CMB heat flux [W m^-2]
     Tcore : array
@@ -41,10 +43,10 @@ def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = [False,0]):
     """
     
     if stratification[0] == True:
-        stratification[1] = min_unstable_ind
+        min_unstable_ind = int(stratification[1])
         f3 = -kc*(Tcore[min_unstable_ind]-Tcore[min_unstable_ind-1])/dr #calculate f3 - eqn 28 in Dodds (2020)
-        rconv = min_unstable_ind*dr
-        Vconv = 4/3*np.pi*(rc**3-rconv**3) #calculate Vconv - volume of cmb boundary layer has negligible volume 
+        rstrat = min_unstable_ind*dr
+        Vconv = 4/3*np.pi*(rc**3-rstrat**3) #calculate Vconv - volume of cmb boundary layer has negligible volume 
         Tc = Tcore[min_unstable_ind]
 
 
@@ -56,13 +58,13 @@ def dTcdt_calc(Fcmb,Tcore,f,solidification = False, stratification = [False,0]):
         Tc = Tcore[-2] #take temperature just below CMB as core convective temp
     
     Qst = rhoc*cpc*Vconv
-
+    Qrad = Qr(t)
        
     if solidification == True: #core solidifying so consider buoyancy, latent heat
-        dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb)/(Qst+Qlt(Tc,f)+Qgt(Tc,f))
+        dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb+Qrad)/(Qst+Qlt(Tc,f)+Qgt(Tc,f))
    
     else:
-        dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb)/Qst
+        dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb+Qrad)/Qst
 
  
         

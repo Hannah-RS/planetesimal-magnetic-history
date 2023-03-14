@@ -4,7 +4,7 @@
 Script for calculating the average temperature over a volume
 """
 import numpy as np
-from parameters import rhoc
+from parameters import rhoc, rc
 
 def volume_average(Tprofile, unstable_ind, dr):
     """
@@ -25,21 +25,20 @@ def volume_average(Tprofile, unstable_ind, dr):
         volume average temperature
 
     """
-        
-    
-    min_unstable = min(unstable_ind)
-    max_unstable = max(unstable_ind)
-    r = unstable_ind*dr
-    
-    if min_unstable==0: #if central node is unstable that is same as one node up being unstable
+    rcore = np.arange(0,rc,dr)    
+    min_unstable = int(min(unstable_ind)) 
+    if min_unstable ==0: #amend unstable indices so layer mass works
         min_unstable = 1
-    else:
-        r = np.insert(r,0,(min_unstable-1)*dr) # add one radius smaller
+        unstable_ind = unstable_ind[1:]
+    max_unstable = int(max(unstable_ind))
+    r = rcore[unstable_ind]
     
     r = np.append(r,(max_unstable+1)*dr) # add one radius larger     
     m = rhoc*4/3*np.pi*r**3
     mlayer = np.diff(m)
-    T = (Tprofile[min_unstable:max_unstable+2]+Tprofile[min_unstable-1:max_unstable+1])*mlayer/2 #use temp of midpoints
+    Tmid = [(a + b) / 2 for a, b in zip(Tprofile[:-1], Tprofile[1:])]
+   
+    T = Tmid[-len(mlayer):]*mlayer #use temp of midpoints
     Tave = np.sum(T)/np.sum(mlayer)
     
     return Tave
@@ -50,19 +49,19 @@ def volume_average(Tprofile, unstable_ind, dr):
 # unstable_ind = [2]
 # if volume_average(Tprofile,unstable_ind,1)==1:
 #     pass
-# else: raiseValueError('Test failed')
+# else: raise ValueError('Test failed')
 
 # #multiple points
 # Tprofile = np.ones([10])
 # unstable_ind = [2,3]
 # if volume_average(Tprofile,unstable_ind,1)==1:
 #     pass
-# else: raiseValueError('Test failed')
+# else: raise ValueError('Test failed')
 
 # #including the base
 # Tprofile = np.ones([10])
 # unstable_ind = [0,1]
 # if volume_average(Tprofile,unstable_ind,1)==1:
 #     pass
-# else: raiseValueError('Test failed')
+# else: raise ValueError('Test failed')
 

@@ -19,34 +19,53 @@ year=60*60*24*365 #number of seconds in a year
 Myr=1e6*year
 
 # Size of body
-r = 400e3 # radius of asteroid [m]
+r = 500e3 # radius of asteroid [m]
+V = 4/3*np.pi*r**3
 rc = r/2 #radius of core [m]
 dr = 500 # size of cells [m]
-out_interval =10*Myr #how often do you want temp profiles to be output
-save_interval = 0.01*Myr # how often do you want each variable to be saved
+out_interval =20 #how many times do you want t to be printed in the whole run
+save_interval_d = 0.01*Myr # how often do you want each variable to be saved during differentiation
+save_interval_t = 1*Myr # how often do you want each variable to be saved during thermal evolution
 
 #Surface parameters
 Ts=200 # surface temperature, modelled as fixed [K]
 As = 4*np.pi*r**2 # surface area [m^2]
 
+#Undifferentiated parameters
+ka = 2.295 # [W /m /K] same as mantle (correct for post sintering - Dodds 2021)
+rhoa = 3500 # kg m^-3 density of undifferentiated material (Dodds 2021 rho_b)
+cpa = 850 # heat capacity [J /kg /K] (Elkins-Tanton 2011, Bryson 2019 use silicate value)
+alpha_a = 4e-5 # thermal expansivity of mantle [/K]
 # Mantle parameters
-cpm = 800 # heat capacity [J /kg /K]
+cpm = 850 # heat capacity [J /kg /K] (Dodds et al.)
 Lm = 400e3 #latent heat of mantle [J /kg]
-Tml = 1800 # liquidus [K]
-Tms = 1400 # solidus [K]
+Tml = 1800 # mantle liquidus [K]
+Tms = 1400 # mantle solidus [K]
 rhom = 3000 # density [kg m^-3]
-h0 = 0.355 # [W/ kg] heating rate of Al^26 at t=0
-Al0 = 5e-5 # 26Al/27Al ratio in accreting material
-XAl = 0.014 # abundance of Al in accreting material [wt % /100]
-thalf_al = 0.717*Myr # half life of Al26 [s]
 alpha_m = 4e-5 # thermal expansivity of mantle [/K]
 kappa = 9e-7 # thermal diffusivity of silicate [m^2 /s] - 4 options are given in Bryson (2019) have picked the one used in the figures
 Rac = 1000  #critical Rayleigh number 
 E = 300e3 # activation energy [J /mol]
 R = 8.31 # gas constant [J /K /mol]
+Tref = 1800 # viscosity reference temperature (Dodds 2021) [K] 
 Tm0 = 1600 # intial mantle temp - from beginning of stage 2 in Figure 1 of Bryson (2019)
 c1 = 8 # constant in boundary layer thickness Dodds (2021)
+convect_ratio = 0.001 #ratio of d0/r for onset of convection in differentiation
 
+#radiogenic heating
+h0Al = 0.355 # [W/ kg] heating rate of Al^26 at t=0 (Dodds 2021)
+Al0 = 5e-5 # 26Al/27Al ratio in accreting material (Dodds 2021)
+XAl_a = 0.014 # abundance of Al in accreting material [wt % /100] (Dodds 2021)
+thalf_al = 0.717*Myr # half life of Al26 [s] (Dodds 2021)
+h0Fe = 0.0366 # [W/ kg] heating rate of 60Fe at t=0 (Dodds thesis)
+Fe0 = 0#1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
+XFe_a = 0.224 # abundance of Fe in accreting material [wt % /100] (Dodds thesis - Lodders 2021 for CV chondrites)
+thalf_fe = 2.62*Myr # half life of 60Fe [s] (Dodds thesis - Ruedas 2017)
+
+Xs_0 = 30 # initial wt % sulfur in core (needs a citation)
+XFe_d =0# 1 - Xs_0/100 #abundance of Fe in core assuming S is only other significant phase [wt %]
+Xs_to_core = XFe_a/(1-Xs_0/100)-XFe_a # wt % of S from accreted body that went into core
+XAl_d = XAl_a/(1-XFe_d-Xs_to_core)
 #viscosity models
 default ='Dodds' #default viscosity model
 # Bryson 2019
@@ -70,21 +89,10 @@ alpha_c=9.2e-5 #[K^-1] 9.2e-5
 Lc = 270e3 # latent heat of core [J kg^-1] 750,000
 drho=0.025 # \delta rho/rho 0.05 Nimmo (2009)
 Delta=1.2 #dTm/dP/dT/dP 1.2 Nimmo (2009)
-Tsolidus = 1450 # solidus temp [K] based on phase diagram from Scheinberg 2016
 eta_c =0.01 # viscosity of core [Pa s] Dodds (2021)
 bpart = 0.5 #buoyancy partitioning coefficient Nichols (2021) but based on Aubert 2009 - might want to investigate
-Xs_0 = 32 # initial wt % sulfur in core (needs a citation)
 Xs_eutectic = 32 # eutectic wt% S
-#radioactivity
-#assume core is pure iron with ppm amounts of K that has a negligible effect on mass
-# energy generation rate per unit mass iron = de_fe * f60 * e^(-t/thalf_fe) 
-# energy generation rate per unit mass potassium = de_k * ppm * e^(-t/thalf_k) 
-thalf_fe=2.62*Myr #Henke 2013
-thalf_k = 1.25e9*year #Wikipedia
-f60 = 1e-6 # ratio of Fe60 to Fe56 Tachibana 2006 (Nimmo 2009)
-ppm_k=400 # Nimmo 2004
-de_fe = 4.9e9
-de_k = 0.382
+Ts_fe = 1234 # FeFeS solidus [K]
 
 # Initial conditions
 Tc0=Tm0# intial CMB temp [K] is same as intial mantle temp from Fig 1 in Bryson (2019)
@@ -95,8 +103,22 @@ lambda_mag = 1.3 # magnetic diffusivity [m^2 s^{-1}] 2
 Omega = 1.75e-4 # rotational frequency (10 hr period) [s^{-1}] 6hr period in N09
 beta=0.85 
 
+#Modified specific heat capacities
+from fe_fes_liquidus import fe_fes_liquidus
+Tl_fe = fe_fes_liquidus(Xs_0)
+#before differentiation
+if Xs_0 != Xs_eutectic:
+    cpa_fe = cpa + XFe_a*Lc/(Tl_fe-Ts_fe) #cp for Tfe_s < T < Tsi_s
+    cpa_fesi = cpa + XFe_a*Lc/(Tl_fe-Ts_fe) + (1-XFe_a)*Lm/(Tml-Tms) #cp for Tms < T < Tfe_s
+else:
+    cpa_fe = None
+    cpa_fesi = None
+    
+cpa_si = cpa + (1-XFe_a)*Lm/(Tml-Tms) #cp for Tfe_l < T < Tml
+#after differentiation
+cpm_p = cpm*(1+(Lm/(cpm*(Tml-Tms)))) # modified mantle heat capacity accounting for latent heat Tms < Tm <Tml
+
 # Calculated mantle parameters
-cpm_p = cpm*(1+(Lm/(cpm*(Tml-Tms)))) # modified mantle heat capacity accounting for latent heat
 Vm = 4/3*np.pi*(r**3-rc**3) # volume of magma ocean, assumed to be same as volume of mantle
 gamma = E/(R*T0eta**2)
 g = G*(Vm*rhom+4/3*np.pi*rc**3*rhoc)/r**2 # surface gravity 
