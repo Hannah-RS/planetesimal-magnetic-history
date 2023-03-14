@@ -360,7 +360,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             
             if min_unstable[i-1]>0:  #there is thermal stratification 
                 
-                if np.all(T_old_core < Tcmb[i-1]):
+                if np.all(T_old_core[:-1] < Tcmb[i-1]):
                         # scenario 1 - just conduction in the core
                         # use already calculated condctive profile and keep core in current state
                         f[i] = f[i-1]
@@ -368,7 +368,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
 
                 else: #scenario 2 - erosion of stratification, convective layer at top of core
                     core_conv = True
-                    b_ind = np.where( T_old_core >= Tcmb[i-1])[0] #indices of unstable layer as array
+                    b_ind = np.where( T_old_core[:-1] >= Tcmb[i-1])[0] #indices of unstable layer as array
                     min_unstable[i] = b_ind[0]
                     
                     # is the core solidifying?
