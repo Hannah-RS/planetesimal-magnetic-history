@@ -26,7 +26,7 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run =5
+run =1
 
 t_acc=0.8*Myr  #Accretion time
 t_end_m=50#end time in Myr
@@ -93,6 +93,31 @@ plt.title('Temperature profile post thermal evolution')
 print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time)))
 
 ############################# Process data ####################################
+########## Current comparitive parameters ####################
+#do before lose resolution
+from parameters import convect_ratio
+nmantle = int((r/dr)/2)
+diff_time = t_diff[-1]/Myr
+diff_T = Tdiff[int(nmantle),-1]
+peakT = np.amax(Tprofile[:,nmantle:])
+loc_max = np.where(Tprofile[:,nmantle:]==peakT)[1][0] #take the set of time coordinates and first value (they should all be the same)
+tmax = t[loc_max]/Myr
+if np.all(Tprofile[:,int(nmantle)-2]<Tcmb):
+    tstrat_remove = np.inf
+else:
+    tstrat_remove = t[Tcmb < Tprofile[:,int(nmantle)-2]][0]/Myr
+    
+if np.any(min_unstable==0):
+     strat_end = t[np.where(min_unstable==0)[0]][0]/Myr
+else:
+    strat_end = np.inf
+    
+if np.all(Fcmb < Fad):
+    super_ad_start = np.inf
+    super_ad_end = np.inf
+else:
+    super_ad_start = t[np.where(Fcmb>Fad)[0]][0]/Myr
+    super_ad_end = t[np.where(Fcmb>Fad)[0]][-1]/Myr
 
 #Reduce data points - as model saves more often than needed
 # take every nth point at an interval specified by save_interval in parameters.py
@@ -172,30 +197,8 @@ with open('run_info4.csv','a') as f_object:
     writer_object.writerow(var_list) # pass list as argument into write row
     f_object.close() #close file
   
-########## Current comparitive parameters ####################
-from parameters import convect_ratio
-nmantle = int((r/dr)/2)
-diff_time = t_diff[-1]/Myr
-diff_T = Tdiff[int(nmantle),-1]
-peakT = np.amax(Tprofile[:,nmantle:])
-loc_max = np.where(Tprofile[:,nmantle:]==peakT)[1][0] #take the set of time coordinates and first value (they should all be the same)
-tmax = t[loc_max]/Myr
-if np.all(Tprofile[:,int(nmantle)-2]<Tcmb):
-    tstrat_remove = np.inf
-else:
-    tstrat_remove = t[Tcmb < Tprofile[:,int(nmantle)-2]][0]/Myr
-    
-if np.any(min_unstable==0):
-     strat_end = t[np.where(min_unstable==0)[0]][0]/Myr
-else:
-    strat_end = np.inf
-    
-if np.all((Fcmb < Fad) | (min_unstable>=0)):
-    tc_conv = np.inf
-else:
-    tc_conv = t[np.where((Fcmb>Fad) & (min_unstable==0))[0]][0]/Myr
-
-var_list2 = [convect_ratio, diff_time, peakT, tmax, tstrat_remove, strat_end, tc_conv, diff_T, run]
+#comparative parameters
+var_list2 = [convect_ratio, diff_time, peakT, tmax, tstrat_remove, strat_end, super_ad_start, super_ad_end, diff_T, run]
 
 with open('lid_test.csv','a') as f_object:
     writer_object = writer(f_object) #pass file object to csv.writer
