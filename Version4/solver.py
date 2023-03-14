@@ -26,7 +26,7 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run =1
+run =12
 
 t_acc=0.8*Myr  #Accretion time
 t_end_m=50#end time in Myr
@@ -79,7 +79,7 @@ np.savez(f'Results_combined/run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi
 
 #integrate
 tic = time.perf_counter()
-Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ra, RaH, RanoH, Racrit, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ra, RaH, RanoH, Racrit, Fs, Fad, Fcmb, t, cond_t = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time = toc - tic    
 
@@ -94,7 +94,7 @@ print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_t
 
 ############################# Process data ####################################
 ########## Current comparitive parameters ####################
-#do before lose resolution
+
 from parameters import convect_ratio
 nmantle = int((r/dr)/2)
 diff_time = t_diff[-1]/Myr
@@ -118,32 +118,6 @@ if np.all(Fcmb < Fad):
 else:
     super_ad_start = t[np.where(Fcmb>Fad)[0]][0]/Myr
     super_ad_end = t[np.where(Fcmb>Fad)[0]][-1]/Myr
-
-#Reduce data points - as model saves more often than needed
-# take every nth point at an interval specified by save_interval in parameters.py
-Tc= Tc[0::n_save_t]
-Tc_conv = Tc_conv[0::n_save_t]
-Tcmb = Tcmb[0::n_save_t]
-Tm_mid = Tm_mid[0::n_save_t]
-Tm_conv = Tm_conv[0::n_save_t]
-Tm_surf = Tm_surf[0::n_save_t] 
-Tprofile = Tprofile[0::n_save_t,:]
-f = f[0::n_save_t]
-Xs = Xs[0::n_save_t]
-dl = dl[0::n_save_t]
-dc = dc[0::n_save_t]
-d0 = d0[0::n_save_t]
-min_unstable = min_unstable[0::n_save_t]
-Ra = Ra[0::n_save_t]
-RaH = RaH[0::n_save_t]
-RanoH = RanoH[0::n_save_t]
-Racrit = Racrit[0::n_save_t]
-Fs = Fs[0::n_save_t]
-Fad = Fad[0::n_save_t]
-Fcmb = Fcmb[0::n_save_t]
-t = t[0::n_save_t] 
-if cond_i != 'nan':
-    cond_i = int(cond_i/n_save_t) #scale cond_i too
 
 # calculate Frad, Rem
 from parameters import km, kc, G, rhoc, alpha_c, cpc, gamma
@@ -189,7 +163,7 @@ np.savez('Results_combined/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb
 from csv import writer
 from parameters import r, Tm0, default
 
-var_list = [run, r, Tm0, t_acc/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_i, int_time, dr, out_interval/Myr, default]
+var_list = [run, r, Tm0, t_acc/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_t, int_time, dr, out_interval/Myr, default]
 
     
 with open('run_info4.csv','a') as f_object:
@@ -197,12 +171,12 @@ with open('run_info4.csv','a') as f_object:
     writer_object.writerow(var_list) # pass list as argument into write row
     f_object.close() #close file
   
-#comparative parameters
-var_list2 = [convect_ratio, diff_time, peakT, tmax, tstrat_remove, strat_end, super_ad_start, super_ad_end, diff_T, run]
+# #comparative parameters
+# var_list2 = [convect_ratio, diff_time, peakT, tmax, tstrat_remove, strat_end, super_ad_start, super_ad_end, diff_T, run]
 
-with open('lid_test.csv','a') as f_object:
-    writer_object = writer(f_object) #pass file object to csv.writer
-    writer_object.writerow(var_list2) # pass list as argument into write row
-    f_object.close() #close file
+# with open('lid_test.csv','a') as f_object:
+#     writer_object = writer(f_object) #pass file object to csv.writer
+#     writer_object.writerow(var_list2) # pass list as argument into write row
+#     f_object.close() #close file
 
-print('Results and run parameters saved')
+# print('Results and run parameters saved')
