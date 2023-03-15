@@ -311,7 +311,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T_old_mantle[1],default) #use temp at base of mantle 
         Racrit_new = Rayleigh_crit(T_old_mantle[1])   
         
-        if Ra_new <= Racrit_new:
+        if (Ra_new <= Racrit_new) | (Tm_conv_old ==0):
             mantle_conv = False
             if Tm_conv_old!=0: #check if first time it is conductive i.e. the switch
                 cond_t = tsolve_new #record time for switch to conduction
@@ -545,8 +545,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Fad[save_ind] = Fad_old
             Fcmb[save_ind] = Fcmb_old
             tsolve[save_ind] = tsolve_old
-            print('Parameters are saved at t={:.2f}Myr'.format(tsolve_new/Myr)) #useful to track progress of simulation
-            print('Reduced index is',int(i*dt/save_interval_t))
         
         if i%int((tstart-tend)/(dt*out_interval))==0: #every 1/out_interval fraction of the run print the time
             print('t={:.2f}Myr'.format(tsolve_new/Myr)) #useful to track progress of simulation
