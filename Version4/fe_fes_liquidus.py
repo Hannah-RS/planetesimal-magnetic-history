@@ -46,7 +46,11 @@ def fe_fes_liquids_bw(Xs,P):
     Mr_s = 32.07 # Pub chem [amu]
     Mr_fe = 55.84 #Pub chem  [amu]
     Xsd = Xs/100 #convert wt % to decimal
-    x = Xsd/(Xsd+(1-Xsd)*(Mr_s/Mr_fe)) #mole fraction sulfur
+
+    mrr = Mr_fe/Mr_s
+    molefrac_fes = Xsd*mrr*(1-Xsd*(1+mrr))**(-1)
+
+    x = molefrac_fes
     
     
     A = -2.4724*P**4 + 28.025*P**3 + 9.1404*P**2 + 581.71*P + 3394.8
