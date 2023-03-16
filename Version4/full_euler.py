@@ -189,6 +189,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     # is the core solidifying?
     Tliquidus = fe_fes_liquidus(Xs_0)
     if np.any(T0_core < Tliquidus) == True: #core solidifies - convecting so isothermal beneath CMB
+        core_conv = False
         if Xs_0>= Xs_eutectic:
             dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
             dfdt = Fcmb_new*Acmb/(4*np.pi*rc**3*f0**2*Lc*rhoc)                    
@@ -197,13 +198,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             #find new convective temperature
             Tc_conv_new = T0_core[0] 
             T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
-            #check if there is thermal convection
-            if (Fcmb_new > Fad_new): #thermal stratification will not still exist at 1234K so only check super adiabatic
-                core_conv = True
-            else: 
-                core_conv = False
+
         else:
-            core_conv = True #compositional convection
+
             min_unstable_new = 0               
             dTcdt, f_new = dTcdt_calc_solid(tsolve_new,Fcmb_new, T0_core, f0, Xs_0, dt) 
             #find new convective temperature
@@ -344,6 +341,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         # is the core solidifying?
         Tliquidus = fe_fes_liquidus(Xs_old)
         if np.any(T_old_core[0] < Tliquidus) == True: #core solidifies - convecting so isothermal beneath CMB
+            core_conv = False #core convects but b.l. thickness set by rho not T so use conductive Fcmb
             if Xs_old>= Xs_eutectic:
                 dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
                 dfdt = Fcmb_old*Acmb/(4*np.pi*rc**3*f_old**2*Lc*rhoc)                    
@@ -352,13 +350,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 #find new convective temperature
                 Tc_conv_new = T_old_core[0] 
                 T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
-                #check if there is thermal convection
-                if (Fcmb_old > Fad_old): #thermal stratification will not still exist at 1234K so only check super adiabatic
-                    core_conv = True
-                else: 
-                    core_conv = False
+                
             else:
-                core_conv = True #compositional convection
                 min_unstable_new = 0               
                 dTcdt, f_new = dTcdt_calc_solid(tsolve_new,Fcmb_old, T_old_core, f_old, Xs_old, dt) 
                 #find new convective temperature

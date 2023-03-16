@@ -12,12 +12,14 @@ Can toggle on and off solidification
 
 """
 #import constants and parameters    
-from parameters import gamma, Ts, Acmb, dr, kc, rc, rhoc, cpc
+from parameters import gamma, Ts, Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Ts_fe, G, Lc, drho, Delta, D
+from F_def import F_calc
 from cmb_bl import delta_c
-from q_funcs import Qlt, Qgt, Qr
+from q_funcs import Qr, Qlt, Qgt
+from fe_fes_liquidus import fe_fes_liquidus
 import numpy as np
 
-def dTcdt_calc(t,Fcmb,Tcore,f,solidification = False, stratification = [False,0]):
+def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
     """
 
     Parameters
@@ -29,9 +31,9 @@ def dTcdt_calc(t,Fcmb,Tcore,f,solidification = False, stratification = [False,0]
     Tcore : array
         core temperature array [K]
     f : float
-        fractional inner core radius 
-    solidification: bool
-        is the core solidifying, default is False
+        fractional inner core radius
+    Xs : float
+        sulfur content [wt %]
     stratification: list
         is the unstably core stratified: bool
         index of lowest unstable cell 
@@ -60,12 +62,52 @@ def dTcdt_calc(t,Fcmb,Tcore,f,solidification = False, stratification = [False,0]
     Qst = rhoc*cpc*Vconv
     Qrad = Qr(t)
        
-    if solidification == True: #core solidifying so consider buoyancy, latent heat
-        dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb+Qrad)/(Qst+Qlt(Tc,f)+Qgt(Tc,f))
-   
-    else:
-        dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb+Qrad)/Qst
-
- 
+    dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb+Qrad)/Qst
         
     return dTcdt
+
+def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
+    """
+    Temp change for solidification
+    
+    Parameters
+    ----------
+    t : float
+        time [s]
+    Fcmb: float
+        CMB heat flux [W m^-2]
+    Tcore : array
+        core temperature array [K]
+    f : float
+        fractional inner core radius
+    Xs : float
+        sulfur content [wt %]
+    dt : float
+        timestep [s]
+    Returns
+    -------
+    dTcdt : float
+            rate of change of core temperature (if negative core is cooling)
+    f_new : float
+        new fractional inner core radius
+
+    """
+    #calculate melt fraction
+    # Tl = fe_fes_liquidus(Xs)
+    # Xfe = (Tcore[0]-Tl)/(Tl-Ts_fe) #use central temp
+    # f_new = ((1-Xfe)*(1-f**3)+f**3)**(1/3) #new solid core radius
+    # dri_dt = (f_new-f)*rc/dt
+    # F = F_calc(f_new)
+    
+    Qst = rhoc*cpc*Vc
+    Qrad = Qr(t)
+    Ql = Qlt(Tcore[0],f)
+    Qg = Qgt(Tcore[0],f)
+    #Qg = 6*np.pi*G*F*Vc*rhoc**2*drho*f_new*rc*dri_dt #gravitational potential energy
+    #Ql = 4*np.pi*f_new**2*rc**2*rhoc*Lc*dri_dt 
+    
+    dTcdt = (Qrad-Fcmb*Acmb)/(Qst-Ql-Qg)
+    dfdt = -D**2/(2*Tcore[0]*f*rc**2*(Delta-1))*dTcdt
+    f_new = f+dfdt*dt
+          
+    return dTcdt, f_new

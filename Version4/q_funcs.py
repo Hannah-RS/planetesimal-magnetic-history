@@ -25,9 +25,9 @@ def Qlt(Tc,f):
     """
 
     
-    Mc = 4/3*np.pi*rc**3*rhoc
     
-    return -3/2*Mc*f*Lc*D**2/(rc**2*Tc*(Delta-1))
+    
+    return -2*np.pi*f*rc*Lc*rhoc*D**2/(Tc*(Delta-1))
 
 
 def Qst(Tc):
