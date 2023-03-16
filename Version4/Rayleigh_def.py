@@ -151,6 +151,5 @@ def Rayleigh_differentiate(t,Tb,model=default):
         convect = True
     else: 
         convect = False
-    #convect = RanoH>Ra_crit
     
     return RaH, d0H,  Ra_crit, convect
