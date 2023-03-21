@@ -4,7 +4,6 @@
 Function for differentiating an asteroid. Based on the process in Dodds et. al. (2021)
 """
 from stencil import cond_stencil_general
-from fe_fes_liquidus import fe_fes_liquidus
 from Rayleigh_def import Rayleigh_differentiate
 from heating import AlFe_heating
 from scipy import sparse as sp

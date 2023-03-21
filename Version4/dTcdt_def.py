@@ -12,11 +12,11 @@ Can toggle on and off solidification
 
 """
 #import constants and parameters    
-from parameters import gamma, Ts, Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Ts_fe, G, Lc, drho, Delta, D
+from parameters import gamma, Ts, Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Ts_fe, G, Lc, drho, Delta, D, Pc
 from F_def import F_calc
 from cmb_bl import delta_c
 from q_funcs import Qr, Qlt, Qgt
-from fe_fes_liquidus import fe_fes_liquidus
+from fe_fes_liquidus import fe_fes_liquidus_bw
 import numpy as np
 
 def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
@@ -92,12 +92,7 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
         new fractional inner core radius
 
     """
-    #calculate melt fraction
-    # Tl = fe_fes_liquidus(Xs)
-    # Xfe = (Tcore[0]-Tl)/(Tl-Ts_fe) #use central temp
-    # f_new = ((1-Xfe)*(1-f**3)+f**3)**(1/3) #new solid core radius
-    # dri_dt = (f_new-f)*rc/dt
-    # F = F_calc(f_new)
+
     
     Qst = rhoc*cpc*Vc
     Qrad = Qr(t)

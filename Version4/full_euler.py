@@ -15,7 +15,7 @@ import numpy as np
 import scipy.sparse as sp
 import scipy.optimize as sco
 from parameters import Ts, Myr, Rac, B, dr, out_interval, save_interval_t, km, kc, alpha_m, alpha_c, r, rc, rhoc, rhom, eta_c, g, gc
-from parameters import cpc, Xs_0, default, kappa, kappa_c, c1, gamma, Xs_eutectic, Acmb, Lc, Ts_fe, Tl_fe
+from parameters import cpc, Xs_0, default, kappa, kappa_c, c1, gamma, Xs_eutectic, Acmb, Lc, Ts_fe, Tl_fe, Pc
 
 #import required functions
 from T_cond import Tm_cond_calc, Tc_cond_calc
@@ -24,7 +24,7 @@ from dTcdt_def import dTcdt_calc, dTcdt_calc_solid
 from Rayleigh_def import Rayleigh_calc, Rayleigh_crit
 from viscosity_def import viscosity
 from cmb_bl import delta_l, delta_c
-from fe_fes_liquidus import fe_fes_liquidus 
+from fe_fes_liquidus import fe_fes_liquidus_bw 
 from stratification import volume_average
 
 def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
@@ -187,7 +187,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Fad_new = kc*T0_core[-2]*alpha_c*gc/cpc
     # Step 4. Is the core solidifying? 
     # is the core solidifying?
-    Tliquidus = fe_fes_liquidus(Xs_0)
+    Tliquidus = fe_fes_liquidus_bw(Xs_0,Pc)
     if np.any(T0_core < Tliquidus) == True: #core solidifies - convecting so isothermal beneath CMB
         core_conv = False
         if Xs_0>= Xs_eutectic:
@@ -339,7 +339,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         
         # Step 4. Is the core solidifying? 
         # is the core solidifying?
-        Tliquidus = fe_fes_liquidus(Xs_old)
+        Tliquidus = fe_fes_liquidus_bw(Xs_old,Pc)
         if np.any(T_old_core[0] < Tliquidus) == True: #core solidifies - convecting so isothermal beneath CMB
             core_conv = False #core convects but b.l. thickness set by rho not T so use conductive Fcmb
             if Xs_old>= Xs_eutectic:

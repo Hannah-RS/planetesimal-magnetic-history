@@ -95,7 +95,6 @@ drho=0.025 # \delta rho/rho 0.05 Nimmo (2009)
 Delta=1.2 #dTm/dP/dT/dP 1.2 Nimmo (2009)
 eta_c =0.01 # viscosity of core [Pa s] Dodds (2021)
 bpart = 0.5 #buoyancy partitioning coefficient Nichols (2021) but based on Aubert 2009 - might want to investigate
-Xs_eutectic = 32 # eutectic wt% S
 
 
 # Initial conditions
@@ -123,9 +122,11 @@ B=D**2/(2*rc**2*(Delta-1))
 Acmb=4*np.pi*rc**2
 
 #Modified specific heat capacities
-from fe_fes_liquidus import fe_fes_liquidus
-Tl_fe = fe_fes_liquidus(Xs_0)
-Ts_fe = fe_fes_liquidus(Xs_eutectic) # FeFeS solidus [K]
+from fe_fes_liquidus import fe_fes_liquidus_bw
+Ts_fe = 1260 # Buono and Walker [K]
+Xs_eutectic = 32 # Buono & Walker give 31.9-32.7 for 10-500km size bodies
+Tl_fe = fe_fes_liquidus_bw(Xs_0,Pc)
+
 #before differentiation
 if Xs_0 != Xs_eutectic:
     cpa_fe = cpa + XFe_a*Lc/(Tl_fe-Ts_fe) #cp for Tfe_s < T < Tsi_s
