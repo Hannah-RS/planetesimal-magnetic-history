@@ -12,11 +12,9 @@ Can toggle on and off solidification
 
 """
 #import constants and parameters    
-from parameters import gamma, Ts, Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Ts_fe, G, Lc, drho, Delta, D, Pc
-from F_def import F_calc
-from cmb_bl import delta_c
+from parameters import Acmb, dr, kc, rc, rhoc, cpc, alpha_c, Vc, Xs_0, D, Pc
 from q_funcs import Qr, Qlt, Qgt
-from fe_fes_liquidus import fe_fes_liquidus_bw
+from fe_fes_liquidus import fe_fes_liquidus_dp
 import numpy as np
 
 def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
@@ -92,17 +90,18 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
         new fractional inner core radius
 
     """
-
-    
+    dTl_dP = fe_fes_liquidus_dp(Xs, Pc)
+    Delta = dTl_dP*(rhoc*cpc)/(alpha_c*Tcore[0])
     Qst = rhoc*cpc*Vc
     Qrad = Qr(t)
-    Ql = Qlt(Tcore[0],f)
-    Qg = Qgt(Tcore[0],f)
-    #Qg = 6*np.pi*G*F*Vc*rhoc**2*drho*f_new*rc*dri_dt #gravitational potential energy
-    #Ql = 4*np.pi*f_new**2*rc**2*rhoc*Lc*dri_dt 
-    
+    Ql = Qlt(Tcore[0],f,Delta)
+    Qg = Qgt(Tcore[0],f,Delta)
+
     dTcdt = (Qrad-Fcmb*Acmb)/(Qst-Ql-Qg)
-    dfdt = -D**2/(2*Tcore[0]*f*rc**2*(Delta-1))*dTcdt
+    if Delta < 1:
+        dfdt = -D**2/(2*Tcore[0]*f*rc**2*(1-Delta))*dTcdt
+    else:
+        dfdt = -D**2/(2*Tcore[0]*f*rc**2*(Delta-1))*dTcdt
     f_new = f+dfdt*dt
           
     return dTcdt, f_new

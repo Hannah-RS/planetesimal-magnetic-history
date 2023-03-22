@@ -3,11 +3,11 @@
 """
 Expressions for heat fluxes divided by dTcdt from Nimmo (2009)
 """
-from parameters import rc, rhoc, Lc, Delta, D, cpc, drho, G
+from parameters import rc, rhoc, Lc, D, cpc, drho, G
 from heating import Fe_heating
 import numpy as np
 
-def Qlt(Tc,f):
+def Qlt(Tc,f,Delta):
     """
     From Table 1 in Nimmo, F. (2009). Energetics of asteroid dynamos and the role of compositional convection. but divided by dTc/dt
 
@@ -17,17 +17,20 @@ def Qlt(Tc,f):
         core temperature.
     f : float
         fractional inner core radius.
+    Delta : float
+        dTl/dP*rho*cp/(alpha*Tc) from Nimmo (2009)
 
     Returns
     -------
     Power contribution due to release of latent heat divided by dTc/dt
 
     """
-
+    if Delta < 1:
+        Qlt = -2*np.pi*f*rc*Lc*rhoc*D**2/(Tc*(1-Delta))
+    else:
+        Qlt = -2*np.pi*f*rc*Lc*rhoc*D**2/(Tc*(Delta-1))
     
-    
-    
-    return -2*np.pi*f*rc*Lc*rhoc*D**2/(Tc*(Delta-1))
+    return Qlt
 
 
 def Qst(Tc):
@@ -51,7 +54,7 @@ def Qst(Tc):
     return -Mc*cpc*(1+2/5*rc**2/D**2)
 
     
-def Qgt(Tc,f):
+def Qgt(Tc,f,Delta):
     """
     From Table 1 in Nimmo, F. (2009). Energetics of asteroid dynamos and the role of compositional convection. Qg but divided by dTc/dt
 
@@ -61,6 +64,8 @@ def Qgt(Tc,f):
         core temperature.
     f : float
         fractional inner core radius
+    Delta : float
+        dTl/dP*rho*cp/(alpha*Tc) from Nimmo (2009)
 
     Returns
     -------
@@ -73,7 +78,12 @@ def Qgt(Tc,f):
     from F_def import F_calc
     F = F_calc(f)
     
-    return -3*np.pi*G*rhoc*Mc*F*drho/(Delta-1)*D**2/Tc
+    if Delta < 1:
+        Qgt = -3*np.pi*G*rhoc*Mc*F*drho/(1-Delta)*D**2/Tc
+    else: 
+        Qgt = -3*np.pi*G*rhoc*Mc*F*drho/(Delta-1)*D**2/Tc
+    
+    return Qgt
 
 def Qr(t):
     """

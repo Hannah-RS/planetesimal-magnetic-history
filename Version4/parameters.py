@@ -64,7 +64,7 @@ Fe0 = 0#1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 202
 XFe_a = 0.224 # abundance of Fe in accreting material [wt % /100] (Dodds thesis - Lodders 2021 for CV chondrites)
 thalf_fe = 2.62*Myr # half life of 60Fe [s] (Dodds thesis - Ruedas 2017)
 
-Xs_0 = 20 # initial wt % sulfur in core (needs a citation)
+Xs_0 = 30 # initial wt % sulfur in core (needs a citation)
 Mr_s = 32.07 # Pub chem [amu]
 Mr_fe = 55.84 #Pub chem  [amu]
 XFe_d = 1 - Xs_0/100 #abundance of Fe in core assuming S is only other significant phase [wt %]
@@ -92,7 +92,6 @@ kc=30 # thermal conducitivity of core material [Wm^-1 K^-1] 30
 alpha_c=9.2e-5 #[K^-1] 9.2e-5
 Lc = 270e3 # latent heat of core [J kg^-1] 750,000
 drho=0.025 # \delta rho/rho 0.05 Nimmo (2009)
-Delta=1.2 #dTm/dP/dT/dP 1.2 Nimmo (2009)
 eta_c =0.01 # viscosity of core [Pa s] Dodds (2021)
 bpart = 0.5 #buoyancy partitioning coefficient Nichols (2021) but based on Aubert 2009 - might want to investigate
 
@@ -116,9 +115,6 @@ D= np.sqrt(3*cpc/(2*np.pi*alpha_c*rhoc*G)) # scale height [m]
 kappa_c = kc/(cpc*rhoc) #thermal diffusivity of core material
 gc = 4/3*np.pi*rc*rhoc*G #gravitational field strength at CMB
 Pc = 2*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre of core [GPa]
-
-# df/dt = D^2/(2*Tc*rc^2*f*(Delta-1)dTc/dt=B dTc/dt) Equation 7 in N09
-B=D**2/(2*rc**2*(Delta-1))
 Acmb=4*np.pi*rc**2
 
 #Modified specific heat capacities

@@ -107,7 +107,7 @@ def differentiation(Tint,tacc,r,dr,dt):
         #now loop
         i = 1
         cond_i = 0 #convective switch
-        while (convect[i-1]==False) or (Xsi[int(ncells/2),i-1]<0.05): #whilst any part except the top cell is not convecting and less than 5% silicate melted
+        while (convect[i-1]==False) or (Xsi[int(ncells/2),i-1]<0.05) or (Xfe[int(ncells/2),i-1]<1): #whilst any part except the top cell is not convecting and less than 5% silicate melted
         #while t[i-1]<1.16*Myr: 
         #while convect[i-1]==False:
         #while Xsi[int(ncells/2),i-1]<0.2625: #Kathryn criteria for case 1

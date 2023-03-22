@@ -140,14 +140,14 @@ from Rem_calc import Rem_comp, Rem_therm, ucomp_nimmo, ucomp_aubert, p_nichols
 Fdrive = Fcmb - Fad
 Fdrive_nn = Fdrive.copy()
 Fdrive_nn[Fdrive<0]=0
-Rem_t = Rem_therm(Fdrive_nn) # magnetic Reynolds number for thermal convection
+Rem_t = Rem_therm(Fdrive_nn)[f<1] # magnetic Reynolds number for thermal convection
 
 #calculate compositional convection two ways
-unimmo = ucomp_nimmo(t,f)
-power = p_nichols(t,f) #convective power density
-uaubert = ucomp_aubert(power,f)
-Rem_cn = Rem_comp(unimmo,f) # magnetic Reynolds number for compositional convection
-Rem_ca = Rem_comp(uaubert,f) # magnetic Reynolds number for compositional convection
+unimmo = ucomp_nimmo(t[f<1],f[f<1])
+power = p_nichols(t[f<1],f[f<1]) #convective power density
+uaubert = ucomp_aubert(power,f[f<1])
+Rem_cn = Rem_comp(unimmo,f[f<1]) # magnetic Reynolds number for compositional convection
+Rem_ca = Rem_comp(uaubert,f[f<1]) # magnetic Reynolds number for compositional convection
 Rem1 = Rem_cn
 Rem2 = Rem_ca
 Rem1[Rem_cn<Rem_t] = Rem_t[Rem_cn<Rem_t] #replace values where Rem_t < Rem_c
@@ -166,7 +166,7 @@ from parameters import r, Tm0, default
 var_list = [run, r, Tm0, t_acc/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_t, int_time, dr, out_interval/Myr, default]
 
     
-with open('run_info4.csv','a') as f_object:
+with open('run_info4.csv','a') as f_object:         
     writer_object = writer(f_object) #pass file object to csv.writer
     writer_object.writerow(var_list) # pass list as argument into write row
     f_object.close() #close file

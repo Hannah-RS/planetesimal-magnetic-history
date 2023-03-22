@@ -8,8 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
-from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_liquidus_linear
-from parameters import rhoc, rhom, G, Mr_s, Mr_fe, Tml, Tms
+from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_liquidus_linear, fe_fes_liquidus_dp
+from parameters import rhoc, rhom, G, Mr_s, Mr_fe, Tml, Tms, cpc, alpha_c
 
 
 #Create S array
@@ -38,17 +38,28 @@ eutS = []
 for i in range(len(r)):
     eutS.append(Xs[bw[i]>Teut][-1])
 
+#Calculate pressure derivative of liquidus
+dTdP = np.zeros([len(r),100])
+for i, pressure in enumerate(P):
+    dTdP[i,:] = fe_fes_liquidus_dp(Xs,pressure)/1e9 #divide by 1e9 as pressure derivative was for GPa
+Tc = 1400 #estimate for Tc
+Delta = dTdP*(rhoc*cpc)/(alpha_c*Tc)
 
 #find lowest Xs for a given silicate melting
 phi = np.linspace(0.01,0.5,200)
-
 minS = np.zeros([len(r),len(phi)])
 Tphi = Tms+phi*(Tml-Tms)
 for i in range(len(r)):
     for j in range(len(phi)):
         minS[i,j]=Xs[bw[i,:]<Tphi[j]][0]
 
-#print minimum Xs for full melting at differentiation as a function of RCMF
+plt.figure()
+plt.pcolormesh(Xs[Xs<32],r/1e3,Delta[:,Xs<32])
+plt.colorbar(norm=mcolors.LogNorm(),label='$\\frac{dT_L}{dP}$')
+plt.ylabel('radius /km')
+plt.xlabel('$X_s$ /wt %')
+
+#plot minimum Xs for full melting at differentiation as a function of RCMF
 fig = plt.figure(tight_layout=True)
 ax1 = fig.add_subplot(111)
 ax2 = ax1.twiny()
@@ -63,7 +74,7 @@ norm = mcolors.Normalize(vmin=np.min(minS), vmax=np.max(minS))
 sm = plt.cm.ScalarMappable(cmap='viridis', norm=norm)
 sm.set_array([]) 
 plt.colorbar(sm,ax=ax2,label='min X$_s$')
-plt.savefig('Plots/differentiation_Xs.png')
+#plt.savefig('Plots/differentiation_Xs.png')
 
 #plot liquidus for different values of r 
 colors = ['navy','purple','seagreen','cornflowerblue','lightblue']

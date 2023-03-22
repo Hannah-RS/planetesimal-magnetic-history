@@ -7,8 +7,6 @@ liquid iron melting at 1810 K
 Pressure dependent liquidus from Buono & Walker (2011)
 """
 
-import numpy as np
-
 def fe_fes_liquidus_linear(Xs):
     """
     Fe-FeS liquidus - linear liquidus approximation for eutectic solidification at 32% S at 1234K
@@ -89,6 +87,7 @@ def fe_fes_liquidus_dp(Xs,P):
     I = (-4*0.2308*P**3) + 3*7.1*P**2 + (-2*64.118*P) + 105.98
     J = 4*0.2302*P**3 + (-3*5.3688*P**2) + 2*38.124*P + (-46.681)
     
-    dTl_dP = F*x**4 + G*x**3 + H*x**2 + I*x**1 + J
+    dTl_dPg = F*x**4 + G*x**3 + H*x**2 + I*x**1 + J #in K/GPa
+    dTl_dP = dTl_dPg/1e9 #in K/ Pa
     
     return dTl_dP

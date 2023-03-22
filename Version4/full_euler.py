@@ -12,17 +12,14 @@ Flow:
 """
 #import modules
 import numpy as np
-import scipy.sparse as sp
-import scipy.optimize as sco
-from parameters import Ts, Myr, Rac, B, dr, out_interval, save_interval_t, km, kc, alpha_m, alpha_c, r, rc, rhoc, rhom, eta_c, g, gc
-from parameters import cpc, Xs_0, default, kappa, kappa_c, c1, gamma, Xs_eutectic, Acmb, Lc, Ts_fe, Tl_fe, Pc
+from parameters import Ts, Myr, dr, out_interval, save_interval_t, km, kc, alpha_c, r, rc, rhoc, gc
+from parameters import cpc, Xs_0, default, Xs_eutectic, Acmb, Lc, Pc
 
 #import required functions
 from T_cond import Tm_cond_calc, Tc_cond_calc
 from dTmdt_def import dTmdt_calc
 from dTcdt_def import dTcdt_calc, dTcdt_calc_solid 
 from Rayleigh_def import Rayleigh_calc, Rayleigh_crit
-from viscosity_def import viscosity
 from cmb_bl import delta_l, delta_c
 from fe_fes_liquidus import fe_fes_liquidus_bw 
 from stratification import volume_average
