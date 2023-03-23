@@ -9,7 +9,6 @@ import numpy as np
 
 def Qlt(Tc,f,dTl_dP):
     """
-    From Table 1 in Nimmo, F. (2009). Energetics of asteroid dynamos and the role of compositional convection. but divided by dTc/dt
 
     Parameters
     ----------
@@ -31,9 +30,7 @@ def Qlt(Tc,f,dTl_dP):
 
 
 def Qst(Tc):
-    """
-    From Table 1 in Nimmo, F. (2009). Energetics of asteroid dynamos and the role of compositional convection. but divided by dTc/dt
-    
+    """   
 
     Parameters
     ----------
@@ -48,12 +45,11 @@ def Qst(Tc):
     
     Mc = 4/3*np.pi*rc**3*rhoc
     
-    return -Mc*cpc*(1+2/5*rc**2/D**2)
+    return -Mc*cpc
 
     
 def Qgt(Tc,f,dTl_dP,Xs):
     """
-    From Table 1 in Nimmo, F. (2009). Energetics of asteroid dynamos and the role of compositional convection. Qg but divided by dTc/dt
 
     Parameters
     ----------
@@ -75,14 +71,12 @@ def Qgt(Tc,f,dTl_dP,Xs):
     Mrr = 1+Mr_fe/Mr_s
     rhol = Xsd*Mrr*rho_eut + (1-Xsd*Mrr)*rhofe_l
     drho = rhofe_s - rhol 
-    Qgt = 8/3*np.pi**2*G*rhol*drho*(f*rc)**4/(rhoc*gc*dTl_dP)
-    
+    Qgt = -8/3*np.pi**2*G*rhol*drho*(f*rc)**4/(rhoc*gc*dTl_dP)
+    Qgt =0 
     return Qgt
 
 def Qr(t):
     """
-    From Table 1 in Nimmo, F. (2009). Energetics of asteroid dynamos and the role of compositional convection. Neglecting heat from potassium. 
-    For source of radioactive parameters see calculations in yellow folder and refereences in parameters file
 
     Parameters
     ----------

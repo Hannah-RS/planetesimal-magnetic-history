@@ -91,9 +91,9 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     Qst = rhoc*cpc*Vc
     Qrad = Qr(t)
     Ql = Qlt(Tcore[0],f,dTl_dP)
-    Qg = Qgt(Tcore[0],f,dTl_dP,Xs)
+    #Qg = Qgt(Tcore[0],f,dTl_dP,Xs) #exclude as makes neglible difference
 
-    dTcdt = (Qrad-Fcmb*Acmb)/(Qst-Ql-Qg)
+    dTcdt = (Fcmb*Acmb-Qrad)/(Qst+Ql)
     dfdt = - dTcdt/(rhoc*gc*dTl_dP*rc)
 
     f_new = f+dfdt*dt
