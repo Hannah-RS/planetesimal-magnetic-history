@@ -190,7 +190,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         if Xs_0>= Xs_eutectic:
             dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
             dfdt = Fcmb_new*Acmb/(4*np.pi*rc**3*f0**2*Lc*rhoc)                    
-            f_new = f0 + dfdt*dt
+            f_new = f0 - dfdt*dt
             Xs_new = Xs_0 #sulfur concentration unchanged in eutectic solidification
             #find new convective temperature
             Tc_conv_new = T0_core[0] 
@@ -203,7 +203,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             #find new convective temperature
             Tc_conv_new = T0_core[0] + dTcdt*dt 
             T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
-            Xs_new = (1-(f_new**3))*Xs_0 #update sulfur content
+            Xs_new = Xs_0/(f_new**3) #update sulfur content
             
     # Is the core convecting  without solidification?
     elif (Fcmb_new > Fad_new) and (min_unstable_new==0): #super adiabatic and no stratification, core convects
@@ -342,7 +342,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             if Xs_old>= Xs_eutectic:
                 dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
                 dfdt = Fcmb_old*Acmb/(4*np.pi*rc**3*f_old**2*Lc*rhoc)                    
-                f_new = f_old + dfdt*dt
+                f_new = f_old - dfdt*dt
                 Xs_new = Xs_old #sulfur concentration unchanged in eutectic solidification
                 #find new convective temperature
                 Tc_conv_new = T_old_core[0] 
@@ -354,7 +354,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 #find new convective temperature
                 Tc_conv_new = T_old_core[0] + dTcdt*dt 
                 T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
-                Xs_new = (1-(f_new**3))*Xs_0 #update sulfur content
+                Xs_new = Xs_0/(f_new**3) #update sulfur content
                 
             
         
@@ -509,7 +509,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         else: 
             pass
  
-        if f_new>=1: #stop integration if core is solid, 
+        if f_new<=0.001: #stop integration if core is solid i.e.inner liquid core radius < 0.1%, 
             #save values at this point
             save_ind =+ save_ind
             Tc[save_ind] = Tc_old
