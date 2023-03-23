@@ -41,7 +41,7 @@ for i in range(len(r)):
 #Calculate pressure derivative of liquidus
 dTdP = np.zeros([len(r),100])
 for i, pressure in enumerate(P):
-    dTdP[i,:] = fe_fes_liquidus_dp(Xs,pressure)/1e9 #divide by 1e9 as pressure derivative was for GPa
+    dTdP[i,:] = fe_fes_liquidus_dp(Xs,pressure) #divide by 1e9 as pressure derivative was for GPa
 Tc = 1400 #estimate for Tc
 Delta = dTdP*(rhoc*cpc)/(alpha_c*Tc)
 
