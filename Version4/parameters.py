@@ -64,7 +64,7 @@ Fe0 = 0#1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 202
 XFe_a = 0.224 # abundance of Fe in accreting material [wt % /100] (Dodds thesis - Lodders 2021 for CV chondrites)
 thalf_fe = 2.62*Myr # half life of 60Fe [s] (Dodds thesis - Ruedas 2017)
 
-Xs_0 = 30 # initial wt % sulfur in core (needs a citation)
+Xs_0 = 28 # initial wt % sulfur in core (needs a citation)
 Mr_s = 32.07 # Pub chem [amu]
 Mr_fe = 55.84 #Pub chem  [amu]
 XFe_d = 1 - Xs_0/100 #abundance of Fe in core assuming S is only other significant phase [wt %]
@@ -86,7 +86,10 @@ Tcrit = Tms+(Tml-Tms)/2 #50% melting temperature
 
 # Core parameters from Bryson (2019)
 #values from Nimmo 2009 are shown after the units in square brackets if they disagree
-rhoc=7800 # density of core [kg m^-3] 7019
+rhofe_l = 6980 # density of pure liquid iron [kg m^-3] Bryson 2016
+rhofe_s = 7980 # density of pure solid iron [kg m^-3] Bryson 2019
+rho_eut = 4992 # density of eutectic Fe-FeS solid [kg m^-3] Buono & Walker 2011
+rhoc= Xs_0/100*(1+Mr_fe/Mr_s)*rho_eut + (1-Xs_0/100*(1+Mr_fe/Mr_s))*rhofe_l # density of core [kg m^-3] 
 cpc=850 # heat capacity of core [J kg^-1 K^-1] 835
 kc=30 # thermal conducitivity of core material [Wm^-1 K^-1] 30
 alpha_c=9.2e-5 #[K^-1] 9.2e-5
@@ -98,7 +101,7 @@ bpart = 0.5 #buoyancy partitioning coefficient Nichols (2021) but based on Auber
 
 # Initial conditions
 Tc0=Tm0# intial CMB temp [K] is same as intial mantle temp from Fig 1 in Bryson (2019)
-f0=0.01 #initial fractional inner core radius 
+f0=0.99 #initial fractional inner liquid core radius 
 
 #constants for magnetic Reynolds number
 lambda_mag = 1.3 # magnetic diffusivity [m^2 s^{-1}] 2
