@@ -185,7 +185,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     # Step 4. Is the core solidifying? 
     # is the core solidifying?
     Tliquidus = fe_fes_liquidus_bw(Xs_0,Pc)
-    if np.any(T0_core < Tliquidus) == True: #core solidifies - convecting so isothermal beneath CMB
+    if T0_core[-2] < Tliquidus: #core solidifies outside in - convecting so isothermal beneath CMB
         core_conv = False
         if Xs_0>= Xs_eutectic:
             dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
@@ -337,7 +337,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         # Step 4. Is the core solidifying? 
         # is the core solidifying?
         Tliquidus = fe_fes_liquidus_bw(Xs_old,Pc)
-        if np.any(T_old_core[0] < Tliquidus) == True: #core solidifies - convecting so isothermal beneath CMB
+        if T_old_core[-2] < Tliquidus: #core solidifies from outside in- convecting so isothermal beneath CMB
             core_conv = False #core convects but b.l. thickness set by rho not T so use conductive Fcmb
             if Xs_old>= Xs_eutectic:
                 dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
