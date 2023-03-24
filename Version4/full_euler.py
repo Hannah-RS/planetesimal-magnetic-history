@@ -21,6 +21,7 @@ from dTmdt_def import dTmdt_calc
 from dTcdt_def import dTcdt_calc, dTcdt_calc_solid 
 from Rayleigh_def import Rayleigh_calc, Rayleigh_crit
 from cmb_bl import delta_l, delta_c
+from q_funcs import Qr
 from fe_fes_liquidus import fe_fes_liquidus_bw 
 from stratification import volume_average
 
@@ -189,8 +190,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         core_conv = False
         if Xs_0>= Xs_eutectic:
             dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
-            dfdt = Fcmb_new*Acmb/(4*np.pi*rc**3*f0**2*Lc*rhoc)                    
-            f_new = f0 - dfdt*dt
+            dfdt = -(Fcmb_new*Acmb-Qr(tsolve_new))/(4*np.pi*rc**3*f0**2*Lc*rhoc)                    
+            f_new = f0 + dfdt*dt
             Xs_new = Xs_0 #sulfur concentration unchanged in eutectic solidification
             #find new convective temperature
             Tc_conv_new = T0_core[0] 
@@ -341,8 +342,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             core_conv = False #core convects but b.l. thickness set by rho not T so use conductive Fcmb
             if Xs_old>= Xs_eutectic:
                 dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
-                dfdt = Fcmb_old*Acmb/(4*np.pi*rc**3*f_old**2*Lc*rhoc)                    
-                f_new = f_old - dfdt*dt
+                dfdt = -(Fcmb_old*Acmb-Qr(tsolve_new))/(4*np.pi*rc**3*f_old**2*Lc*rhoc)                    
+                f_new = f_old + dfdt*dt
                 Xs_new = Xs_old #sulfur concentration unchanged in eutectic solidification
                 #find new convective temperature
                 Tc_conv_new = T_old_core[0] 
