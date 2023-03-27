@@ -26,10 +26,10 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run =15
+run =14
 
 t_acc=0.8*Myr  #Accretion time
-t_end_m=200#end time in Myr
+t_end_m=50#end time in Myr
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle
@@ -140,7 +140,7 @@ from Rem_calc import Rem_comp, Rem_therm, ucomp_nimmo, ucomp_aubert, p_nichols
 Fdrive = Fcmb - Fad
 Fdrive_nn = Fdrive.copy()
 Fdrive_nn[Fdrive<0]=0
-Rem_t = Rem_therm(Fdrive_nn)[f<1] # magnetic Reynolds number for thermal convection
+Rem_t = Rem_therm(Fdrive_nn,f,min_unstable) # magnetic Reynolds number for thermal convection
 
 #calculate compositional convection two ways
 unimmo = ucomp_nimmo(t[f<1],f[f<1])
@@ -161,7 +161,6 @@ np.savez('Results_combined/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb
 
 #write parameters to the run file
 from csv import writer
-from parameters import r, Tm0, default
 
 var_list = [run, r, Tm0, t_acc/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_t, int_time, dr, out_interval/Myr, default]
 
