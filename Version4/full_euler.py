@@ -84,6 +84,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         adiabatic CMB heat flux [W m^-2]
     Fcmb: array
         CMB heat flux [W m^-2]
+    Rem_c : array
+        compositional magnetic Reynolds number
     tsolve: array
         time points corresponding to each of the values above
     cond_t: float
@@ -121,6 +123,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Fs = np.zeros([m])
     Fad = np.zeros([m])
     Fcmb = np.zeros([m])
+    Rem_c = np.zeros([m])
     tsolve = np.zeros([m])
 
     
@@ -182,6 +185,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     # Step 3. Calculate conductive profile for the core
     T_new_core = Tc_cond_calc(tsolve_new,dt,T0_core,sparse_mat_c,True)
     Tc_conv_new = 0 #0 by default 
+    Rem_c_new = 0 # by default
     
     Fad_new = kc*T0_core[-2]*alpha_c*gc/cpc
     # Step 4. Is the core solidifying? 
@@ -197,11 +201,11 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             #find new convective temperature
             Tc_conv_new = T0_core[0] 
             T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
-
+            Rem_c_new = 0
         else:
 
             min_unstable_new = 0               
-            dTcdt, f_new = dTcdt_calc_solid(tsolve_new,Fcmb_new, T0_core, f0, Xs_0, dt) 
+            dTcdt, f_new, Rem_c_new = dTcdt_calc_solid(tsolve_new,Fcmb_new, T0_core, f0, Xs_0, dt) 
             #find new convective temperature
             Tc_conv_new = T0_core[0] + dTcdt*dt 
             T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
@@ -307,13 +311,14 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         # Step 3. Calculate conductive profile for the core
         T_new_core = Tc_cond_calc(tsolve_new,dt,T_old_core,sparse_mat_c,True)
         Tc_conv_new = 0 #by default, over write if core convects
+        Rem_c_new = 0 #by default assume no compositional convection
         f_new = f_old #by default overwrite if solidifies
         Xs_new = Xs_old
         min_unstable_new = min_unstable_old #continuity of mixed layer thickness by default
         
         # Step 4. Is the core solidifying? 
         # is the core solidifying?
-        Tliquidus = fe_fes_liquidus_bw(Xs_old,Pc)
+        Tliquidus = round(fe_fes_liquidus_bw(Xs_old,Pc)) #round as Buono & Walker data to nearest integer
         if T_old_core[-2] < Tliquidus: #core solidifies from outside in- convecting so isothermal beneath CMB
             core_conv = False #core convects but b.l. thickness set by rho not T so use conductive Fcmb
             if Xs_old>= Xs_eutectic:
@@ -326,8 +331,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
                 
             else:
+                print('Solidifying',T_old_core[-2],Tliquidus)
                 min_unstable_new = 0               
-                dTcdt, f_new = dTcdt_calc_solid(tsolve_new,Fcmb_old, T_old_core, f_old, Xs_old, dt) 
+                dTcdt, f_new, Rem_c_new = dTcdt_calc_solid(tsolve_new,Fcmb_old, T_old_core, f_old, Xs_old, dt) 
                 #find new convective temperature
                 Tc_conv_new = T_old_core[0] + dTcdt*dt 
                 T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
@@ -337,7 +343,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         
         # Is the core convecting  without solidification?
         elif (Fcmb_old > Fad_old) and (min_unstable_old==0): #super adiabatic and no stratification, core convects
-
+            print('Not solidifying',T_old_core[-2],Tliquidus)
             core_conv = True
             min_unstable_new = 0
             nbl_cells = round(dc_old/dr)
@@ -351,7 +357,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             T_new_core[:bl_start] = Tc_conv_new #replace everything with the convective temperature up to b.l
             
         else: # don't have whole core convection, 
-
+            print('Not solidifying or convecting',T_old_core[-2],Tliquidus)
             #check if there is thermal stratification
             core_conv = False 
             
@@ -478,6 +484,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Fs[save_ind] = Fs_old
             Fad[save_ind] = Fad_old
             Fcmb[save_ind] = Fcmb_old
+            Rem_c[save_ind] = Rem_c_new
             tsolve[save_ind] = tsolve_old
         
         if i%int((tstart-tend)/(dt*out_interval))==0: #every 1/out_interval fraction of the run print the time
@@ -531,6 +538,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Fs = Fs[:save_ind+1]
             Fad = Fad[:save_ind+1]
             Fcmb = Fcmb[:save_ind+1]
+            Rem_c = Rem_c[:save_ind+1]
             tsolve = tsolve[:save_ind+1]
             
             break
@@ -538,4 +546,4 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             pass
               
   
-    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ra, RaH, RanoH, Racrit, Fs, Fad, Fcmb, tsolve, cond_t
+    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ra, RaH, RanoH, Racrit, Fs, Fad, Fcmb, Rem_c, tsolve, cond_t

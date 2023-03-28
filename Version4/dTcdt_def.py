@@ -12,10 +12,11 @@ Can toggle on and off solidification
 
 """
 #import constants and parameters    
-from parameters import Acmb, dr, kc, rc, rhoc, cpc, alpha_c, Vc, Xs_0, D, Pc, gc
+from parameters import Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Pc, gc
 from q_funcs import Qr, Qlt, Qgt
 from fe_fes_liquidus import fe_fes_liquidus_dp
 import numpy as np
+from Rem_calc import Rem_comp
 
 def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
     """
@@ -97,5 +98,5 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     dfdt = - dTcdt/(rhoc*gc*dTl_dP*rc)
 
     f_new = f+dfdt*dt
-          
-    return dTcdt, f_new
+    Rem_c = Rem_comp(dfdt,f)     
+    return dTcdt, f_new, Rem_c

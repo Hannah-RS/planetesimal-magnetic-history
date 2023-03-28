@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  Myr, Tm0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, cpm_p, rhom, save_interval_t, save_interval_d, default, kappa
+from parameters import  Myr, Tm0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, Vm, As, cpm_p, rhom, save_interval_t, save_interval_d, default, kappa
 
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
@@ -29,7 +29,7 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 run =14
 
 t_acc=0.8*Myr  #Accretion time
-t_end_m=50#end time in Myr
+t_end_m=200#end time in Myr
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle
@@ -79,7 +79,7 @@ np.savez(f'Results_combined/run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi
 
 #integrate
 tic = time.perf_counter()
-Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ra, RaH, RanoH, Racrit, Fs, Fad, Fcmb, t, cond_t = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ra, RaH, RanoH, Racrit, Fs, Fad, Fcmb, Rem_c, t, cond_t = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time = toc - tic    
 
@@ -119,12 +119,8 @@ else:
     super_ad_start = t[np.where(Fcmb>Fad)[0]][0]/Myr
     super_ad_end = t[np.where(Fcmb>Fad)[0]][-1]/Myr
 
-# calculate Frad, Rem
-from parameters import km, kc, G, rhoc, alpha_c, cpc, gamma
-
 
 # Frad - radiogenic heat flux, normalised to surface of body
-from parameters import rhom, Vm, As
 from heating import Al_heating
 h = Al_heating(t) 
 Frad = h*rhom*Vm/As #radiogenic heatflux
@@ -132,8 +128,8 @@ Frad = h*rhom*Vm/As #radiogenic heatflux
 #combine these in a single array
 Flux = [Fs, Fcmb, Fad, Frad]
 
-# calculate both magnetic reynolds numbers and merge only keeping the larger value (the larger velocity will dominate)
-from Rem_calc import Rem_comp, Rem_therm, ucomp_nimmo, ucomp_aubert, p_nichols
+# calculate thermal magnetic reynolds number
+from Rem_calc import Rem_therm
 
 # need Fdrive for Rem_therm
 #only calculate this for Fdrive >0
@@ -142,22 +138,11 @@ Fdrive_nn = Fdrive.copy()
 Fdrive_nn[Fdrive<0]=0
 Rem_t = Rem_therm(Fdrive_nn,f,min_unstable) # magnetic Reynolds number for thermal convection
 
-#calculate compositional convection two ways
-unimmo = ucomp_nimmo(t[f<1],f[f<1])
-power = p_nichols(t[f<1],f[f<1]) #convective power density
-uaubert = ucomp_aubert(power,f[f<1])
-Rem_cn = Rem_comp(unimmo,f[f<1]) # magnetic Reynolds number for compositional convection
-Rem_ca = Rem_comp(uaubert,f[f<1]) # magnetic Reynolds number for compositional convection
-Rem1 = Rem_cn
-Rem2 = Rem_ca
-Rem1[Rem_cn<Rem_t] = Rem_t[Rem_cn<Rem_t] #replace values where Rem_t < Rem_c
-Rem2[Rem_ca<Rem_t] = Rem_t[Rem_ca<Rem_t] #replace values where Rem_t < Rem_c
-
 print('Fluxes and magnetic Reynolds number calculated.')
 
 ############################ Save results #####################################
 # save variables to file
-np.savez('Results_combined/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
+np.savez('Results_combined/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, t=t, Rem_t = Rem_t, Rem_c = Rem_c, Flux = Flux) 
 
 #write parameters to the run file
 from csv import writer
