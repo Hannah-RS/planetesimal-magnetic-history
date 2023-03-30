@@ -145,7 +145,7 @@ def Rayleigh_differentiate(t,Tb,model=default):
     d0H = 0.65*r*(gamma*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
     
     Ra_crit = Rayleigh_crit(Tb)
-    if d0H/r < convect_ratio and RaH>Ra_crit: #still working on this criteria
+    if (d0H/r < convect_ratio) & (RaH>Ra_crit): #still working on this criteria
         convect = True
     else: 
         convect = False

@@ -26,7 +26,7 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run =14
+run =15
 
 t_acc=0.8*Myr  #Accretion time
 t_end_m=200#end time in Myr
@@ -48,7 +48,7 @@ print('Initial conditions set')
 
 ########################### Differentiation ###################################
 tic = time.perf_counter()
-Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, t_diff, H  = differentiation(Tint,t_acc,r, dr, step_m)
+Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H  = differentiation(Tint,t_acc,r, dr, step_m)
 toc = time.perf_counter()
 diff_time = toc - tic  
 
@@ -61,7 +61,6 @@ plt.xlabel('r/km')
 plt.ylabel('Temperature/K')
 plt.title('Temperature profile post differentiation')
 
-print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(diff_time)))
 #rescale data and save here in case thermal evolution crashes
 Tdiff = Tdiff[:,0::n_save_d]
 Xfe = Xfe[:,0::n_save_d]
@@ -70,11 +69,13 @@ cp = cp[:,0::n_save_d]
 Ra = Ra[0::n_save_d]
 Ra_crit = Ra_crit[0::n_save_d]
 convect = convect[0::n_save_d]
+d0 = d0[0::n_save_d]
 t_diff = t_diff[0::n_save_d]
 H = H[0::n_save_d]
 
-np.savez(f'Results_combined/run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, t_diff = t_diff, H=H)
+np.savez(f'Results_combined/run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, d0=d0, t_diff = t_diff, H=H)
 
+print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(diff_time)))
 ######################## Thermal evolution ####################################
 
 #integrate

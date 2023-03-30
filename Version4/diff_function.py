@@ -9,7 +9,7 @@ from heating import AlFe_heating
 from scipy import sparse as sp
 from cp_func import cp_calc_arr, cp_calc_int, cp_calc_eut_arr, cp_calc_eut_int
 import numpy as np
-from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V, Rac, r 
+from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V, Rac, rcmf 
 def differentiation(Tint,tacc,r,dr,dt):
     """
     
@@ -30,8 +30,6 @@ def differentiation(Tint,tacc,r,dr,dt):
     Returns
     -------
     Tdiff: float
-        final temperature profile after differentiation [K]
-    Tdiff_profile: float
         temperature profiles at each step in differentiation [K]
     Xfe: float
         proportion of iron in each cell which is melted in differentiation [0 to 1]
@@ -39,8 +37,18 @@ def differentiation(Tint,tacc,r,dr,dt):
         proportion of silicate in each cell which is melted in differentiation [0 to 1]
     cp : float
         effective specific heat capacity of each cell
+    Ra: float
+        Rayleigh number for body
+    Ra_crit: float
+        critical Rayleigh number for body
+    convect : bool
+        whether the body is convecting
+    d0 : float
+        stagnant lid thickness [m]
     t_diff: float
         array of timesteps during differentiation [s]
+    H : float
+        radiogenic heating [W/kg]
 
     """
     sparse_mat = sp.dia_matrix(cond_stencil_general(r,dr))
@@ -95,11 +103,8 @@ def differentiation(Tint,tacc,r,dr,dt):
         #now loop
         i = 1
         cond_i = 0 #convective switch
-        while (convect[i-1]==False) or (Xsi[int(ncells/2),i-1]<0.05) or (Xfe[int(ncells/2),i-1]<1): #whilst any part except the top cell is not convecting and less than 5% silicate melted
-        #while t[i-1]<1.16*Myr: 
-        #while convect[i-1]==False:
-        #while Xsi[int(ncells/2),i-1]<0.2625: #Kathryn criteria for case 1
-        #while Xsi[int(ncells/2),i-1]<0.05:
+        
+        while Xsi[int(ncells/2),i-1]<rcmf: #assume differentiation occurs at rcmf
             
             app_array = np.zeros([ncells,1])
             T = np.append(T,app_array,1)
@@ -167,7 +172,7 @@ def differentiation(Tint,tacc,r,dr,dt):
     else:
         Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, t_diff, H = differentiation_eutectic(Tint,tacc,r,dr,dt)
               
-    return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, t_diff, H
+    return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H
 
 def differentiation_eutectic(Tint,tacc,r,dr,dt):
     """
@@ -198,6 +203,18 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         proportion of silicate in each cell which is melted in differentiation [0 to 1]
     cp : float
         effective specific heat capacity of each cell
+    Ra: float
+        Rayleigh number for body
+    Ra_crit: float
+        critical Rayleigh number for body
+    convect : bool
+        whether the body is convecting
+    d0 : float
+        stagnant lid thickness [m]
+    t_diff: float
+        array of timesteps during differentiation [s]
+    H : float
+        radiogenic heating [W/kg]
     t_diff: float
         array of timesteps during differentiation [s]
 
@@ -253,11 +270,8 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     #now loop
     i = 1
     cond_i = 0 #convective switch
-    while (convect[i-1]==False) or (Xsi[int(ncells/2),i-1]<0.05): #whilst any part except the top cell is not convecting and less than 5% silicate melted
-    #while t[i-1]<1.16*Myr: 
-    #while convect[i-1]==False:
-    #while Xsi[int(ncells/2),i-1]<0.2625: #Kathryn criteria for case 1
-    #while Xsi[int(ncells/2),i-1]<0.05:
+    
+    while Xsi[int(ncells/2),i-1]<rcmf: #differentiation occurs at rcmf
         
         app_array = np.zeros([ncells,1])
         T = np.append(T,app_array,1)
@@ -329,4 +343,4 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         Tdiff = T
         t_diff = t
 
-    return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, t_diff, H
+    return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H
