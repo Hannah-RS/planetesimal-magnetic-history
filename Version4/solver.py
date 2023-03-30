@@ -130,13 +130,14 @@ Flux = [Fs, Fcmb, Fad, Frad]
 
 # calculate thermal magnetic reynolds number
 from Rem_calc import Rem_therm
-
+from parameters import Xs_eutectic
 # need Fdrive for Rem_therm
 #only calculate this for Fdrive >0
 Fdrive = Fcmb - Fad
 Fdrive_nn = Fdrive.copy()
 Fdrive_nn[Fdrive<0]=0
-Rem_t = Rem_therm(Fdrive_nn,f,min_unstable) # magnetic Reynolds number for thermal convection
+Fdrive_nn[Xs>=Xs_eutectic]=0 #no dynamo in eutectic solidification
+Rem_t = Rem_therm(Fdrive_nn,f,min_unstable) # magnetic Reynolds number for thermal convection - tuple of MAC and CIA balance
 
 print('Fluxes and magnetic Reynolds number calculated.')
 

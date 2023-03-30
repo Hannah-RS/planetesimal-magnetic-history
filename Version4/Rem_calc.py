@@ -27,14 +27,18 @@ def Rem_therm(Fdrive,f,min_unstable):
 
     Returns
     -------
-    Magnetic reynolds number for a thermally driven dynamo
-
+    Rem_mac : float
+        Magnetic reynolds number for a thermally driven dynamo for MAC balance
+    Rem_cia : float
+        Magnetic reynolds number for a thermally driven dynamo for CIA balance
     """    
     #calculate utherm (eqn 17 in Bryson 2019)
     l = f*rc - dr*min_unstable #lengthscale over which convection can occur
-    utherm = ((2*np.pi*G*alpha_c*rc*Fdrive)/(cpc*Omega))**0.5
-    
-    return utherm*l/lambda_mag
+    umac = ((2*np.pi*G*alpha_c*rc*Fdrive)/(cpc*Omega))**0.5
+    ucia = (Fdrive*alpha_c*gc/(rhoc*cpc))**(2/5)*(l/Omega)**(1/5)
+    Rem_mac = umac*l/lambda_mag
+    Rem_cia = ucia*l/lambda_mag
+    return Rem_mac, Rem_cia
 
 def Rem_comp(dfdt,f):
     """
