@@ -331,7 +331,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
                 
             else:
-                print('Solidifying',T_old_core[-2],Tliquidus)
                 min_unstable_new = 0               
                 dTcdt, f_new, Rem_c_new = dTcdt_calc_solid(tsolve_new,Fcmb_old, T_old_core, f_old, Xs_old, dt) 
                 #find new convective temperature
@@ -343,7 +342,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         
         # Is the core convecting  without solidification?
         elif (Fcmb_old > Fad_old) and (min_unstable_old==0): #super adiabatic and no stratification, core convects
-            print('Not solidifying',T_old_core[-2],Tliquidus)
             core_conv = True
             min_unstable_new = 0
             nbl_cells = round(dc_old/dr)
@@ -357,7 +355,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             T_new_core[:bl_start] = Tc_conv_new #replace everything with the convective temperature up to b.l
             
         else: # don't have whole core convection, 
-            print('Not solidifying or convecting',T_old_core[-2],Tliquidus)
             #check if there is thermal stratification
             core_conv = False 
             
