@@ -9,7 +9,7 @@ from heating import AlFe_heating
 from scipy import sparse as sp
 from cp_func import cp_calc_arr, cp_calc_int, cp_calc_eut_arr, cp_calc_eut_int
 import numpy as np
-from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts
+from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V
 def differentiation(Tint,tacc,r,dr,dt):
     """
     
@@ -156,7 +156,7 @@ def differentiation(Tint,tacc,r,dr,dt):
                 cp[:lid_start,i] = cp_calc_int(T[0,i-1],True)
                 cp[-1,i] = cpa
                 Fs = -ka*(Ts-T[lid_start,i-1])/d0[i]
-                dTdt = (rhoa*H[i]-Fs)/(rhoa*cp[0,i])
+                dTdt = (rhoa*H[i]*V-Fs*As)/(rhoa*cp[0,i]*V)
                 T[:lid_start,i] = T[:lid_start,i-1] + dTdt*0.01*dt 
                 T[-1,i] = Ts   
                 
