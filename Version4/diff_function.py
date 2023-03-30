@@ -9,7 +9,7 @@ from heating import AlFe_heating
 from scipy import sparse as sp
 from cp_func import cp_calc_arr, cp_calc_int, cp_calc_eut_arr, cp_calc_eut_int
 import numpy as np
-from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V
+from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V, Rac, r 
 def differentiation(Tint,tacc,r,dr,dt):
     """
     
@@ -63,8 +63,11 @@ def differentiation(Tint,tacc,r,dr,dt):
     
     if Xs_0 != Xs_eutectic:
         #Initial step 
-        # check for convection
-        Ra[0], d0[0], Ra_crit[0], convect[0] = Rayleigh_differentiate(t[0],T[0,0])
+        # don't check for convection as accretes isothermal
+        Ra[0] = 0
+        d0[0] = r
+        Ra_crit[0] = Rac
+        convect[0] = False
         
         #calculate radiogenic heating
         H = np.array([AlFe_heating(t[0])])
@@ -77,21 +80,6 @@ def differentiation(Tint,tacc,r,dr,dt):
         dTdt = rhs/(rhoa*cp[:,0])
         T[:-1,0] = Tint[:-1] + dt*dTdt[:-1]
         T[-1,0] = Tint[-1] #pin top cell to 200
-        
-        if convect[0] == True: #replace convecting portion with convecting profile
-            
-            nlid_cells = round(d0[0]/dr)
-            if nlid_cells ==0:
-                lid_start = ncells -2
-            else:
-                lid_start = ncells - nlid_cells - 1 #index in temp array where lid starts
-            cp[:lid_start,0] = cp_calc_int(Tint[0],True) #replace heat capacity below lid
-            cp[-1,0] = cpa            
-            Fs = -ka*(Ts-Tint[lid_start])/d0[0]
-            
-            dTdt = (rhoa*H-Fs)/(rhoa*cp[0,0])
-            T[:lid_start,0] = Tint[:lid_start] + dTdt*dt
-            T[-1,0] = Ts
         
         #calculate melting
         #iron
@@ -216,8 +204,6 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     """
     sparse_mat = sp.dia_matrix(cond_stencil_general(r,dr))
     ncells = int(r/dr)
-    nmid = int(ncells/2)
-    dTphase_fe = Tl_fe - Ts_fe
     dTphase_si = Tml - Tms
 
     #Initial step
@@ -234,11 +220,12 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     t = np.asarray([tacc])
     
     #Initial step 
-    
-    
-    # check for convection
-    Ra[0], d0[0], Ra_crit[0], convect[0] = Rayleigh_differentiate(t[0],T[0,0])
-    
+        
+    # don't check for convection as accretes isothermal   
+    Ra[0] = 0
+    d0[0] = r
+    Ra_crit[0] = Rac
+    convect[0] = False
     #calculate radiogenic heating
     H = np.array([AlFe_heating(t[0])])
     
@@ -256,25 +243,7 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     if np.any((np.int_(Tint)>=Ts_fe) & (Xfe[:,0]<1)): #once solidus is crossed initiate melting
         melt = np.where((np.int_(Tint)>=Ts_fe) & (Xfe[:,0]<1))
         Xfe[melt,0] = rhs[melt]/(rhoa*XFe_a*Lc)*dt
-        T[melt,0] = Tint[melt] #overwrite melting cells so their temp is constant    
-   
-    
-    if convect[0] == True: #overwrite conductive profile
-        nlid_cells = round(d0[0]/dr)
-        if nlid_cells ==0:
-            lid_start = ncells -2
-        else:
-            lid_start = ncells - nlid_cells - 1 #index in temp array where lid starts
-                
-        Fs = -ka*(Ts-Tint[lid_start])/d0[0]
-        if int(Tint[lid_start-1]) >= Ts_fe and (Xfe[lid_start-1,0]<1): #no temp change only melting
-            Xfe[:lid_start,0] = (rhoa*H-Fs)/(rhoa*XFe_a*Lc)*dt
-        else:
-            cp[:lid_start,0] = cp_calc_eut_int(Tint[0],True)
-            cp[lid_start:,0] = cp_calc_eut_arr(Tint[lid_start:],True)
-            dTdt = (rhoa*H-Fs)/(rhoa*cp[0,0])
-            T[:lid_start,0] = Tint[:-1] + dTdt*dt
-            T[-1,0] = Ts  
+        T[melt,0] = Tint[melt] #overwrite melting cells so their temp is constant      
 
     #calculate silicate melting  
     Xsi[T[:,0]<Tms,0] = 0 #subsolidus
