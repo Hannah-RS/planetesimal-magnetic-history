@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  Myr, Tm0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, Vm, As, cpm_p, rhom, save_interval_t, save_interval_d, default, kappa, rcmf
+from parameters import  Myr, Ts, f0, r, rc, dr, kappa_c, save_interval_d, save_interval_t, km, Vm, As, cpm_p, rhom, default, kappa, rcmf, Xs_0, Fe0
 
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
@@ -26,7 +26,7 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run =20
+run =1
 
 t_acc=0.8*Myr  #Accretion time
 t_end_m=200#end time in Myr
@@ -73,7 +73,7 @@ d0 = d0[0::n_save_d]
 t_diff = t_diff[0::n_save_d]
 H = H[0::n_save_d]
 
-np.savez(f'Results_combined/Lid_test/run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, d0=d0, t_diff = t_diff, H=H)
+np.savez(f'Results_combined/run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, d0=d0, t_diff = t_diff, H=H)
 
 print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(diff_time)))
 ######################## Thermal evolution ####################################
@@ -144,25 +144,25 @@ print('Fluxes and magnetic Reynolds number calculated.')
 
 ############################ Save results #####################################
 # save variables to file
-np.savez('Results_combined/Lid_test/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, t=t, Rem_t = Rem_t, Rem_c = Rem_c, Flux = Flux) 
+np.savez('Results_combined/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, t=t, Rem_t = Rem_t, Rem_c = Rem_c, Flux = Flux) 
 
 #write parameters to the run file
 from csv import writer
 
-var_list = [run, r, Tm0, t_acc/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_t, int_time, dr, out_interval/Myr, default]
+var_list = [run, r, dr, t_acc/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_t, int_time,  save_interval_d/Myr, save_interval_t/Myr, default, rcmf, Xs_0, Fe0]
 
     
-with open('run_info4.csv','a') as f_object:         
+with open('run_info.csv','a') as f_object:         
     writer_object = writer(f_object) #pass file object to csv.writer
     writer_object.writerow(var_list) # pass list as argument into write row
     f_object.close() #close file
   
 # #comparative parameters
-var_list2 = [convect_ratio, diff_time, peakT, tmax, tstrat_remove, strat_end, super_ad_start, super_ad_end, diff_T, run, r, rcmf]
+# var_list2 = [convect_ratio, diff_time, peakT, tmax, tstrat_remove, strat_end, super_ad_start, super_ad_end, diff_T, run, r, rcmf]
 
-with open('lid_test.csv','a') as f_object:
-    writer_object = writer(f_object) #pass file object to csv.writer
-    writer_object.writerow(var_list2) # pass list as argument into write row
-    f_object.close() #close file
+# with open('lid_test.csv','a') as f_object:
+#     writer_object = writer(f_object) #pass file object to csv.writer
+#     writer_object.writerow(var_list2) # pass list as argument into write row
+#     f_object.close() #close file
 
-print('Results and run parameters saved')
+# print('Results and run parameters saved')

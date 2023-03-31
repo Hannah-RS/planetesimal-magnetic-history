@@ -3,7 +3,7 @@
 """
 Expressions for heat fluxes divided by dTcdt from Nimmo (2009)
 """
-from parameters import rc, rhoc, rhofe_l, rhofe_s, rho_eut, Mr_fe, Mr_s, Lc, D, cpc, G, gc
+from parameters import rc, rhoc, rhofe_l, rhofe_s, rho_eut, Mr_fe, Mr_s, Lc, cpc, G, gc
 from heating import Fe_heating
 import numpy as np
 
