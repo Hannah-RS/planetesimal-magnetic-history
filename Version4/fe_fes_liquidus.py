@@ -6,6 +6,47 @@ liquid iron melting at 1810 K
 
 Pressure dependent liquidus from Buono & Walker (2011)
 """
+def weight_perc_to_mole_frac(Xs):
+    """
+    
+
+    Parameters
+    ----------
+    s : float
+        wt % sulfur
+
+    Returns
+    -------
+    x : float
+        mole fraction of S in Fe-FeS
+
+    """
+    Mr_s = 32.07 # Pub chem [amu]
+    Mr_fe = 55.84 #Pub chem  [amu]
+    Xsd = Xs/100 #convert wt % to decimal
+
+    mrr = Mr_fe/Mr_s
+    x = Xsd*mrr/(1-Xsd) #mole fraction of FeS in Fe,FeS
+    return x
+
+def weight_perc_to_at_frac(Xs):
+    """
+    
+
+    Parameters
+    ----------
+    Xs : float
+        wt % sulfur
+
+    Returns
+    -------
+    at : float
+        atom fraction of S in Fe-FeS
+
+    """
+    x = weight_perc_to_mole_frac(Xs)
+    at = x/(1+x)
+    return at
 
 def fe_fes_liquidus_linear(Xs):
     """
@@ -40,12 +81,7 @@ def fe_fes_liquidus_bw(Xs,P):
     Liquidus temp [K]
 
     """
-    Mr_s = 32.07 # Pub chem [amu]
-    Mr_fe = 55.84 #Pub chem  [amu]
-    Xsd = Xs/100 #convert wt % to decimal
-
-    mrr = Mr_fe/Mr_s
-    x = Xsd*mrr/(1-Xsd) #mole fraction of FeS in Fe,FeS
+    x = weight_perc_to_mole_frac(Xs)
     
     A = (-2.4724*P**4) + (28.025*P**3) + (9.1404*P**2) + (581.71*P) + 3394.8
     B = (1.7978*P**4) + (-6.7881*P**3) + (-197.69*P**2) + (-271.69*P) + (-8219.5)
@@ -74,12 +110,7 @@ def fe_fes_liquidus_dp(Xs,P):
     dTl/dP 
 
     """
-    Mr_s = 32.07 # Pub chem [amu]
-    Mr_fe = 55.84 #Pub chem  [amu]
-    Xsd = Xs/100 #convert wt % to decimal
-
-    mrr = Mr_fe/Mr_s
-    x = Xsd*mrr/(1-Xsd) #mole fraction of FeS in Fe,FeS
+    x = weight_perc_to_mole_frac(Xs)
        
     F = 4*(-2.4724*P**3)+3*(28.025*P**2)+2*(9.1404*P)+(581.71)
     G = 4*(1.7978*P**3)+3*(-6.7881*P**2)+2*(-197.69*P)+(-271.69)
