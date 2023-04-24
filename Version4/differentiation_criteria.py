@@ -6,9 +6,13 @@ Investigate affect of stagnant lid criterion on differentiation time and tempera
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from parameters import Myr
 
-data = pd.read_csv('lid_test.csv',delimiter=',',header=[0],skiprows=[1])
+
+data_all = pd.read_csv('lid_test.csv',delimiter=',',header=[0],skiprows=[1])
+
+#data from original runs
+data = data_all[data_all['r']==500]
+data2 = data_all[data_all['r']==100000]
 
 data.loc[data['super_ad_end']==np.inf,'super_ad_end'] = 50 #if core didn't start convecting 50 is a lower limit
 data.loc[data['strat_end']==np.inf,'strat_end'] = 50 #if core didn't start convecting 50 is a lower limit
@@ -23,7 +27,7 @@ ax2.scatter(data['convect_ratio'],data['melt frac'],color='cornflowerblue')
 ax1.set_ylabel('Differentiation temp /K')
 ax1.set_xlabel('$\delta_0/r$')
 ax2.set_ylabel('silicate $\phi$ at differentiation')
-plt.savefig('Plots/Lid_test/phi_proxy.png')
+#plt.savefig('Plots/Lid_test/phi_proxy.png')
 
 ######################## Absolute plots ######################################
 yaxis_lab = ['differentiation time/Myr','Peak temperature /K','Time of peak temperature /Myr','Onset of erosion of \n core thermal stratification /Myr','End of erosion of \n core thermal stratification /Myr','Start $F_{CMB} > F_{ad}$','End $F_{CMB} > F_{ad}$','Temp at differentiation/K']
@@ -48,7 +52,7 @@ for val, ylab in zip(data.columns[1:-2],yaxis_lab[:-1]):
         plt.savefig(f'Plots/Lid_test/{val}_abs_phi.png')
     else:
         plt.xlabel('$\delta_0$/r')
-        plt.savefig(f'Plots/Lid_test/{val}_abs_dr.png')
+        #plt.savefig(f'Plots/Lid_test/{val}_abs_dr.png')
 
     
 ##################### Percentage plots #######################################
@@ -59,14 +63,14 @@ for val, ylab in zip(data.columns[1:-3],yaxis_lab[:-2]):
     plt.scatter(data['convect_ratio'],(np.sqrt((data[val]-data[val].mean())**2)/data[val].mean()))
     plt.xlabel('$\delta_0$/r')
     plt.ylabel(f'Fractional RMS deviation in \n {ylab}')
-    plt.savefig(f'Plots/Lid_test/{val}_rel.png')
+    #plt.savefig(f'Plots/Lid_test/{val}_rel.png')
 
 ######## Differentiation temp as a fraction of peak temp ##################
 plt.figure(tight_layout=True)
 plt.scatter(data['convect_ratio'],data['Tdiff']/data['peakT'])
 plt.xlabel('$\delta_0$/r')
-plt.ylabel(f'Differentiation temp/peak temp')
-plt.savefig(f'Plots/Lid_test/temp_compare.png')
+plt.ylabel('Differentiation temp/peak temp')
+#plt.savefig(f'Plots/Lid_test/temp_compare.png')
 
 ################ Put Fcmb > Fad and min_unstable ==0 on same axes
 xaxis = 'convect_ratio'
@@ -82,11 +86,29 @@ plt.legend(loc='upper left',fontsize='x-small')
 plt.ylabel('Time/Myr')
 if xaxis == 'melt frac':
     plt.xlabel('silicate $\phi$ at differentiation')
-    plt.savefig('Plots/Lid_test/Onset_of_convection_phi.png')
+    #plt.savefig('Plots/Lid_test/Onset_of_convection_phi.png')
 else:
     plt.xlabel('$\delta_0$/r')
-    plt.savefig('Plots/Lid_test/Onset_of_convection_dr.png')
+    #plt.savefig('Plots/Lid_test/Onset_of_convection_dr.png')
 
-
+xaxis = 'rcmf'
+plt.figure(tight_layout=True)
+plt.scatter(data2.loc[data2['super_ad_start']!=50,xaxis],data2.loc[data2['super_ad_start']!=50,xaxis],marker='x',color='black',label='Super adiabatic heat flux start')
+plt.scatter(data2.loc[data2['super_ad_end']!=50,xaxis],data2.loc[data2['super_ad_end']!=50,'super_ad_end'],marker='x',color='navy',label='Super adiabatic heat flux end')
+plt.scatter(data2.loc[data2['super_ad_end']==50,xaxis],data2.loc[data2['super_ad_end']==50,'super_ad_end'],marker='^',color='navy')
+plt.scatter(data2.loc[data2['strat_remove']!=50,xaxis],data2.loc[data2['strat_remove']!=50,'strat_remove'],marker='+',color='cornflowerblue',label='Onset of Erosion of stratifciation')
+plt.scatter(data2.loc[data2['strat_remove']==50,xaxis],data2.loc[data2['strat_remove']==50,'strat_remove'],marker='^',color='cornflowerblue')
+plt.scatter(data2.loc[data2['strat_end']!=50,xaxis],data2.loc[data2['strat_end']!=50,'strat_end'],marker='+',color='lightblue',label='Stratifciation Eroded')
+plt.scatter(data2.loc[data2['strat_end']==50,xaxis],data2.loc[data2['strat_end']==50,'strat_end'],marker='^',color='lightblue',label='lower limit')
+plt.legend(loc='upper right',fontsize='x-small')
+plt.ylabel('Time/Myr')
+#plt.ylim([0,50])
+plt.title('100km body')
+if xaxis == 'rcmf':
+    plt.xlabel(' $\phi_{RCMF}$ at differentiation')
+    plt.savefig('Plots/Lid_test/Onset_of_convection_rcmf.png')
+else:
+    plt.xlabel('$\delta_0$/r')
+    #plt.savefig('Plots/Lid_test/Onset_of_convection_dr.png')
 
 

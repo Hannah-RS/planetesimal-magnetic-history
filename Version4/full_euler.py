@@ -12,18 +12,17 @@ Flow:
 """
 #import modules
 import numpy as np
-import scipy.sparse as sp
-import scipy.optimize as sco
-from parameters import Ts, Myr, Rac, B, dr, out_interval, km, kc, alpha_m, alpha_c, r, rc, rhoc, rhom, eta_c, g, gc, cpc, Xs_0, default, kappa, kappa_c, c1, gamma, Xs_eutectic, Acmb, Lc
+from parameters import Ts, Myr, dr, out_interval, save_interval_t, km, kc, alpha_c, r, rc, rhoc, gc
+from parameters import cpc, Xs_0, default, Xs_eutectic, Acmb, Lc, Pc
 
 #import required functions
 from T_cond import Tm_cond_calc, Tc_cond_calc
 from dTmdt_def import dTmdt_calc
-from dTcdt_def import dTcdt_calc 
+from dTcdt_def import dTcdt_calc, dTcdt_calc_solid 
 from Rayleigh_def import Rayleigh_calc, Rayleigh_crit
-from viscosity_def import viscosity
 from cmb_bl import delta_l, delta_c
-from fe_fes_liquidus import fe_fes_liquidus 
+from q_funcs import Qr
+from fe_fes_liquidus import fe_fes_liquidus_bw 
 from stratification import volume_average
 
 def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
@@ -85,19 +84,20 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         adiabatic CMB heat flux [W m^-2]
     Fcmb: array
         CMB heat flux [W m^-2]
+    Rem_c : array
+        compositional magnetic Reynolds number
     tsolve: array
         time points corresponding to each of the values above
-    cond_i: integer
-        index in the array when the mantle switched from conduction to convection, nan if didn't switch
+    cond_t: float
+        time [s] when the mantle switched from conduction to convection, nan if didn't switch
          
     """
 
     #initialise arrays for output
-    m = int((tend-tstart)/dt)
-    i_save=0
+    m = round((tend-tstart)/save_interval_t)
     n_cells = len(T0) #number of cells
     i_core = round(n_cells/2)-1 # index in array of last core cell (-1 as indexing starts at 0)
-    cond_i = 'nan' #set as string and then reset if switches to conduction
+    cond_t = 'nan' #set as string and then reset if switches to conduction
     mantle_conv = False #flag for mantle convection
     core_conv = False #flag for core convection
 
@@ -123,384 +123,445 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Fs = np.zeros([m])
     Fad = np.zeros([m])
     Fcmb = np.zeros([m])
+    Rem_c = np.zeros([m])
     tsolve = np.zeros([m])
 
     
     #Step 0. Calculate time, get two separate temperature arrays
     # the last cell of the core array is the same as the first cell of the mantle array
-    tsolve[0] = tstart + dt
+    tsolve_new = tstart + dt
     T0_core = T0[:i_core+1] #include last core cell
     T0_mantle = T0[i_core:]
     nmantle_cells = len(T0_mantle)
     ncore_cells = len(T0_core)
+    i=0 #counter for saving and printing
+    
+    # Initialise values that might not get calculated
+    f_new = f0
+    Xs_new = Xs_0
+    dc_new = 0
+    dl_new = 0
+    min_unstable_new = int((i_core-1))
+
     
     ##################    Initial step    #########################
     # Step 1. Calculate conductive profile for mantle
-    T_new_mantle = Tm_cond_calc(tsolve[0],dt,T0_mantle,sparse_mat_m)
-
-    Fs[0] = -km*(T_new_mantle[-1]-T_new_mantle[-5])/(4*dr)
+    T_new_mantle = Tm_cond_calc(tsolve_new,dt,T0_mantle,sparse_mat_m)
+    
+    Fs_new = -km*(T_new_mantle[-1]-T_new_mantle[-5])/(4*dr)
     
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
-    Ra[0], d0[0], RaH[0], RanoH[0] = Rayleigh_calc(tsolve[0],T0_mantle[1],default) #use temp at base of mantle 
-    Racrit[0] = Rayleigh_crit(T0_mantle[1])   
+    Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T0_mantle[1],default) #use temp at base of mantle 
+    Racrit_new = Rayleigh_crit(T0_mantle[1])   
       
     
     # in initial step use balance of eqn 23 and 24 to find Tcmb
-    Tcmb[0] = (km/kc*T0_mantle[0]+T0_core[0])/(km/kc+1)
-    T_new_mantle[0] = Tcmb[0]
-    Fcmb[0] = -km*(T0_mantle[0]-Tcmb[0])/dr # CMB heat flux eqn 23 in Dodds 2020
+    Tcmb_new = (km/kc*T0_mantle[0]+T0_core[0])/(km/kc+1)
+    T_new_mantle[0] = Tcmb_new
+    Fcmb_new = -km*(T0_mantle[0]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020
     
-    if Ra[0] < Racrit[0]:# not convecting
+    if Ra_new < Racrit_new:# not convecting
 
-        Tm_conv[0] = 0 # convective mantle temperature is 0 if mantle not convecting
+        Tm_conv_new = 0 # convective mantle temperature is 0 if mantle not convecting
        
     else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile
-        dl[0] = delta_l(tsolve[0],T0_mantle[1],T0_mantle[0])
-        nlid_cells = round(d0[0]/dr)
+        dl_new = delta_l(tsolve_new,T0_mantle[1],T0_mantle[0])
+        nlid_cells = round(d0_new/dr)
         if nlid_cells ==0:
             lid_start = nmantle_cells -2
         else:
             lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
-        Tm_conv[0] = T0_mantle[1] + dTmdt_calc(tsolve[0],T0_mantle[1],d0[0],Fs[0],Fcmb[0])*dt #take temp one above CMB
-        T_new_mantle[:lid_start+1] = Tm_conv[0]
+        Tm_conv_new = T0_mantle[1] + dTmdt_calc(tsolve_new,T0_mantle[1],d0_new,Fs_new,Fcmb_new)*dt #take temp one above CMB
+        T_new_mantle[:lid_start+1] = Tm_conv_new
         T_new_mantle[-1] = Ts #pin surface to 200K
-        if d0[0]<(r-rc): #make sure lid thickness less than mantle if using in heat flux
-            Fs[0] = -km*(Ts-Tm_conv[0])/d0[0] #replace Fs with convective version
+        if d0_new<(r-rc): #make sure lid thickness less than mantle if using in heat flux
+            Fs_new = -km*(Ts-Tm_conv_new)/d0_new #replace Fs with convective version
         
         
     #store values   
-    Tm_mid[0] = T_new_mantle[round(nmantle_cells/2)] # temperature at the mid mantle
-    Tm_surf[0] = T_new_mantle[-2] #temperature one cell above surface pinned to 200K
+    Tm_mid_new = T_new_mantle[round(nmantle_cells/2)] # temperature at the mid mantle
+    Tm_surf_new = T_new_mantle[-2] #temperature one cell above surface pinned to 200K
                 
     # Step 3. Calculate conductive profile for the core
-    T_new_core = Tc_cond_calc(tsolve[0],dt,T0_core,sparse_mat_c,True)
-        
-    # Step 4. Is the core convecting? 
-    # check if heat flux is super adiabatic 
+    T_new_core = Tc_cond_calc(tsolve_new,dt,T0_core,sparse_mat_c,True)
+    Tc_conv_new = 0 #0 by default 
+    Rem_c_new = 0 # by default
     
-    Fad[0] = kc*T0_core[-2]*alpha_c*gc/cpc
+    Fad_new = kc*T0_core[-2]*alpha_c*gc/cpc
+    # Step 4. Is the core solidifying? 
+    # is the core solidifying?
+    Tliquidus = fe_fes_liquidus_bw(Xs_0,Pc)
+    if T0_core[-2] < Tliquidus: #core solidifies outside in - convecting so isothermal beneath CMB
+        core_conv = False
+        if Xs_0>= Xs_eutectic:
+            dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
+            dfdt = -(Fcmb_new*Acmb-Qr(tsolve_new))/(4*np.pi*rc**3*f0**2*Lc*rhoc)                    
+            f_new = f0 + dfdt*dt
+            Xs_new = Xs_0 #sulfur concentration unchanged in eutectic solidification
+            #find new convective temperature
+            Tc_conv_new = T0_core[0] 
+            T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
+            Rem_c_new = 0
+        else:
+
+            min_unstable_new = 0               
+            dTcdt, f_new, Rem_c_new = dTcdt_calc_solid(tsolve_new,Fcmb_new, T0_core, f0, Xs_0, dt) 
+            #find new convective temperature
+            Tc_conv_new = T0_core[0] + dTcdt*dt 
+            T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
+            Xs_new = Xs_0/(f_new**3) #update sulfur content
+            
+    # Is the core convecting  without solidification?
+    elif (Fcmb_new > Fad_new) and (min_unstable_new==0): #super adiabatic and no stratification, core convects
+        
+        core_conv = True
+        min_unstable_new = 0
+        nbl_cells = round(dc_new/dr)
+        bl_start = ncore_cells - nbl_cells - 1 #index in temp array where lid starts
+
+        dTcdt = dTcdt_calc(tsolve_new,Fcmb_new, T0_core, f0)
+        
+        #find new convective temperature
+        Tc_conv_new = T0_core[bl_start-1] + dTcdt*dt 
+        
+        T_new_core[:bl_start] = Tc_conv_new #replace everything with the convective temperature up to b.l
+        
+    else: # don't have whole core convection, for first step don't check for stratification as haven't recalculated Tcmb yet
+        pass
+        
     
-    if Fcmb[0] > Fad[0]: #super adiabatic, core convects
-        min_unstable[0] = 1
-        dc[0] = delta_c(T0_core[-2],T0_mantle[0]) #second input is CMB temp
-
-        # is the core solidifying?
-        Tliquidus = fe_fes_liquidus(Xs_0)
-        if np.any(T0_core < Tliquidus) == True: #core solidifies
-            dTcdt = dTcdt_calc(tsolve[0], Fcmb[0], T0_core, f0, solidification = True) #save dTcdt seperately as need for f
-            dfdt = -B*dTcdt/(T0_core[-2]*f0)
-            f[0] = f0 + dfdt*dt
-            Xs[0] = (1-(f[0]**3))*Xs_0 #update sulfur content
-        
-        else: # core not solidifying
-            dTcdt = dTcdt_calc(tsolve[0], Fcmb[0], T0_core, f0, solidification = False) 
-            f[0]=f0
-            Xs[0]=Xs_0
-        
-        #find number of cells which are solid
-        nic_cells = round(f[0]*rc/dr)
-        Tc_conv[0] = T0_core[-2] + dTcdt*dt
-        T_new_core[:] = Tc_conv[0] #replace everything inside the core with the convective temperature
-        
-              
-    else: # don't have whole core convection, 
-        #check if there is thermal stratification
-        
-        if np.any(T0_core < Tcmb[0]): #there is thermal stratification
-            
-            if np.all(T0_core < 1.001*Tcmb[0]): # add the *1.001 criterion as otherwise rounding errors cause this to be true in the first step
-                    # scenario 1 - just conduction in the core
-                    pass # use already calculated condctive profile, don't do anything
-            else: #scenario 2 - erosion of stratification, convective layer at top of core
-                dc[0] = delta_c(T0_core[-2],T0_mantle[0]) #second input is CMB temp
-                b_ind = np.where(T0_core >= (1.001*Tcmb[0]))[0] #indices of unstable layer - add the *1.001 criterion as otherwise rounding errors cause this to be true in the first step
-                min_unstable[0] = b_ind[0]
-
-                Tc_conv[0] = T0_core[min_unstable[0]]
-                # is the core solidifying?
-                Tliquidus = fe_fes_liquidus(Xs_0)
-                if np.any(T0_core < Tliquidus): #core solidifies
-                    raise NotImplementedError('Core solidification erodes thermal stratification - write this code!')
-                
-                else: # core not solidifying
-                    dTcdt = dTcdt_calc(tsolve[0],Fcmb[0], T0_core, f0, solidification = False, stratification = [True, min_unstable[0]])
-                    f[0]=f0
-                    Xs[0]=Xs_0
-                    
-                    Tc_conv[0] = Tc_conv[0]+dTcdt*dt #replace convecting layer from last timestep with new temp - in later steps use i-1 and i
-                    T_new_core[min_unstable[0]:-1] = Tc_conv[0]
-                    T_new_core[-1] = Tcmb[0]
-                    
-                    #now perform volume average over unstable layer
-                    Tlayer = volume_average(T_new_core, b_ind,dr)
-                    T_new_core[min_unstable[0]:-1] = Tlayer #replace unstable layer with average temp
-                    
-        
-        else: #there is no stratification and the core is not thermally convecting 
-            
-            """Below here needs rewriting for conductive core solidification/compositional convection"""
-            # is the core solidifying?
-            Tliquidus = fe_fes_liquidus(Xs_0)
-            if T0_core[-2] < Tliquidus: #core solidifies
-                dTcdt = dTcdt_calc(tsolve[0],Fcmb[0], T0_core, f0, solidification = True) #save dTcdt seperately as need for f
-                dfdt = -B*dTcdt/(T0_core[lnb-1]*f0)
-                f[0] = f0 + dfdt*dt
-                Xs[0] = (1-(f[0])**3)*Xs_0 #update sulfur content
-                #Tc_conv[0] = T0_core[lnb-1] + dTcdt*dt
-                #T_new_core[:lnb+1] = Tc_conv[0] #replace everything above the solid core
-            else: # core not solidifying or convecting keep conductive profile
-                pass 
-            
-            
-
-            
-        
     # Step 5. Recalculate the CMB temperature so now it is determined by the end of the step as it will be in subsequent steps
     #use balance of eqn 23 and 24 to find Tcmb
-    Tcmb[0] = (km/kc*T_new_mantle[1]+T_new_core[-2])/(km/kc+1)
-    T_new_mantle[0] = Tcmb[0]
-    T_new_core[-1] = Tcmb[0]
-    Fcmb[0] = -km*(T_new_mantle[0]-Tcmb[0])/dr # CMB heat flux eqn 23 in Dodds 2020
-    Tc[0] = T_new_core[0] #temperature of core is always taken at centre
+    Tcmb_new = (km/kc*T_new_mantle[1]+T_new_core[-2])/(km/kc+1)
+    T_new_mantle[0] = Tcmb_new
+    T_new_core[-1] = Tcmb_new
+    Fcmb_new = -km*(T_new_mantle[0]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020
+    Tc_new = T_new_core[0] #temperature of core is always taken at centre
     
     # Step 6. Replace old array with new ready for next step
     T_old_core = T_new_core
     T_old_mantle = T_new_mantle
-    Tprofile[0,:] = np.hstack((T_new_core,T_new_mantle[1:]))
+    Tprofile_old = np.hstack((T_new_core,T_new_mantle[1:]))
+    Tc_old = Tc_new
+    Tc_conv_old = Tc_conv_new
+    Tcmb_old = Tcmb_new
+    Tm_mid_old = Tm_mid_new
+    Tm_conv_old = Tm_conv_new
+    Tm_surf_old = Tm_surf_new
+    f_old = f_new
+    Xs_old = Xs_new
+    dl_old = dl_new
+    dc_old = dc_new
+    d0_old = d0_new
+    min_unstable_old = min_unstable_new
+    Ra_old = Ra_new
+    RaH_old = RaH_new
+    RanoH_old = RanoH_new
+    Racrit_old = Racrit_new
+    Fs_old = Fs_new
+    Fad_old = Fad_new
+    Fcmb_old = Fcmb_new
+    tsolve_old = tsolve_new
     
-    for i in range(1,m):
+    while tsolve_new < tend:
 
         #Step 0. Calculate time
-        tsolve[i] = tsolve[i-1] + dt
+        tsolve_new = tsolve_old + dt
         
         # Step 1. Calculate conductive profile for mantle
-        T_new_mantle = Tm_cond_calc(tsolve[i],dt,T_old_mantle,sparse_mat_m)
-        Fs[i] = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
+        T_new_mantle = Tm_cond_calc(tsolve_new,dt,T_old_mantle,sparse_mat_m)
+        Fs_new = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
 
         # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
-        Ra[i], d0[i], RaH[i], RanoH[i] = Rayleigh_calc(tsolve[i],T_old_mantle[1],default) #use temp at base of mantle 
-        Racrit[i] = Rayleigh_crit(T_old_mantle[1])   
-        #Racrit[i]=Rac
-        if Ra[i] <= Racrit[i]:
-            mantle_conv = False
-            if Tm_conv[i-1]!=0: #check if first time it is conductive i.e. the switch
-                cond_i = i #record time for switch to conduction
-            else: #mantle already conducting
-                pass
-            Tm_conv[i] = 0 # convective mantle temperature is 0 if mantle not convecting
+        Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T_old_mantle[1],default) #use temp at base of mantle 
+        Racrit_new = Rayleigh_crit(T_old_mantle[1])   
+        dTdt_mantle = dTmdt_calc(tsolve_old,T_old_mantle[1],d0_old,Fs_old,Fcmb_old) #convective dTdt - use base mantle temp as convective temp
+        
+        if (dTdt_mantle<0): #mantle is cooling
+            if (Ra_new <= Racrit_new) | (Tm_conv_old ==0): #check for Ra and switch to conduction
+                mantle_conv = False
+                if Tm_conv_old!=0: #check if first time it is conductive i.e. the switch
+                    cond_t = tsolve_new #record time for switch to conduction
+                else: #mantle already conducting
+                    pass
+                Tm_conv_new = 0 # convective mantle temperature is 0 if mantle not convecting
+                
+            else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile 
+                mantle_conv = True
+                nlid_cells = round(d0_new/dr)
+                
+                if nlid_cells ==0:
+                    lid_start = nmantle_cells -2
+                else:
+                    lid_start = nmantle_cells - nlid_cells - 1  #index in temp array where lid starts
 
-        else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile 
-            mantle_conv = True
-            nlid_cells = round(d0[i]/dr)
-            
-            if nlid_cells ==0:
-                lid_start = nmantle_cells -2
-            else:
-                lid_start = nmantle_cells - nlid_cells - 1  #index in temp array where lid starts
-            if Tm_conv[i-1]!=0: #mantle already convecting
-                Tm_old = Tm_conv[i-1]
-            else: #mantle just started convecting
-                Tm_old = T_old_mantle[1] # take temperature at base of mantle as mantle temp
+                Tm_conv_new = T_old_mantle[1] + dTdt_mantle*dt #temperature of convecting region 
+                T_new_mantle[:lid_start+1] = Tm_conv_new
+                T_new_mantle[-1] = Ts #pin surface to 200K in case d0 < 1 cell thick
+                if d0_new<(r-rc):
+                    Fs_new = -km*(Ts-Tm_conv_new)/d0_new
+        
+        else: #mantle still heating up
+            if Ra_new <= Racrit_new: #check Ra
+                mantle_conv = False
+                Tm_conv_new = 0 # convective mantle temperature is 0 if mantle not convecting
 
-            Tm_conv[i] = Tm_old + dTmdt_calc(tsolve[i-1],Tm_old,d0[i-1],Fs[i-1],Fcmb[i-1])*dt #temperature of convecting region 
-            T_new_mantle[:lid_start+1] = Tm_conv[i]
-            T_new_mantle[-1] = Ts #pin surface to 200K in case d0 < 1 cell thick
-            if d0[i]<(r-rc):
-                Fs[i] = -km*(Ts-Tm_conv[i])/d0[i]
+            else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile 
+                mantle_conv = True
+                nlid_cells = round(d0_new/dr)
+                
+                if nlid_cells ==0:
+                    lid_start = nmantle_cells -2
+                else:
+                    lid_start = nmantle_cells - nlid_cells - 1  #index in temp array where lid starts
+                
+    
+                Tm_conv_new = T_old_mantle[1] + dTdt_mantle*dt #temperature of convecting region 
+                T_new_mantle[:lid_start+1] = Tm_conv_new
+                T_new_mantle[-1] = Ts #pin surface to 200K in case d0 < 1 cell thick
+                if d0_new<(r-rc):
+                    Fs_new = -km*(Ts-Tm_conv_new)/d0_new
             
             
         #store values
-        Tm_mid[i] = T_new_mantle[round(nmantle_cells/2)] # temperature at the mid mantle
-        Tm_surf[i] = T_new_mantle[-2] #temperature one cell above surface pinned to 200K
+        Tm_mid_new = T_new_mantle[round(nmantle_cells/2)] # temperature at the mid mantle
+        Tm_surf_new = T_new_mantle[-2] #temperature one cell above surface pinned to 200K
           
         # Step 3. Calculate conductive profile for the core
-        T_new_core = Tc_cond_calc(tsolve[i],dt,T_old_core,sparse_mat_c,True)
-   
-        # Step 4. Is the core convecting? 
-        # check if heat flux is super adiabatic 
-        min_unstable[i] = min_unstable[i-1] #continuity of mixed layer thickness by default
+        T_new_core = Tc_cond_calc(tsolve_new,dt,T_old_core,sparse_mat_c,True)
+        Tc_conv_new = 0 #by default, over write if core convects
+        Rem_c_new = 0 #by default assume no compositional convection
+        f_new = f_old #by default overwrite if solidifies
+        Xs_new = Xs_old
+        min_unstable_new = min_unstable_old #continuity of mixed layer thickness by default
         
-        if (Fcmb[i-1] > Fad[i-1]) and (min_unstable[i-1]==0): #super adiabatic and no stratification, core convects
+        # Step 4. Is the core solidifying? 
+        # is the core solidifying?
+        Tliquidus = round(fe_fes_liquidus_bw(Xs_old,Pc)) #round as Buono & Walker data to nearest integer
+        if T_old_core[-2] < Tliquidus: #core solidifies from outside in- convecting so isothermal beneath CMB
+            core_conv = False #core convects but b.l. thickness set by rho not T so use conductive Fcmb
+            if Xs_old>= Xs_eutectic:
+                dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
+                dfdt = -(Fcmb_old*Acmb-Qr(tsolve_new))/(4*np.pi*rc**3*f_old**2*Lc*rhoc)                    
+                f_new = f_old + dfdt*dt
+                Xs_new = Xs_old #sulfur concentration unchanged in eutectic solidification
+                #find new convective temperature
+                Tc_conv_new = T_old_core[0] 
+                T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
+                
+            else:
+                min_unstable_new = 0               
+                dTcdt, f_new, Rem_c_new = dTcdt_calc_solid(tsolve_new,Fcmb_old, T_old_core, f_old, Xs_old, dt) 
+                #find new convective temperature
+                Tc_conv_new = T_old_core[0] + dTcdt*dt 
+                T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
+                Xs_new = Xs_0/(f_new**3) #update sulfur content
+                
             
+        
+        # Is the core convecting  without solidification?
+        elif (Fcmb_old > Fad_old) and (min_unstable_old==0): #super adiabatic and no stratification, core convects
             core_conv = True
-            min_unstable[i] = 0
-            nbl_cells = round(dc[i-1]/dr)
+            min_unstable_new = 0
+            nbl_cells = round(dc_old/dr)
             bl_start = ncore_cells - nbl_cells - 1 #index in temp array where lid starts
 
-            # is the core solidifying?
-            Tliquidus = fe_fes_liquidus(Xs[i-1])
-            if np.any(T_old_core < Tliquidus) == True: #core solidifies
-                if Xs[i-1]>= Xs_eutectic:
-                    dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
-                    dfdt = Fcmb[i-1]*Acmb/(4*np.pi*rc**3*f[i-1]**2*Lc*rhoc)                    
-                    f[i] = f[i-1] + dfdt*dt
-                    Xs[i] = Xs[i-1] #sulfur concentration unchanged in eutectic solidification
-                else:
-                    dTcdt = dTcdt_calc(tsolve[i],Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
-                    dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
-                    f[i] = f[i-1] + dfdt*dt
-                    Xs[i] = (1-(f[i]**3))*Xs_0 #update sulfur content
-            
-            else: # core not solidifying
-                dTcdt = dTcdt_calc(tsolve[i],Fcmb[i-1], T_old_core, f[i-1], solidification = False)
-                f[i]=f[i-1] #keep the current core size
-                Xs[i]=Xs[i-1]
+            dTcdt = dTcdt_calc(tsolve_new,Fcmb_old, T_old_core, f_old)
             
             #find new convective temperature
-            Tc_conv[i] = T_old_core[bl_start-1] + dTcdt*dt 
+            Tc_conv_new = T_old_core[bl_start-1] + dTcdt*dt 
             
-            T_new_core[:] = Tc_conv[i] #replace everything with the convective temperature
-
-            
+            T_new_core[:bl_start] = Tc_conv_new #replace everything with the convective temperature up to b.l
             
         else: # don't have whole core convection, 
-
             #check if there is thermal stratification
             core_conv = False 
             
-            if min_unstable[i-1]>0:  #there is thermal stratification 
+            if min_unstable_old>0:  #there is thermal stratification 
                 
-                if np.all(T_old_core[:-1] < Tcmb[i-1]):
+                if np.all(T_old_core[:-1] < Tcmb_old):
+                    min_unstable_new = int(i_core -1) 
                         # scenario 1 - just conduction in the core
                         # use already calculated condctive profile and keep core in current state
-                        f[i] = f[i-1]
-                        Xs[i] = Xs[i-1]
 
                 else: #scenario 2 - erosion of stratification, convective layer at top of core
                     core_conv = True
-                    b_ind = np.where( T_old_core[:-1] >= Tcmb[i-1])[0] #indices of unstable layer as array
-                    min_unstable[i] = b_ind[0]
+                    b_ind = np.where( T_old_core[:-1] >= Tcmb_old)[0] #indices of unstable layer as array
+                    min_unstable_new = b_ind[0]
                     
-                    # is the core solidifying?
-                    Tliquidus = fe_fes_liquidus(Xs[i-1])
-                    if np.any(T_old_core < Tliquidus): #core solidifies
-                        raise NotImplementedError('Core solidification erodes thermal stratification - write this code!')
-                    
-                    else: # core not solidifying
-                        dTcdt = dTcdt_calc(tsolve[i],Fcmb[i-1], T_old_core, f[i-1], solidification = False, stratification = [True, min_unstable[i-1]])
-                        f[i]=f[i-1]
-                        Xs[i]=Xs[i-1]
-                        
-                        Tc_conv[i] = T_old_core[min_unstable[i-1]]+dTcdt*dt #replace convecting layer from last timestep with new temp - in later steps use i-1 and i
-                        T_new_core[min_unstable[i-1]:-1] = Tc_conv[i]
-                                                 
-                        #now perform volume average over unstable layer
-                        Tlayer = volume_average(T_new_core, b_ind,dr)
-                        T_new_core[min_unstable[i]:-1] = Tlayer #replace unstable layer with average temp
-                        
-        
-            
+                    dTcdt = dTcdt_calc(tsolve_new,Fcmb_old, T_old_core, f_old, stratification = [True, min_unstable_old])
+                    Tc_conv_new = T_old_core[min_unstable_old]+dTcdt*dt #replace convecting layer from last timestep with new temp - in later steps use i-1 and i
+                    T_new_core[min_unstable_old:-1] = Tc_conv_new
+                                             
+                    #now perform volume average over unstable layer
+                    Tlayer = volume_average(T_new_core, b_ind,dr)
+                    T_new_core[min_unstable_new:-1] = Tlayer #replace unstable layer with average temp
+    
             else: #there is no stratification (min_unstable ==0) and the core is not thermally convecting 
-                
-                """Below here needs rewriting for conductive core solidification/compositional convection"""
-                # is the core solidifying?
-                Tliquidus = fe_fes_liquidus(Xs[i-1])
-                if T_old_core[-2] < Tliquidus: #core solidifies
-                    if Xs[i-1]>= Xs_eutectic: #eutectic solidification
-                        dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
-                        dfdt = Fcmb[i-1]*Acmb/(4*np.pi*rc**3*f[i-1]**2*Lc*rhoc)                    
-                        f[i] = f[i-1] + dfdt*dt
-                        Xs[i] = Xs[i-1] #sulfur concentration unchanged in eutectic solidification
-                    else:
-                        dTcdt = dTcdt_calc(tsolve[i],Fcmb[i-1], T_old_core, f[i-1], solidification = True) #save dTcdt seperately as need for f
-                        dfdt = -B*dTcdt/(T_old_core[-2]*f[i-1])
-                        f[i] = f[i-1] + dfdt*dt
-                        Xs[i] = (1-(f[i])**3)*Xs_0 #update sulfur content
-                    
-                else: # core not solidifying or convecting keep conductive profile
-                    f[i] = f[i-1]
-                    Xs[i] = Xs[i-1]
+                pass #keep conductive profile
                  
-        Tc[i] = T_new_core[0] #temperature of core is always taken at centre
-        Fad[i] = kc*T_new_core[-2]*alpha_c*gc/cpc   
+        Tc_new = T_new_core[0] #temperature of core is always taken at centre
+        Fad_new = kc*T_new_core[-2]*alpha_c*gc/cpc   
 
         # Step 5. Find the CMB temperature, how you do this depends on if core and mantle are convecting
         if mantle_conv == True:
             if core_conv == True:
                 # eqn 26 and 29 in Dodds 2020 - use bl from previous timestep
                 # check if non zero if just switched to convection b.l. at previous timestep = 0
-                if dl[i-1] == 0 and dc[i-1] == 0:
-                    dc[i-1] = delta_c(Tc_conv[i],Tcmb[i-1]) #find approximate core cmb b.l. thickness
-                    dl[i-1] = delta_l(tsolve[i],Tm_conv[i],Tcmb[i-1]) #find approximate mantle cmb b.l. thickness
-                    factor = (kc*dl[i-1])/(km*dc[i-1])
+                if dl_old == 0 and dc_old == 0:
+                    dc_old = delta_c(Tc_conv_new,Tcmb_old) #find approximate core cmb b.l. thickness
+                    dl_old = delta_l(tsolve_new,Tm_conv_new,Tcmb_old) #find approximate mantle cmb b.l. thickness
+                    factor = (kc*dl_old)/(km*dc_old)
                     
-                elif dl[i-1] != 0 and dc[i-1] == 0:
-                     dc[i-1] = delta_c(Tc_conv[i],Tcmb[i-1]) #find approximate core cmb b.l. thickness
-                     factor = (kc*dl[i-1])/(km*dc[i-1])
+                elif dl_old != 0 and dc_old == 0:
+                     dc_old = delta_c(Tc_conv_new,Tcmb_old) #find approximate core cmb b.l. thickness
+                     factor = (kc*dl_old)/(km*dc_old)
                      
-                elif dl[i-1] == 0 and dc[i-1] != 0:
-                     dl[i-1] = delta_l(tsolve[i],Tm_conv[i],Tcmb[i-1]) #find approximate mantle cmb b.l. thickness
-                     factor = (kc*dl[i-1])/(km*dc[i-1])
+                elif dl_old == 0 and dc_old != 0:
+                     dl_old = delta_l(tsolve_new,Tm_conv_new,Tcmb_old) #find approximate mantle cmb b.l. thickness
+                     factor = (kc*dl_old)/(km*dc_old)
                      
                 else: #both convective b.l. are non zero
-                    factor = (kc*dl[i-1])/(km*dc[i-1])
+                    factor = (kc*dl_old)/(km*dc_old)
                     
-                Tcmb[i] = (Tm_conv[i] + factor*Tc_conv[i])/(1+factor) 
-                dc[i] = delta_c(Tc_conv[i],Tcmb[i]) #find core cmb b.l. thickness
-                dl[i] = delta_l(tsolve[i],Tm_conv[i],Tcmb[i]) #find mantle cmb b.l. thickness
-                Fcmb[i] = -km*(Tm_conv[i]-Tcmb[i])/dr#dl[i]
+                Tcmb_new = (Tm_conv_new + factor*Tc_conv_new)/(1+factor) 
+                dc_new = delta_c(Tc_conv_new,Tcmb_new) #find core cmb b.l. thickness
+                dl_new = delta_l(tsolve_new,Tm_conv_new,Tcmb_new) #find mantle cmb b.l. thickness
+                Fcmb_new = -km*(Tm_conv_new-Tcmb_new)/dr#dl_new
             else: #eqn 23 = 24  
                 
-                Tcmb[i] = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
-                dl[i] = delta_l(tsolve[i],Tm_conv[i],Tcmb[i]) #find mantle cmb b.l. thickness
-                Fcmb[i] = -km*(T_new_mantle[1]-Tcmb[i])/dr # CMB heat flux eqn 23 in Dodds 2020 - until core starts to convect heat transport is modelled as diffusive
+                Tcmb_new = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
+                dl_new = delta_l(tsolve_new,Tm_conv_new,Tcmb_new) #find mantle cmb b.l. thickness
+                Fcmb_new = -km*(T_new_mantle[1]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020 - until core starts to convect heat transport is modelled as diffusive
         else:
             if core_conv == True:
                 #mantle sets CMB temp
-                #Tcmb[i] = T_new_mantle[0]
-                if dc[i-1] == 0:
-                    dc[i-1] = delta_c(Tc_conv[i],Tcmb[i-1]) #find approximate core cmb b.l. thickness
-                factor = (kc*dr)/(km*dc[i-1])
-                Tcmb[i] = (T_new_mantle[1]+factor*T_new_core[-2])/(1+factor)
-                dc[i] = delta_c(Tc_conv[i],Tcmb[i]) #find core cmb b.l. thickness
-                Fcmb[i] = -km*(T_new_mantle[1]-Tcmb[i])/dr # CMB heat flux eqn 23 in Dodds 2020
+                #Tcmb_new = T_new_mantle[0]
+                if dc_old == 0:
+                    dc_old = delta_c(Tc_conv_new,Tcmb_old) #find approximate core cmb b.l. thickness
+                factor = (kc*dr)/(km*dc_old)
+                Tcmb_new = (T_new_mantle[1]+factor*T_new_core[-2])/(1+factor)
+                dc_new = delta_c(Tc_conv_new,Tcmb_new) #find core cmb b.l. thickness
+                Fcmb_new = -km*(T_new_mantle[1]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020
             else: # eqn 23 = 24
-                Tcmb[i] = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
-                Fcmb[i] = -km*(T_new_mantle[1]-Tcmb[i])/dr # CMB heat flux eqn 23 in Dodds 2020
+                Tcmb_new = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
+                Fcmb_new = -km*(T_new_mantle[1]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020
 
         #replace CMB nodes
-        T_new_mantle[0] = Tcmb[i]
-        T_new_core[-1] = Tcmb[i]
+        T_new_mantle[0] = Tcmb_new
+        T_new_core[-1] = Tcmb_new
  
-        # Step 6. Replace old array with new ready for next step
+        # Step 6. Replace old values with new ready for next step
         T_old_core = T_new_core
         T_old_mantle = T_new_mantle
-        Tprofile[i,:] = np.hstack((T_new_core,T_new_mantle[1:])) #top cell of core and bottom cell of mantle are Tcmb
+        Tprofile_old = np.hstack((T_new_core,T_new_mantle[1:])) #top cell of core and bottom cell of mantle are Tcmb
+        Tc_old = Tc_new
+        Tc_conv_old = Tc_conv_new
+        Tcmb_old = Tcmb_new
+        Tm_mid_old = Tm_mid_new
+        Tm_conv_old = Tm_conv_new
+        Tm_surf_old = Tm_surf_new
+        f_old = f_new
+        Xs_old = Xs_new
+        dl_old = dl_new
+        dc_old = dc_new
+        d0_old = d0_new
+        min_unstable_old = min_unstable_new
+        Ra_old = Ra_new
+        RaH_old = RaH_new
+        RanoH_old = RanoH_new
+        Racrit_old = Racrit_new
+        Fs_old = Fs_new
+        Fad_old = Fad_new
+        Fcmb_old = Fcmb_new
+        tsolve_old = tsolve_new
+        i+=1 #use for saving
         
+        ### add things here
+        if i%int(save_interval_t/dt)==0: #save parameters
+            save_ind = int(i*dt/save_interval_t)
+            Tc[save_ind] = Tc_old
+            Tc_conv[save_ind] = Tc_conv_old
+            Tcmb[save_ind] = Tcmb_old
+            Tm_mid[save_ind] = Tm_mid_old
+            Tm_conv[save_ind] = Tm_conv_old
+            Tm_surf[save_ind] = Tm_surf_old
+            Tprofile[save_ind,:] = Tprofile_old
+            f[save_ind] = f_old
+            Xs[save_ind] = Xs_old
+            dl[save_ind] = dl_old
+            dc[save_ind] = dc_old
+            d0[save_ind] = d0_old
+            min_unstable[save_ind] = min_unstable_old
+            Ra[save_ind] = Ra_old
+            RaH[save_ind] = RaH_old
+            RanoH[save_ind] = RanoH_old
+            Racrit[save_ind] = Racrit_old
+            Fs[save_ind] = Fs_old
+            Fad[save_ind] = Fad_old
+            Fcmb[save_ind] = Fcmb_old
+            Rem_c[save_ind] = Rem_c_new
+            tsolve[save_ind] = tsolve_old
         
-        if i%int(m/out_interval)==0: #every 1/out_interval fraction of the run print the time
-            print('t={:.2f}Myr'.format(tsolve[i]/Myr)) #useful to track progress of simulation
+        if i%int((tstart-tend)/(dt*out_interval))==0: #every 1/out_interval fraction of the run print the time
+            print('t={:.2f}Myr'.format(tsolve_new/Myr)) #useful to track progress of simulation
         else: 
             pass
  
-        if f[i]>=1: #stop integration if core is solid, truncate arrays to only return non-zero values
+        if f_new<=0.001: #stop integration if core is solid i.e.inner liquid core radius < 0.1%, 
+            #save values at this point
+
+            if save_ind < len(Tc)-2: #if on final save then don't add one more as not space in array
+                save_ind =+ save_ind
+                Tc[save_ind] = Tc_old
+                Tc_conv[save_ind] = Tc_conv_old
+                Tcmb[save_ind] = Tcmb_old
+                Tm_mid[save_ind] = Tm_mid_old
+                Tm_conv[save_ind] = Tm_conv_old
+                Tm_surf[save_ind] = Tm_surf_old
+                Tprofile[save_ind,:] = Tprofile_old
+                f[save_ind] = f_old
+                Xs[save_ind] = Xs_old
+                dl[save_ind] = dl_old
+                dc[save_ind] = dc_old
+                d0[save_ind] = d0_old
+                min_unstable[save_ind] = min_unstable_old
+                Ra[save_ind] = Ra_old
+                RaH[save_ind] = RaH_old
+                RanoH[save_ind] = RanoH_old
+                Racrit[save_ind] = Racrit_old
+                Fs[save_ind] = Fs_old
+                Fad[save_ind] = Fad_old
+                Fcmb[save_ind] = Fcmb_old
+                tsolve[save_ind] = tsolve_old
             
-            
-            Tc = Tc[:i+1]
-            Tc_conv = Tc_conv[:i+1]
-            Tcmb = Tcmb[:i+1]
-            Tm_mid = Tm_mid[:i+1]
-            Tm_conv = Tm_conv[:i+1]
-            Tm_surf = Tm_surf[:i+1]
-            Tprofile = Tprofile[:i_save+1]
-            f=f[:i+1]
-            Xs = Xs[:i+1]
-            dl = dl[:i+1]
-            dc = dc[:i+1]
-            d0 = d0[:i+1]
-            min_unstable = min_unstable[:i+1]
-            Ra = Ra[:i+1]
-            RaH = RaH[:i+1]
-            RanoH = RanoH[:i+1]
-            Racrit = Racrit[:i+1]
-            Fs = Fs[:i+1]
-            Fad = Fad[:i+1]
-            Fcmb = Fcmb[:i+1]
-            tsolve = tsolve[:i+1]
+            #truncate arrays to only return non-zero values
+            Tc = Tc[:save_ind+1]
+            Tc_conv = Tc_conv[:save_ind+1]
+            Tcmb = Tcmb[:save_ind+1]
+            Tm_mid = Tm_mid[:save_ind+1]
+            Tm_conv = Tm_conv[:save_ind+1]
+            Tm_surf = Tm_surf[:save_ind+1]
+            Tprofile = Tprofile[:save_ind+1]
+            f=f[:save_ind+1]
+            Xs = Xs[:save_ind+1]
+            dl = dl[:save_ind+1]
+            dc = dc[:save_ind+1]
+            d0 = d0[:save_ind+1]
+            min_unstable = min_unstable[:save_ind+1]
+            Ra = Ra[:save_ind+1]
+            RaH = RaH[:save_ind+1]
+            RanoH = RanoH[:save_ind+1]
+            Racrit = Racrit[:save_ind+1]
+            Fs = Fs[:save_ind+1]
+            Fad = Fad[:save_ind+1]
+            Fcmb = Fcmb[:save_ind+1]
+            Rem_c = Rem_c[:save_ind+1]
+            tsolve = tsolve[:save_ind+1]
             
             break
         else: 
             pass
               
   
-    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ra, RaH, RanoH, Racrit, Fs, Fad, Fcmb, tsolve, cond_i
+    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ra, RaH, RanoH, Racrit, Fs, Fad, Fcmb, Rem_c, tsolve, cond_t

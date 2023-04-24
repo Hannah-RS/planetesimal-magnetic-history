@@ -3,13 +3,13 @@
 """
 Expressions for heat fluxes divided by dTcdt from Nimmo (2009)
 """
-from parameters import rc, rhoc, Lc, Delta, D, cpc, drho, G
+from parameters import rc, rhoc, rhofe_l, rhofe_s, rho_eut, Mr_fe, Mr_s, Lc, cpc, G, gc, alpha_c, rho_exp
+from fe_fes_liquidus import fe_fes_density
 from heating import Fe_heating
 import numpy as np
 
-def Qlt(Tc,f):
+def Qlt(Tc,f,dTl_dP):
     """
-    From Table 1 in Nimmo, F. (2009). Energetics of asteroid dynamos and the role of compositional convection. but divided by dTc/dt
 
     Parameters
     ----------
@@ -17,23 +17,21 @@ def Qlt(Tc,f):
         core temperature.
     f : float
         fractional inner core radius.
+    dTl_dP : float
+        dTl/dP 
 
     Returns
     -------
     Power contribution due to release of latent heat divided by dTc/dt
 
     """
-
+    Qlt = 4*np.pi*(f*rc)**2*Lc/(gc*dTl_dP)
     
-    Mc = 4/3*np.pi*rc**3*rhoc
-    
-    return -3/2*Mc*f*Lc*D**2/(rc**2*Tc*(Delta-1))
+    return Qlt
 
 
 def Qst(Tc):
-    """
-    From Table 1 in Nimmo, F. (2009). Energetics of asteroid dynamos and the role of compositional convection. but divided by dTc/dt
-    
+    """   
 
     Parameters
     ----------
@@ -48,12 +46,11 @@ def Qst(Tc):
     
     Mc = 4/3*np.pi*rc**3*rhoc
     
-    return -Mc*cpc*(1+2/5*rc**2/D**2)
+    return -Mc*cpc
 
     
-def Qgt(Tc,f):
+def Qgt(Tc,f,dTl_dP,Xs):
     """
-    From Table 1 in Nimmo, F. (2009). Energetics of asteroid dynamos and the role of compositional convection. Qg but divided by dTc/dt
 
     Parameters
     ----------
@@ -61,24 +58,24 @@ def Qgt(Tc,f):
         core temperature.
     f : float
         fractional inner core radius
+    dTl_dP : float
+        dTl/dP pressure gradient of the liquidus
+    Xs : float
+        sulfur content wt %
 
     Returns
     -------
     Power contribution due to release of GPE from release of light elements when inner core solidifies
 
     """
-
-    Mc = 4/3*np.pi*rc**3*rhoc # mass of core [kg]
-    
-    from F_def import F_calc
-    F = F_calc(f)
-    
-    return -3*np.pi*G*rhoc*Mc*F*drho/(Delta-1)*D**2/Tc
+    rhol = fe_fes_density(Xs)*rho_exp
+    drho = rhofe_s - rhol 
+    Qgt = -8/3*np.pi**2*G*rhol*drho*(f*rc)**4/(rhoc*gc*dTl_dP)
+    Qgt =0 
+    return Qgt
 
 def Qr(t):
     """
-    From Table 1 in Nimmo, F. (2009). Energetics of asteroid dynamos and the role of compositional convection. Neglecting heat from potassium. 
-    For source of radioactive parameters see calculations in yellow folder and refereences in parameters file
 
     Parameters
     ----------

@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  Myr, Tm0, Tc0, Ts, f0, r, rc, dr, kappa_c, out_interval, km, cpm_p, rhom, save_interval_t, save_interval_d, default, kappa
+from parameters import  Myr, Ts, f0, r, rc, dr, kappa_c, save_interval_d, save_interval_t, km, Vm, As, cpm_p, rhom, default, kappa, rcmf, Xs_0, Fe0
 
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
@@ -26,10 +26,10 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run =1
+run =4
 
 t_acc=0.8*Myr  #Accretion time
-t_end_m=50#end time in Myr
+t_end_m=1000#end time in Myr
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle
@@ -48,7 +48,7 @@ print('Initial conditions set')
 
 ########################### Differentiation ###################################
 tic = time.perf_counter()
-Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, t_diff, H  = differentiation(Tint,t_acc,r, dr, step_m)
+Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H  = differentiation(Tint,t_acc,r, dr, step_m)
 toc = time.perf_counter()
 diff_time = toc - tic  
 
@@ -61,7 +61,6 @@ plt.xlabel('r/km')
 plt.ylabel('Temperature/K')
 plt.title('Temperature profile post differentiation')
 
-print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(diff_time)))
 #rescale data and save here in case thermal evolution crashes
 Tdiff = Tdiff[:,0::n_save_d]
 Xfe = Xfe[:,0::n_save_d]
@@ -70,16 +69,18 @@ cp = cp[:,0::n_save_d]
 Ra = Ra[0::n_save_d]
 Ra_crit = Ra_crit[0::n_save_d]
 convect = convect[0::n_save_d]
+d0 = d0[0::n_save_d]
 t_diff = t_diff[0::n_save_d]
 H = H[0::n_save_d]
 
-np.savez(f'Results_combined/run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, t_diff = t_diff, H=H)
+np.savez(f'Results_combined/run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, d0=d0, t_diff = t_diff, H=H)
 
+print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(diff_time)))
 ######################## Thermal evolution ####################################
 
 #integrate
 tic = time.perf_counter()
-Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ra, RaH, RanoH, Racrit, Fs, Fad, Fcmb, t, cond_i = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ra, RaH, RanoH, Racrit, Fs, Fad, Fcmb, Rem_c, t, cond_t = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time = toc - tic    
 
@@ -94,7 +95,7 @@ print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_t
 
 ############################# Process data ####################################
 ########## Current comparitive parameters ####################
-#do before lose resolution
+
 from parameters import convect_ratio
 nmantle = int((r/dr)/2)
 diff_time = t_diff[-1]/Myr
@@ -119,38 +120,8 @@ else:
     super_ad_start = t[np.where(Fcmb>Fad)[0]][0]/Myr
     super_ad_end = t[np.where(Fcmb>Fad)[0]][-1]/Myr
 
-#Reduce data points - as model saves more often than needed
-# take every nth point at an interval specified by save_interval in parameters.py
-Tc= Tc[0::n_save_t]
-Tc_conv = Tc_conv[0::n_save_t]
-Tcmb = Tcmb[0::n_save_t]
-Tm_mid = Tm_mid[0::n_save_t]
-Tm_conv = Tm_conv[0::n_save_t]
-Tm_surf = Tm_surf[0::n_save_t] 
-Tprofile = Tprofile[0::n_save_t,:]
-f = f[0::n_save_t]
-Xs = Xs[0::n_save_t]
-dl = dl[0::n_save_t]
-dc = dc[0::n_save_t]
-d0 = d0[0::n_save_t]
-min_unstable = min_unstable[0::n_save_t]
-Ra = Ra[0::n_save_t]
-RaH = RaH[0::n_save_t]
-RanoH = RanoH[0::n_save_t]
-Racrit = Racrit[0::n_save_t]
-Fs = Fs[0::n_save_t]
-Fad = Fad[0::n_save_t]
-Fcmb = Fcmb[0::n_save_t]
-t = t[0::n_save_t] 
-if cond_i != 'nan':
-    cond_i = int(cond_i/n_save_t) #scale cond_i too
-
-# calculate Frad, Rem
-from parameters import km, kc, G, rhoc, alpha_c, cpc, gamma
-
 
 # Frad - radiogenic heat flux, normalised to surface of body
-from parameters import rhom, Vm, As
 from heating import Al_heating
 h = Al_heating(t) 
 Frad = h*rhom*Vm/As #radiogenic heatflux
@@ -158,51 +129,40 @@ Frad = h*rhom*Vm/As #radiogenic heatflux
 #combine these in a single array
 Flux = [Fs, Fcmb, Fad, Frad]
 
-# calculate both magnetic reynolds numbers and merge only keeping the larger value (the larger velocity will dominate)
-from Rem_calc import Rem_comp, Rem_therm, ucomp_nimmo, ucomp_aubert, p_nichols
-
+# calculate thermal magnetic reynolds number
+from Rem_calc import Rem_therm
+from parameters import Xs_eutectic
 # need Fdrive for Rem_therm
 #only calculate this for Fdrive >0
 Fdrive = Fcmb - Fad
 Fdrive_nn = Fdrive.copy()
 Fdrive_nn[Fdrive<0]=0
-Rem_t = Rem_therm(Fdrive_nn) # magnetic Reynolds number for thermal convection
-
-#calculate compositional convection two ways
-unimmo = ucomp_nimmo(t,f)
-power = p_nichols(t,f) #convective power density
-uaubert = ucomp_aubert(power,f)
-Rem_cn = Rem_comp(unimmo,f) # magnetic Reynolds number for compositional convection
-Rem_ca = Rem_comp(uaubert,f) # magnetic Reynolds number for compositional convection
-Rem1 = Rem_cn
-Rem2 = Rem_ca
-Rem1[Rem_cn<Rem_t] = Rem_t[Rem_cn<Rem_t] #replace values where Rem_t < Rem_c
-Rem2[Rem_ca<Rem_t] = Rem_t[Rem_ca<Rem_t] #replace values where Rem_t < Rem_c
+Fdrive_nn[Xs>=Xs_eutectic]=0 #no dynamo in eutectic solidification
+Rem_t = Rem_therm(Fdrive_nn,f,min_unstable) # magnetic Reynolds number for thermal convection - tuple of MAC and CIA balance
 
 print('Fluxes and magnetic Reynolds number calculated.')
 
 ############################ Save results #####################################
 # save variables to file
-np.savez('Results_combined/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, t=t, Rem1 = Rem1, Rem2 = Rem2, Flux = Flux) 
+np.savez('Results_combined/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, T_profile = Tprofile, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, t=t, Rem_t = Rem_t, Rem_c = Rem_c, Flux = Flux) 
 
 #write parameters to the run file
 from csv import writer
-from parameters import r, Tm0, default
 
-var_list = [run, r, Tm0, t_acc/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_i, int_time, dr, out_interval/Myr, default]
+var_list = [run, r, dr, t_acc/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_t, int_time,  save_interval_d/Myr, save_interval_t/Myr, default, rcmf, Xs_0, Fe0]
 
     
-with open('run_info4.csv','a') as f_object:
+with open('run_info.csv','a') as f_object:         
     writer_object = writer(f_object) #pass file object to csv.writer
     writer_object.writerow(var_list) # pass list as argument into write row
     f_object.close() #close file
   
-#comparative parameters
-var_list2 = [convect_ratio, diff_time, peakT, tmax, tstrat_remove, strat_end, super_ad_start, super_ad_end, diff_T, run]
+# #comparative parameters
+# var_list2 = [convect_ratio, diff_time, peakT, tmax, tstrat_remove, strat_end, super_ad_start, super_ad_end, diff_T, run, r, rcmf]
 
-with open('lid_test.csv','a') as f_object:
-    writer_object = writer(f_object) #pass file object to csv.writer
-    writer_object.writerow(var_list2) # pass list as argument into write row
-    f_object.close() #close file
+# with open('lid_test.csv','a') as f_object:
+#     writer_object = writer(f_object) #pass file object to csv.writer
+#     writer_object.writerow(var_list2) # pass list as argument into write row
+#     f_object.close() #close file
 
-print('Results and run parameters saved')
+# print('Results and run parameters saved')

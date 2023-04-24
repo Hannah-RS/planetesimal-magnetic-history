@@ -3,9 +3,7 @@
 """
 Functions for calculating CMB boundary layer thicknesses
 """
-import numpy as np
-from parameters import gamma, c1, kappa, Rac, g, alpha_m, rhom, Ts, kappa_c, eta_c, rhoc, alpha_c, gc, r, rc
-from viscosity_def import viscosity
+from parameters import gamma, c1, Rac, kappa_c, eta_c, rhoc, alpha_c, gc, r, rc
 from Rayleigh_def import Rayleigh_calc
 
 def delta_l(t,Tm,Tcmb):
@@ -23,9 +21,12 @@ def delta_l(t,Tm,Tcmb):
     -------
     mantle bottom boundary layer thickness
     """
-    eta = viscosity(Tm)
+
     Ra, d0, RaH, RanoH = Rayleigh_calc(t,Tm)
-    delta_l = (r-rc)*(gamma*abs(Tcmb-Tm)/c1)**(4/3)*(Ra/Rac)**(-1/3)
+    if RaH > RanoH:
+        delta_l = 0.65*(r-rc)*(gamma*abs(Tcmb-Tm)/c1)**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
+    else:
+        delta_l = (r-rc)*(gamma*abs(Tcmb-Tm)/c1)**(4/3)*(Ra/Rac)**(-1/3) #eqn 21 from Dodds (2021)
 
     return delta_l
 

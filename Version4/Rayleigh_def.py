@@ -5,11 +5,11 @@ Script for calculating the Rayleigh number, expression for d0 comes from substit
 so that length of the domain cancels
 Also script for Rayleigh number and critical Rayleigh number for differentiation section
 """
-import numpy as np
+
 from viscosity_def import viscosity #import viscosity model
 from heating import Al_heating, AlFe_heating
 
-from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, km, Rac, Ts, default, c1, G, E, R, Tref, rhoa, alpha_a, convect_ratio
+from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, km, Rac, Ts, default, c1, G, convect_ratio
 
 def Rayleigh_crit(Tb):
     """
@@ -101,7 +101,7 @@ def Rayleigh_H(t,Tb,rcore = rc, model=default,Fe=False):
 
     """
     eta = viscosity(Tb,model)
-    g = 4*np.pi*r*rhom*G/3
+
     if Fe == False: #exclude radiogenic heating from Fe
         h = Al_heating(t)
     else:
@@ -139,18 +139,15 @@ def Rayleigh_differentiate(t,Tb,model=default):
     """
    
     RaH = Rayleigh_H(t,Tb,0,model,Fe=True)
-    eta = viscosity(Tb,model)
+
     RanoH, d0_noH = Rayleigh_noH(Tb,model)
-    if RanoH == 0: #for first step where there is no temp difference
-        d0H = 1000*r #artificially big value
-    else:
-        d0H = 0.65*r*(gamma*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
+
+    d0H = 0.65*r*(gamma*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
     
     Ra_crit = Rayleigh_crit(Tb)
-    if d0H/r < convect_ratio and RaH>Ra_crit: #still working on this criteria
+    if (d0H/r < convect_ratio) & (RaH>Ra_crit): #still working on this criteria
         convect = True
     else: 
         convect = False
-    #convect = RanoH>Ra_crit
     
     return RaH, d0H,  Ra_crit, convect
