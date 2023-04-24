@@ -7,41 +7,45 @@ Created on Tue Mar 28 11:10:18 2023
 """
 import matplotlib.pyplot as plt
 import numpy as np
-from parameters import Mr_fe, Mr_s, rho_eut, rhofe_l, rhofe_s
-from fe_fes_liquidus import weight_perc_to_at_frac
+from parameters import Mr_fe, Mr_s, rho_eut, rhofe_l, rhofe_s, Tl_fe, alpha_c, rho_exp
+from fe_fes_liquidus import fe_fes_density, weight_perc_to_at_frac
 
 Xs = np.linspace(0.1,32,100)
 Xsd = Xs/100
-Mrr = 1+Mr_fe/Mr_s
 at = weight_perc_to_at_frac(Xs)
-rhom19 = -3180*at**2 - 5176*at + 6950
-rhol = Xsd*Mrr*rho_eut + (1-Xsd*Mrr)*rhofe_l
-drho1 = (rhofe_s - rhol)/rhol
-drho2 = (rhofe_s - rho_eut)/rhol
-drho3 = (rhom19[0]-rhom19)/rhom19
+Mrr = 1+Mr_fe/Mr_s
 
-ticks = np.arange(0,0.65,0.05)
+rhom19 = fe_fes_density(Xs)
+drho2 = (rhom19[0]-rhom19)/rhom19
+drho3 = (rhofe_s-rhom19)/rhom19
+drho4 = (rhofe_s/rho_exp-rhom19)/rhom19
+
+
 plt.figure()
-plt.plot(Xs,drho1,label='$\\Delta \\rho = \\rho_{Fe,solid}-\\rho_c$')
-plt.plot(Xs,drho2,label='$\\Delta \\rho =\\rho_{Fe,solid}-\\rho_{FeS,eut}$')
+plt.plot(Xs,drho2,label='$\\Delta \\rho =\\rho_{Fe,liquid}-\\rho_c$ Morard 2019')
 plt.plot(Xs,drho3,label='$\\Delta \\rho =\\rho_{Fe,solid}-\\rho_c$ Morard 2019')
+plt.plot(Xs,drho4,label='$\\Delta \\rho =\\rho_{Fe,solid}-\\rho_c(1+\\alpha\\Delta T)$ Morard 2019 ')
 plt.hlines(0.05,0,32,linestyle='dashed',color='black',label='Nimmo (2009)')
 plt.xlabel('Xs/wt%')
 plt.ylabel('$\\frac{\\Delta \\rho}{\\rho_c} $ ')
-plt.yticks(ticks,minor=False)
-plt.legend(bbox_to_anchor=(0.97,0.4))
-#plt.savefig('Plots/density_difference.png')
+plt.legend()
+plt.savefig('Plots/density_difference.png')
 
 plt.figure()
-plt.plot(Xs,rhol,label='old parameters')
 plt.plot(Xs,rhom19,label='Morard 2019')
-plt.legend()
+plt.scatter(min(Xs),7800,label='solid Fe - Bryson 2015',color='black',marker='x')
+plt.scatter(32,4992,label='eutectic FeS - Dodds 2022',color='green',marker='x')
+plt.scatter(min(Xs),6980,label='liquid Fe - Dodds 2022',color='blue',marker='x')
+plt.legend(loc='lower left')
 plt.xlabel('Xs/ wt %')
-plt.ylabel('$\\rho kg m^{-3}$')
+plt.ylabel('$\\rho / kg m^{-3}$')
+plt.savefig('Plots/core_density.png')
 
 plt.figure()
-plt.plot(at,rhol,label='Old parameters')
 plt.plot(at,rhom19,label='Morard 2019')
-plt.legend()
+plt.hlines(7800,min(at),max(at),label='solid Fe - Bryson 2015',linestyle='dashed',color='black')
+plt.hlines(4992,max(at)-0.05,max(at),label='eutectic FeS - Dodds 2022',linestyle='dashed',color='green')
+plt.hlines(6980,min(at),max(at),label='liquid Fe - Dodds 2022',linestyle='dashed',color='red')
+plt.legend(loc='lower left')
 plt.xlabel('atom % S')
 plt.ylabel('$\\rho kg m^{-3}$')

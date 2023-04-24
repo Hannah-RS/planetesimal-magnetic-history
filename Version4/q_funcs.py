@@ -3,7 +3,8 @@
 """
 Expressions for heat fluxes divided by dTcdt from Nimmo (2009)
 """
-from parameters import rc, rhoc, rhofe_l, rhofe_s, rho_eut, Mr_fe, Mr_s, Lc, cpc, G, gc
+from parameters import rc, rhoc, rhofe_l, rhofe_s, rho_eut, Mr_fe, Mr_s, Lc, cpc, G, gc, alpha_c, rho_exp
+from fe_fes_liquidus import fe_fes_density
 from heating import Fe_heating
 import numpy as np
 
@@ -67,9 +68,7 @@ def Qgt(Tc,f,dTl_dP,Xs):
     Power contribution due to release of GPE from release of light elements when inner core solidifies
 
     """
-    Xsd = Xs/100
-    Mrr = 1+Mr_fe/Mr_s
-    rhol = Xsd*Mrr*rho_eut + (1-Xsd*Mrr)*rhofe_l
+    rhol = fe_fes_density(Xs)*rho_exp
     drho = rhofe_s - rhol 
     Qgt = -8/3*np.pi**2*G*rhol*drho*(f*rc)**4/(rhoc*gc*dTl_dP)
     Qgt =0 

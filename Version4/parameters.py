@@ -23,7 +23,7 @@ save_interval_t = 0.1*Myr # how often do you want each variable to be saved duri
 
 # Parameters that will vary
 r = 100e3 # radius of asteroid [m]
-default ='Dodds' #default viscosity model
+default ='Bryson3' #default viscosity model
 rcmf = 0.3 #rheologically critical melt fraction - melting required for differentiation
 Xs_0 = 30 # initial wt % sulfur in core 
 Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
@@ -93,10 +93,9 @@ Xs_to_core = XFe_a/(1-Xs_0/100)-XFe_a # wt % of S from accreted body that went i
 XAl_d = XAl_a/(1-XFe_d-Xs_to_core)  #wt % of Al in differentiated mantle
 
 # Core parameters 
-rhofe_l = 6980 # density of pure liquid iron [kg m^-3] Bryson 2016
-rhofe_s = 7800 # density of pure solid iron [kg m^-3] Bryson 2015
-rho_eut = 4992 # density of eutectic Fe-FeS solid [kg m^-3] Buono & Walker 2011
-rhoc= Xs_0/100*(1+Mr_fe/Mr_s)*rho_eut + (1-Xs_0/100*(1+Mr_fe/Mr_s))*rhofe_l # density of core [kg m^-3] 
+from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_density
+Ts_fe = 1260 # [K] Buono and Walker 2011 give 1263+-25
+Xs_eutectic = 32 # Buono & Walker give 31.9-32.7 for 10-500km size bodies
 cpc=850 # heat capacity of core [J kg^-1 K^-1] 
 kc=30 # thermal conducitivity of core material [Wm^-1 K^-1] 
 alpha_c=9.2e-5 #[K^-1] Nimmo 2009
@@ -106,19 +105,21 @@ f0=0.99 #initial fractional inner liquid core radius
 #constants for magnetic Reynolds number
 lambda_mag = 1.3 # magnetic diffusivity [m^2 s^{-1}] Weiss 2010
 Omega = 1.75e-4 # rotational frequency (10 hr period) [s^{-1}]
+Tmor = 1900 # temperature of measurements in Morard 2019 [K]
+rho_exp = 1 + alpha_c*(Tmor-1600) #expansion correction as core not at 1900K
+rhofe_l = fe_fes_density(0)*rho_exp # density of pure liquid iron [kg m^-3] Morard (2019)
+rhofe_s = 7800 # density of pure solid iron [kg m^-3] Bryson 2015
+rho_eut = fe_fes_density(Xs_eutectic)*rho_exp # density of eutectic Fe-FeS solid [kg m^-3] Morard (2019)
+rhoc = fe_fes_density(Xs_0)*rho_exp # density of core [kg m^-3]
 
 #Calculated parameters
 kappa_c = kc/(cpc*rhoc) #thermal diffusivity of core material
 g = G*(Vm*rhom+4/3*np.pi*rc**3*rhoc)/r**2 # surface gravity [m/s^2]
 gc = 4/3*np.pi*rc*rhoc*G #gravitational field strength at CMB [m/s^2]
 Pc = 2*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre of core [GPa]
-
-#Modified specific heat capacities
-from fe_fes_liquidus import fe_fes_liquidus_bw
-Ts_fe = 1260 # [K] Buono and Walker 2011 give 1263+-25
-Xs_eutectic = 32 # Buono & Walker give 31.9-32.7 for 10-500km size bodies
 Tl_fe = fe_fes_liquidus_bw(Xs_0,Pc)
 
+#Modified specific heat capacities
 #before differentiation
 if Xs_0 != Xs_eutectic:
     cpa_fe = cpa + XFe_a*Lc/(Tl_fe-Ts_fe) #cp for Tfe_s < T < Tsi_s

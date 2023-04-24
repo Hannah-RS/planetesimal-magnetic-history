@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Fe-FeS liquidus - linear liquidus approximation for eutectic solidification at 32% S at 1234K
-liquid iron melting at 1810 K 
+Fe-FeS liquidus and Fe-FeS density
 
 Pressure dependent liquidus from Buono & Walker (2011)
 """
@@ -47,6 +46,24 @@ def weight_perc_to_at_frac(Xs):
     x = weight_perc_to_mole_frac(Xs)
     at = x/(1+x)
     return at
+
+def fe_fes_density(Xs):
+    """
+    Density based on eqn. 1 in Morard 2019
+
+    Parameters
+    ----------
+    Xs : float
+        wt % sulfur
+
+    Returns
+    -------
+    rho : float
+        density [kg m^-3]
+    """
+    at = weight_perc_to_at_frac(Xs)
+    rho = (-3108*at**2)+(-5176*at)+6950
+    return rho
 
 def fe_fes_liquidus_linear(Xs):
     """

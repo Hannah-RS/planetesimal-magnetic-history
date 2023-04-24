@@ -9,7 +9,8 @@ from Aubert 2009
 3. My own expression for the convective power in the equation from Aubert 2009 (haven't figured this out yet)
 """
 import numpy as np
-from parameters import G, alpha_c, rc, cpc, Omega, lambda_mag, rhofe_s, rho_eut, rhoc, gc, dr #drho here is delta_rho/rho
+from parameters import G, alpha_c, rc, cpc, Omega, lambda_mag, rhofe_s, rho_eut, rhoc, gc, dr, rho_exp
+from fe_fes_liquidus import fe_fes_density
 
 def Rem_therm(Fdrive,f,min_unstable):
     """
@@ -40,7 +41,7 @@ def Rem_therm(Fdrive,f,min_unstable):
     Rem_cia = ucia*l/lambda_mag
     return Rem_mac, Rem_cia
 
-def Rem_comp(dfdt,f):
+def Rem_comp(dfdt,f, Xs):
     """
     
     Parameters
@@ -49,19 +50,21 @@ def Rem_comp(dfdt,f):
         rate of change of inner core radius
     f: float
         fractional inner core radius
+    Xs : float
+        sulfur content of core [wt %]
     Returns
     -------
     compositional magnetic reynolds number
 
     """
-    ucomp = ucomp_aubert(dfdt,f)
+    ucomp = ucomp_aubert(dfdt,f,Xs)
     Re_c = ucomp*rc*f/lambda_mag
     
     return Re_c
 
 
 
-def ucomp_aubert(dfdt,f):
+def ucomp_aubert(dfdt,f,Xs):
     """
     RMS velocity of compositional convection from equation 24 in Aubert 2009
 
@@ -71,6 +74,8 @@ def ucomp_aubert(dfdt,f):
         rate of change of inner core radius
     f: float
         fractional inner core radius
+    Xs : float
+        sulfur content of core [wt %]
 
     Returns
     -------
@@ -79,7 +84,8 @@ def ucomp_aubert(dfdt,f):
 
     """
     d = rc*f
-    Raq = rc*gc*abs(dfdt)*(rhofe_s - rho_eut)/(rhoc*Omega**3*d**2)
+    rhol = fe_fes_density(Xs)*rho_exp
+    Raq = rc*gc*abs(dfdt)*(rhofe_s - rhol)/(rhol*Omega**3*d**2)
     p = 3/5*Raq
     c3 = 1.31 # from Figure 10 caption in Aubert 2009
     

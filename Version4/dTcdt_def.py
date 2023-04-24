@@ -98,5 +98,5 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     dfdt = - dTcdt/(rhoc*gc*dTl_dP*rc)
 
     f_new = f+dfdt*dt
-    Rem_c = Rem_comp(dfdt,f)     
+    Rem_c = Rem_comp(dfdt,f,Xs)     
     return dTcdt, f_new, Rem_c
