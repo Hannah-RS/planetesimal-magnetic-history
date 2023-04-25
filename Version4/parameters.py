@@ -22,7 +22,7 @@ save_interval_d = 0.01*Myr # how often do you want each variable to be saved dur
 save_interval_t = 0.1*Myr # how often do you want each variable to be saved during thermal evolution
 
 # Parameters that will vary
-r = 100e3 # radius of asteroid [m]
+r = 400e3 # radius of asteroid [m]
 default ='Bryson3' #default viscosity model
 rcmf = 0.3 #rheologically critical melt fraction - melting required for differentiation
 Xs_0 = 30 # initial wt % sulfur in core 
