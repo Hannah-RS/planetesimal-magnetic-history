@@ -94,7 +94,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     """
 
     #initialise arrays for output
-    m = round((tend-tstart)/save_interval_t)
+    m = round((tend-tstart)/save_interval_t)+1 #add one so always enough space
     n_cells = len(T0) #number of cells
     i_core = round(n_cells/2)-1 # index in array of last core cell (-1 as indexing starts at 0)
     cond_t = 'nan' #set as string and then reset if switches to conduction
