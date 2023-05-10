@@ -23,8 +23,8 @@ save_interval_t = 0.1*Myr # how often do you want each variable to be saved duri
 
 # Parameters that will vary
 r = 400e3 # radius of asteroid [m]
-default ='Bryson3' #default viscosity model
-rcmf = 0.3 #rheologically critical melt fraction - melting required for differentiation
+default ='Dodds' #default viscosity model
+rcmf = 0.2 #rheologically critical melt fraction - melting required for differentiation
 Xs_0 = 30 # initial wt % sulfur in core 
 Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
 
