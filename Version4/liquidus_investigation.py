@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_liquidus_linear, fe_fes_liquidus_dp
-from parameters import rhoc, rhom, G, Mr_s, Mr_fe, Tml, Tms, cpc, alpha_c
+from parameters import rhoc, rhom, G, Mr_s, Mr_fe, Tml, Tms, cpc, alpha_c, Xs_eutectic
 
 
 #Create S array
@@ -20,8 +20,8 @@ x = Xsd*mrr/(1-Xsd) #mole fraction of FeS
 
 
 #create pressure array
-#r = np.array([10,100,250,500])*1e3 #radius [m]
-r = np.linspace(10,500,200)*1e3
+r = np.array([10,100,250,500])*1e3 #radius [m]
+#r = np.linspace(10,500,200)*1e3
 rc = r/2
 P = 2*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre [GPa]
 
@@ -82,11 +82,11 @@ plt.figure()
 plt.plot(Xs[linear>Teut],linear[linear>Teut],label='linear',color='black')
 for i, rad in enumerate(r):
     plt.plot(Xs[bw[i]>Teut],bw[i,bw[i]>Teut],label=f'radius {rad/1e3:.1f} km',color=colors[i%4])
-plt.hlines(1260,0,max(Xs),linestyle='dashed',color='black',label='eutectic temp 1bar - 6GPa')
+plt.scatter(Xs_eutectic,1260,linestyle='dashed',color='black',label='eutectic temp 1bar - 6GPa',marker='X')
 plt.xlabel('Weight % S')
 plt.ylabel('Tl /K')
 plt.ylim([1000,1800])
-#plt.legend()
+plt.legend()
 plt.title('Comparison between linear liquidus and Buono & Walker (2011)')
 #plt.savefig('Plots/liquidus_comp_xs.png')
 
