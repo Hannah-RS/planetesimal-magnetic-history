@@ -9,7 +9,7 @@ from Rayleigh_def import Rayleigh_calc
 from heating import Al_heating, AlFe_heating
 from cp_func import cp_calc_int
 
-def dTmdt_calc(t,Tconv,d0,Fs,Fcmb):
+def dTmdt_calc(t,Tconv,d0,Flid,Fcmb):
     """
 
     Parameters
@@ -31,14 +31,15 @@ def dTmdt_calc(t,Tconv,d0,Fs,Fcmb):
     """
     if (r-d0) < rc: #i.e. lid thickness is less than mantle thickness
         Vocean = 4/3*np.pi*((r-d0)**3-rc**3)
+        Alid = 4*np.pi*(r-d0)**2
     else:
         Vocean = Vm #put filler here as the output of this function won't be used
+        Alid = As
     #calculate radiogenic heating 
     h = Al_heating(t)
     rad = h*rhom*Vocean #radiogenic heating contribution
     cp = cp_calc_int(Tconv,False)
-    
-    return 1/(rhom*cp*Vocean)*(rad-Fs*As+Fcmb*Acmb)
+    return 1/(rhom*cp*Vocean)*(rad-Flid*Alid+Fcmb*Acmb)
 
 def dTadt_calc(t,Tconv,Fs): #not sure if this is called anywhere
     """
