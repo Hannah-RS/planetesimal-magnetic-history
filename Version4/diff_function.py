@@ -18,7 +18,7 @@ def differentiation(Tint,tacc,r,dr,dt):
     Parameters
     ----------
     Tint : float
-        array of initial temperatures
+        array of initial temperatures [K]
     tacc: float
         accretion time after CAIs [s]
     r : float
@@ -37,7 +37,7 @@ def differentiation(Tint,tacc,r,dr,dt):
     Xsi: float
         proportion of silicate in each cell which is melted in differentiation [0 to 1]
     cp : float
-        effective specific heat capacity of each cell
+        effective specific heat capacity of each cell [J /kg /K]
     Ra: float
         Rayleigh number for body
     Ra_crit: float

@@ -32,13 +32,13 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Parameters
     ----------
     tstart : float  
-        start time
+        start time [s]
     tend : float
-        end time
+        end time [s]
     dt : float
-        time step
+        time step [s]
     T0 : array
-        initial temperature profile
+        initial temperature profile [K]
     f0: float
         initial fractional inner core radius
     sparse_mat_c: sparse matrix
@@ -67,15 +67,19 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Xs: array
         wt % S in core 
     dl: array
-        thickness of mantle CMB boundary layer (0 if mantle not convecting)
+        thickness of mantle CMB boundary layer (0 if mantle not convecting) [m]
     dc: array
-        thickness of core CMB boundary layer (0 if core not thermally convecting)
+        thickness of core CMB boundary layer (0 if core not thermally convecting) [m]
     d0: array
-        stagnant lid thickness for convecting mantle
+        stagnant lid thickness for convecting mantle [m]
     min_unstable : int
         index of base of convecting core
     Ra: array
         Rayleigh number for convecting mantle
+    RaH: array
+        radiogenic Rayleigh number for convecting mantle
+    RanoH: array
+        non-radiogenic Rayleigh number for convecting mantle
     Racrit: array
         critical Rayleigh number for convecting mantle
     Flid: array
@@ -89,9 +93,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Rem_c : array
         compositional magnetic Reynolds number
     tsolve: array
-        time points corresponding to each of the values above
+        time points corresponding to each of the values above [s]
     cond_t: float
-        time [s] when the mantle switched from conduction to convection, nan if didn't switch
+        time when the mantle switched from conduction to convection, nan if didn't switch [s]
          
     """
 

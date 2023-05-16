@@ -14,7 +14,7 @@ def dTmdt_calc(t,Tconv,d0,Flid,Fcmb):
     Parameters
     ----------
     t : float
-        time, s
+        time, [s]
     Tconv : float
         convective temp [K]
     d0 : float
@@ -27,7 +27,7 @@ def dTmdt_calc(t,Tconv,d0,Flid,Fcmb):
     Returns
     -------
     dTmdt : float
-            rate of change of mantle temperature 
+            rate of change of mantle temperature [K/s]
 
     """
     if (r-d0) < rc: #i.e. lid thickness is less than mantle thickness
@@ -48,7 +48,7 @@ def dTadt_calc(t,Tconv,d0,Flid): #not sure if this is called anywhere
     Parameters
     ----------
     t : float
-        time, s
+        time, [s]
     Tconv : float
         convective temp [K]
     d0 : float
@@ -59,7 +59,7 @@ def dTadt_calc(t,Tconv,d0,Flid): #not sure if this is called anywhere
     Returns
     -------
     dTadt : float
-            rate of change of body temperature 
+            rate of change of body temperature [K/s]
 
     """
     if d0/r < convect_ratio: #i.e. lid thickness is less than mantle thickness
