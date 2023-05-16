@@ -174,7 +174,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             lid_start = nmantle_cells -2
         else:
             lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
-        if d0_new < 0.01*r:
+        if d0_new < dr:
             Flid_new = -km*(Ts-T_new_mantle[lid_start])/d0_new #if less than grid thickness choose d0 so don't overestimate thickness
             Fs_new = Flid_new #lid determines flux out of surface
         else:
@@ -308,7 +308,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     Tm_conv_new = T_old_mantle[1] + dTdt_mantle*dt #temperature of convecting region 
                     T_new_mantle[:lid_start+1] = Tm_conv_new
                     T_new_mantle[-1] = Ts #pin surface to 200K in case d0 < 1 cell thick
-                    if d0_new < 0.01*r:
+                    if d0_new < dr:
                         Flid_new = -km*(Ts-T_new_mantle[lid_start])/d0_new #flux from convecting region to stagnant lid
                         Fs_new = Flid_new #lid determines flux out of surface
                     else:
@@ -325,8 +325,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     Tm_conv_new = T_old_mantle[1] + dTdt_mantle*dt #temperature of convecting region 
                     T_new_mantle[:lid_start+1] = Tm_conv_new
                     T_new_mantle[-1] = Ts #pin surface to 200K in case d0 < 1 cell thick
-                    if d0_new < 0.01*r:
-                        Flid_new = -km*(T_new_mantle[lid_start+1]-T_new_mantle[lid_start])/d0_new #flux from convecting region to stagnant lid
+                    if d0_new < dr:
+                        Flid_new = -km*(Ts-T_new_mantle[lid_start])/d0_new #flux from convecting region to stagnant lid
                         Fs_new = Flid_new #lid determines flux out of surface
                     else:
                         Flid_new = -km*(T_new_mantle[lid_start+1]-T_new_mantle[lid_start])/dr
