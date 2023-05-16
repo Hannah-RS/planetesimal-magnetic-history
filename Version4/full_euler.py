@@ -579,7 +579,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         else: 
             pass
               
-    #truncate arrays to only return non-zero values
+    #truncate arrays to only return non-zero values in case core hasn't solidified and there is one cell empty
     Tc = Tc[:save_ind+1]
     Tc_conv = Tc_conv[:save_ind+1]
     Tcmb = Tcmb[:save_ind+1]
