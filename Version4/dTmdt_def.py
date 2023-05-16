@@ -3,9 +3,8 @@
 """
 Expression for dTm/dt from rearranging eqn 25 in Dodds (2020) and dTdt for an undifferentiated body
 """
-from parameters import rhom, As, Ts, Acmb, km, gamma, Myr, cpa, rhoa, V, r, rc, Vm
 import numpy as np
-from Rayleigh_def import Rayleigh_calc
+from parameters import rhom, As, Acmb, rhoa, V, r, rc, Vm, convect_ratio
 from heating import Al_heating, AlFe_heating
 from cp_func import cp_calc_int
 
@@ -18,10 +17,12 @@ def dTmdt_calc(t,Tconv,d0,Flid,Fcmb):
         time, s
     Tconv : float
         convective temp [K]
-    Fs: float
-        surface heat flux [W m^-2]
+    d0 : float
+        stagnant lid thickness [m]
+    Flid: float
+        heat flux through top of stagnant lid [W m^-2]
     Fcmb : float
-        CMB heat flux
+        CMB heat flux [W m^-2]
 
     Returns
     -------
@@ -41,7 +42,7 @@ def dTmdt_calc(t,Tconv,d0,Flid,Fcmb):
     cp = cp_calc_int(Tconv,False)
     return 1/(rhom*cp*Vocean)*(rad-Flid*Alid+Fcmb*Acmb)
 
-def dTadt_calc(t,Tconv,Fs): #not sure if this is called anywhere
+def dTadt_calc(t,Tconv,d0,Flid): #not sure if this is called anywhere
     """
 
     Parameters
@@ -50,8 +51,10 @@ def dTadt_calc(t,Tconv,Fs): #not sure if this is called anywhere
         time, s
     Tconv : float
         convective temp [K]
-    Fs: float
-        surface heat flux [W m^-2]
+    d0 : float
+        stagnant lid thickness [m]
+    Flid: float
+        heat flux through top of stagnant lid [W m^-2]
 
     Returns
     -------
@@ -59,10 +62,15 @@ def dTadt_calc(t,Tconv,Fs): #not sure if this is called anywhere
             rate of change of body temperature 
 
     """
-    
+    if d0/r < convect_ratio: #i.e. lid thickness is less than mantle thickness
+        Vocean = 4/3*np.pi*(r-d0)**3
+        Alid = 4*np.pi*(r-d0)**2
+    else:
+        Vocean = V #put filler here as the output of this function won't be used
+        Alid = As
     #calculate radiogenic heating 
     h = AlFe_heating(t)
-    rad = h*rhoa*V #radiogenic heating contribution
-    cp = cp_calc_int(Tconv, True)
+    rad = h*rhoa*Vocean #radiogenic heating contribution
+    cp = cp_calc_int(Tconv,True)
     
-    return 1/(rhoa*cpa*V)*(rad-Fs*As)
+    return 1/(rhoa*cp*Vocean)*(rad-Flid*Alid)

@@ -6,6 +6,7 @@ Function for differentiating an asteroid. Based on the process in Dodds et. al. 
 from stencil import cond_stencil_general
 from Rayleigh_def import Rayleigh_differentiate
 from heating import AlFe_heating
+from dTmdt_def import dTadt_calc
 from scipy import sparse as sp
 from cp_func import cp_calc_arr, cp_calc_int, cp_calc_eut_arr, cp_calc_eut_int
 import numpy as np
@@ -88,6 +89,7 @@ def differentiation(Tint,tacc,r,dr,dt):
         dTdt = rhs/(rhoa*cp[:,0])
         T[:-1,0] = Tint[:-1] + dt*dTdt[:-1]
         T[-1,0] = Tint[-1] #pin top cell to 200
+        Flid_old = -ka*(Ts - T[-2,0])/dr
         
         #calculate melting
         #iron
@@ -134,6 +136,7 @@ def differentiation(Tint,tacc,r,dr,dt):
             dTdt = rhs/(rhoa*cp[:,i])
             T[:-1,i] = T[:-1,i-1] + dt*dTdt[:-1]
             T[-1,i] = Ts
+            Flid_new = -ka*(Ts-T[-2,i])/dr #default surface flux
             
             if convect[i] == True or cond_i==1: #overwrite convecting portion
                 if cond_i == 0:
@@ -148,11 +151,19 @@ def differentiation(Tint,tacc,r,dr,dt):
                 
                 cp[:lid_start,i] = cp_calc_int(T[0,i-1],True)
                 cp[-1,i] = cpa
-                Fs = -ka*(Ts-T[lid_start,i-1])/d0[i]
-                dTdt = (rhoa*H[i]*V-Fs*As)/(rhoa*cp[0,i]*V)
+                dTdt = dTadt_calc(t[i-1],T[lid_start-1,i-1],d0[i-1],Flid_old)
                 T[:lid_start,i] = T[:lid_start,i-1] + dTdt*0.01*dt 
-                T[-1,i] = Ts   
+                T[-1,i] = Ts 
                 
+                if d0[i] < dr:
+                    Flid_new = -ka*(Ts-T[lid_start,i])/d0[i] #if less than grid thickness choose d0 so don't overestimate thickness
+                else:
+                    Flid_new = -ka*(T[lid_start+1,i]-T[lid_start,i])/dr 
+                
+                  
+            #relabel for next step
+            Flid_old = Flid_new
+            
             #calculate melting
             #iron
             Xfe[T[:,i]<Ts_fe,i] = 0 #subsolidus
