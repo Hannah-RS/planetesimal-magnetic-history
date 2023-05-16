@@ -174,8 +174,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             lid_start = nmantle_cells -2
         else:
             lid_start = nmantle_cells - nlid_cells - 1 #index in temp array where lid starts
-        if d0_new < dr:
-            Flid_new = -km*(T_new_mantle[lid_start+1]-T_new_mantle[lid_start])/d0_new #if less than grid thickness choose d0 so don't overestimate thickness
+        if d0_new < 0.01*r:
+            Flid_new = -km*(Ts-T_new_mantle[lid_start])/d0_new #if less than grid thickness choose d0 so don't overestimate thickness
             Fs_new = Flid_new #lid determines flux out of surface
         else:
             Flid_new = -km*(T_new_mantle[lid_start+1]-T_new_mantle[lid_start])/dr 
@@ -308,8 +308,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     Tm_conv_new = T_old_mantle[1] + dTdt_mantle*dt #temperature of convecting region 
                     T_new_mantle[:lid_start+1] = Tm_conv_new
                     T_new_mantle[-1] = Ts #pin surface to 200K in case d0 < 1 cell thick
-                    if d0_new < dr:
-                        Flid_new = -km*(T_new_mantle[lid_start+1]-T_new_mantle[lid_start])/d0_new #flux from convecting region to stagnant lid
+                    if d0_new < 0.01*r:
+                        Flid_new = -km*(Ts-T_new_mantle[lid_start])/d0_new #flux from convecting region to stagnant lid
                         Fs_new = Flid_new #lid determines flux out of surface
                     else:
                         Flid_new = -km*(T_new_mantle[lid_start+1]-T_new_mantle[lid_start])/dr
@@ -325,7 +325,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     Tm_conv_new = T_old_mantle[1] + dTdt_mantle*dt #temperature of convecting region 
                     T_new_mantle[:lid_start+1] = Tm_conv_new
                     T_new_mantle[-1] = Ts #pin surface to 200K in case d0 < 1 cell thick
-                    if d0_new < dr:
+                    if d0_new < 0.01*r:
                         Flid_new = -km*(T_new_mantle[lid_start+1]-T_new_mantle[lid_start])/d0_new #flux from convecting region to stagnant lid
                         Fs_new = Flid_new #lid determines flux out of surface
                     else:
@@ -525,7 +525,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         if f_new<=0.001: #stop integration if core is solid i.e.inner liquid core radius < 0.1%, 
             #save values at this point
 
-            if save_ind < len(Tc)-2: #if on final save then don't add one more as not space in array
+            if save_ind < len(Tc)-3: #if on final save then don't add one more as not space in array
                 save_ind =+ save_ind
                 Tc[save_ind] = Tc_old
                 Tc_conv[save_ind] = Tc_conv_old
@@ -579,5 +579,29 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         else: 
             pass
               
-  
+    #truncate arrays to only return non-zero values
+    Tc = Tc[:save_ind+1]
+    Tc_conv = Tc_conv[:save_ind+1]
+    Tcmb = Tcmb[:save_ind+1]
+    Tm_mid = Tm_mid[:save_ind+1]
+    Tm_conv = Tm_conv[:save_ind+1]
+    Tm_surf = Tm_surf[:save_ind+1]
+    Tprofile = Tprofile[:save_ind+1]
+    f=f[:save_ind+1]
+    Xs = Xs[:save_ind+1]
+    dl = dl[:save_ind+1]
+    dc = dc[:save_ind+1]
+    d0 = d0[:save_ind+1]
+    min_unstable = min_unstable[:save_ind+1]
+    Ra = Ra[:save_ind+1]
+    RaH = RaH[:save_ind+1]
+    RanoH = RanoH[:save_ind+1]
+    Racrit = Racrit[:save_ind+1]
+    Fs = Fs[:save_ind+1]
+    Flid = Flid[:save_ind+1]
+    Fad = Fad[:save_ind+1]
+    Fcmb = Fcmb[:save_ind+1]
+    Rem_c = Rem_c[:save_ind+1]
+    tsolve = tsolve[:save_ind+1]
+            
     return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ra, RaH, RanoH, Racrit, Fs, Flid, Fad, Fcmb, Rem_c, tsolve, cond_t
