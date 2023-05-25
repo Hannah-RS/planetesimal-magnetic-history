@@ -317,10 +317,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             if (dTdt_mantle_new<0): #mantle is cooling
                 if (Ra_new <= Racrit_new) | (Tm_conv_old ==0): #check for Ra and switch to conduction
                     mantle_conv = False
-                    if Tm_conv_old!=0: #check if first time it is conductive i.e. the switch
-                        cond_t = tsolve_new #record time for switch to conduction
-                    else: #mantle already conducting
-                        pass
                     Tm_conv_new = 0 # convective mantle temperature is 0 if mantle not convecting
                     
                 else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile 
@@ -354,9 +350,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         else:
             mantle_conv = False
             Tm_conv_new = 0
-            # if Tm_conv_old!=0: #check if first time it is conductive i.e. the switch
-            #     cond_t = tsolve_new #record time for switch to conduction
-        
+
+        if (Tm_conv_old !=0) & (Tm_conv_new ==0): #record time for switch to conduction
+            cond_t = tsolve_new
+            print("Mantle conducting")
+            
+            
         # Calculate Urey ratio with correct heat flux
         h = Al_heating(tsolve_new)
         Ur_new = rhom*Vm*h/abs(Fs_new*As)

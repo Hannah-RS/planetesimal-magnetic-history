@@ -121,10 +121,6 @@ else:
     super_ad_start = t[np.where(Fcmb>Fad)[0]][0]/Myr
     super_ad_end = t[np.where(Fcmb>Fad)[0]][-1]/Myr
 
-if np.all(Tm_conv>0):
-    cond_t = np.nan
-else:
-    cond_t = t[Tm_conv==0][0]/Myr
 
 # Frad - radiogenic heat flux, normalised to surface of body
 from heating import Al_heating
