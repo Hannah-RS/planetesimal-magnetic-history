@@ -92,6 +92,8 @@ def differentiation(Tint,tacc,r,dr,dt):
         T[-1,0] = Tint[-1] #pin top cell to 200
         Flid_old = -ka*(Ts - T[-2,0])/dr
         
+        Ur = rhoa*H*V/abs(Flid_old*As) #calculate Urey ratio
+        
         #calculate melting
         #iron
         Xfe[T[:,0]<Ts_fe,0] = 0 #subsolidus
@@ -124,7 +126,7 @@ def differentiation(Tint,tacc,r,dr,dt):
             else: 
                 t = np.append(t,t[i-1]+0.01*dt) #adaptive timestep smaller when convecting
                 
-            Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1], dTdt_old)
+            Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1], dTdt_old, Ur)
             
             #calculate radiogenic heating
             H = np.append(H,AlFe_heating(t[i]))
@@ -162,7 +164,9 @@ def differentiation(Tint,tacc,r,dr,dt):
                 else:
                     Flid_new = -ka*(T[lid_start+1,i]-T[lid_start,i])/dr 
                 
-                  
+            #calculate Urey ratio
+            Fs = -ka*(Ts-T[-2,i])/dr
+            Ur = rhoa*V*H[i]/(abs(Fs*As))
             #relabel for next step
             Flid_old = Flid_new
             dTdt_old = dTdt_new

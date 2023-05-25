@@ -29,7 +29,7 @@ def Rayleigh_crit(Tb):
     Ra_crit = 20.9*(gamma*(Tb-Ts))**4 
     return Ra_crit
     
-def Rayleigh_calc(t,Tb,dTmdt,model=default):
+def Rayleigh_calc(t,Tb,dTmdt,Ur,model=default):
     """
     
 
@@ -41,6 +41,8 @@ def Rayleigh_calc(t,Tb,dTmdt,model=default):
         mantle base temperature
     dTmdt : float
         rate of temperature change of convecting mantle [K/s]
+    Ur : float
+        Urey ratio
 
     Returns
     -------
@@ -51,9 +53,13 @@ def Rayleigh_calc(t,Tb,dTmdt,model=default):
     RaH, RaRob = Rayleigh_H(t,Tb,dTmdt,model=model)
     RanoH, d0 = Rayleigh_noH(Tb,model)
     
+    if Ur > 1:
+        d0 = 0.667*(r-rc)*(gamma*(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
+    else:
+        d0 = 0.633*(r-rc)*(gamma*(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
+        
     if RaH > RanoH:
         Ram = RaH
-        d0 = 0.65*(r-rc)*(gamma*(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
     else:
         Ram = RanoH
     
@@ -118,7 +124,7 @@ def Rayleigh_H(t,Tb,dTmdt,rcore = rc, model=default,Fe=False):
     return Ra, RaRob
 
 
-def Rayleigh_differentiate(t,Tb,dTmdt,model=default):
+def Rayleigh_differentiate(t,Tb,dTmdt,Ur,model=default):
     """
     Check for onset of differentiation
 
@@ -130,6 +136,8 @@ def Rayleigh_differentiate(t,Tb,dTmdt,model=default):
         temperature at the base of the convecting region
     dTmdt : float
         rate of temperature change of convecting mantle [K/s]
+    Ur : float
+        Urey ratio
     model : str, optional
         viscosity model The default is default (set in parameters.py).
 
@@ -149,8 +157,11 @@ def Rayleigh_differentiate(t,Tb,dTmdt,model=default):
     RaH, RaRob = Rayleigh_H(t,Tb,dTmdt,0,model,Fe=True)
 
     RanoH, d0_noH = Rayleigh_noH(Tb,model)
-
-    d0H = 0.65*r*(gamma*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
+    
+    if Ur > 1:
+        d0H = 0.667*r*(gamma*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
+    else:
+        d0H = 0.633*(r-rc)*(gamma*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
     
     Ra_crit = Rayleigh_crit(Tb)
     if (d0H/r < convect_ratio) & (RaRob>Ra_crit): #still working on this criteria
