@@ -6,7 +6,7 @@ Functions for calculating CMB boundary layer thicknesses
 from parameters import gamma, c1, Rac, kappa_c, eta_c, rhoc, alpha_c, gc, r, rc
 from Rayleigh_def import Rayleigh_calc
 
-def delta_l(t,Tm,Tcmb):
+def delta_l(t,Tm,Tcmb,dTmdt):
     """
     Eqn 21 in Dodds 2020 simplified to cancel out length-scale of conduction
     Parameters
@@ -17,12 +17,14 @@ def delta_l(t,Tm,Tcmb):
         mantle temperature [K]
     Tcmb : float
         CMB temperature [K]
+    dTmdt : float
+        rate of temperature change of convecting mantle [K/s]
     Returns
     -------
     mantle bottom boundary layer thickness
     """
 
-    Ra, d0, RaH, RanoH = Rayleigh_calc(t,Tm)
+    Ra, d0, RaH, RanoH, RaRob = Rayleigh_calc(t,Tm, dTmdt)
     if RaH > RanoH:
         delta_l = 0.65*(r-rc)*(gamma*abs(Tcmb-Tm)/c1)**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
     else:

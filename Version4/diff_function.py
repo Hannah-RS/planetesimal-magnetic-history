@@ -87,6 +87,7 @@ def differentiation(Tint,tacc,r,dr,dt):
         
         #calculate temperature change
         dTdt = rhs/(rhoa*cp[:,0])
+        dTdt_old = dTdt[0] #take temp change at centre for Rayeligh-Roberts number
         T[:-1,0] = Tint[:-1] + dt*dTdt[:-1]
         T[-1,0] = Tint[-1] #pin top cell to 200
         Flid_old = -ka*(Ts - T[-2,0])/dr
@@ -123,7 +124,7 @@ def differentiation(Tint,tacc,r,dr,dt):
             else: 
                 t = np.append(t,t[i-1]+0.01*dt) #adaptive timestep smaller when convecting
                 
-            Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1])
+            Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1], dTdt_old)
             
             #calculate radiogenic heating
             H = np.append(H,AlFe_heating(t[i]))
@@ -134,6 +135,7 @@ def differentiation(Tint,tacc,r,dr,dt):
 
             #calculate temperature change
             dTdt = rhs/(rhoa*cp[:,i])
+            dTdt_new = dTdt[0]
             T[:-1,i] = T[:-1,i-1] + dt*dTdt[:-1]
             T[-1,i] = Ts
             Flid_new = -ka*(Ts-T[-2,i])/dr #default surface flux
@@ -151,8 +153,8 @@ def differentiation(Tint,tacc,r,dr,dt):
                 
                 cp[:lid_start,i] = cp_calc_int(T[0,i-1],True)
                 cp[-1,i] = cpa
-                dTdt = dTadt_calc(t[i-1],T[lid_start-1,i-1],d0[i-1],Flid_old)
-                T[:lid_start,i] = T[:lid_start,i-1] + dTdt*0.01*dt 
+                dTdt_new = dTadt_calc(t[i-1],T[lid_start-1,i-1],d0[i-1],Flid_old)
+                T[:lid_start,i] = T[:lid_start,i-1] + dTdt_new*0.01*dt 
                 T[-1,i] = Ts 
                 
                 if d0[i] < dr:
@@ -163,6 +165,7 @@ def differentiation(Tint,tacc,r,dr,dt):
                   
             #relabel for next step
             Flid_old = Flid_new
+            dTdt_old = dTdt_new
             
             #calculate melting
             #iron

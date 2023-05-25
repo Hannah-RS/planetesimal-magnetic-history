@@ -80,6 +80,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         radiogenic Rayleigh number for convecting mantle
     RanoH: array
         non-radiogenic Rayleigh number for convecting mantle
+    RaRob : array
+        modified Rayleigh Roberst number for convecting mantle (eqn 25 of Sturtz 2022b)
     Racrit: array
         critical Rayleigh number for convecting mantle
     Flid: array
@@ -114,6 +116,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Racrit = np.zeros([m])
     RaH = np.zeros([m])
     RanoH = np.zeros([m])
+    RaRob = np.zeros([m])
     d0 = np.zeros([m])
     dl = np.zeros([m])
     dc = np.zeros([m])
@@ -154,12 +157,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     ##################    Initial step    #########################
     # Step 1. Calculate conductive profile for mantle
     T_new_mantle = Tm_cond_calc(tsolve_new,dt,T0_mantle,sparse_mat_m)
-    
+    dTdt_mantle_new = (T_new_mantle-T0_mantle)[1] #default use temp change at base above CMB
     Fs_new = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
     Flid_new = Fs_new #by default lid flux is same as surface
     
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
-    Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T0_mantle[1],default) #use temp at base of mantle 
+    Ra_new, d0_new, RaH_new, RanoH_new, RaRob_new = Rayleigh_calc(tsolve_new,T0_mantle[1],dTdt_mantle_new,default) #use temp at base of mantle 
     Racrit_new = Rayleigh_crit(T0_mantle[1])   
       
     
@@ -172,7 +175,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Tm_conv_new = 0 # convective mantle temperature is 0 if mantle not convecting
        
     else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile
-        dl_new = delta_l(tsolve_new,T0_mantle[1],T0_mantle[0])
+        dl_new = delta_l(tsolve_new,T0_mantle[1],T0_mantle[0],dTdt_mantle_new)
         nlid_cells = round(d0_new/dr)
         if nlid_cells ==0:
             lid_start = nmantle_cells -2
@@ -183,7 +186,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Fs_new = Flid_new #lid determines flux out of surface
         else:
             Flid_new = -km*(T_new_mantle[lid_start+1]-T_new_mantle[lid_start])/dr 
-        Tm_conv_new = T0_mantle[1] + dTmdt_calc(tsolve_new,T0_mantle[1],d0_new,Flid_new,Fcmb_new)*dt #take temp one above CMB
+        dTdt_mantle_new = dTmdt_calc(tsolve_new,T0_mantle[1],d0_new,Flid_new,Fcmb_new)
+        Tm_conv_new = T0_mantle[1] + dTdt_mantle_new*dt #take temp one above CMB
         T_new_mantle[:lid_start+1] = Tm_conv_new
         T_new_mantle[-1] = Ts #pin surface to 200K
 
@@ -259,6 +263,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Tm_mid_old = Tm_mid_new
     Tm_conv_old = Tm_conv_new
     Tm_surf_old = Tm_surf_new
+    dTdt_mantle_old = dTdt_mantle_new
     f_old = f_new
     Xs_old = Xs_new
     dl_old = dl_new
@@ -268,6 +273,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Ra_old = Ra_new
     RaH_old = RaH_new
     RanoH_old = RanoH_new
+    RaRob_old = RaRob_new
     Racrit_old = Racrit_new
     Flid_old = Flid_new
     Fs_old = Fs_new
@@ -284,9 +290,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         T_new_mantle = Tm_cond_calc(tsolve_new,dt,T_old_mantle,sparse_mat_m)
         Fs_new = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
         Flid_new = Fs_new #by default lid flux is same as surface
+        dTdt_mantle_new = (T_new_mantle-T_old_mantle)[1] #default use temp change at base just above CMB
         
         # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
-        Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T_old_mantle[1],default) #use temp at base of mantle 
+        Ra_new, d0_new, RaH_new, RanoH_new, RaRob_new = Rayleigh_calc(tsolve_new,T_old_mantle[1],dTdt_mantle_old,default) #use temp at base of mantle 
+        #if RaRob_new < 0.1*RaRob_old:
+            #RaRob_new = RaRob_old
         Racrit_new = Rayleigh_crit(T_old_mantle[1])
        
         if d0_new<(r-rc): #other convection criteria are meaningless if lid thickness is greater than mantle thickness
@@ -296,9 +305,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             else:
                 lid_start = nmantle_cells - nlid_cells - 1  #index in temp array where lid starts
                           
-            dTdt_mantle = dTmdt_calc(tsolve_old,T_old_mantle[1],d0_old,Flid_old,Fcmb_old) #convective dTdt - use base mantle temp as convective temp
+            dTdt_mantle_new = dTmdt_calc(tsolve_old,T_old_mantle[1],d0_old,Flid_old,Fcmb_old) #convective dTdt - use base mantle temp as convective temp
             
-            if (dTdt_mantle<0): #mantle is cooling
+            if (dTdt_mantle_new<0): #mantle is cooling
                 if (Ra_new <= Racrit_new) | (Tm_conv_old ==0): #check for Ra and switch to conduction
                     mantle_conv = False
                     if Tm_conv_old!=0: #check if first time it is conductive i.e. the switch
@@ -309,7 +318,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     
                 else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile 
                     mantle_conv = True
-                    Tm_conv_new = T_old_mantle[1] + dTdt_mantle*dt #temperature of convecting region 
+                    Tm_conv_new = T_old_mantle[1] + dTdt_mantle_new*dt #temperature of convecting region 
                     T_new_mantle[:lid_start+1] = Tm_conv_new
                     T_new_mantle[-1] = Ts #pin surface to 200K in case d0 < 1 cell thick
                     if d0_new < dr:
@@ -326,7 +335,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile 
                     mantle_conv = True               
         
-                    Tm_conv_new = T_old_mantle[1] + dTdt_mantle*dt #temperature of convecting region 
+                    Tm_conv_new = T_old_mantle[1] + dTdt_mantle_new*dt #temperature of convecting region 
                     T_new_mantle[:lid_start+1] = Tm_conv_new
                     T_new_mantle[-1] = Ts #pin surface to 200K in case d0 < 1 cell thick
                     if d0_new < dr:
@@ -338,6 +347,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         else:
             mantle_conv = False
             Tm_conv_new = 0
+            # if Tm_conv_old!=0: #check if first time it is conductive i.e. the switch
+            #     cond_t = tsolve_new #record time for switch to conduction
             
         #store values
         Tm_mid_new = T_new_mantle[round(nmantle_cells/2)] # temperature at the mid mantle
@@ -426,7 +437,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 # check if non zero if just switched to convection b.l. at previous timestep = 0
                 if dl_old == 0 and dc_old == 0:
                     dc_old = delta_c(Tc_conv_new,Tcmb_old) #find approximate core cmb b.l. thickness
-                    dl_old = delta_l(tsolve_new,Tm_conv_new,Tcmb_old) #find approximate mantle cmb b.l. thickness
+                    dl_old = delta_l(tsolve_new,Tm_conv_new,Tcmb_old,dTdt_mantle_old) #find approximate mantle cmb b.l. thickness
                     factor = (kc*dl_old)/(km*dc_old)
                     
                 elif dl_old != 0 and dc_old == 0:
@@ -434,7 +445,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                      factor = (kc*dl_old)/(km*dc_old)
                      
                 elif dl_old == 0 and dc_old != 0:
-                     dl_old = delta_l(tsolve_new,Tm_conv_new,Tcmb_old) #find approximate mantle cmb b.l. thickness
+                     dl_old = delta_l(tsolve_new,Tm_conv_new,Tcmb_old,dTdt_mantle_old) #find approximate mantle cmb b.l. thickness
                      factor = (kc*dl_old)/(km*dc_old)
                      
                 else: #both convective b.l. are non zero
@@ -442,12 +453,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     
                 Tcmb_new = (Tm_conv_new + factor*Tc_conv_new)/(1+factor) 
                 dc_new = delta_c(Tc_conv_new,Tcmb_new) #find core cmb b.l. thickness
-                dl_new = delta_l(tsolve_new,Tm_conv_new,Tcmb_new) #find mantle cmb b.l. thickness
+                dl_new = delta_l(tsolve_new,Tm_conv_new,Tcmb_new,dTdt_mantle_old) #find mantle cmb b.l. thickness
                 Fcmb_new = -km*(Tm_conv_new-Tcmb_new)/dr#dl_new
             else: #eqn 23 = 24  
                 
                 Tcmb_new = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
-                dl_new = delta_l(tsolve_new,Tm_conv_new,Tcmb_new) #find mantle cmb b.l. thickness
+                dl_new = delta_l(tsolve_new,Tm_conv_new,Tcmb_new,dTdt_mantle_old) #find mantle cmb b.l. thickness
                 Fcmb_new = -km*(T_new_mantle[1]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020 - until core starts to convect heat transport is modelled as diffusive
         else:
             if core_conv == True:
@@ -477,6 +488,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Tm_mid_old = Tm_mid_new
         Tm_conv_old = Tm_conv_new
         Tm_surf_old = Tm_surf_new
+        dTdt_mantle_old = dTdt_mantle_new
         f_old = f_new
         Xs_old = Xs_new
         dl_old = dl_new
@@ -486,6 +498,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Ra_old = Ra_new
         RaH_old = RaH_new
         RanoH_old = RanoH_new
+        RaRob_old = RaRob_new
         Racrit_old = Racrit_new
         Flid_old = Flid_new
         Fs_old = Fs_new
@@ -513,6 +526,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Ra[save_ind] = Ra_old
             RaH[save_ind] = RaH_old
             RanoH[save_ind] = RanoH_old
+            RaRob[save_ind] = RaRob_old
             Racrit[save_ind] = Racrit_old
             Fs[save_ind] = Fs_old
             Flid[save_ind] = Flid_old
@@ -547,6 +561,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 Ra[save_ind] = Ra_old
                 RaH[save_ind] = RaH_old
                 RanoH[save_ind] = RanoH_old
+                RaRob[save_ind] = RaRob_old
                 Racrit[save_ind] = Racrit_old
                 Fs[save_ind] = Fs_old
                 Flid[save_ind] = Flid_new
@@ -571,6 +586,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Ra = Ra[:save_ind+1]
             RaH = RaH[:save_ind+1]
             RanoH = RanoH[:save_ind+1]
+            RaRob = RaRob[:save_ind+1]
             Racrit = Racrit[:save_ind+1]
             Fs = Fs[:save_ind+1]
             Flid = Flid[:save_ind+1]
@@ -601,6 +617,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     RaH = RaH[:save_ind+1]
     RanoH = RanoH[:save_ind+1]
     Racrit = Racrit[:save_ind+1]
+    RaRob = RaRob[:save_ind+1]
     Fs = Fs[:save_ind+1]
     Flid = Flid[:save_ind+1]
     Fad = Fad[:save_ind+1]
@@ -608,4 +625,4 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Rem_c = Rem_c[:save_ind+1]
     tsolve = tsolve[:save_ind+1]
             
-    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ra, RaH, RanoH, Racrit, Fs, Flid, Fad, Fcmb, Rem_c, tsolve, cond_t
+    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ra, RaH, RanoH, RaRob, Racrit, Fs, Flid, Fad, Fcmb, Rem_c, tsolve, cond_t
