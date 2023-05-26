@@ -162,13 +162,16 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     # Step 1. Calculate conductive profile for mantle
     T_new_mantle = Tm_cond_calc(tsolve_new,dt,T0_mantle,sparse_mat_m)
     dTdt_mantle_new = (T_new_mantle-T0_mantle)[1] #default use temp change at base above CMB
+    dTdt_mantle_sum = np.ones([5])*dTdt_mantle_new
+    dTdt_mantle_av = (np.average(1/dTdt_mantle_sum))**(-1)
+    
     Fs_new = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
     Flid_new = Fs_new #by default lid flux is same as surface
     h = Al_heating(tsolve_new)
     Ur_new = rhom*Vm*h/abs(Fs_new*As) #calculate Urey ratio
     
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
-    Ra_new, d0_new, RaH_new, RanoH_new, RaRob_new = Rayleigh_calc(tsolve_new,T0_mantle[1],dTdt_mantle_new,Ur_new,default) #use temp at base of mantle 
+    Ra_new, d0_new, RaH_new, RanoH_new, RaRob_new = Rayleigh_calc(tsolve_new,T0_mantle[1],dTdt_mantle_av,Ur_new,default) #use temp at base of mantle 
     Racrit_new = Rayleigh_crit(T0_mantle[1])   
       
     
@@ -181,7 +184,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Tm_conv_new = 0 # convective mantle temperature is 0 if mantle not convecting
        
     else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile
-        dl_new = delta_l(T0_mantle[1],T0_mantle[0],Ur_old)
+        dl_new = delta_l(T0_mantle[1],T0_mantle[0],Ur_new)
         nlid_cells = round(d0_new/dr)
         if nlid_cells ==0:
             lid_start = nmantle_cells -2
@@ -298,11 +301,15 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Fs_new = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
         Flid_new = Fs_new #by default lid flux is same as surface
         dTdt_mantle_new = (T_new_mantle-T_old_mantle)[1] #default use temp change at base just above CMB
+        dTdt_mantle_sum = np.delete(dTdt_mantle_sum,0)
+        dTdt_mantle_sum = np.append(dTdt_mantle_sum,dTdt_mantle_new)
+        dTdt_mantle_av = (np.average(1/dTdt_mantle_sum))**(-1)
         
         # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
-        Ra_new, d0_new, RaH_new, RanoH_new, RaRob_new = Rayleigh_calc(tsolve_new,T_old_mantle[1],dTdt_mantle_old,Ur_old,default) #use temp at base of mantle 
-        #if RaRob_new < 0.1*RaRob_old:
-            #RaRob_new = RaRob_old
+        Ra_new, d0_new, RaH_new, RanoH_new, RaRob_new = Rayleigh_calc(tsolve_new,T_old_mantle[1],dTdt_mantle_av,Ur_old,default) #use temp at base of mantle 
+        # if RaRob_new < 0.01*RaRob_old:
+        #     RaRob_new = RaRob_old
+        Ra_new = RaRob_new
         Racrit_new = Rayleigh_crit(T_old_mantle[1])
        
         if d0_new<(r-rc): #other convection criteria are meaningless if lid thickness is greater than mantle thickness
