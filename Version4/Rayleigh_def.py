@@ -43,6 +43,8 @@ def Rayleigh_calc(t,Tb,dTmdt,Ur,model=default):
         rate of temperature change of convecting mantle [K/s]
     Ur : float
         Urey ratio
+    model : str
+        viscosity model default set in parameters
 
     Returns
     -------
@@ -52,7 +54,7 @@ def Rayleigh_calc(t,Tb,dTmdt,Ur,model=default):
 
     RaH, RaRob = Rayleigh_H(t,Tb,dTmdt,model=model)
     RanoH, d0 = Rayleigh_noH(Tb,model)
-    
+
     if Ur > 1:
         d0 = 0.667*(r-rc)*(gamma*(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
     else:
@@ -75,6 +77,8 @@ def Rayleigh_noH(Tb,model=default):
         time [s]
     Tb : float
         mantle base temperature
+    model : str
+        viscosity model default set in parameters
 
     Returns
     -------
@@ -169,4 +173,4 @@ def Rayleigh_differentiate(t,Tb,dTmdt,Ur,model=default):
     else: 
         convect = False
     
-    return RaRob, d0H,  Ra_crit, convect
+    return RaH, d0H,  Ra_crit, convect
