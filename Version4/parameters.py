@@ -45,10 +45,12 @@ Lm = 400e3 #latent heat of mantle [J /kg]
 Tml = 1800 # mantle liquidus [K]
 Tms = 1400 # mantle solidus [K]
 rhom = 3000 # density [kg m^-3] Bryson et. al. (2019)
+km = 2.16 # thermal conductivity of silicate [W /m /K] needs to be consistent with cp, kappa and rhom
+kappa = 9e-7 # thermal diffusivity of silicate [m^2 /s] - 4 options are given in Dodds (2021) have picked the middle one - needs to be consistent with other choices
 alpha_m = 4e-5 # thermal expansivity of mantle [/K]
-kappa = 9e-7 # thermal diffusivity of silicate [m^2 /s] - 4 options are given in Dodds (2021) have picked the middle one
+
 Rac = 1000  #critical Rayleigh number for isoviscous convection
-km = kappa*cpm*rhom # thermal conductivity of silicate [W /m /K]
+
 
 # Viscosity parameters
 E = 300e3 # activation energy [J /mol]

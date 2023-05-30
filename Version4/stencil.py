@@ -6,7 +6,7 @@ Requires no inputs just run once at the beginning of model for a given body to c
 Returns r_mat which is the required stencil based on Equation 13 in supplementary materials of Bryson (2019) but with Ts fixed and dT/dr = 0 at r=0
 Three stencils: one for core, one for mantle and one without k which can be multiplied in later
 """
-def cond_stencil_mantle(r,rc,dr,kappa_m):
+def cond_stencil_mantle(r,rc,dr,krho):
     """
     
 
@@ -18,8 +18,8 @@ def cond_stencil_mantle(r,rc,dr,kappa_m):
         core radius [m]
     dr : float
         cell width [m]
-    kappa_m : float
-        thermal diffusivity of silicate [m^2 /s]
+    krho : float
+        thermal conductivity/density of silicate [W kg^-1 K^-1 m^2]
     Returns
     -------
     r_mat : matrix (2d np array)
@@ -53,7 +53,7 @@ def cond_stencil_mantle(r,rc,dr,kappa_m):
     
     # multiply array by kappa_m
 
-    r_mat_m = r_mat*kappa_m/dr**2
+    r_mat_m = r_mat*krho/dr**2
        
     return r_mat_m
 

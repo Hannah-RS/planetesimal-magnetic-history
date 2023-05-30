@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  Myr, Ts, f0, r, rc, dr, kappa_c, save_interval_d, save_interval_t, km, Vm, As, cpm_p, rhom, default, kappa, rcmf, Xs_0, Fe0
+from parameters import  Myr, Ts, f0, r, rc, dr, kappa_c, save_interval_d, save_interval_t, km, Vm, As, rhom, kappa, default, rcmf, Xs_0, Fe0
 
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
@@ -18,18 +18,18 @@ from diff_function import differentiation
 from full_euler import thermal_evolution
 
 import scipy.sparse as sp
-kappa_m = km/(rhom*cpm_p) #use modified specific heat capacity to account for mantle melting
+
 dT_mat_c = cond_stencil_core(r,rc,dr,kappa_c) 
-dT_mat_m = cond_stencil_mantle(r,rc,dr,kappa_m)  
+dT_mat_m = cond_stencil_mantle(r,rc,dr,km/rhom)  
 sparse_mat_m = sp.dia_matrix(dT_mat_m)
 sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run =12
+run =16
 
 t_acc=0.8*Myr  #Accretion time
-t_end_m=100#end time in Myr
+t_end_m=20#end time in Myr
 
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
