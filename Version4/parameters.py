@@ -73,7 +73,6 @@ gamma = E/(R*T0eta**2)
 #Undifferentiated parameters
 #Authors tend to use same value as silicates
 ka = km # [W /m /K] same as mantle (correct for post sintering - Dodds 2021)
-rhoa = 3500 # kg m^-3 density of undifferentiated material (Dodds 2021 rho_b)
 cpa = cpm # heat capacity [J /kg /K] (Elkins-Tanton 2011 and Bryson 2019 use silicate value)
 alpha_a = alpha_m # thermal expansivity of mantle [/K]
 convect_ratio = 0.99 #ratio of d0/r for onset of convection in undifferentiated body
@@ -115,6 +114,7 @@ rho_eut = fe_fes_density(Xs_eutectic)*rho_exp # density of eutectic Fe-FeS solid
 rhoc = fe_fes_density(Xs_0)*rho_exp # density of core [kg m^-3]
 
 #Calculated parameters
+rhoa = 1/(XFe_a/rhofe_s +(1-XFe_a)/rhom) # kg m^-3 density of undifferentiated material (Sturtz 2022b eqn. 1)
 kappa_c = kc/(cpc*rhoc) #thermal diffusivity of core material
 g = G*(Vm*rhom+4/3*np.pi*rc**3*rhoc)/r**2 # surface gravity [m/s^2]
 gc = 4/3*np.pi*rc*rhoc*G #gravitational field strength at CMB [m/s^2]
