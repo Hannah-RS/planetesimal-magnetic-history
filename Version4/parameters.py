@@ -90,8 +90,7 @@ thalf_fe = 2.62*Myr # half life of 60Fe [s] (Dodds thesis - Ruedas 2017)
 Mr_s = 32.07 # Molar mass of sulfur Pub chem [amu]
 Mr_fe = 55.84 # Molar mass of iron Pub chem  [amu]
 XFe_d = 1 - Xs_0/100 #abundance of Fe in core assuming S is only other significant phase [wt %]
-Xs_to_core = XFe_a/(1-Xs_0/100)-XFe_a # wt % of S from accreted body that went into core
-XAl_d = XAl_a/(1-XFe_d-Xs_to_core)  #wt % of Al in differentiated mantle
+
 
 # Core parameters 
 from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_density
@@ -115,6 +114,7 @@ rhoc = fe_fes_density(Xs_0)*rho_exp # density of core [kg m^-3]
 
 #Calculated parameters
 rhoa = 1/(XFe_a/rhofe_s +(1-XFe_a)/rhom) # kg m^-3 density of undifferentiated material (Sturtz 2022b eqn. 1)
+XAl_d = (rhoa/rhom*(r**3/(r**3-rc**3)))*XAl_a
 kappa_c = kc/(cpc*rhoc) #thermal diffusivity of core material
 g = G*(Vm*rhom+4/3*np.pi*rc**3*rhoc)/r**2 # surface gravity [m/s^2]
 gc = 4/3*np.pi*rc*rhoc*G #gravitational field strength at CMB [m/s^2]
