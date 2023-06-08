@@ -26,10 +26,10 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run =16
+run =17
 
 t_acc=0.8*Myr  #Accretion time
-t_end_m=20#end time in Myr
+t_end_m=50#end time in Myr
 
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
@@ -131,7 +131,7 @@ Frad = h*rhom*Vm/As #radiogenic heatflux
 Flux = [Fs, Fcmb, Fad, Frad]
 
 # calculate thermal magnetic reynolds number
-from Rem_calc import Rem_therm
+from Rem_calc import Rem_therm, B_flux_therm, B_mac
 from parameters import Xs_eutectic
 # need Fdrive for Rem_therm
 #only calculate this for Fdrive >0
@@ -140,14 +140,16 @@ Fdrive_nn = Fdrive.copy()
 Fdrive_nn[Fdrive<0]=0
 Fdrive_nn[Xs>=Xs_eutectic]=0 #no dynamo in eutectic solidification
 Rem_t = Rem_therm(Fdrive_nn,f,min_unstable) # magnetic Reynolds number for thermal convection - tuple of MAC and CIA balance
-
+Bmac1 = B_mac(Fdrive_nn) #field strength for thermal convection - MAC balance
+Bmac2, Bcia = B_flux_therm(Fdrive_nn,f,min_unstable) # field strength for thermal convection based on energy flux scaling 
+Btherm = [Bmac1, Bmac2, Bcia]
 print('Fluxes and magnetic Reynolds number calculated.')
 
 ############################ Save results #####################################
 # save variables to file
 np.savez('Results_combined/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, 
          T_profile = Tprofile, Flid = Flid, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, Ur=Ur, 
-         Ra = Ra, RaH= RaH, RanoH = RanoH, RaRob = RaRob, Racrit = Racrit, t=t, Rem_t = Rem_t, Rem_c = Rem_c, Flux = Flux) 
+         Ra = Ra, RaH= RaH, RanoH = RanoH, RaRob = RaRob, Racrit = Racrit, t=t, Rem_t = Rem_t, Btherm = Btherm, Rem_c = Rem_c, Flux = Flux) 
 
 #write parameters to the run file
 from csv import writer

@@ -14,6 +14,7 @@ G = 6.67e-11 # gravitational constant [N kg^-2 m^2]
 year = 60*60*24*365 #number of seconds in a year
 Myr = 1e6*year #number of seconds in Myr
 R = 8.31 # gas constant [J /K /mol]
+mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
 dr = 500 # size of cells [m]
@@ -101,7 +102,7 @@ kc=30 # thermal conducitivity of core material [Wm^-1 K^-1]
 alpha_c=9.2e-5 #[K^-1] Nimmo 2009
 Lc = 270e3 # latent heat of core [J kg^-1] Bryson 2015, Tarduno 2012
 eta_c =0.01 # viscosity of core [Pa s] Dodds (2021)
-f0=0.99 #initial fractional inner liquid core radius
+f0=0.999 #initial fractional inner liquid core radius
 #constants for magnetic Reynolds number
 lambda_mag = 1.3 # magnetic diffusivity [m^2 s^{-1}] Weiss 2010
 Omega = 1.75e-4 # rotational frequency (10 hr period) [s^{-1}]
@@ -111,6 +112,8 @@ rhofe_l = fe_fes_density(0)*rho_exp # density of pure liquid iron [kg m^-3] Mora
 rhofe_s = 7800 # density of pure solid iron [kg m^-3] Bryson 2015
 rho_eut = fe_fes_density(Xs_eutectic)*rho_exp # density of eutectic Fe-FeS solid [kg m^-3] Morard (2019)
 rhoc = fe_fes_density(Xs_0)*rho_exp # density of core [kg m^-3]
+Bp_frac = 0.1 #fraction of poloidal field at CMB to total field in the core (Weiss 2010)
+fohm = 1 #fraction of energy dissipated via Ohmic dissipation in the dynamo (Weiss 2010)
 
 #Calculated parameters
 rhoa = 1/(XFe_a/rhofe_s +(1-XFe_a)/rhom) # kg m^-3 density of undifferentiated material (Sturtz 2022b eqn. 1)
