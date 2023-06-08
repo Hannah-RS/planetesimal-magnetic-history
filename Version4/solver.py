@@ -29,7 +29,7 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 run =17
 
 t_acc=0.8*Myr  #Accretion time
-t_end_m=50#end time in Myr
+t_end_m=400#end time in Myr
 
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
@@ -81,7 +81,7 @@ print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtim
 
 #integrate
 tic = time.perf_counter()
-Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, RaRob, Racrit, Fs, Flid, Fad, Fcmb, Rem_c, t, cond_t = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, RaRob, Racrit, Fs, Flid, Fad, Fcmb, Rem_c, Bcomp, t, cond_t = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time = toc - tic    
 
@@ -142,14 +142,14 @@ Fdrive_nn[Xs>=Xs_eutectic]=0 #no dynamo in eutectic solidification
 Rem_t = Rem_therm(Fdrive_nn,f,min_unstable) # magnetic Reynolds number for thermal convection - tuple of MAC and CIA balance
 Bmac1 = B_mac(Fdrive_nn) #field strength for thermal convection - MAC balance
 Bmac2, Bcia = B_flux_therm(Fdrive_nn,f,min_unstable) # field strength for thermal convection based on energy flux scaling 
-Btherm = [Bmac1, Bmac2, Bcia]
+B = [Bmac1, Bmac2, Bcia, Bcomp]
 print('Fluxes and magnetic Reynolds number calculated.')
 
 ############################ Save results #####################################
 # save variables to file
 np.savez('Results_combined/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, 
          T_profile = Tprofile, Flid = Flid, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, Ur=Ur, 
-         Ra = Ra, RaH= RaH, RanoH = RanoH, RaRob = RaRob, Racrit = Racrit, t=t, Rem_t = Rem_t, Btherm = Btherm, Rem_c = Rem_c, Flux = Flux) 
+         Ra = Ra, RaH= RaH, RanoH = RanoH, RaRob = RaRob, Racrit = Racrit, t=t, Rem_t = Rem_t, B = B, Rem_c = Rem_c, Flux = Flux) 
 
 #write parameters to the run file
 from csv import writer

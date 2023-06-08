@@ -168,3 +168,26 @@ def B_flux_therm(Fdrive,f,min_unstable):
     Bflux_mac, Bflux_cia = Bp_frac*(rc/r)**3*((8*np.pi*mu0*G*alpha_c*fohm*rhoc*rc**2*Fdrive)/(cpc*np.array([umac,ucia])))**0.5
     
     return Bflux_mac, Bflux_cia
+
+def B_flux_comp(dfdt,f,Xs):
+    """
+    
+    Parameters
+    ----------
+    dfdt : float
+        rate of change of inner core radius
+    f: float
+        fractional inner core radius
+    Xs : float
+        sulfur content of core [wt %]
+    Returns
+    -------
+    compositional magnetic field strength
+
+    """
+    ucomp = ucomp_aubert(dfdt, f, Xs)
+    rhol = fe_fes_density(Xs)*rho_exp
+    Fdrive = (rhofe_s - rhol)*gc*f*abs(dfdt)*rc**2
+    Bflux_comp = Bp_frac*(rc/r)**3*((8*np.pi*mu0*G*alpha_c*fohm*rhoc*rc**2*Fdrive)/(cpc*ucomp))**0.5
+    
+    return Bflux_comp
