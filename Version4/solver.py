@@ -29,7 +29,7 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 run =17
 
 t_acc=0.8*Myr  #Accretion time
-t_end_m=400#end time in Myr
+t_end_m=350#end time in Myr
 
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
@@ -131,7 +131,7 @@ Frad = h*rhom*Vm/As #radiogenic heatflux
 Flux = [Fs, Fcmb, Fad, Frad]
 
 # calculate thermal magnetic reynolds number
-from Rem_calc import Rem_therm, B_flux_therm, B_mac
+from Rem_calc import Rem_therm, B_flux_therm
 from parameters import Xs_eutectic
 # need Fdrive for Rem_therm
 #only calculate this for Fdrive >0
@@ -140,9 +140,8 @@ Fdrive_nn = Fdrive.copy()
 Fdrive_nn[Fdrive<0]=0
 Fdrive_nn[Xs>=Xs_eutectic]=0 #no dynamo in eutectic solidification
 Rem_t = Rem_therm(Fdrive_nn,f,min_unstable) # magnetic Reynolds number for thermal convection - tuple of MAC and CIA balance
-Bmac1 = B_mac(Fdrive_nn) #field strength for thermal convection - MAC balance
-Bmac2, Bcia = B_flux_therm(Fdrive_nn,f,min_unstable) # field strength for thermal convection based on energy flux scaling 
-B = [Bmac1, Bmac2, Bcia, Bcomp]
+Bml, Bmac, Bcia = B_flux_therm(Fdrive_nn,f,min_unstable) # field strength for thermal convection based on energy flux scaling 
+B = [Bml, Bmac, Bcia, Bcomp]
 print('Fluxes and magnetic Reynolds number calculated.')
 
 ############################ Save results #####################################

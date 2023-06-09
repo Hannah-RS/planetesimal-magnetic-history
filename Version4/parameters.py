@@ -23,7 +23,7 @@ save_interval_d = 0.01*Myr # how often do you want each variable to be saved dur
 save_interval_t = 0.1*Myr # how often do you want each variable to be saved during thermal evolution
 
 # Parameters that will vary
-r = 400e3 # radius of asteroid [m]
+r = 200e3 # radius of asteroid [m]
 default ='Dodds' #default viscosity model
 rcmf = 0.2 #rheologically critical melt fraction - melting required for differentiation
 Xs_0 = 30 # initial wt % sulfur in core 
@@ -114,6 +114,8 @@ rho_eut = fe_fes_density(Xs_eutectic)*rho_exp # density of eutectic Fe-FeS solid
 rhoc = fe_fes_density(Xs_0)*rho_exp # density of core [kg m^-3]
 Bp_frac = 0.1 #fraction of poloidal field at CMB to total field in the core (Weiss 2010)
 fohm = 1 #fraction of energy dissipated via Ohmic dissipation in the dynamo (Weiss 2010)
+cu = 1.1 # Ruckriemen 2015
+cb = 1.17 #Ruckriemen 2015 
 
 #Calculated parameters
 rhoa = 1/(XFe_a/rhofe_s +(1-XFe_a)/rhom) # kg m^-3 density of undifferentiated material (Sturtz 2022b eqn. 1)
