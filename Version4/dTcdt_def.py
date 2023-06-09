@@ -104,5 +104,5 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     f_new = f+dfdt*dt
     Rem_c = Rem_comp(dfdt,f,Xs) 
     Bcomp = B_flux_comp(dfdt,f,Xs)
-    print(Bcomp)
+   
     return dTcdt, f_new, Rem_c, Bcomp

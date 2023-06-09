@@ -124,28 +124,9 @@ def ucomp_aubert(dfdt,f,Xs):
     
     return ucomp
 
-def B_mac(Fdrive):
-    """
-    Magnetic field strength based on MAC scaling (Weiss 2010 pg. 40)
-
-    Parameters
-    ----------
-    Fdrive : float
-        convective flux at CMB [Wm^-2]
-
-    Returns
-    -------
-    Bmac : float
-        predicted magnetic field strength at the surface [T]
-
-    """
-    Bmac = Bp_frac*(rc/r)**3*(rhoc*mu0)**0.5*((8*np.pi* G*rc**3*alpha_c*Omega*Fdrive)/cpc)**0.25
-    
-    return Bmac
-
 def B_flux_therm(Fdrive,f,min_unstable):
     """
-    Magnetic field strength from flux based scaling for thermal flux
+    Magnetic field strength from flux based scaling for thermal flux from Christensen 2009
     
     Parameters
     ----------
@@ -158,16 +139,20 @@ def B_flux_therm(Fdrive,f,min_unstable):
 
     Returns
     -------
+    Bflux_ml : float
+        magnetic field strength using mixing length scaling for convective velocity [T]
     Bflux_mac : float
         magnetic field strength using MAC scaling for convective velocity [T]
     Bflux_cia : float
-        magnetic field strength using MAC scaling for convective velocity [T]
+        magnetic field strength using CIA scaling for convective velocity [T]
 
     """
-    umac, ucia = u_therm(Fdrive,f,min_unstable)
-    Bflux_mac, Bflux_cia = Bp_frac*(rc/r)**3*((8*np.pi*mu0*G*alpha_c*fohm*rhoc*rc**2*Fdrive)/(cpc*np.array([umac,ucia])))**0.5
+    l = f*rc - dr*min_unstable #lengthscale over which convection can occur
+    Bflux_ml = Bp_frac*(rc/r)**3*(2*mu0*fohm)**0.5*((4*np.pi*f*rc*l*alpha_c*G*rhoc**(3/2)*Fdrive)/(3*cpc))**(1/3)
+    Bflux_mac = Bp_frac*(rc/r)**3*(2*mu0*fohm*l)**0.5*((4*np.pi*f*rc*alpha_c*G*rhoc**2*Omega*Fdrive)/(3*cpc))**(1/4)
+    Bflux_cia = Bp_frac*(rc/r)**3*(2*mu0*fohm*rhoc*Omega**(1/5)*l**(4/5))**0.5*((4*np.pi*f*rc*alpha_c*G*Fdrive)/(3*cpc))**(3/10)
     
-    return Bflux_mac, Bflux_cia
+    return Bflux_ml, Bflux_mac, Bflux_cia
 
 def B_flux_comp(dfdt,f,Xs):
     """
@@ -187,7 +172,6 @@ def B_flux_comp(dfdt,f,Xs):
     """
     ucomp = ucomp_aubert(dfdt, f, Xs)
     rhol = fe_fes_density(Xs)*rho_exp
-    Fdrive = (rhofe_s - rhol)*gc*f*abs(dfdt)*rc**2
-    Bflux_comp = Bp_frac*(rc/r)**3*((8*np.pi*mu0*G*alpha_c*fohm*rhoc*rc**2*Fdrive)/(cpc*ucomp))**0.5
+    Bflux_comp = Bp_frac*(rc/r)**3*((32*mu0*fohm*np.pi**2*G**2*(f*rc)**4*rhoc**2*alpha_c*(rhofe_s-rhol)*f*abs(dfdt))/(9*ucomp*cpc))**0.5
     
     return Bflux_comp
