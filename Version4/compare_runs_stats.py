@@ -9,8 +9,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 file='Results_combined/Timestep_test/timestep_test.csv'
-
+save =False #decide whether to save
 data = pd.read_csv(file,delimiter=',',skiprows=[1])
+n =len(data)
 
 #scale dt and dr by original step
 data['dt']=data['dt']/9.62603058148927e-05
@@ -33,6 +34,7 @@ diff = data_range/mean
 
 data_dt = data[data['dr']==1] #runs where only dt was changed
 data_dr = data[data['dr']!=1] #runs where dr was changed so dt changed
+data_dr = pd.concat([data_dr,data[data['run']==3]]) #add default run
 
 #################### Percentage difference plot ###########################
 col1 = ['diff_T','diff_time','peakT','tmax','tc_conv2']
@@ -43,29 +45,30 @@ col4 = ['MAC_length','CIA_length','comp_length']
 plt.figure(tight_layout=True,figsize=[10,10])
 plt.subplot(4,1,1)
 for col in col1:
-    plt.scatter([col]*3,data_norm[col]*100,label=f'{col}')
+    plt.scatter([col]*n,data_norm[col]*100,label=f'{col}')
     plt.ylabel('|deviation| from mean %')
 
 plt.subplot(4,1,2)
 for col in col2:
-    plt.scatter([col]*3,data_norm[col]*100,label=f'{col}')
+    plt.scatter([col]*n,data_norm[col]*100,label=f'{col}')
     plt.ylabel('|deviation| from mean %')
 
 plt.subplot(4,1,3)
 for col in col3:
-    plt.scatter([col]*3,data_norm[col]*100,label=f'{col}')
+    plt.scatter([col]*n,data_norm[col]*100,label=f'{col}')
     plt.ylabel('|deviation| from mean %')
 
 plt.subplot(4,1,4)
 for col in col4:
-    plt.scatter([col]*3,data_norm[col]*100,label=f'{col}')
+    plt.scatter([col]*n,data_norm[col]*100,label=f'{col}')
     plt.ylabel('|deviation| from mean %')
-plt.savefig('Results_combined/Timestep_test/perc_diff.png',dpi=300)
+if save == True:
+    plt.savefig('Results_combined/Timestep_test/perc_diff.png',dpi=300)
 
 ######### Difference in magnetic field start and stop times as a fraction of total generation time #############
 plt.figure()
 for i, col in enumerate(col2):
-    plt.scatter([col]*3,data_diff[col]*100/data[col4[int(i/2)]],label=f'{col}')
+    plt.scatter([col]*n,data_diff[col]*100/data[col4[int(i/2)]],label=f'{col}')
     plt.ylabel('t-$\\bar{t}$/$\\Delta$t %')
     
 ######################### Change in each value with timestep only #################
@@ -79,7 +82,7 @@ ylabels6 = ['t/Myr','t/Myr','t/Myr','t/Myr','t/Myr','t/Myr','','t/Myr']
 ylabels7 = ['t/Myr','t/Myr','t/Myr','t/Myr','t/Myr']
 ylabels8 = ['t/Myr','t/Myr','t/Myr']
 
-plt.figure(tight_layout=True)
+plt.figure(tight_layout=True,figsize = [10,7])
 plt.suptitle('Differentiation and peak temperature')
 for i, col in enumerate(col5):
     plt.subplot(2,2,i+1)
@@ -124,7 +127,7 @@ ylabels6 = ['t/Myr','t/Myr','t/Myr','t/Myr','t/Myr','t/Myr','','t/Myr']
 ylabels7 = ['t/Myr','t/Myr','t/Myr','t/Myr','t/Myr']
 ylabels8 = ['t/Myr','t/Myr','t/Myr']
 
-plt.figure(tight_layout=True)
+plt.figure(tight_layout=True,figsize = [10,7])
 plt.suptitle('Differentiation and peak temperature')
 for i, col in enumerate(col5):
     plt.subplot(2,2,i+1)
