@@ -17,7 +17,7 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-dr = 400 # size of cells [m]
+dr = 500 # size of cells [m]
 out_interval = 20 #how many times do you want t to be printed in the whole run
 save_interval_d = 0.01*Myr # how often do you want each variable to be saved during differentiation
 save_interval_t = 0.1*Myr # how often do you want each variable to be saved during thermal evolution
@@ -114,8 +114,8 @@ rho_eut = fe_fes_density(Xs_eutectic)*rho_exp # density of eutectic Fe-FeS solid
 rhoc = fe_fes_density(Xs_0)*rho_exp # density of core [kg m^-3]
 Bp_frac = 0.1 #fraction of poloidal field at CMB to total field in the core (Weiss 2010)
 fohm = 1 #fraction of energy dissipated via Ohmic dissipation in the dynamo (Weiss 2010)
-cu = 1.1 # Ruckriemen 2015
-cb = 1.17 #Ruckriemen 2015 
+cu = 1.65 #  Aubert 2009
+cb = 1.31 # Aubert 2009
 
 #Calculated parameters
 rhoa = 1/(XFe_a/rhofe_s +(1-XFe_a)/rhom) # kg m^-3 density of undifferentiated material (Sturtz 2022b eqn. 1)
