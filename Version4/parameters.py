@@ -17,13 +17,13 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-dr = 500 # size of cells [m]
+dr = 400 # size of cells [m]
 out_interval = 20 #how many times do you want t to be printed in the whole run
 save_interval_d = 0.01*Myr # how often do you want each variable to be saved during differentiation
 save_interval_t = 0.1*Myr # how often do you want each variable to be saved during thermal evolution
 
 # Parameters that will vary
-r = 200e3 # radius of asteroid [m]
+r = 400e3 # radius of asteroid [m]
 default ='Dodds' #default viscosity model
 rcmf = 0.2 #rheologically critical melt fraction - melting required for differentiation
 Xs_0 = 30 # initial wt % sulfur in core 
