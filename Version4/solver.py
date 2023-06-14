@@ -34,7 +34,7 @@ t_end_m=1000#end time in Myr
 t_end=t_end_m*Myr
 t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle
-step_m=0.1*t_cond_core  #max timestep must be smaller than conductive timestep
+step_m=0.05*t_cond_core  #max timestep must be smaller than conductive timestep
 n_save_d = int(save_interval_d/step_m)
 n_save_t = int(save_interval_t/step_m)
 
