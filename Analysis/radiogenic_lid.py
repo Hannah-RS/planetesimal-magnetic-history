@@ -5,6 +5,9 @@ Script for comparing the two radiogenic lid thicknesses
 """
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+# setting path
+sys.path.append('../')
 from Rayleigh_def import Rayleigh_H, Rayleigh_noH
 from parameters import Myr, Ts, gamma, r, rc, Rac
 

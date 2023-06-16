@@ -8,7 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-data_all = pd.read_csv('lid_test.csv',delimiter=',',header=[0],skiprows=[1])
+data_all = pd.read_csv('../Results_combined/Lid_test/lid_test.csv',delimiter=',',header=[0],skiprows=[1])
 
 #data from original runs
 data = data_all[data_all['r']==500]

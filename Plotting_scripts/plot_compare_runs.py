@@ -8,6 +8,9 @@ as well as magnetic Reynolds number and solid core fraction
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+import sys
+# setting path
+sys.path.append('../')
 from load_info import load_run_info
 #choose your runs
 run1 = 1
@@ -21,7 +24,7 @@ model3 = 'dt,dr'
 #scale time to Myr
 from parameters import Myr
 
-path = 'Results_combined/Timestep_test/'
+path = '../Results_combined/Timestep_test/'
 #import data from npz file - run1
 npzfile = np.load(f'{path}run_{run1}.npz')
 Tm1 = npzfile['Tm_mid']  
@@ -95,7 +98,7 @@ with sns.plotting_context('talk'):
     plt.ylabel('T/K')
     plt.xlabel('Time/Myr')
     plt.legend(loc='upper right',ncol=2,fontsize='small')
-    #plt.savefig('Plots/viscosity_bryson_dodds_talk.png',dpi=600)
+    #plt.savefig('../Plots/viscosity_bryson_dodds_talk.png',dpi=600)
 
 ################### Flux plots ################################################
 
@@ -124,7 +127,7 @@ plt.xlabel('Time/ Myr')
 plt.ylim([1e-3,1e2])   #use these limits when comparing runs
 plt.ylabel('Flux/ W$m^{-2}$')
 plt.legend(loc='upper right',ncol=2,fontsize='small')
-#plt.savefig('Plots/Tflux_comp.png',dpi=450)
+#plt.savefig('../Plots/Tflux_comp.png',dpi=450)
 
 
 ############# Just Rem ###################################################
@@ -158,7 +161,7 @@ with sns.plotting_context('talk',font_scale=0.8):
     plt.legend(loc='upper left',ncol=2)
     plt.ylim([7,100])
     plt.xlim([xmin,max(t_plot1)])
-    #plt.savefig('Plots/Rem_ukpf.png',dpi=600)
+    #plt.savefig('../Plots/Rem_ukpf.png',dpi=600)
 
 ############# Compositional and thermal on same plot ##########################
 with sns.plotting_context('talk',font_scale=0.8):
@@ -178,7 +181,7 @@ with sns.plotting_context('talk',font_scale=0.8):
     plt.legend(loc='upper left',ncol=2)
     plt.ylim([7,100])
     plt.xlim([xmin,max(t_plot1)])
-    #plt.savefig('Plots/Rem_ukpf2.png',dpi=600)
+    #plt.savefig('../Plots/Rem_ukpf2.png',dpi=600)
     
 ############# Magnetic field strength ########################################
 threshold = 10 #critical Rem
@@ -210,7 +213,7 @@ with sns.plotting_context('talk',font_scale=0.8):
     plt.xlabel('Time/ Myr')
     plt.ylabel('f')
     plt.legend()
-    #plt.savefig('Plots/f_transfer.png',dpi=600)
+    #plt.savefig('../Plots/f_transfer.png',dpi=600)
 
 ##################### Flux plot ######################################    
 plt.figure()

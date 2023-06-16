@@ -8,8 +8,8 @@ Created on Mon Jun 12 11:53:18 2023
 import pandas as pd
 import matplotlib.pyplot as plt
 
-file='Results_combined/Timestep_test/timestep_test.csv'
-save =True #decide whether to save
+file='../Results_combined/Timestep_test/timestep_test.csv'
+save = False #decide whether to save
 data = pd.read_csv(file,delimiter=',',skiprows=[1])
 n =len(data)
 

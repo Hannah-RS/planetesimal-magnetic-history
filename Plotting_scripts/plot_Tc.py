@@ -5,6 +5,9 @@ Plot central temperature as a function of time for 4 values of 60Fe
 """
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+# setting path
+sys.path.append('../')
 from parameters import Myr
 
 #load run 
@@ -14,7 +17,8 @@ lines = ['dotted','dashed','-.','-']
 
 plt.figure()
 for i, run in enumerate(runs):
-    npzfile = np.load(f'Results_combined/run_{run}_diff.npz')
+    #import data from npz file
+    npzfile = np.load('../Results_combined/run_{}.npz'.format(run))
     Tdiff = npzfile['Tdiff']
     tdiff = npzfile['t_diff']
     Tc1 = Tdiff[0,:]

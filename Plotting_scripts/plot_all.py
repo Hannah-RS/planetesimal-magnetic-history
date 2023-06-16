@@ -13,10 +13,14 @@ run=51
 conduction = False # does the mantle switch to conduction?
 save = False # do you want to save your figures?
 #scale time to Myr
+
+import sys
+# setting path
+sys.path.append('../')
 from parameters import Myr, r, Tm0, Tsolidus
 
 #import data from npz file
-npzfile = np.load('Results/run_{}.npz'.format(run))
+npzfile = np.load('../Results_combined/run_{}.npz'.format(run))
 Tc= npzfile['Tc'] 
 Tc_conv = npzfile['Tc_conv']
 Tcmb = npzfile['Tcmb']
@@ -43,7 +47,7 @@ t_plot = t/Myr
 
 
 #import label info - read in from correct row in csv
-run_info = pd.read_csv('run_info3.csv',delimiter=',')
+run_info = pd.read_csv('../Results_combined/run_info.csv',delimiter=',')
 
 row = run_info[run_info['run']==run]
 r = row.iloc[0,1] #radius [m]
