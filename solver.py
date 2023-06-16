@@ -29,7 +29,7 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 run = 8
 
 t_acc=0.8*Myr  #Accretion time
-t_end_m=10#end time in Myr
+t_end_m=500#end time in Myr
 
 t_end=t_end_m*Myr
 step_m=0.1*t_cond_core  #max timestep must be smaller than conductive timestep
