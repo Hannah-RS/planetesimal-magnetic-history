@@ -150,13 +150,13 @@ for i in range(m):
         max_B[i] = np.max(B[i,Rem[i,:]>threshold])
         max_Bt[i] = t[B[i,:]==max_B[i]][0]/Myr
         
-# maximum Rem
+# maximum Rem - ignore first entry as Rem_mac is duplicated
 max_Rem = np.zeros([m-1])
 max_Remt = np.zeros([m-1])
-for i in range(1,m):
-    if np.any(Rem[i,:]>threshold):
-        max_Rem[i] = np.max(Rem[i,Rem[i,:]>threshold])
-        max_Remt[i] = t[Rem[i,:]==max_Rem[i]][0]/Myr
+for i in range(m-1):
+    if np.any(Rem[i+1,:]>threshold):
+        max_Rem[i] = np.max(Rem[i+1,Rem[i+1,:]>threshold])
+        max_Remt[i] = t[Rem[i+1,:]==max_Rem[i]][0]/Myr
         
 #on and off times
 t_plot_t = t/Myr
