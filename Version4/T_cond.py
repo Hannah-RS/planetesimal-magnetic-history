@@ -34,10 +34,10 @@ def Tm_cond_calc(t,dt,T,sparse_mat):
 
     #calculate dTdt for conduction
 
-    dTdt = sparse_mat.dot(T)
+    cpdTdt = sparse_mat.dot(T) #lhs of 16 divided by rhom
     cp = cp_calc_arr(T,False)   
     h = Al_heating(t)
-    dTdt = dTdt + h/cp
+    dTdt = cpdTdt/cp + h/cp
 
     Tnew = dTdt*dt + T
     Tnew[-1] = T[-1]   #top cell of mantle is always at surface temp so need to overwrite so radiogenic heating term doesn't heat it up 

@@ -86,6 +86,10 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
             rate of change of core temperature (if negative core is cooling)
     f_new : float
         new fractional inner core radius
+    Rem_c : float
+        compositional magnetic Reynolds number
+    Bcomp : float
+        flux based magnetic field strength [T]
 
     """
     dTl_dP = fe_fes_liquidus_dp(Xs, Pc)
@@ -98,5 +102,6 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     dfdt = - dTcdt/(rhoc*gc*dTl_dP*rc)
 
     f_new = f+dfdt*dt
-    Rem_c = Rem_comp(dfdt,f,Xs)     
-    return dTcdt, f_new, Rem_c
+    Rem_c, Bcomp = Rem_comp(dfdt,f,Xs) 
+   
+    return dTcdt, f_new, Rem_c, Bcomp

@@ -9,7 +9,7 @@ Also script for Rayleigh number and critical Rayleigh number for differentiation
 from viscosity_def import viscosity #import viscosity model
 from heating import Al_heating, AlFe_heating
 
-from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, km, Rac, Ts, default, c1, G, convect_ratio
+from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, km, Rac, Ts, default, c1, G, convect_ratio, cpm_p
 
 def Rayleigh_crit(Tb):
     """
@@ -18,7 +18,7 @@ def Rayleigh_crit(Tb):
     Parameters
     ----------
     Tb : float
-        temperature at base of convecting region
+        temperature at base of convecting region [K]
 
     Returns
     -------
@@ -29,7 +29,7 @@ def Rayleigh_crit(Tb):
     Ra_crit = 20.9*(gamma*(Tb-Ts))**4 
     return Ra_crit
     
-def Rayleigh_calc(t,Tb,model=default):
+def Rayleigh_calc(t,Tb,dTmdt,Ur,model=default):
     """
     
 
@@ -38,7 +38,13 @@ def Rayleigh_calc(t,Tb,model=default):
     t : float
         time [s]
     Tb : float
-        mantle base temperature
+        mantle base temperature [K]
+    dTmdt : float
+        rate of temperature change of convecting mantle [K/s]
+    Ur : float
+        Urey ratio
+    model : str
+        viscosity model default set in parameters
 
     Returns
     -------
@@ -46,16 +52,20 @@ def Rayleigh_calc(t,Tb,model=default):
 
     """
 
-    RaH = Rayleigh_H(t,Tb,model=model)
+    RaH, RaRob = Rayleigh_H(t,Tb,dTmdt,model=model)
     RanoH, d0 = Rayleigh_noH(Tb,model)
-    
+
+    if Ur > 1:
+        d0 = 0.667*(r-rc)*(gamma*(Tb-Ts)/c1)**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
+    else:
+        d0 = 0.633*(r-rc)*(gamma*(Tb-Ts)/c1)**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
+        
     if RaH > RanoH:
         Ram = RaH
-        d0 = 0.65*(r-rc)*(gamma*(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
     else:
         Ram = RanoH
     
-    return Ram, d0, RaH, RanoH
+    return Ram, d0, RaH, RanoH, RaRob
 
 def Rayleigh_noH(Tb,model=default): 
     """
@@ -66,7 +76,9 @@ def Rayleigh_noH(Tb,model=default):
     t : float
         time [s]
     Tb : float
-        mantle base temperature
+        mantle base temperature [K]
+    model : str
+        viscosity model default set in parameters
 
     Returns
     -------
@@ -79,7 +91,7 @@ def Rayleigh_noH(Tb,model=default):
     
     return Ram, d0
     
-def Rayleigh_H(t,Tb,rcore = rc, model=default,Fe=False):
+def Rayleigh_H(t,Tb,dTmdt,rcore = rc, model=default,Fe=False):
     """
     Rayleigh number for radiogenic heating
 
@@ -88,7 +100,9 @@ def Rayleigh_H(t,Tb,rcore = rc, model=default,Fe=False):
     t : float
         time [s]
     Tb : float
-        temperature at the base of the convecting region
+        temperature at the base of the convecting region [K]
+    dTmdt : float
+        rate of temperature change of convecting mantle [K/s]
     rcore: float
         core radius, defaults to value in parameters [m]   
     model : str, optional
@@ -106,13 +120,15 @@ def Rayleigh_H(t,Tb,rcore = rc, model=default,Fe=False):
         h = Al_heating(t)
     else:
         h = AlFe_heating(t)
-        
-    Ra = rhom**3*alpha_m*h*G*(r-rcore)**6/(km*kappa*eta) #Internally heated sphere (Schubert 2001)
     
-    return Ra
+    hstar = abs(rhom*h-rhom*cpm_p*dTmdt)
+    Ra = rhom**3*alpha_m*h*G*(r-rcore)**6/(km*kappa*eta) #Internally heated sphere (Schubert 2001)
+    RaRob = rhom*alpha_m*hstar*g*(r-rcore)**5/(km*kappa*eta)
+    
+    return Ra, RaRob
 
 
-def Rayleigh_differentiate(t,Tb,model=default):
+def Rayleigh_differentiate(t,Tb,dTmdt,Ur,model=default):
     """
     Check for onset of differentiation
 
@@ -121,7 +137,11 @@ def Rayleigh_differentiate(t,Tb,model=default):
     t : float
         time [s]
     Tb : float
-        temperature at the base of the convecting region
+        temperature at the base of the convecting region [K]
+    dTmdt : float
+        rate of temperature change of convecting mantle [K/s]
+    Ur : float
+        Urey ratio
     model : str, optional
         viscosity model The default is default (set in parameters.py).
 
@@ -130,7 +150,7 @@ def Rayleigh_differentiate(t,Tb,model=default):
     RaH : float
         Rayleigh number
     d0H : float
-        stagnant lid thickness
+        stagnant lid thickness [m]
     Ra_crit : float
         critical Rayleigh number
     convect: bool
@@ -138,14 +158,17 @@ def Rayleigh_differentiate(t,Tb,model=default):
 
     """
    
-    RaH = Rayleigh_H(t,Tb,0,model,Fe=True)
+    RaH, RaRob = Rayleigh_H(t,Tb,dTmdt,0,model,Fe=True)
 
     RanoH, d0_noH = Rayleigh_noH(Tb,model)
-
-    d0H = 0.65*r*(gamma*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) using average for alid
+    
+    if Ur > 1:
+        d0H = 0.667*r*(gamma*abs(Tb-Ts)/c1)**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
+    else:
+        d0H = 0.633*r*(gamma*abs(Tb-Ts)/c1)**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
     
     Ra_crit = Rayleigh_crit(Tb)
-    if (d0H/r < convect_ratio) & (RaH>Ra_crit): #still working on this criteria
+    if (d0H/r < convect_ratio) & (RaRob>Ra_crit): #still working on this criteria
         convect = True
     else: 
         convect = False

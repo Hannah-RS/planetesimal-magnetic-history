@@ -6,10 +6,11 @@ Function for differentiating an asteroid. Based on the process in Dodds et. al. 
 from stencil import cond_stencil_general
 from Rayleigh_def import Rayleigh_differentiate
 from heating import AlFe_heating
+from dTmdt_def import dTadt_calc
 from scipy import sparse as sp
 from cp_func import cp_calc_arr, cp_calc_int, cp_calc_eut_arr, cp_calc_eut_int
 import numpy as np
-from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V, Rac, rcmf 
+from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V, Rac, rcmf, t_cond_core
 def differentiation(Tint,tacc,r,dr,dt):
     """
     
@@ -17,7 +18,7 @@ def differentiation(Tint,tacc,r,dr,dt):
     Parameters
     ----------
     Tint : float
-        array of initial temperatures
+        array of initial temperatures [K]
     tacc: float
         accretion time after CAIs [s]
     r : float
@@ -36,7 +37,7 @@ def differentiation(Tint,tacc,r,dr,dt):
     Xsi: float
         proportion of silicate in each cell which is melted in differentiation [0 to 1]
     cp : float
-        effective specific heat capacity of each cell
+        effective specific heat capacity of each cell [J /kg /K]
     Ra: float
         Rayleigh number for body
     Ra_crit: float
@@ -86,8 +87,12 @@ def differentiation(Tint,tacc,r,dr,dt):
         
         #calculate temperature change
         dTdt = rhs/(rhoa*cp[:,0])
+        dTdt_old = dTdt[0] #take temp change at centre for Rayeligh-Roberts number
         T[:-1,0] = Tint[:-1] + dt*dTdt[:-1]
         T[-1,0] = Tint[-1] #pin top cell to 200
+        Flid_old = -ka*(Ts - T[-2,0])/dr
+        
+        Ur = rhoa*H*V/abs(Flid_old*As) #calculate Urey ratio
         
         #calculate melting
         #iron
@@ -116,13 +121,9 @@ def differentiation(Tint,tacc,r,dr,dt):
             Ra_crit = np.append(Ra_crit, 0)
             convect = np.append(convect, 0)
             
-            if cond_i == 0:
-                t = np.append(t,t[i-1]+dt)
-            else: 
-                t = np.append(t,t[i-1]+0.01*dt) #adaptive timestep smaller when convecting
-                
-            Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1])
+            t = np.append(t,t[i-1]+dt)
             
+            Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1], dTdt_old, Ur)
             #calculate radiogenic heating
             H = np.append(H,AlFe_heating(t[i]))
             Tk = ka*T[:,i-1]
@@ -132,13 +133,15 @@ def differentiation(Tint,tacc,r,dr,dt):
 
             #calculate temperature change
             dTdt = rhs/(rhoa*cp[:,i])
+            dTdt_new = dTdt[0]
             T[:-1,i] = T[:-1,i-1] + dt*dTdt[:-1]
             T[-1,i] = Ts
+            Flid_new = -ka*(Ts-T[-2,i])/dr #default surface flux
             
-            if convect[i] == True or cond_i==1: #overwrite convecting portion
+            if convect[i-1] == True or cond_i==1: #overwrite convecting portion
                 if cond_i == 0:
                     cond_i =1 
-                    print('Convecting, changing timestep')
+                    print('Onset of convection')
                     
                 nlid_cells = round(d0[i]/dr)
                 if nlid_cells ==0:
@@ -148,11 +151,22 @@ def differentiation(Tint,tacc,r,dr,dt):
                 
                 cp[:lid_start,i] = cp_calc_int(T[0,i-1],True)
                 cp[-1,i] = cpa
-                Fs = -ka*(Ts-T[lid_start,i-1])/d0[i]
-                dTdt = (rhoa*H[i]*V-Fs*As)/(rhoa*cp[0,i]*V)
-                T[:lid_start,i] = T[:lid_start,i-1] + dTdt*0.01*dt 
-                T[-1,i] = Ts   
+                dTdt_new = dTadt_calc(t[i-1],T[lid_start-1,i-1],d0[i-1],Flid_old)
+                T[:lid_start,i] = T[:lid_start,i-1] + dTdt_new*dt 
+                T[-1,i] = Ts 
                 
+                if d0[i] < dr:
+                    Flid_new = -ka*(Ts-T[lid_start,i])/d0[i] #if less than grid thickness choose d0 so don't overestimate thickness
+                else:
+                    Flid_new = -ka*(T[lid_start+1,i]-T[lid_start,i])/dr 
+                
+            #calculate Urey ratio
+            Fs = -ka*(Ts-T[-2,i])/dr
+            Ur = rhoa*V*H[i]/(abs(Fs*As))
+            #relabel for next step
+            Flid_old = Flid_new
+            dTdt_old = dTdt_new
+            
             #calculate melting
             #iron
             Xfe[T[:,i]<Ts_fe,i] = 0 #subsolidus
@@ -283,13 +297,9 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         Ra_crit = np.append(Ra_crit, 0)
         convect = np.append(convect, 0)
         
-        if cond_i == 0:
-            t = np.append(t,t[i-1]+dt)
-        else: 
-            t = np.append(t,t[i-1]+0.01*dt) #adaptive timestep smaller when convecting
-            
-        Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1])
+        t = np.append(t,t[i-1]+dt)
         
+        Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1])
         #calculate radiogenic heating
         H = np.append(H,AlFe_heating(t[i]))
         Tk = ka*T[:,i-1]
@@ -308,8 +318,7 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
             Xfe[melt,i] = Xfe[melt,i-1]+rhs[melt]/(rhoa*XFe_a*Lc)*dt
             T[melt,i] = T[melt,i-1] #melting region has constant temperature
         
-        if convect[i] == True or cond_i==1: #overwrite convecting portion
-            print('Convecting')
+        if convect[i-1] == True or cond_i==1: #overwrite convecting portion
             nlid_cells = round(d0[i]/dr)
             if nlid_cells ==0:
                 lid_start = ncells -2
@@ -318,7 +327,7 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
             cp[:lid_start,i] = cp_calc_eut_int(T[lid_start-1,i-1],True)
                         
             if cond_i == 0: #first time it starts convecting
-                print('Convecting, changing timestep')             
+                print('Onset of convection')             
                 cond_i =1
                 
             Fs = -ka*(Ts-T[lid_start,i-1])/d0[i]
@@ -328,7 +337,7 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
                 cp[:lid_start,i] = cp_calc_eut_int(T[:lid_start,i-1],True)
                 cp[lid_start:,i] = cp_calc_eut_arr(T[lid_start:,i-1],True)
                 dTdt = (rhoa*H[i]-Fs)/(rhoa*cp[0,i])
-                T[:lid_start,i] = T[:lid_start,i-1] + dTdt*0.01*dt
+                T[:lid_start,i] = T[:lid_start,i-1] + dTdt*dt
                 T[-1,i] = Ts 
                 
      
