@@ -95,7 +95,6 @@ print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_t
 ############################# Process data ####################################
 ########## Current comparitive parameters ####################
 
-from parameters import convect_ratio
 nmantle = int((r/dr)/2)
 diff_time = t_diff[-1]/Myr
 diff_T = Tdiff[int(nmantle),-1]
