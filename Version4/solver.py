@@ -118,7 +118,6 @@ else:
     super_ad_start = t[np.where(Fcmb>Fad)[0]][0]/Myr
     super_ad_end = t[np.where(Fcmb>Fad)[0]][-1]/Myr
 
-
 # Frad - radiogenic heat flux, normalised to surface of body
 from heating import Al_heating
 h = Al_heating(t) 
@@ -138,7 +137,70 @@ Fdrive_nn[Fdrive<0]=0
 Fdrive_nn[Xs>=Xs_eutectic]=0 #no dynamo in eutectic solidification
 Rem_t = Rem_therm(Fdrive_nn,f,min_unstable) # magnetic Reynolds number for thermal convection - tuple of MAC and CIA balance
 Bml, Bmac, Bcia = B_flux_therm(Fdrive_nn,f,min_unstable) # field strength for thermal convection based on energy flux scaling 
-B = [Bml, Bmac, Bcia, Bcomp]
+B = np.array([Bml, Bmac, Bcia, Bcomp])
+Rem = np.array([Rem_t[0],Rem_t[0],Rem_t[1],Rem_c]) #use conservative MAC Rem for ML
+
+#calculate maximum field strengths
+m = 4
+threshold = 10 
+max_B = np.zeros([m])
+max_Bt = np.zeros([m])
+for i in range(m):
+    if np.any(Rem[i,:]>threshold):
+        max_B[i] = np.max(B[i,Rem[i,:]>threshold])
+        max_Bt[i] = t[B[i,:]==max_B[i]][0]/Myr
+        
+# maximum Rem
+max_Rem = np.zeros([m-1])
+max_Remt = np.zeros([m-1])
+for i in range(1,m):
+    if np.any(Rem[i,:]>threshold):
+        max_Rem[i] = np.max(Rem[i,Rem[i,:]>threshold])
+        max_Remt[i] = t[Rem[i,:]==max_Rem[i]][0]/Myr
+        
+#on and off times
+t_plot_t = t/Myr
+t_therm1 = t_plot_t[Rem[0]>threshold]
+t_therm11 = t_therm1[t_therm1<100] #distinguish between early and late dynamo
+t_therm12 = t_therm1[t_therm1>100]
+t_therm2 = t_plot_t[Rem[2]>10]
+t_therm21 = t_therm2[t_therm2<100]
+t_therm22 = t_therm2[t_therm2>100]
+t_comp = t_plot_t[Rem_c>10]
+if np.any(Rem[0]>threshold):
+    if np.any(t_therm1<100):
+        MAC_start = t_therm11[0]
+        MAC_stop = t_therm11[-1]
+        print(f'MAC balance predicts there is a thermal dynamo between {MAC_start:.1f} and {MAC_stop:.1f}Myr')
+    if np.any(t_therm1>100):
+        MAC_start = t_therm12[0]
+        MAC_stop = t_therm12[-1]
+        print(f'MAC balance predicts there is a thermal dynamo between {MAC_start:.1f} and {MAC_stop:.1f}Myr')
+else:
+    MAC_start = np.nan
+    MAC_stop = np.nan
+    print('MAC balance predicts there is no thermal dynamo')
+if np.any(Rem[2]>threshold):
+    if np.any(t_therm2<100):
+        CIA_start = t_therm21[0]
+        CIA_stop = t_therm21[-1]
+        print(f'CIA balance predicts there is a thermal dynamo between {CIA_start:.1f} and {CIA_stop:.1f}Myr')
+    if np.any(t_therm2>threshold):
+        CIA_start = t_therm22[0]
+        CIA_stop = t_therm22[-1]
+        print(f'CIA balance predicts there is a thermal dynamo between {CIA_start:.1f} and {CIA_stop:.1f}Myr')
+else:
+    CIA_start = np.nan
+    CIA_stop = np.nan
+    print('CIA balance predicts there is no thermal dynamo')
+if np.any(Rem_c>threshold):
+    comp_start = t_comp[0]
+    comp_stop = t_comp[-1]
+    print(f'There is a compositional dynamo between {comp_start:.1f} and {comp_stop:.1f} Myr')
+else:
+    comp_start = np.nan
+    comp_stop = np.nan
+    print('There is no compositional dynamo')
 print('Fluxes and magnetic Reynolds number calculated.')
 
 ############################ Save results #####################################
@@ -154,17 +216,18 @@ var_list = [run, r, dr, t_acc/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_t, int_
             default, rcmf, Xs_0, Fe0]
 
     
-with open('run_info.csv','a') as f_object:         
+with open('Results_combined/run_info.csv','a') as f_object:         
     writer_object = writer(f_object) #pass file object to csv.writer
     writer_object.writerow(var_list) # pass list as argument into write row
     f_object.close() #close file
   
-# #comparative parameters
-# var_list2 = [convect_ratio, diff_time, peakT, tmax, tstrat_remove, strat_end, super_ad_start, super_ad_end, diff_T, run, r, rcmf]
-
-# with open('lid_test.csv','a') as f_object:
-#     writer_object = writer(f_object) #pass file object to csv.writer
-#     writer_object.writerow(var_list2) # pass list as argument into write row
-#     f_object.close() #close file
-
+var_list2 = [run,step_m,dr,diff_time, diff_T, peakT, tmax, tstrat_remove, 
+             strat_end, super_ad_start, super_ad_end, cond_t, max_Rem[0], max_Remt[0], max_Rem[1], max_Remt[1], max_Rem[2], 
+             max_Remt[2],MAC_start,MAC_stop, CIA_start, CIA_stop, comp_start, comp_stop,
+             max_B[0],max_Bt[0],max_B[1],max_Bt[1],max_B[2],max_Bt[2],max_B[3],max_Bt[3]]
+from csv import writer
+with open('Results_combined/timestep_test.csv','a') as f_object:
+     writer_object = writer(f_object) #pass file object to csv.writer
+     writer_object.writerow(var_list2) # pass list as argument into write row
+     f_object.close() #close file
 # print('Results and run parameters saved')
