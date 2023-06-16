@@ -7,6 +7,8 @@ Created on Tue Mar 28 11:10:18 2023
 """
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
+sys.path.append('../')
 from parameters import Mr_fe, Mr_s, rho_eut, rhofe_l, rhofe_s, Tl_fe, alpha_c, rho_exp
 from fe_fes_liquidus import fe_fes_density, weight_perc_to_at_frac
 

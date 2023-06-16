@@ -7,6 +7,8 @@ The constants used are the same in both expressions, this script just explores t
 """
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+sys.path.append('../')
 from viscosity_def import viscosity
 from Rayleigh_def import Rayleigh_calc
 from parameters import Tml, Tms
