@@ -10,7 +10,7 @@ from dTmdt_def import dTadt_calc
 from scipy import sparse as sp
 from cp_func import cp_calc_arr, cp_calc_int, cp_calc_eut_arr, cp_calc_eut_int
 import numpy as np
-from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V, Rac, rcmf 
+from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V, Rac, rcmf, t_cond_core
 def differentiation(Tint,tacc,r,dr,dt):
     """
     
@@ -121,13 +121,13 @@ def differentiation(Tint,tacc,r,dr,dt):
             Ra_crit = np.append(Ra_crit, 0)
             convect = np.append(convect, 0)
             
-            if cond_i == 0:
-                t = np.append(t,t[i-1]+dt)
+            if convect[i-1] == False:
+                dtn = dt
             else: 
-                t = np.append(t,t[i-1]+0.01*dt) #adaptive timestep smaller when convecting
-                
-            Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1], dTdt_old, Ur)
+                dtn = 0.1*t_cond_core #adaptive timestep smaller when convecting
+            t = np.append(t,t[i-1]+dtn)
             
+            Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1], dTdt_old, Ur)
             #calculate radiogenic heating
             H = np.append(H,AlFe_heating(t[i]))
             Tk = ka*T[:,i-1]
@@ -138,11 +138,11 @@ def differentiation(Tint,tacc,r,dr,dt):
             #calculate temperature change
             dTdt = rhs/(rhoa*cp[:,i])
             dTdt_new = dTdt[0]
-            T[:-1,i] = T[:-1,i-1] + dt*dTdt[:-1]
+            T[:-1,i] = T[:-1,i-1] + dtn*dTdt[:-1]
             T[-1,i] = Ts
             Flid_new = -ka*(Ts-T[-2,i])/dr #default surface flux
             
-            if convect[i] == True or cond_i==1: #overwrite convecting portion
+            if convect[i-1] == True or cond_i==1: #overwrite convecting portion
                 if cond_i == 0:
                     cond_i =1 
                     print('Convecting, changing timestep')
@@ -156,7 +156,7 @@ def differentiation(Tint,tacc,r,dr,dt):
                 cp[:lid_start,i] = cp_calc_int(T[0,i-1],True)
                 cp[-1,i] = cpa
                 dTdt_new = dTadt_calc(t[i-1],T[lid_start-1,i-1],d0[i-1],Flid_old)
-                T[:lid_start,i] = T[:lid_start,i-1] + dTdt_new*0.01*dt 
+                T[:lid_start,i] = T[:lid_start,i-1] + dTdt_new*dtn 
                 T[-1,i] = Ts 
                 
                 if d0[i] < dr:
@@ -301,13 +301,13 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         Ra_crit = np.append(Ra_crit, 0)
         convect = np.append(convect, 0)
         
-        if cond_i == 0:
-            t = np.append(t,t[i-1]+dt)
+        if convect[i-1] == False:
+            dtn = dt
         else: 
-            t = np.append(t,t[i-1]+0.01*dt) #adaptive timestep smaller when convecting
-            
-        Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1])
+            dtn = 0.01*t_cond_core #adaptive timestep smaller when convecting
+        t = np.append(t,t[i-1]+dtn)
         
+        Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1])
         #calculate radiogenic heating
         H = np.append(H,AlFe_heating(t[i]))
         Tk = ka*T[:,i-1]
@@ -317,16 +317,16 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
                 
         #calculate temperature change
         dTdt = rhs/(rhoa*cp[:,i])
-        T[:-1,i] = T[:-1,i-1] + dt*dTdt[:-1]
+        T[:-1,i] = T[:-1,i-1] + dtn*dTdt[:-1]
         T[-1,i] = Ts
         Xfe[:,i] = Xfe[:,i-1] #continuity of Xfe between timesteps  
         
         if np.any((np.int_(T)[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)): #see if there are any melting cells
             melt = np.where((np.int_(T)[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1))
-            Xfe[melt,i] = Xfe[melt,i-1]+rhs[melt]/(rhoa*XFe_a*Lc)*dt
+            Xfe[melt,i] = Xfe[melt,i-1]+rhs[melt]/(rhoa*XFe_a*Lc)*dtn
             T[melt,i] = T[melt,i-1] #melting region has constant temperature
         
-        if convect[i] == True or cond_i==1: #overwrite convecting portion
+        if convect[i-1] == True or cond_i==1: #overwrite convecting portion
             print('Convecting')
             nlid_cells = round(d0[i]/dr)
             if nlid_cells ==0:
@@ -341,12 +341,12 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
                 
             Fs = -ka*(Ts-T[lid_start,i-1])/d0[i]
             if int(T[lid_start-1,i-1]) >= Ts_fe and (Xfe[lid_start-1,i-1]<1): #no temp change only melting
-                Xfe[:lid_start,i] = Xfe[:lid_start,i-1]+(rhoa*H-Fs)/(rhoa*XFe_a*Lc)*dt
+                Xfe[:lid_start,i] = Xfe[:lid_start,i-1]+(rhoa*H-Fs)/(rhoa*XFe_a*Lc)*dtn
             else:
                 cp[:lid_start,i] = cp_calc_eut_int(T[:lid_start,i-1],True)
                 cp[lid_start:,i] = cp_calc_eut_arr(T[lid_start:,i-1],True)
                 dTdt = (rhoa*H[i]-Fs)/(rhoa*cp[0,i])
-                T[:lid_start,i] = T[:lid_start,i-1] + dTdt*0.01*dt
+                T[:lid_start,i] = T[:lid_start,i-1] + dTdt*dtn 
                 T[-1,i] = Ts 
                 
      

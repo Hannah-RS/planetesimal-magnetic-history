@@ -125,6 +125,8 @@ g = G*(Vm*rhom+4/3*np.pi*rc**3*rhoc)/r**2 # surface gravity [m/s^2]
 gc = 4/3*np.pi*rc*rhoc*G #gravitational field strength at CMB [m/s^2]
 Pc = 2*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre of core [GPa]
 Tl_fe = fe_fes_liquidus_bw(Xs_0,Pc)
+t_cond_core = dr**2/kappa_c #conductive timestep for core
+t_cond_mantle = dr**2/kappa #conductive timestep for mantle
 
 #Modified specific heat capacities
 #before differentiation

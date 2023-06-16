@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  Myr, Ts, f0, r, rc, dr, kappa_c, save_interval_d, save_interval_t, km, Vm, As, rhom, kappa, default, rcmf, Xs_0, Fe0
+from parameters import  Myr, Ts, f0, r, rc, dr, kappa_c, save_interval_d, save_interval_t, km, Vm, As, rhom, default, rcmf, Xs_0, Fe0, t_cond_core
 
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
@@ -26,15 +26,13 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run = 5
+run = 8
 
 t_acc=0.8*Myr  #Accretion time
-t_end_m=1000#end time in Myr
+t_end_m=10#end time in Myr
 
 t_end=t_end_m*Myr
-t_cond_core = dr**2/kappa_c #conductive timestep for core
-t_cond_mantle = dr**2/kappa #conductive timestep for mantle
-step_m=0.05*t_cond_core  #max timestep must be smaller than conductive timestep
+step_m=0.1*t_cond_core  #max timestep must be smaller than conductive timestep
 n_save_d = int(save_interval_d/step_m)
 n_save_t = int(save_interval_t/step_m)
 
