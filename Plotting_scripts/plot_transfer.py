@@ -15,11 +15,14 @@ import seaborn as sns
 run=33
 conduction = False #did the mantle start conducting before the core solidified
 
+import sys
+# setting path
+sys.path.append('../')
 #scale time to Myr
 from parameters import Myr, r, Tm0, Tsolidus
 
 #import data from npz file
-npzfile = np.load('Results/run_{}.npz'.format(run))
+npzfile = np.load('../Results_combined/run_{}.npz'.format(run))
 Tm = npzfile['Tm_base'] 
 
 Tc= npzfile['Tc'] 

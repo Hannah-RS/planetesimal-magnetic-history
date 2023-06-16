@@ -5,7 +5,9 @@ Test for Tcmb code
 """
 import numpy as np
 import scipy.optimize as sco
-
+import sys
+# setting path
+sys.path.append('../')
 from parameters import km, kc, c1, gamma, kappa_c, kappa, eta_c, alpha_m, alpha_c, rhom, rhoc, g, gc, Rac, Ts
 from viscosity_def import viscosity
 

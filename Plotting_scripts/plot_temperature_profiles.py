@@ -12,10 +12,13 @@ import pandas as pd
 run=38
 
 #scale time to Myr
+import sys
+# setting path
+sys.path.append('../')
 from parameters import Myr, r, Tm0, Tsolidus
 
 #import data from npz file
-npzfile = np.load('Results/run_{}.npz'.format(run))
+npzfile = np.load('../Results_combined/run_{}.npz'.format(run))
 
 T_profile = npzfile['T_profile']
 t = npzfile['t'] #time in s

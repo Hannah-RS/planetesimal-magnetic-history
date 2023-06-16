@@ -14,10 +14,13 @@ import pandas as pd
 run=37
 
 #scale time to Myr
+import sys
+# setting path
+sys.path.append('../')
 from parameters import Myr, r, Tm0, Tsolidus
 
 #import data from npz file
-npzfile = np.load('Results/run_{}.npz'.format(run))
+npzfile = np.load('../Results_combined/run_{}.npz'.format(run))
 f = npzfile['f']
 t = npzfile['t'] #time in s
 Rem1 = npzfile['Rem1'] # magnetic Reynolds number from compositional (Nimmo) and thermal convection (whatever is larger at each time step)

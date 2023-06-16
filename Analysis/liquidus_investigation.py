@@ -8,6 +8,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
+import sys
+# setting path
+sys.path.append('../')
 from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_liquidus_linear, fe_fes_liquidus_dp
 from parameters import rhoc, rhom, G, Mr_s, Mr_fe, Tml, Tms, cpc, alpha_c, Xs_eutectic
 

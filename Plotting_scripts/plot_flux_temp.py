@@ -14,10 +14,13 @@ run=33
 conduction = False #did the mantle start conducting before the core solidified
 
 #scale time to Myr
+import sys
+# setting path
+sys.path.append('../')
 from parameters import Myr, r, Tm0, Tsolidus
 
 #import data from npz file
-npzfile = np.load('Results/run_{}.npz'.format(run))
+npzfile = np.load('../Results_combined/run_{}.npz'.format(run))
 Tm = npzfile['Tm_mid'] 
 Tm_surf = npzfile['Tm_surf'] 
 Tc= npzfile['Tc'] 

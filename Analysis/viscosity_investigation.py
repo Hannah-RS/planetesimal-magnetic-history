@@ -5,6 +5,9 @@ Script for comparing different viscosity profiles
 """
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+# setting path
+sys.path.append('../')
 from viscosity_def import viscosity
 from parameters import Tml, Tms
 import pandas as pd
@@ -15,7 +18,7 @@ Tm = np.linspace(1400,1700, n)
 phi = (Tm-Tms)/(Tml-Tms)
 
 # import scott and kohlstedt data
-sk_data=pd.read_excel('Results/scott_and_kohlstedt_06.xlsx')
+sk_data=pd.read_excel('../Results/scott_and_kohlstedt_06.xlsx')
 sk_diff = sk_data[sk_data['regime']=='diffusion'] # get diffusion points
 #hk_diff = sk_diff[sk_diff['source']=='hk1'] # get hirth and kohlstedt points (3)
 #sk_diff = sk_diff[sk_diff['source']=='sk'] #get scott and kohlstedt points
@@ -45,7 +48,7 @@ plt.semilogy(Tm, eta3, label=model3,linestyle='dotted',color='navy')
 plt.xlabel('Tm/K')
 plt.ylabel('Viscosity/Pas')
 plt.legend()
-#plt.savefig('Plots/viscosity_comparison_T.png')
+#plt.savefig('../Plots/viscosity_comparison_T.png')
 
 #melt fraction version
 #plot models
@@ -59,7 +62,7 @@ plt.semilogy(phi, eta3, label=model3,linestyle='dotted',color='navy')
 
 plt.ylabel('Viscosity/Pas')
 plt.legend()
-#plt.savefig('Plots/viscosity_comparison_phi.png')
+#plt.savefig('../Plots/viscosity_comparison_phi.png')
 
 ########################  plot models with two axes  ###########################
 fig = plt.figure()
@@ -73,7 +76,7 @@ ax1.set_ylabel('Viscosity/Pas')
 ax2.set_xlabel('T$_m$/K')
 ax1.set_xlabel('Melt fraction, $\phi$')
 fig.legend(loc=(0.15,0.15))
-#plt.savefig('Plots/viscosity_comparison2.png')
+#plt.savefig('../Plots/viscosity_comparison2.png')
 
 ######################### Version with all experiments ########################
 plt.figure(tight_layout=True)
@@ -88,7 +91,7 @@ plt.arrow(x=0.3, y=1e4, dx = 0, dy = 1e7,head_width=0.02,head_length=5e7,color='
 plt.xlabel('Melt fraction')
 plt.ylabel('Viscosity/Pas')
 plt.legend(loc='upper right',ncol=1,fontsize='small')
-#plt.savefig('Plots/experiments2.png',dpi=600)
+#plt.savefig('../Plots/experiments2.png',dpi=600)
 
 ################# plot Bryson model sequentially  #############################
 plt.figure()
@@ -97,7 +100,7 @@ plt.xlabel('Melt fraction')
 plt.ylabel('Viscosity/Pas')
 plt.ylim([1,1e22])
 plt.xlim([0,0.8])
-#plt.savefig('Plots/Bryson_1.png')
+#plt.savefig('../Plots/Bryson_1.png')
 
 plt.figure()
 plt.semilogy(phi[phi<0.63],eta1[phi<0.63],linestyle='--')
@@ -106,7 +109,7 @@ plt.xlabel('Melt fraction')
 plt.ylabel('Viscosity/Pas')
 plt.ylim([1,1e22])
 plt.xlim([0,0.8])
-#plt.savefig('Plots/Bryson_2.png')
+#plt.savefig('../Plots/Bryson_2.png')
 
 plt.figure()
 plt.semilogy(phi,eta1,linestyle='--')
@@ -128,4 +131,4 @@ ax1.set_ylabel('Viscosity/Pas')
 ax2.set_xlabel('T$_m$/K')
 ax1.set_xlabel('Melt fraction, $\phi$')
 
-plt.savefig('Plots/bryson_two_axes.png')
+#plt.savefig('../Plots/bryson_two_axes.png')

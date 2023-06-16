@@ -7,11 +7,14 @@ Uses results from run 16, which output a temp profile very 0.1Myr
 import numpy as np
 import matplotlib.pyplot as plt
 
+import sys
+# setting path
+sys.path.append('../')
 from parameters import Myr, km, dr, Ts,r 
 
 run = 16
 
-npzfile = np.load('Results/run_{}.npz'.format(run))
+npzfile = np.load('../Results/run_{}.npz'.format(run))
 Tm = npzfile['Tm_base'] 
 Tm_surf = npzfile['Tm_surf'] 
 T_profile = npzfile['T_profile']
@@ -27,7 +30,7 @@ Frad = Flux[3]
 
 tplot = t/Myr
 cond_i = 8359 #index when switch from convection to conduction
-dr=500
+
 tplot2 = np.arange(1,np.round(tplot[cond_i],1),0.01) #for shorter arrays
 #tplot2 = np.arange(1,5,0.1) #for shorter arrays
 

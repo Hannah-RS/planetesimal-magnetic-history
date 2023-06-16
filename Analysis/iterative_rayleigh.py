@@ -15,6 +15,10 @@ Ra_plot = np.zeros([m,n])
 d0_plot = np.zeros([m,n])
 iter_num = np.linspace(0,n-1,n)
 
+import sys
+
+# setting path
+sys.path.append('../')
 from parameters import eta0, gamma, dt_gamma, alpha_n, Tms, Tml, rhom, alpha_m, g, r, rc, kappa, Rac, Ts
 
 from viscosity_def import viscosity

@@ -5,6 +5,12 @@ Created on Tue Oct 11 10:25:30 2022
 
 @author: exet5460
 """
+import sys
+
+# setting path
+sys.path.append('../')
+
+# importing
 from flux_definitions_dep import f1_conductive, f1_convective, f2_conductive, f2_convective, flux_balance
 import numpy as np
 import matplotlib.pyplot as plt
