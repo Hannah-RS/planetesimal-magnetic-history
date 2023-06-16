@@ -121,11 +121,7 @@ def differentiation(Tint,tacc,r,dr,dt):
             Ra_crit = np.append(Ra_crit, 0)
             convect = np.append(convect, 0)
             
-            if convect[i-1] == False:
-                dtn = dt
-            else: 
-                dtn = 0.1*t_cond_core #adaptive timestep smaller when convecting
-            t = np.append(t,t[i-1]+dtn)
+            t = np.append(t,t[i-1]+dt)
             
             Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1], dTdt_old, Ur)
             #calculate radiogenic heating
@@ -138,14 +134,14 @@ def differentiation(Tint,tacc,r,dr,dt):
             #calculate temperature change
             dTdt = rhs/(rhoa*cp[:,i])
             dTdt_new = dTdt[0]
-            T[:-1,i] = T[:-1,i-1] + dtn*dTdt[:-1]
+            T[:-1,i] = T[:-1,i-1] + dt*dTdt[:-1]
             T[-1,i] = Ts
             Flid_new = -ka*(Ts-T[-2,i])/dr #default surface flux
             
             if convect[i-1] == True or cond_i==1: #overwrite convecting portion
                 if cond_i == 0:
                     cond_i =1 
-                    print('Convecting, changing timestep')
+                    print('Onset of convection')
                     
                 nlid_cells = round(d0[i]/dr)
                 if nlid_cells ==0:
@@ -156,7 +152,7 @@ def differentiation(Tint,tacc,r,dr,dt):
                 cp[:lid_start,i] = cp_calc_int(T[0,i-1],True)
                 cp[-1,i] = cpa
                 dTdt_new = dTadt_calc(t[i-1],T[lid_start-1,i-1],d0[i-1],Flid_old)
-                T[:lid_start,i] = T[:lid_start,i-1] + dTdt_new*dtn 
+                T[:lid_start,i] = T[:lid_start,i-1] + dTdt_new*dt 
                 T[-1,i] = Ts 
                 
                 if d0[i] < dr:
@@ -301,11 +297,7 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         Ra_crit = np.append(Ra_crit, 0)
         convect = np.append(convect, 0)
         
-        if convect[i-1] == False:
-            dtn = dt
-        else: 
-            dtn = 0.01*t_cond_core #adaptive timestep smaller when convecting
-        t = np.append(t,t[i-1]+dtn)
+        t = np.append(t,t[i-1]+dt)
         
         Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1])
         #calculate radiogenic heating
@@ -317,17 +309,16 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
                 
         #calculate temperature change
         dTdt = rhs/(rhoa*cp[:,i])
-        T[:-1,i] = T[:-1,i-1] + dtn*dTdt[:-1]
+        T[:-1,i] = T[:-1,i-1] + dt*dTdt[:-1]
         T[-1,i] = Ts
         Xfe[:,i] = Xfe[:,i-1] #continuity of Xfe between timesteps  
         
         if np.any((np.int_(T)[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)): #see if there are any melting cells
             melt = np.where((np.int_(T)[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1))
-            Xfe[melt,i] = Xfe[melt,i-1]+rhs[melt]/(rhoa*XFe_a*Lc)*dtn
+            Xfe[melt,i] = Xfe[melt,i-1]+rhs[melt]/(rhoa*XFe_a*Lc)*dt
             T[melt,i] = T[melt,i-1] #melting region has constant temperature
         
         if convect[i-1] == True or cond_i==1: #overwrite convecting portion
-            print('Convecting')
             nlid_cells = round(d0[i]/dr)
             if nlid_cells ==0:
                 lid_start = ncells -2
@@ -336,17 +327,17 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
             cp[:lid_start,i] = cp_calc_eut_int(T[lid_start-1,i-1],True)
                         
             if cond_i == 0: #first time it starts convecting
-                print('Convecting, changing timestep')             
+                print('Onset of convection')             
                 cond_i =1
                 
             Fs = -ka*(Ts-T[lid_start,i-1])/d0[i]
             if int(T[lid_start-1,i-1]) >= Ts_fe and (Xfe[lid_start-1,i-1]<1): #no temp change only melting
-                Xfe[:lid_start,i] = Xfe[:lid_start,i-1]+(rhoa*H-Fs)/(rhoa*XFe_a*Lc)*dtn
+                Xfe[:lid_start,i] = Xfe[:lid_start,i-1]+(rhoa*H-Fs)/(rhoa*XFe_a*Lc)*dt
             else:
                 cp[:lid_start,i] = cp_calc_eut_int(T[:lid_start,i-1],True)
                 cp[lid_start:,i] = cp_calc_eut_arr(T[lid_start:,i-1],True)
                 dTdt = (rhoa*H[i]-Fs)/(rhoa*cp[0,i])
-                T[:lid_start,i] = T[:lid_start,i-1] + dTdt*dtn 
+                T[:lid_start,i] = T[:lid_start,i-1] + dTdt*dt
                 T[-1,i] = Ts 
                 
      
