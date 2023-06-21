@@ -9,8 +9,9 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  Myr, Ts, f0, r, rc, dr, kappa_c, save_interval_d, save_interval_t, km, Vm, As, rhom, default, rcmf, Xs_0, Fe0, t_cond_core
-
+from parameters import  Myr, Ts, f0, r, rc, kappa_c, save_interval_d, save_interval_t, km, Vm, As, rhom, default, rcmf, Xs_0, Fe0
+# import run info
+from parameters import run, t_acc_m, t_end_m, dr, step_m
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
 from stencil import cond_stencil_core, cond_stencil_mantle
@@ -26,13 +27,9 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-run = 8
-
-t_acc=0.8*Myr  #Accretion time
-t_end_m=500#end time in Myr
-
-t_end=t_end_m*Myr
-step_m=0.1*t_cond_core  #max timestep must be smaller than conductive timestep
+t_acc = t_acc_m *Myr #Accretion time
+t_end=t_end_m*Myr #end time 
+#step_m=0.1*t_cond_core  #max timestep must be smaller than conductive timestep
 n_save_d = int(save_interval_d/step_m)
 n_save_t = int(save_interval_t/step_m)
 
@@ -212,7 +209,7 @@ np.savez('Results_combined/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb
 #write parameters to the run file
 from csv import writer
 
-var_list = [run, r, dr, t_acc/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_t, int_time,  save_interval_d/Myr, save_interval_t/Myr, 
+var_list = [run, r, dr, t_acc/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_t, int_time+diff_time,  save_interval_d/Myr, save_interval_t/Myr, 
             default, rcmf, Xs_0, Fe0]
 
     
@@ -225,9 +222,16 @@ var_list2 = [run,step_m,dr,diff_time, diff_T, peakT, tmax, tstrat_remove,
              strat_end, super_ad_start, super_ad_end, cond_t, max_Rem[0], max_Remt[0], max_Rem[1], max_Remt[1], max_Rem[2], 
              max_Remt[2],MAC_start,MAC_stop, CIA_start, CIA_stop, comp_start, comp_stop,
              max_B[0],max_Bt[0],max_B[1],max_Bt[1],max_B[2],max_Bt[2],max_B[3],max_Bt[3]]
-from csv import writer
+
 with open('Results_combined/timestep_test.csv','a') as f_object:
      writer_object = writer(f_object) #pass file object to csv.writer
      writer_object.writerow(var_list2) # pass list as argument into write row
      f_object.close() #close file
 # print('Results and run parameters saved')
+
+#add done flag to run
+from parameters import ind
+import pandas as pd
+auto = pd.read_csv('auto_params.csv')
+auto.loc[ind+1,'done']=1
+auto.to_csv('auto_params.csv',index=False)
