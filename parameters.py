@@ -18,28 +18,34 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-#dr = 500 # size of cells [m]
+automated = True
 out_interval = 20 #how many times do you want t to be printed in the whole run
 save_interval_d = 0.01*Myr # how often do you want each variable to be saved during differentiation
 save_interval_t = 0.1*Myr # how often do you want each variable to be saved during thermal evolution
 
 # Parameters that will vary
-auto = pd.read_csv('auto_params.csv',skiprows=[1])
-ind = len(auto[auto['done']==1]) #find how many runs are done
-r = auto.loc[ind,'r']
-default = auto.loc[ind,'default']
-rcmf = auto.loc[ind,'rcmf']
-Xs_0 = auto.loc[ind,'Xs_0']
-Fe0 = auto.loc[ind,'Fe0']
-run = int(auto.loc[ind,'run'])
-t_acc_m = auto.loc[ind,'t_acc_m']
-t_end_m = auto.loc[ind,'t_end_m']
-dr = auto.loc[ind,'dr']
-# r = 400e3 # radius of asteroid [m]
-# default ='Dodds' #default viscosity model
-# rcmf = 0.2 #rheologically critical melt fraction - melting required for differentiation
-# Xs_0 = 30 # initial wt % sulfur in core 
-# Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
+if automated == True:
+    auto = pd.read_csv('auto_params.csv',skiprows=[1])
+    ind = len(auto[auto['done']==1]) #find how many runs are done
+    r = auto.loc[ind,'r']
+    default = auto.loc[ind,'default']
+    rcmf = auto.loc[ind,'rcmf']
+    Xs_0 = auto.loc[ind,'Xs_0']
+    Fe0 = auto.loc[ind,'Fe0']
+    run = int(auto.loc[ind,'run'])
+    t_acc_m = auto.loc[ind,'t_acc_m']
+    t_end_m = auto.loc[ind,'t_end_m']
+    dr = auto.loc[ind,'dr']
+else: #set manually
+    r = 400e3 # radius of asteroid [m]
+    dr = 500 # grid size [m]
+    default ='Dodds' #default viscosity model
+    rcmf = 0.2 #rheologically critical melt fraction - melting required for differentiation
+    Xs_0 = 30 # initial wt % sulfur in core 
+    Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
+    run = 8
+    t_acc_m = 0.8 #accretion time [Myr]
+    t_end_m = 100 # max end time [Myr]
 
 # Size of body
 rc = r/2 #radius of core [m]
@@ -140,7 +146,11 @@ Tl_fe = fe_fes_liquidus_bw(Xs_0,Pc)
 t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle
 
-step_m = auto.loc[ind,'dt']*t_cond_core
+if automated == True:
+    step_m = auto.loc[ind,'dt']*t_cond_core
+else:
+    step_m = 0.1*t_cond_core
+    
 #Modified specific heat capacities
 #before differentiation
 if Xs_0 != Xs_eutectic:
