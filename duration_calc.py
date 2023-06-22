@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+"""
+Functions for testing and saving on and off of a certain parameter
+"""
 import numpy as np
+import pandas as pd
 
 def on_off_test(tarray,out_array,threshold,save_interval):
     """
@@ -43,12 +46,40 @@ def on_off_test(tarray,out_array,threshold,save_interval):
     
     return tstart, tend, duration
 
+def on_off_save(tarray,out_array,threshold,save_interval,file,label,run):
+    """
+    Function for finding start and end periods e.g. for a dynamo and saving to csv
+
+    Parameters
+    ----------
+    tarray : float
+        time series
+    out_array : float
+        output to test condition on - must be same length as time series
+    threshold : float
+        threshold value to compare out_array
+    save_interval : float
+        spacing between time saves
+    file : string
+        file to save to
+    label : string
+        quantity you are testing e.g. MAC
+    run : int
+        run number
+    Returns
+    -------
+    None
+    """
+    start, end, duration = on_off_test(tarray,out_array,threshold,save_interval)
+    data = {"run":run,"label":label,"start":start, "end":end, "duration":duration}
+    data = pd.DataFrame(data)
+    data.to_csv(file,index=False)
+    return None
+
 #test function
 tarray = np.linspace(1,20,20)
 Rem = np.array([1,20,20,20,4,4,20,20,20,3,8,11,11,11,11,11,0,0,20,20])
 threshold =10
 save_interval = 1
-
-print(on_off_test(tarray,Rem,threshold,save_interval))
-
+on_off_save(tarray,Rem,threshold,save_interval,'test_import.csv','MAC',1)
 
