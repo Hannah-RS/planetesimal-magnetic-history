@@ -26,7 +26,7 @@ save_interval_t = 0.1*Myr # how often do you want each variable to be saved duri
 # Parameters that will vary
 if automated == True:
     auto = pd.read_csv('auto_params.csv',skiprows=[1])
-    ind = len(auto[auto['done']==1]) #find how many runs are done
+    ind = len(auto[(auto['status']==1)|(auto['status']==0)]) #find how many runs are done
     r = auto.loc[ind,'r']
     default = auto.loc[ind,'default']
     rcmf = auto.loc[ind,'rcmf']

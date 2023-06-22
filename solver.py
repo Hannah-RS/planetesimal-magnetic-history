@@ -5,13 +5,19 @@ Script for solving the thermal evolution of an asteroid. Doesn't include differe
 """
 # import modules
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
 from parameters import  Myr, Ts, f0, r, rc, kappa_c, save_interval_d, save_interval_t, km, Vm, As, rhom, default, rcmf, Xs_0, Fe0
 # import run info
-from parameters import run, t_acc_m, t_end_m, dr, step_m
+from parameters import run, t_acc_m, t_end_m, dr, step_m, ind
+
+#set flag for run started
+auto = pd.read_csv('auto_params.csv')
+auto.loc[ind+1,'status']=0 #indicates started
+auto.to_csv('auto_params.csv',index=False)
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
 from stencil import cond_stencil_core, cond_stencil_mantle
@@ -160,7 +166,7 @@ t_plot_t = t/Myr
 t_therm1 = t_plot_t[Rem[0]>threshold]
 t_therm11 = t_therm1[t_therm1<100] #distinguish between early and late dynamo
 t_therm12 = t_therm1[t_therm1>100]
-t_therm2 = t_plot_t[Rem[2]>10]
+t_therm2 = t_plot_t[Rem[2]>threshold]
 t_therm21 = t_therm2[t_therm2<100]
 t_therm22 = t_therm2[t_therm2>100]
 t_comp = t_plot_t[Rem_c>10]
@@ -230,8 +236,6 @@ with open('Results_combined/timestep_test.csv','a') as f_object:
 # print('Results and run parameters saved')
 
 #add done flag to run
-from parameters import ind
-import pandas as pd
 auto = pd.read_csv('auto_params.csv')
-auto.loc[ind+1,'done']=1
+auto.loc[ind+1,'status']=1 #indicates completed
 auto.to_csv('auto_params.csv',index=False)
