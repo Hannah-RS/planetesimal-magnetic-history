@@ -22,7 +22,7 @@ model2 = '0.025dt,0.5dr'
 model3 = 'dt,dr'
 
 #scale time to Myr
-from parameters import Myr
+from plotting_constants import Myr
 
 path = '../Results_combined/Timestep_test/'
 #import data from npz file - run1

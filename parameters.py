@@ -8,8 +8,7 @@ Dodds et. al. (2021) and references within or it is a fundamental constant
 
 import numpy as np
 import pandas as pd
-#import os
-#file_path = os.path.abspath('learning-model')
+
 #Constants
 G = 6.67e-11 # gravitational constant [N kg^-2 m^2]
 year = 60*60*24*365 #number of seconds in a year
