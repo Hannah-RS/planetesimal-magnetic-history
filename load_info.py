@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import pandas as pd
-from parameters import Myr
+from plotting_constants import Myr
 
 def load_run_info(run,file,conduction=False):
     """
