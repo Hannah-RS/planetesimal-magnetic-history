@@ -81,6 +81,30 @@ def on_off_save(tarray,out_array,threshold,save_interval,file,label,run):
     data.to_csv(file,index=False,mode='a',header=False)
     return None
 
+def on_off_load(file,run=0):
+    """
+    Load on off and duration times for a given parameter
+
+    Parameters
+    ----------
+    file : string
+        filename
+    run : float
+        run number, if 0 load all runs
+
+    Returns
+    -------
+    onoff : pandas dataframe
+        on, off times and durations and labels for a given run
+
+    """
+    on_off_all = pd.read_csv(file,skiprows=[1])
+    if run ==0: #return all runs
+        onoff = on_off_all
+    else:
+        onoff = on_off_all[on_off_all['run']==run]
+        onoff.reset_index(drop=True,inplace=True) #reset indices of sub data frame
+    return onoff
 #test function
 #tarray = np.linspace(1,20,20)
 #Rem = np.array([1,20,20,20,4,4,20,20,20,3,8,11,11,11,11,11,0,0,20,20])

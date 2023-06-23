@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, kappa_c, save_interval_d, save_interval_t, km, Vm, As, rhom, step_m
+from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, kappa_c, save_interval_d, save_interval_t, km, Vm, As, rhom, step_m, Xs_0, default, rcmf, Fe0
 
 #set flag for run started
 if automated == True:
@@ -18,6 +18,10 @@ if automated == True:
     auto = pd.read_csv('auto_params2.csv')
     auto.loc[ind+1,'status']=0 #indicates started
     auto.to_csv('auto_params2.csv',index=False)
+else: #save run parameters in run_info file
+    run_info = {"run":run,"r":r,"default":default,"rcmf":rcmf,"Xs_0":Xs_0, "Fe0":Fe0, "t_acc_m":t_acc_m, "t_end_m":t_end_m, "dr":dr,"step_m":step_m}
+    run_info = pd.DataFrame(run_info)
+    run_info.to_csv('run_info.csv',index=False,mode='a',header=False)
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
 from stencil import cond_stencil_core, cond_stencil_mantle

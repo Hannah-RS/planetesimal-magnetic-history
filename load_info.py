@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import pandas as pd
-from plotting_constants import Myr
 
 def load_run_info(run,file):
     """
@@ -26,21 +25,18 @@ def load_run_info(run,file):
         max possible time of simulation [Myr]
     tstep : float
         step size in integration [Myr]
-    dt : float
-        variable output frequency [Myr]
     viscosity : string
         viscosity profile
 
     """
     run_info = pd.read_csv(file,delimiter=',',skiprows=[1])  
     r = run_info[run_info['run']==run]['r'].to_numpy()[0] #radius [m]
-    tstep = run_info[run_info['run']==run]['step_size'].to_numpy()[0] #step size in integration [Myr]
+    tstep = run_info[run_info['run']==run]['step_m'].to_numpy()[0] #step size in integration [Myr]
     dr = run_info[run_info['run']==run]['dr'].to_numpy()[0] #grid spacing [m]
-    tstart = run_info[run_info['run']==run]['t_acc'].to_numpy()[0] #accretion time [Myr after CAIs]
-    dt = run_info[run_info['run']==run]['save_interval_t'].to_numpy()[0] #variable output frequency
+    tstart = run_info[run_info['run']==run]['t_acc_m'].to_numpy()[0] #accretion time [Myr after CAIs]
     viscosity = run_info[run_info['run']==run]['default'].iloc[0] #viscosity profile
     
-    return r, dr, tstart, tend, tstep, dt, viscosity
+    return r, dr, tstart, tstep, viscosity
 
 def load_run_results(run,file):
     """
@@ -63,6 +59,5 @@ def load_run_results(run,file):
     """
     run_info = pd.read_csv(file,delimiter=',',skiprows=[1])  
     run_results = run_info[run_info['run']==run]
-    
+    run_results.reset_index(inplace=True,drop=True) #reset indices of sub data frame
     return run_results
-    return r, dr, tstart, tend, tstep, tsolid, cond_t, dt, viscosity
