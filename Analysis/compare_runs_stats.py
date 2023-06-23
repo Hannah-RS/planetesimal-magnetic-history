@@ -14,7 +14,7 @@ data = pd.read_csv(file,delimiter=',',skiprows=[1])
 n =len(data)
 
 #scale dt and dr by original step
-data['dt']=data['dt']/9.62603058148927e-05
+data['dt']=data['dt']/data.loc[0,'dt']
 data['dr']=data['dr']/500
 
 #magnetic field generation as a fraction of total time of field generation
@@ -39,9 +39,9 @@ data_norm_dr = (data_dr - data_dr.mean()) /data_dr.mean()
 data_norm_dt = (data_dt - data_dt.mean()) /data_dt.mean()
 
 #################### Percentage difference plot, colour by dt ###########################
-col1 = ['diff_T','diff_time','peakT','tmax','tc_conv2']
+col1 = ['diff_T','diff_time','peakT','tmax','super_ad_end']
 col2 = ['MAC_start','MAC_stop','CIA_start','CIA_stop','comp_start','comp_stop']
-col3 = ['tstrat_end','terode','tc_conv1','cond_t','max_Rem','max_Remt']
+col3 = ['tstrat_remove','terode','super_ad_start','cond_t','max_Rem_mac','max_Remt_mac']
 col4 = ['MAC_length','CIA_length','comp_length']
 
 plt.figure(tight_layout=True,figsize=[10,10])
@@ -130,8 +130,8 @@ for i, col in enumerate(col2):
     
 ######################### Change in each value with timestep only #################
 col5 = ['diff_T','diff_time','peakT','tmax']
-col6 = ['MAC_start','MAC_stop','CIA_start','CIA_stop','comp_start','comp_stop','max_Rem','max_Remt']
-col7 = ['tstrat_end','terode','tc_conv1','tc_conv2','cond_t']
+col6 = ['MAC_start','MAC_stop','CIA_start','CIA_stop','comp_start','comp_stop','max_Rem_mac','max_Remt_mac']
+col7 = ['tstrat_remove','terode','super_ad_start','super_ad_end','cond_t']
 col8 = ['MAC_length','CIA_length','comp_length']
 
 ylabels5 = ['T/K','t/Myr','T/K','t/Myr']
@@ -177,8 +177,8 @@ for i, col in enumerate(col8):
     
 ######################### Change in each value with dr and timestep  #################
 col5 = ['diff_T','diff_time','peakT','tmax']
-col6 = ['MAC_start','MAC_stop','CIA_start','CIA_stop','comp_start','comp_stop','max_Rem','max_Remt']
-col7 = ['tstrat_end','terode','tc_conv1','tc_conv2','cond_t']
+col6 = ['MAC_start','MAC_stop','CIA_start','CIA_stop','comp_start','comp_stop','max_Rem_mac','max_Remt_mac']
+col7 = ['tstrat_remove','terode','super_ad_start','super_ad_end','cond_t']
 col8 = ['MAC_length','CIA_length','comp_length']
 
 ylabels5 = ['T/K','t/Myr','T/K','t/Myr']
