@@ -44,7 +44,7 @@ else: #set manually
     Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
     run = 8
     t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 100 # max end time [Myr]
+    t_end_m = 800 # max end time [Myr]
 
 # Size of body
 rc = r/2 #radius of core [m]
