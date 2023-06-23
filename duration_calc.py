@@ -82,11 +82,11 @@ def on_off_save(tarray,out_array,threshold,save_interval,file,label,run):
     return None
 
 #test function
-tarray = np.linspace(1,20,20)
+#tarray = np.linspace(1,20,20)
 #Rem = np.array([1,20,20,20,4,4,20,20,20,3,8,11,11,11,11,11,0,0,20,20])
 #Rem = np.array([1,1,1,1,4,4,20,20,20,3,8,1,1,1,1,1,0,0,1,1])
-Rem = np.linspace(0,5,20)
-threshold =10
-save_interval = 1
-on_off_save(tarray,Rem,threshold,save_interval,'test_import.csv','MAC',1)
+#Rem = np.linspace(0,5,20)
+#threshold =10
+#save_interval = 1
+#on_off_save(tarray,Rem,threshold,save_interval,'test_import.csv','MAC',1)
 
