@@ -5,7 +5,7 @@ while [ $i -lt $nruns ]
 do
     runi=$(awk '(NR>2)' auto_params.csv | awk -F',' '$11<0' | awk -F',' 'NR==1{print $1}') #get run number
     SECONDS=0 #start timer
-    python solver.py >> output.txt 2>&1 #run model and write terminal output to file, send error there too
+    python solver_break.py >> output.txt 2>&1 #run model and write terminal output to file, send errors there too
     runt=$SECONDS #stop timer
     printf '%s\n' $runi $runt | paste -sd ',' >> runtime.csv #save run number and time to file
     echo Run $runi has been completed in 
