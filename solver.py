@@ -19,7 +19,7 @@ if automated == True:
     auto.loc[ind+1,'status']=0 #indicates started
     auto.to_csv('auto_params.csv',index=False)
 else: #save run parameters in run_info file
-    run_info = {"run":run,"r":r,"default":default,"rcmf":rcmf,"Xs_0":Xs_0, "Fe0":Fe0, "t_acc_m":t_acc_m, "t_end_m":t_end_m, "dr":dr,"step_m":step_m}
+    run_info = {"run":[run],"r":[r],"default":[default],"rcmf":[rcmf],"Xs_0":[Xs_0], "Fe0":[Fe0], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"step_m":[step_m]}
     run_info = pd.DataFrame(run_info)
     run_info.to_csv('run_info.csv',index=False,mode='a',header=False)
 
@@ -187,10 +187,11 @@ with open('Results_combined/run_results.csv','a') as f_object:
      writer_object.writerow(var_list) # pass list as argument into write row
      f_object.close() #close file
 
-print('Results and run parameters saved')
+print('Results and run parameters saved. Run sucessful')
 
 #add done flag to run
 if automated == True: #no need to reimport ind as will have been imported earlier
     auto = pd.read_csv('auto_params.csv')
     auto.loc[ind+1,'status']=1 #indicates completed
     auto.to_csv('auto_params.csv',index=False)
+
