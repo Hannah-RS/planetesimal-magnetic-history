@@ -10,14 +10,18 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  Myr, Ts, f0, r, rc, kappa_c, save_interval_d, save_interval_t, km, Vm, As, rhom, default, rcmf, Xs_0, Fe0
-# import run info
-from parameters import run, t_acc_m, t_end_m, dr, step_m, ind
+from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, kappa_c, save_interval_d, save_interval_t, km, Vm, As, rhom, step_m, Xs_0, default, rcmf, Fe0
 
 #set flag for run started
-auto = pd.read_csv('auto_params.csv')
-auto.loc[ind+1,'status']=0 #indicates started
-auto.to_csv('auto_params.csv',index=False)
+if automated == True:
+    from parameters import ind
+    auto = pd.read_csv('auto_params.csv')
+    auto.loc[ind+1,'status']=0 #indicates started
+    auto.to_csv('auto_params.csv',index=False)
+else: #save run parameters in run_info file
+    run_info = {"run":run,"r":r,"default":default,"rcmf":rcmf,"Xs_0":Xs_0, "Fe0":Fe0, "t_acc_m":t_acc_m, "t_end_m":t_end_m, "dr":dr,"step_m":step_m}
+    run_info = pd.DataFrame(run_info)
+    run_info.to_csv('run_info.csv',index=False,mode='a',header=False)
 
 #calculate the stencil for the conductive profile, save so can be reloaded in later steps
 from stencil import cond_stencil_core, cond_stencil_mantle
@@ -33,7 +37,7 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c)
 
 
 # define the run number, start and end times
-t_acc = t_acc_m *Myr #Accretion time
+t_acc = t_acc_m*Myr #Accretion time
 t_end=t_end_m*Myr #end time 
 #step_m=0.1*t_cond_core  #max timestep must be smaller than conductive timestep
 n_save_d = int(save_interval_d/step_m)
@@ -46,13 +50,11 @@ Tint[-1]=Ts
 
 print('Initial conditions set')
 
-###############  sintering and compaction code will go here  ##################
-
 ########################### Differentiation ###################################
 tic = time.perf_counter()
 Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H  = differentiation(Tint,t_acc,r, dr, step_m)
 toc = time.perf_counter()
-diff_time = toc - tic  
+int_time1 = toc - tic  
 
 # update user on progress and plot differentiated temperature profile 
 rplot= np.arange(0,r,dr)/1e3
@@ -77,14 +79,14 @@ H = H[0::n_save_d]
 
 np.savez(f'Results_combined/run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, d0=d0, t_diff = t_diff, H=H)
 
-print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(diff_time)))
+print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time1)))
 ######################## Thermal evolution ####################################
 
 #integrate
 tic = time.perf_counter()
 Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, RaRob, Racrit, Fs, Flid, Fad, Fcmb, Rem_c, Bcomp, t, cond_t = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
-int_time = toc - tic    
+int_time2 = toc - tic    
 
 #update on progress
 plt.figure()
@@ -93,17 +95,21 @@ plt.xlabel('r/km')
 plt.ylabel('Temperature/K')
 plt.title('Temperature profile post thermal evolution')
 
-print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time)))
+print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time2)))
 
 ############################# Process data ####################################
 ########## Current comparitive parameters ####################
+from duration_calc import on_off_save
 
+################ all processes which happen once  #############################
+int_time = int_time1+int_time2 #total time for the two scripts
 nmantle = int((r/dr)/2)
 diff_time = t_diff[-1]/Myr
 diff_T = Tdiff[int(nmantle),-1]
 peakT = np.amax(Tprofile[:,nmantle:])
 loc_max = np.where(Tprofile[:,nmantle:]==peakT)[1][0] #take the set of time coordinates and first value (they should all be the same)
 tmax = t[loc_max]/Myr
+tsolid = t[-1]/Myr #time of core solidification
 if np.all(Tprofile[:,int(nmantle)-2]<Tcmb):
     tstrat_remove = np.inf
 else:
@@ -113,13 +119,6 @@ if np.any(min_unstable==0):
      strat_end = t[np.where(min_unstable==0)[0]][0]/Myr
 else:
     strat_end = np.inf
-    
-if np.all(Fcmb < Fad):
-    super_ad_start = np.inf
-    super_ad_end = np.inf
-else:
-    super_ad_start = t[np.where(Fcmb>Fad)[0]][0]/Myr
-    super_ad_end = t[np.where(Fcmb>Fad)[0]][-1]/Myr
 
 # Frad - radiogenic heat flux, normalised to surface of body
 from heating import Al_heating
@@ -161,50 +160,13 @@ for i in range(m-1):
         max_Rem[i] = np.max(Rem[i+1,Rem[i+1,:]>threshold])
         max_Remt[i] = t[Rem[i+1,:]==max_Rem[i]][0]/Myr
         
-#on and off times
+########################## on and off times - calculate and save ####################
 t_plot_t = t/Myr
-t_therm1 = t_plot_t[Rem[0]>threshold]
-t_therm11 = t_therm1[t_therm1<100] #distinguish between early and late dynamo
-t_therm12 = t_therm1[t_therm1>100]
-t_therm2 = t_plot_t[Rem[2]>threshold]
-t_therm21 = t_therm2[t_therm2<100]
-t_therm22 = t_therm2[t_therm2>100]
-t_comp = t_plot_t[Rem_c>10]
-if np.any(Rem[0]>threshold):
-    if np.any(t_therm1<100):
-        MAC_start = t_therm11[0]
-        MAC_stop = t_therm11[-1]
-        print(f'MAC balance predicts there is a thermal dynamo between {MAC_start:.1f} and {MAC_stop:.1f}Myr')
-    if np.any(t_therm1>100):
-        MAC_start = t_therm12[0]
-        MAC_stop = t_therm12[-1]
-        print(f'MAC balance predicts there is a thermal dynamo between {MAC_start:.1f} and {MAC_stop:.1f}Myr')
-else:
-    MAC_start = np.nan
-    MAC_stop = np.nan
-    print('MAC balance predicts there is no thermal dynamo')
-if np.any(Rem[2]>threshold):
-    if np.any(t_therm2<100):
-        CIA_start = t_therm21[0]
-        CIA_stop = t_therm21[-1]
-        print(f'CIA balance predicts there is a thermal dynamo between {CIA_start:.1f} and {CIA_stop:.1f}Myr')
-    if np.any(t_therm2>threshold):
-        CIA_start = t_therm22[0]
-        CIA_stop = t_therm22[-1]
-        print(f'CIA balance predicts there is a thermal dynamo between {CIA_start:.1f} and {CIA_stop:.1f}Myr')
-else:
-    CIA_start = np.nan
-    CIA_stop = np.nan
-    print('CIA balance predicts there is no thermal dynamo')
-if np.any(Rem_c>threshold):
-    comp_start = t_comp[0]
-    comp_stop = t_comp[-1]
-    print(f'There is a compositional dynamo between {comp_start:.1f} and {comp_stop:.1f} Myr')
-else:
-    comp_start = np.nan
-    comp_stop = np.nan
-    print('There is no compositional dynamo')
-print('Fluxes and magnetic Reynolds number calculated.')
+
+on_off_save(t_plot_t, Rem_t[0], threshold, save_interval_t, 'Results_combined/MAC_onoff.csv', 'MAC', run) #MAC on off
+on_off_save(t_plot_t, Rem_t[1], threshold, save_interval_t, 'Results_combined/CIA_onoff.csv', 'CIA', run) #CIA on off
+on_off_save(t_plot_t, Rem_c, threshold, save_interval_t, 'Results_combined/comp_onoff.csv', 'comp', run) #comp on off
+on_off_save(t_plot_t, Fdrive, 0, save_interval_t, 'Results_combined/coreconv_onoff.csv', 'core_conv', run) #core convection on off
 
 ############################ Save results #####################################
 # save variables to file
@@ -214,28 +176,20 @@ np.savez('Results_combined/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb
 
 #write parameters to the run file
 from csv import writer
-
-var_list = [run, r, dr, t_acc/Myr, t_end_m, step_m/Myr, max(t)/Myr, cond_t, int_time+diff_time,  save_interval_d/Myr, save_interval_t/Myr, 
-            default, rcmf, Xs_0, Fe0]
-
-    
-with open('Results_combined/run_info.csv','a') as f_object:         
-    writer_object = writer(f_object) #pass file object to csv.writer
-    writer_object.writerow(var_list) # pass list as argument into write row
-    f_object.close() #close file
   
-var_list2 = [run,step_m,dr,diff_time, diff_T, peakT, tmax, tstrat_remove, 
-             strat_end, super_ad_start, super_ad_end, cond_t, max_Rem[0], max_Remt[0], max_Rem[1], max_Remt[1], max_Rem[2], 
-             max_Remt[2],MAC_start,MAC_stop, CIA_start, CIA_stop, comp_start, comp_stop,
-             max_B[0],max_Bt[0],max_B[1],max_Bt[1],max_B[2],max_Bt[2],max_B[3],max_Bt[3]]
+var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, tstrat_remove, 
+             strat_end, cond_t, max_Rem[0], max_Remt[0], max_Rem[1], max_Remt[1], max_Rem[2], 
+             max_Remt[2],max_B[0],max_Bt[0],max_B[1],max_Bt[1],max_B[2],max_Bt[2],max_B[3],max_Bt[3]]
 
-with open('Results_combined/timestep_test.csv','a') as f_object:
+with open('Results_combined/run_results.csv','a') as f_object:
      writer_object = writer(f_object) #pass file object to csv.writer
-     writer_object.writerow(var_list2) # pass list as argument into write row
+     writer_object.writerow(var_list) # pass list as argument into write row
      f_object.close() #close file
-# print('Results and run parameters saved')
+
+print('Results and run parameters saved')
 
 #add done flag to run
-auto = pd.read_csv('auto_params.csv')
-auto.loc[ind+1,'status']=1 #indicates completed
-auto.to_csv('auto_params.csv',index=False)
+if automated == True: #no need to reimport ind as will have been imported earlier
+    auto = pd.read_csv('auto_params.csv')
+    auto.loc[ind+1,'status']=1 #indicates completed
+    auto.to_csv('auto_params.csv',index=False)
