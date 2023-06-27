@@ -32,12 +32,8 @@ def on_off_test(tarray,out_array,threshold,save_interval):
     """
     #check arrays are same length
     assert(len(tarray)==len(out_array))
-    if np.all(out_array<threshold): #no on periods
-        tstart = np.array([np.nan])
-        tend = np.array([np.nan])
-        duration = np.array([np.nan])
-    else:
-        t = tarray[out_array>threshold]
+    if np.any(out_array>threshold): #there are on periods - False even for nan values
+        t = tarray[out_array>=threshold]
         #find difference between sucessive tvalues
         tdiff = np.ediff1d(t)
         tend_ind = np.where(tdiff>save_interval)[0]
@@ -48,7 +44,11 @@ def on_off_test(tarray,out_array,threshold,save_interval):
         tend = np.append(tend,t[-1])
         tstart = np.insert(tstart, 0, t[0])
         duration = tend-tstart
-    
+    else: #no on periods
+        tstart = np.array([np.nan])
+        tend = np.array([np.nan])
+        duration = np.array([np.nan])
+            
     return tstart, tend, duration
 
 def on_off_save(tarray,out_array,threshold,save_interval,file,label,run):
@@ -106,11 +106,11 @@ def on_off_load(file,run=0):
         onoff.reset_index(drop=True,inplace=True) #reset indices of sub data frame
     return onoff
 #test function
-#tarray = np.linspace(1,20,20)
-#Rem = np.array([1,20,20,20,4,4,20,20,20,3,8,11,11,11,11,11,0,0,20,20])
-#Rem = np.array([1,1,1,1,4,4,20,20,20,3,8,1,1,1,1,1,0,0,1,1])
-#Rem = np.linspace(0,5,20)
-#threshold =10
-#save_interval = 1
-#on_off_save(tarray,Rem,threshold,save_interval,'test_import.csv','MAC',1)
+# tarray = np.linspace(1,20,20)
+# Rem = np.array([1,20,20,20,4,4,22,22,22,3,8,11,11,11,11,11,0,0,20,20])
+# #Rem = np.array([1,1,1,1,4,4,20,20,20,3,8,1,1,1,1,1,0,0,1,1])
+# #Rem = np.linspace(0,5,20)
+# threshold =30
+# save_interval = 1
+# on_off_test(tarray,Rem,threshold,save_interval)#,'test_import.csv','MAC',1)
 
