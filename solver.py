@@ -48,6 +48,7 @@ n_cells = int(r/dr) #number of cells needed to span body
 Tint = np.ones([n_cells])*Ts#first element in the array is at r=0, accrete cold at surface temp 
 Tint[-1]=Ts
 
+print(f'Beginning run {run}')
 print('Initial conditions set')
 
 ########################### Differentiation ###################################
