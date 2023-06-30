@@ -14,12 +14,12 @@ sys.path.append('../')
 from load_info import load_run_info
 #choose your runs
 run1 = 1
-run2 = 2 
-run3 = 3
+run2 = 5 
+run3 = 18
 #choose model labels
-model1 = '0.05dt,dr'
-model2 = '0.025dt,0.5dr'
-model3 = 'dt,dr'
+model1 = 'dt,dr'
+model2 = '0.5dt,dr'
+model3 = '0.8dt,dr'
 
 #scale time to Myr
 from plotting_constants import Myr
@@ -32,7 +32,7 @@ Tc1= npzfile['Tc']
 t1 = npzfile['t'] #time in s
 Flux1 = npzfile['Flux']
 f1 = npzfile['f']
-Rem_t1 = npzfile['Rem_t'][0,:] # magnetic Reynolds number from thermal convection based on MAC balance
+Rem_t1 = npzfile['Rem_t'][:2,:] # magnetic Reynolds number from thermal convection based on MAC balance
 Rem_c1 = npzfile['Rem_c'] # magnetic Reynolds number from compositional convection 
 B1 = npzfile['B']
 
@@ -50,7 +50,7 @@ Tc2= npzfile['Tc']
 t2 = npzfile['t'] #time in s
 Flux2 = npzfile['Flux']
 f2 = npzfile['f']
-Rem_t2 = npzfile['Rem_t'][0,:] # magnetic Reynolds number from thermal convection  based on MAC balance
+Rem_t2 = npzfile['Rem_t'][:2,:] # magnetic Reynolds number from thermal convection  based on MAC balance
 Rem_c2 = npzfile['Rem_c'] # magnetic Reynolds number from compositional convection
 B2 = npzfile['B']
  
@@ -68,7 +68,7 @@ Tc3= npzfile['Tc']
 t3 = npzfile['t'] #time in s
 Flux3 = npzfile['Flux']
 f3 = npzfile['f']
-Rem_t3 = npzfile['Rem_t'][0,:] # magnetic Reynolds number from thermal convection  based on MAC balance
+Rem_t3 = npzfile['Rem_t'][:2,:] # magnetic Reynolds number from thermal convection  based on MAC balance
 Rem_c3 = npzfile['Rem_c'] # magnetic Reynolds number from compositional convection
 B3 = npzfile['B']
 
@@ -80,7 +80,7 @@ Frad3 = Flux3[3]
 t_plot3 = t3/Myr
 
 # #import label info - read in from correct row in csv
-r, dr, tstart, tend, tstep, tsolid, cond_t, dt, viscosity = load_run_info(2,'run_info.csv',True)
+r, dr, tstart, tstep, viscosity = load_run_info(1,'../Results_combined/Timestep_test/run_info.csv')
 
 ################# Core and mantle temp plot for transfer ##########################################
 with sns.plotting_context('talk'):
@@ -136,9 +136,9 @@ with sns.plotting_context('talk',font_scale=0.8):
     plt.suptitle('Magnetic field generation in a {:.0f}km asteroid '.format(r/1e3))
     plt.subplot(2,1,1)
     plt.title('Thermal dynamo')
-    plt.loglog(t_plot1,Rem_t1,label=model1,color='cornflowerblue',alpha=0.7)
-    plt.loglog(t_plot2,Rem_t2,label=model2,color='mediumblue',linestyle='dashed')
-    plt.loglog(t_plot3,Rem_t3,label=model3,color='navy',linestyle='dotted')
+    plt.loglog(t_plot1,Rem_t1[0,:],label=model1,color='cornflowerblue',alpha=0.7)
+    plt.loglog(t_plot2,Rem_t2[0,:],label=model2,color='mediumblue',linestyle='dashed')
+    plt.loglog(t_plot3,Rem_t3[0,:],label=model3,color='navy',linestyle='dotted')
     plt.yscale('log')
     plt.xscale('log')
     plt.hlines(10,xmin=0,xmax=t_plot2[-1],color='k',linestyle='--')
@@ -167,19 +167,22 @@ with sns.plotting_context('talk',font_scale=0.8):
 with sns.plotting_context('talk',font_scale=0.8):
     plt.figure(tight_layout=True,figsize=[10,3.5])
     plt.title('Magnetic field generation in a {:.0f}km asteroid '.format(r/1e3))
-    plt.loglog(t_plot1,Rem_t1,label=model1,color='cornflowerblue',alpha=0.7)
-    plt.loglog(t_plot2,Rem_t2,label=model2,color='mediumblue',linestyle='dashed')
-    plt.loglog(t_plot3,Rem_t3,label=model3,color='navy',linestyle='dotted')
+    plt.loglog(t_plot1,Rem_t1[0,:],label=model1,color='cornflowerblue',alpha=0.7)
+    plt.loglog(t_plot2,Rem_t2[0,:],label=model2,color='mediumblue',linestyle='dashed')
+    plt.loglog(t_plot3,Rem_t3[0,:],label=model3,color='navy',linestyle='dotted')
+    plt.loglog(t_plot1,Rem_t1[1,:],label=model1,color='cornflowerblue',alpha=0.7)
+    plt.loglog(t_plot2,Rem_t2[1,:],label=model2,color='mediumblue',linestyle='dashed')
+    plt.loglog(t_plot3,Rem_t3[1,:],label=model3,color='navy',linestyle='dotted')
     plt.loglog(t_plot1[Rem_c1>10],Rem_c1[Rem_c1>10],color='cornflowerblue',alpha=0.7)
     plt.loglog(t_plot2[Rem_c2>10],Rem_c2[Rem_c2>10],color='mediumblue',linestyle='dashed')
     plt.loglog(t_plot3[Rem_c3>10],Rem_c3[Rem_c3>10],color='navy',linestyle='dotted')
-    plt.yscale('log')
+    #plt.yscale('log')
     plt.xscale('log')
     plt.hlines(10,xmin=0,xmax=t_plot2[-1],color='k',linestyle='--')
     plt.xlabel('Time/Myr')
     plt.ylabel('Rem')
     plt.legend(loc='upper left',ncol=2)
-    plt.ylim([7,100])
+    plt.ylim([10,100])
     plt.xlim([xmin,max(t_plot1)])
     #plt.savefig('../Plots/Rem_ukpf2.png',dpi=600)
     
