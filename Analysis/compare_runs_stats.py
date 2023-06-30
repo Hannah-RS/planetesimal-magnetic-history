@@ -8,6 +8,20 @@ Created on Mon Jun 12 11:53:18 2023
 import pandas as pd
 import matplotlib.pyplot as plt
 
+################# Tabulate runtime info ################################
+runs = pd.read_csv('../Results_combined/Timestep_test/run_info.csv',delimiter=',',skiprows=[1])
+from time import strftime
+from time import gmtime
+
+runs['step_m'] = runs['step_m']/runs.loc[0,'step_m'] #normalise by default timestep
+runs2 = runs[runs['dr']==500]
+runs2=runs2[runs2['step_m']>=0.5]
+runs2.reset_index(inplace = True)
+for i in range(len(runs2)):
+    runs2.loc[i,'int_time']=strftime("%H:%M:%S", gmtime(runs2.loc[i,'int_time']))
+runs2.to_latex(columns=['step_m','int_time'],index_names=False)
+
+###################### Analyse other info ################################
 file='../Results_combined/Timestep_test/timestep_test.csv'
 save = False #decide whether to save
 data = pd.read_csv(file,delimiter=',',skiprows=[1])
