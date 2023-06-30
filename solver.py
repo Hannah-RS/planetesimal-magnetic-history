@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script for solving the thermal evolution of an asteroid. Doesn't include differentiation (i.e commented out)'
+Script for solving the thermal evolution of an asteroid. 
 """
 # import modules
 import numpy as np
@@ -131,13 +131,11 @@ Flux = [Fs, Fcmb, Fad, Frad]
 
 # calculate thermal magnetic reynolds number
 from Rem_calc import Rem_therm, B_flux_therm
-from parameters import Xs_eutectic
 # need Fdrive for Rem_therm
 #only calculate this for Fdrive >0
 Fdrive = Fcmb - Fad
 Fdrive_nn = Fdrive.copy()
 Fdrive_nn[Fdrive<0]=0
-Fdrive_nn[Xs>=Xs_eutectic]=0 #no dynamo in eutectic solidification
 Rem_t = Rem_therm(Fdrive_nn,f,min_unstable) # magnetic Reynolds number for thermal convection - tuple of MAC and CIA balance
 Bml, Bmac, Bcia = B_flux_therm(Fdrive_nn,f,min_unstable) # field strength for thermal convection based on energy flux scaling 
 B = np.array([Bml, Bmac, Bcia, Bcomp])
