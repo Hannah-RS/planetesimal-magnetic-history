@@ -13,10 +13,11 @@ Can toggle on and off solidification
 """
 #import constants and parameters    
 from parameters import Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Pc, gc
-from q_funcs import Qr, Qlt, Qgt
+from q_funcs import Qlt, Qr
 from fe_fes_liquidus import fe_fes_liquidus_dp
 import numpy as np
 from Rem_calc import Rem_comp
+from heating import Fe_heating
 
 def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
     """
@@ -56,7 +57,7 @@ def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
         
     
     Qst = rhoc*cpc*Vconv
-    Qrad = Qr(t)
+    Qrad = rhoc*Vconv*Fe_heating(t)
        
     dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb+Qrad)/Qst
         
