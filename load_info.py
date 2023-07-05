@@ -31,7 +31,7 @@ def load_run_info(run,file):
     """
     run_info = pd.read_csv(file,delimiter=',',skiprows=[1])  
     r = run_info[run_info['run']==run]['r'].to_numpy()[0] #radius [m]
-    tstep = run_info[run_info['run']==run]['step_m'].to_numpy()[0] #step size in integration [Myr]
+    tstep = run_info[run_info['run']==run]['dt'].to_numpy()[0] #step size in integration [Myr]
     dr = run_info[run_info['run']==run]['dr'].to_numpy()[0] #grid spacing [m]
     tstart = run_info[run_info['run']==run]['t_acc_m'].to_numpy()[0] #accretion time [Myr after CAIs]
     viscosity = run_info[run_info['run']==run]['default'].iloc[0] #viscosity profile
