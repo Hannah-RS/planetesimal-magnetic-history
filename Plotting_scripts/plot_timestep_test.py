@@ -13,20 +13,20 @@ import sys
 sys.path.append('../')
 from load_info import load_run_info
 #choose your runs
-run1 = 1
-run2 = 5 
-run3 = 18
-run4 = 19
+run1 = 24
+run2 = 26 
+run3 = 14
+run4 = 28
 #choose model labels
-model1 = 'dt,dr'
-model2 = '0.5dt,dr'
-model3 = '0.8dt,dr'
-model4 = '0.6dt,dr'
+model1 = 'No $^{56}$Fe, switch'
+model2 = 'No $^{56}$Fe, no switch'
+model3 = '$10^{-7}$ $^{56}$Fe/$^{60}$Fe, switch'
+model4 = '$10^{-7}$ $^{56}$Fe/$^{60}$Fe, no switch'
 
 #scale time to Myr
 from plotting_constants import Myr
 
-path = '../Results_combined/Timestep_test/'
+path = '../Results_combined/'
 #import data from npz file - run1
 npzfile = np.load(f'{path}run_{run1}.npz')
 Ra1 = npzfile['Ra']
@@ -101,9 +101,29 @@ t_plot4 = t4/Myr
 
 # #import label info - read in from correct row in csv
 r, dr, tstart, tstep, viscosity = load_run_info(1,'../Results_combined/Timestep_test/run_info.csv')
-
+ 
 threshold = 10
-################# Rayleigh numbers and surface fluxe ##########################################
+
+################### Just Ra ####################################################
+plt.figure(tight_layout=True)
+plt.plot(t_plot1,Ra1,color='mediumblue',label=f'{model1}')
+plt.plot(t_plot2,Ra2,color='cornflowerblue',label=f'{model2}',linestyle='dashed')
+plt.plot(t_plot3,Ra3,color='forestgreen',label=f'{model3}')
+plt.plot(t_plot4,Ra4,color='limegreen',label=f'{model4}',linestyle='dashed')
+plt.plot(t_plot1,Racrit1,color='navy',label='critical Ra',linestyle='dotted')
+#plt.plot(t_plot2,Racrit2,color='black',label='critical Ra',linestyle='dotted')
+#plt.plot(t_plot3,Racrit3,color='black',label='critical Ra',linestyle='dotted')
+plt.plot(t_plot4,Racrit4,color='darkgreen',label=f'critical Ra -{model4}',linestyle='dotted')
+plt.yscale('log')
+plt.xscale('log')
+plt.xlim(right=500)
+plt.ylim([1e6,1e11])
+plt.ylabel('Ra')
+plt.xlabel('t/Myr')
+plt.legend(ncols=2)
+#plt.savefig('../Plots/Xs_r_tests/Ra_switch.png',dpi=600)
+
+################# Rayleigh numbers and surface fluxes ##########################################
 
 fig, ax1 = plt.subplots(tight_layout=True)
 plt.plot(t_plot1,Ra1,color='navy',label=f'Ra {model1}')

@@ -13,18 +13,18 @@ import sys
 sys.path.append('../')
 from load_info import load_run_info
 #choose your runs
-run1 = 1
-run2 = 5 
-run3 = 18
+run1 = 14
+run2 = 28 
+run3 = 27
 #choose model labels
-model1 = 'dt,dr'
-model2 = '0.5dt,dr'
-model3 = '0.8dt,dr'
+model1 = 'switch'
+model2 = 'no switch'
+model3 = 'No $^{56}$Fe, no switch, $Ra_c$=1000'
 
 #scale time to Myr
 from plotting_constants import Myr
 
-path = '../Results_combined/Timestep_test/'
+path = '../Results_combined/'
 #import data from npz file - run1
 npzfile = np.load(f'{path}run_{run1}.npz')
 Tm1 = npzfile['Tm_mid']  
@@ -80,25 +80,27 @@ Frad3 = Flux3[3]
 t_plot3 = t3/Myr
 
 # #import label info - read in from correct row in csv
-r, dr, tstart, tstep, viscosity = load_run_info(1,'../Results_combined/Timestep_test/run_info.csv')
-
+#r, dr, tstart, tstep, viscosity = load_run_info(1,'../run_info.csv')
+r=400e3
+tstart=0.8
 ################# Core and mantle temp plot for transfer ##########################################
 with sns.plotting_context('talk'):
     plt.figure(tight_layout=True,figsize=[10,7])
     plt.title(f'Thermal evolution of a {r/1e3:.0f}km asteroid ')
     xmin=tstart
     #temperatures as function of time
-    plt.semilogx(t_plot1,Tm1,label='mantle',color='red')  
-    plt.semilogx(t_plot1,Tc1,label='core',color='black')
+    plt.semilogx(t_plot1,Tm1,label='mid mantle',color='red')  
+    plt.semilogx(t_plot1,Tc1,label='centre of core',color='black')
     plt.semilogx(t_plot2,Tm2,color='red',linestyle='--')
-    plt.semilogx(t_plot2,Tc2,color='black',linestyle='--',label=model2)
-    plt.semilogx(t_plot3,Tm3,color='red',linestyle='dotted',label=model3)
-    plt.semilogx(t_plot3,Tc3,color='black',linestyle='dotted',label=model1)
     plt.semilogx(t_plot1,Tc1,label=model1,color='black')
+    plt.semilogx(t_plot2,Tc2,color='black',linestyle='--',label=model2)
+    plt.semilogx(t_plot3,Tm3,color='red',linestyle='dotted')
+    plt.semilogx(t_plot3,Tc3,color='black',linestyle='dotted',label=model3)
     plt.ylabel('T/K')
     plt.xlabel('Time/Myr')
-    plt.legend(loc='upper right',ncol=2,fontsize='small')
-    #plt.savefig('../Plots/viscosity_bryson_dodds_talk.png',dpi=600)
+    plt.ylim(bottom=1000)
+    plt.legend(loc='lower left',ncol=1,fontsize='small')
+    #plt.savefig('../Plots/Xs_r_tests/core_mantle_switch.png',dpi=600)
 
 ################### Flux plots ################################################
 
@@ -127,13 +129,13 @@ plt.xlabel('Time/ Myr')
 plt.ylim([1e-3,1e2])   #use these limits when comparing runs
 plt.ylabel('Flux/ W$m^{-2}$')
 plt.legend(loc='upper right',ncol=2,fontsize='small')
-#plt.savefig('../Plots/Tflux_comp.png',dpi=450)
+#plt.savefig('../Plots/Xs_r_tests/Flux_switch.png',dpi=600)
 
 
 ############# Just Rem ###################################################
 with sns.plotting_context('talk',font_scale=0.8):
     plt.figure(tight_layout=True,figsize=[10,7])
-    plt.suptitle('Magnetic field generation in a {:.0f}km asteroid '.format(r/1e3))
+    plt.suptitle('MAC Magnetic field generation in a {:.0f}km asteroid '.format(r/1e3))
     plt.subplot(2,1,1)
     plt.title('Thermal dynamo')
     plt.loglog(t_plot1,Rem_t1[0,:],label=model1,color='cornflowerblue',alpha=0.7)
@@ -165,44 +167,50 @@ with sns.plotting_context('talk',font_scale=0.8):
 
 ############# Compositional and thermal on same plot ##########################
 with sns.plotting_context('talk',font_scale=0.8):
-    plt.figure(tight_layout=True,figsize=[10,3.5])
-    plt.title('Magnetic field generation in a {:.0f}km asteroid '.format(r/1e3))
-    plt.loglog(t_plot1,Rem_t1[0,:],label=model1,color='cornflowerblue',alpha=0.7)
-    plt.loglog(t_plot2,Rem_t2[0,:],label=model2,color='mediumblue',linestyle='dashed')
-    plt.loglog(t_plot3,Rem_t3[0,:],label=model3,color='navy',linestyle='dotted')
-    plt.loglog(t_plot1,Rem_t1[1,:],label=model1,color='cornflowerblue',alpha=0.7)
-    plt.loglog(t_plot2,Rem_t2[1,:],label=model2,color='mediumblue',linestyle='dashed')
-    plt.loglog(t_plot3,Rem_t3[1,:],label=model3,color='navy',linestyle='dotted')
-    plt.loglog(t_plot1[Rem_c1>10],Rem_c1[Rem_c1>10],color='cornflowerblue',alpha=0.7)
-    plt.loglog(t_plot2[Rem_c2>10],Rem_c2[Rem_c2>10],color='mediumblue',linestyle='dashed')
-    plt.loglog(t_plot3[Rem_c3>10],Rem_c3[Rem_c3>10],color='navy',linestyle='dotted')
-    #plt.yscale('log')
+    plt.figure(tight_layout=True,figsize=[10,5])
+    plt.title('Magnetic field generation in a 400km asteroid \n with $10^{-7}$ $^{56}$Fe/$^{60}$Fe')
+    plt.plot(t_plot1,Rem_t1[0,:],label='MAC',color='cornflowerblue',alpha=0.7)
+    #plt.plot(t_plot3[Rem_c3>10],Rem_c3[Rem_c3>10],color='darkorchid',linestyle='dotted',label='compositional')
+    plt.plot(t_plot2,Rem_t2[1,:],color='forestgreen',linestyle='dashed')
+    plt.plot(t_plot2,Rem_t2[0,:],color='mediumblue',linestyle='dashed')
+    #plt.plot(t_plot3,Rem_t3[0,:],color='navy',linestyle='dotted')
+    plt.plot(t_plot1,Rem_t1[1,:],color='limegreen',alpha=0.7,label='CIA')
+    plt.plot(t_plot1,Rem_t1[1,:],label=model1,color='limegreen',alpha=0.7)
+    plt.plot(t_plot2,Rem_t2[1,:],label=model2,color='forestgreen',linestyle='dashed')
+    #plt.plot(t_plot3,Rem_t3[1,:],label=model3,color='darkgreen',linestyle='dotted')
+    plt.plot(t_plot1[Rem_c1>10],Rem_c1[Rem_c1>10],color='violet',alpha=0.7,label=f'{model1} compositional')
+    plt.plot(t_plot2[Rem_c2>10],Rem_c2[Rem_c2>10],color='mediumpurple',linestyle='dashed',label=f'{model2} compositional')
+    #plt.plot(t_plot3[Rem_c3>10],Rem_c3[Rem_c3>10],color='darkorchid',linestyle='dotted')
+    plt.yscale('log')
     plt.xscale('log')
     plt.hlines(10,xmin=0,xmax=t_plot2[-1],color='k',linestyle='--')
     plt.xlabel('Time/Myr')
     plt.ylabel('Rem')
     plt.legend(loc='upper left',ncol=2)
-    plt.ylim([10,100])
-    plt.xlim([xmin,max(t_plot1)])
-    #plt.savefig('../Plots/Rem_ukpf2.png',dpi=600)
+    plt.ylim(bottom=7)
+    #plt.xlim([xmin,max(t_plot1)])
+    #plt.savefig('../Plots/Xs_r_tests/Rem_switch_radio.png',dpi=600)
     
 ############# Magnetic field strength ########################################
 threshold = 10 #critical Rem
 
 with sns.plotting_context('talk',font_scale=0.8):
-    plt.figure(tight_layout=True,figsize=[10,3.5])
+    plt.figure(tight_layout=True,figsize=[10,7])
     plt.title('Field strengths for supercritical Re$_m$')
-    plt.loglog(t_plot1[Rem_t1>threshold],B1[0,Rem_t1>threshold]/1e-6,label=f'{model1} - thermal',color='cornflowerblue',alpha=0.7)
-    plt.loglog(t_plot1[Rem_c1>threshold],B1[3,Rem_c1>threshold]/1e-6,label=f'{model1} - compositional',color='mediumblue',alpha=0.7)
-    plt.loglog(t_plot2[Rem_t2>threshold],B2[0,Rem_t2>threshold]/1e-6,label=f'{model2} - thermal',color='seagreen',alpha=0.7,linestyle='dashed')
+    plt.loglog(t_plot1[Rem_t1[0,:]>threshold],B1[0,Rem_t1[0,:]>threshold]/1e-6,label='ML thermal',color='cornflowerblue',alpha=0.7,linestyle='dashed')
+    plt.loglog(t_plot1[Rem_t1[1,:]>threshold],B1[1,Rem_t1[1,:]>threshold]/1e-6,label='MAC thermal',color='mediumblue',alpha=0.7,linestyle='-.')
+    plt.loglog(t_plot3[Rem_c3>threshold],B3[3,Rem_c3>threshold]/1e-6,label='compositional',color='darkorchid',alpha=0.7,linestyle='dotted')
+    plt.loglog(t_plot1[Rem_c1>threshold],B1[3,Rem_c1>threshold]/1e-6,label=f'{model1}',color='navy',alpha=0.7,linestyle='dotted')
+    plt.loglog(t_plot2[Rem_t2[0,:]>threshold],B2[0,Rem_t2[0,:]>threshold]/1e-6,label=f'{model2}',color='seagreen',alpha=0.7,linestyle='dashed')
+    plt.loglog(t_plot2[Rem_t2[1,:]>threshold],B2[1,Rem_t2[1,:]>threshold]/1e-6,color='limegreen',alpha=0.7,linestyle='-.')
     plt.loglog(t_plot2[Rem_c2>threshold],B2[3,Rem_c2>threshold]/1e-6,color='forestgreen',alpha=0.7,linestyle='dashed')
-    plt.loglog(t_plot3[Rem_t3>threshold],B3[0,Rem_t3>threshold]/1e-6,label=f'{model3} - thermal',color='mediumpurple',alpha=0.7,linestyle='dotted')
-    plt.loglog(t_plot3[Rem_c3>threshold],B3[3,Rem_c3>threshold]/1e-6,color='darkorchid',alpha=0.7,linestyle='dotted')
+    plt.loglog(t_plot3[Rem_t3[0,:]>threshold],B3[0,Rem_t3[0,:]>threshold]/1e-6,label=f'{model3}',color='violet',alpha=0.7,linestyle='dashed')
+    plt.loglog(t_plot3[Rem_t3[1,:]>threshold],B3[1,Rem_t3[1,:]>threshold]/1e-6,color='mediumpurple',alpha=0.7,linestyle='-.')
     plt.yscale('log')
     plt.xscale('log')
     plt.xlabel('Time/Myr')
     plt.ylabel('B/$\mu$T')
-    plt.legend(loc='upper right')
+    plt.legend(loc='upper right',ncols=2)
     plt.xlim([xmin,max(t_plot1)])
 
   
