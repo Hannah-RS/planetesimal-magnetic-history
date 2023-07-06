@@ -99,7 +99,29 @@ plt.colorbar(label='x$_{S,0}$')
 plt.legend()
 if save == True:
    plt.savefig('../Plots/Xs_r_tests/thermal_timings.png',dpi=450)
-   
+
+#dynamo timings only
+plt.figure(figsize=[15,5])
+plt.title('Dynamo timings')
+plt.scatter(data['start_MAC'],data['r'],label='MAC dynamo start',marker='<',c=data['Xs_0'])
+plt.scatter(data['end_MAC'],data['r'],label='MAC dynamo end',marker='>',c=data['Xs_0'])
+plt.scatter(data['start_CIA'],data['r'],label='CIA dynamo start',marker='3',c=data['Xs_0'])
+plt.scatter(data['end_CIA'],data['r'],label='CIA dynamo end',marker='4',c=data['Xs_0'])
+plt.scatter(data['start_comp'],data['r'],label='compositional dynamo start',marker='^',c=data['Xs_0'])
+plt.scatter(data['end_comp'],data['r'],label='compositional dynamo end',marker='v',c=data['Xs_0'])
+plt.xlabel('Time/Myr')
+plt.xscale('log')
+plt.ylabel('radius/km')
+plt.colorbar(label='x$_{S,0}$')
+plt.legend(ncols=2,bbox_to_anchor=(0.3,0.5))
+ax = plt.gca()
+leg = ax.get_legend()
+for i, lab in enumerate(leg.legendHandles):
+    lab.set_edgecolor('black')
+    lab.set_facecolor([[0,0,0,1]])
+    #lab.set_facecolor('black')
+if save == True:
+   plt.savefig('../Plots/Xs_r_tests/dynamo_timings.png',dpi=450) 
 #same as above but with dynamo timings too
 #y axis is r, x axis is time
 plt.figure(figsize=[15,5])
