@@ -108,8 +108,11 @@ nmantle = int((r/dr)/2)
 diff_time = t_diff[-1]/Myr
 diff_T = Tdiff[int(nmantle),-1]
 peakT = np.amax(Tprofile[:,nmantle:])
-loc_max = np.where(Tprofile[:,nmantle:]==peakT)[1][0] #take the set of time coordinates and first value (they should all be the same)
+loc_max = np.where(Tprofile[:,nmantle:]==peakT)[0][0] #take the set of time coordinates and first value (they should all be the same)
 tmax = t[loc_max]/Myr
+peak_coreT = np.amax(Tprofile[:,:nmantle])
+loc_max = np.where(Tprofile[:,:nmantle]==peak_coreT)[0][0] #take the set of time coordinates and first value (they should all be the same)
+tcoremax = t[loc_max]/Myr
 tsolid = t[-1]/Myr #time of core solidification
 if np.all(Tprofile[:,int(nmantle)-2]<Tcmb):
     tstrat_remove = np.inf
@@ -176,7 +179,7 @@ np.savez('Results_combined/run_{}'.format(run), Tc = Tc, Tc_conv = Tc_conv, Tcmb
 #write parameters to the run file
 from csv import writer
   
-var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, tstrat_remove, 
+var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_remove, 
              strat_end, cond_t, max_Rem[0], max_Remt[0], max_Rem[1], max_Remt[1], max_Rem[2], 
              max_Remt[2],max_B[0],max_Bt[0],max_B[1],max_Bt[1],max_B[2],max_Bt[2],max_B[3],max_Bt[3]]
 
