@@ -167,10 +167,10 @@ for i in range(m-1):
 ########################## on and off times - calculate and save ####################
 t_plot_t = t/Myr
 
-on_off_save(t_plot_t, Rem_t[0], threshold, save_interval_t, '{folder}MAC_onoff.csv', 'MAC', run) #MAC on off
-on_off_save(t_plot_t, Rem_t[1], threshold, save_interval_t, '{folder}CIA_onoff.csv', 'CIA', run) #CIA on off
-on_off_save(t_plot_t, Rem_c, threshold, save_interval_t, '{folder}comp_onoff.csv', 'comp', run) #comp on off
-on_off_save(t_plot_t, Fdrive, 0, save_interval_t, '{folder}coreconv_onoff.csv', 'core_conv', run) #core convection on off
+on_off_save(t_plot_t, Rem_t[0], threshold, save_interval_t, f'{folder}MAC_onoff.csv', 'MAC', run) #MAC on off
+on_off_save(t_plot_t, Rem_t[1], threshold, save_interval_t, f'{folder}CIA_onoff.csv', 'CIA', run) #CIA on off
+on_off_save(t_plot_t, Rem_c, threshold, save_interval_t, f'{folder}comp_onoff.csv', 'comp', run) #comp on off
+on_off_save(t_plot_t, Fdrive, 0, save_interval_t, f'{folder}coreconv_onoff.csv', 'core_conv', run) #core convection on off
 
 ############################ Save results #####################################
 # save variables to file
