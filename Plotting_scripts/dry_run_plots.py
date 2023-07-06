@@ -16,10 +16,11 @@ data = combine_info('../Results_combined/Xs_r_tests/','auto_params.csv','run_res
 data['r']=data['r']/1e3 #rescale to km
 data['cond_t'] = data['cond_t']/Myr #rescale by Myr
 
-save = False #do you want to save the figures
+save = True #do you want to save the figures
 ###################### Effect on dynamo timing ################################
 #r as x axis, sulfur as colour
 plt.figure(tight_layout=True,figsize=[15,15])
+plt.suptitle('Effect of radius on dynamo timing')
 #MAC dynamo
 name = 'MAC'
 make_sub_scatter(data['r'],data[f'start_{name}'],'radius/km',f'{name} dynamo start /Myr',3,3,1,colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=5)
@@ -40,6 +41,7 @@ if save == True:
 
 #sulfur as x axis, radius as size
 plt.figure(tight_layout=True,figsize=[15,15])
+plt.suptitle('Effect of initial sulfur content on dynamo timing')
 #MAC dynamo
 name = 'MAC'
 make_sub_scatter(data['Xs_0'],data[f'start_{name}'],'X$_{s,0}$/ wt%',f'{name} dynamo start /Myr',3,3,1,size=data['r'],sizelabel='radius /km',ss=1.5)
@@ -61,8 +63,120 @@ if save == True:
 ##################### Effect on dynamo strength ###############################
 #r as x axis, sulfur as colour
 plt.figure(tight_layout=True,figsize=[15,15])
+plt.suptitle('Maximum field strength')
 names = ['ml','mac','cia','comp']
-for i, name in enumerate(names):
-    make_sub_scatter(data['r'],data[f'maxB_{name}'],'radius/km',f'max B {name}/$\mu$T',4,1,i+1,colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=5)
+label = ['flux balance','MAC','CIA','compositional']
+for i, name,  in enumerate(names):
+    make_sub_scatter(data['r'],data[f'maxB_{name}']/1e-6,'radius/km',f'max B {label[i]} /$\mu$T',4,1,i+1,colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=5)
 if save == True:
-    plt.savefig('../Plots/Xs_r_tests/dynamo_strength.png')
+    plt.savefig('../Plots/Xs_r_tests/dynamo_strength.png',dpi=450)
+
+##################### Peak temperature ###############################
+#r as x axis, sulfur as colour
+make_scatter(data['r'], data['peakT'], 'radius /km', 'peak mantle temperature /K',colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=2.5)
+if save == True:
+   plt.savefig('../Plots/Xs_r_tests/peakT_axis.png',dpi=450) 
+   
+# r as xaxis, sulfur as y, peak T as colour
+make_scatter(data['r'],data['Xs_0'],'radius /km','X$_{S,0}$',colour=data['peakT'],colourlabel='peak mantle temperature /K',ss=2.5)
+if save == True:
+   plt.savefig('../Plots/Xs_r_tests/peakT_colour.png',dpi=450) 
+   
+#################### Thermal history timings ###############################
+#y axis is r, x axis is time
+plt.figure(figsize=[15,5])
+plt.title('Thermal history timing')
+plt.scatter(data['diff_time'],data['r'],label='differentiation',marker='x',c=data['Xs_0'])
+plt.scatter(data['tmax'],data['r'],label='peak mantle temp',marker='+',c=data['Xs_0'])
+plt.scatter(data['tstrat_remove'],data['r'],label='erosion of core stratification',marker='o',c=data['Xs_0'])
+plt.scatter(data['terode'],data['r'],label='core stratification removed',marker='v',c=data['Xs_0'])
+plt.scatter(data['cond_t'],data['r'],label='end of mantle convection',marker='*',c=data['Xs_0'])
+plt.scatter(data['tsolid'],data['r'],label='core solidified',marker='^',c=data['Xs_0'])
+plt.xlabel('Time/Myr')
+plt.xscale('log')
+plt.ylabel('radius/km')
+plt.colorbar(label='x$_{S,0}$')
+plt.legend()
+if save == True:
+   plt.savefig('../Plots/Xs_r_tests/thermal_timings.png',dpi=450)
+   
+#same as above but with dynamo timings too
+#y axis is r, x axis is time
+plt.figure(figsize=[15,5])
+plt.title('Thermal history and dynamo timings')
+plt.scatter(data['diff_time'],data['r'],label='differentiation',marker='x',c=data['Xs_0'])
+plt.scatter(data['tmax'],data['r'],label='peak mantle temp',marker='+',c=data['Xs_0'])
+plt.scatter(data['tstrat_remove'],data['r'],label='erosion of core stratification',marker='o',c=data['Xs_0'])
+plt.scatter(data['terode'],data['r'],label='core stratification removed',marker='p',c=data['Xs_0'])
+plt.scatter(data['start_MAC'],data['r'],label='MAC dynamo start',marker='<',c=data['Xs_0'])
+plt.scatter(data['end_MAC'],data['r'],label='MAC dynamo end',marker='>',c=data['Xs_0'])
+plt.scatter(data['start_CIA'],data['r'],label='CIA dynamo start',marker='3',c=data['Xs_0'])
+plt.scatter(data['end_CIA'],data['r'],label='CIA dynamo end',marker='4',c=data['Xs_0'])
+plt.scatter(data['cond_t'],data['r'],label='end of mantle convection',marker='*',c=data['Xs_0'])
+plt.scatter(data['start_comp'],data['r'],label='compositional dynamo start',marker='^',c=data['Xs_0'])
+plt.scatter(data['end_comp'],data['r'],label='compositional dynamo end',marker='v',c=data['Xs_0'])
+plt.scatter(data['tsolid'],data['r'],label='core solidified',marker='d',c=data['Xs_0'])
+plt.xlabel('Time/Myr')
+plt.xscale('log')
+plt.ylabel('radius/km')
+plt.colorbar(label='x$_{S,0}$')
+plt.legend(ncols=2,bbox_to_anchor=(0.3,0.5))
+ax = plt.gca()
+leg = ax.get_legend()
+for i, lab in enumerate(leg.legendHandles):
+    lab.set_edgecolor('black')
+    lab.set_facecolor([[0,0,0,1]])
+    #lab.set_facecolor('black')
+if save == True:
+   plt.savefig('../Plots/Xs_r_tests/all_timings.png',dpi=450) 
+   
+#early times
+plt.figure(figsize=[15,5])
+plt.scatter(data['diff_time'],data['r'],label='differentiation',marker='x',c=data['Xs_0'])
+plt.scatter(data['tmax'],data['r'],label='peak mantle temp',marker='+',c=data['Xs_0'])
+plt.scatter(data['tstrat_remove'],data['r'],label='erosion of core stratification',marker='o',c=data['Xs_0'])
+plt.scatter(data['terode'],data['r'],label='core stratification removed',marker='p',c=data['Xs_0'])
+plt.scatter(data['start_MAC'],data['r'],label='MAC dynamo start',marker='<',c=data['Xs_0'])
+plt.scatter(data['end_MAC'],data['r'],label='MAC dynamo end',marker='>',c=data['Xs_0'])
+plt.scatter(data['start_CIA'],data['r'],label='CIA dynamo start',marker='3',c=data['Xs_0'])
+plt.scatter(data['end_CIA'],data['r'],label='CIA dynamo end',marker='4',c=data['Xs_0'])
+plt.scatter(data['cond_t'],data['r'],label='end of mantle convection',marker='*',c=data['Xs_0'])
+plt.xlabel('Time/Myr')
+plt.xscale('log')
+plt.xlim(right=10)
+plt.ylabel('radius/km')
+plt.colorbar(label='x$_{S,0}$')
+plt.title('Thermal history and dynamo timings  \n 0.8-10Myr')
+plt.legend(ncols=2,bbox_to_anchor=(0.3,0.5))
+ax = plt.gca()
+leg = ax.get_legend()
+for i, lab in enumerate(leg.legendHandles):
+    lab.set_edgecolor('black')
+    lab.set_facecolor([[0,0,0,1]])
+    #lab.set_facecolor('black')
+if save == True:
+   plt.savefig('../Plots/Xs_r_tests/all_timings_early.png',dpi=450) 
+   
+#late times
+plt.figure(figsize=[15,3.5])
+plt.scatter(data['end_CIA'],data['r'],label='CIA dynamo end',marker='4',c=data['Xs_0'])
+plt.scatter(data['start_comp'],data['r'],label='compositional dynamo start',marker='^',c=data['Xs_0'])
+plt.scatter(data['end_comp'],data['r'],label='compositional dynamo end',marker='v',c=data['Xs_0'])
+plt.scatter(data['tsolid'],data['r'],label='core solidified',marker='d',c=data['Xs_0'])
+plt.xlabel('Time/Myr')
+plt.xscale('log')
+plt.xlim(left=10)
+plt.ylabel('radius/km')
+plt.colorbar(label='x$_{S,0}$')
+plt.title('Thermal history and dynamo timings  \n >10Myr')
+plt.legend(ncols=2)
+ax = plt.gca()
+leg = ax.get_legend()
+for i, lab in enumerate(leg.legendHandles):
+    lab.set_edgecolor('black')
+    lab.set_facecolor([[0,0,0,1]])
+    #lab.set_facecolor('black')
+if save == True:
+   plt.savefig('../Plots/Xs_r_tests/all_timings_late.png',dpi=450)
+   
+#early and late times as combined subplot
