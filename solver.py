@@ -94,11 +94,12 @@ toc = time.perf_counter()
 int_time2 = toc - tic    
 
 #update on progress
-plt.figure()
-plt.scatter(rplot,Tprofile[-1,:])
-plt.xlabel('r/km')
-plt.ylabel('Temperature/K')
-plt.title('Temperature profile post thermal evolution')
+if automated == False:
+    plt.figure()
+    plt.scatter(rplot,Tprofile[-1,:])
+    plt.xlabel('r/km')
+    plt.ylabel('Temperature/K')
+    plt.title('Temperature profile post thermal evolution')
 
 print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time2)))
 
