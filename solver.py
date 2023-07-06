@@ -60,13 +60,14 @@ toc = time.perf_counter()
 int_time1 = toc - tic  
 
 # update user on progress and plot differentiated temperature profile 
-rplot= np.arange(0,r,dr)/1e3
-
-plt.figure()
-plt.scatter(rplot,Tdiff[:,-1])
-plt.xlabel('r/km')
-plt.ylabel('Temperature/K')
-plt.title('Temperature profile post differentiation')
+if automated == False:
+    rplot= np.arange(0,r,dr)/1e3
+    
+    plt.figure()
+    plt.scatter(rplot,Tdiff[:,-1])
+    plt.xlabel('r/km')
+    plt.ylabel('Temperature/K')
+    plt.title('Temperature profile post differentiation')
 
 #rescale data and save here in case thermal evolution crashes
 Tdiff = Tdiff[:,0::n_save_d]

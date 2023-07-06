@@ -13,7 +13,7 @@ Flow:
 #import modules
 import numpy as np
 from parameters import Ts, Myr, dr, out_interval, save_interval_t, km, kc, alpha_c, r, rc, rhoc, gc, Vm, rhom, As
-from parameters import cpc, Xs_0, default, Xs_eutectic, Acmb, Lc, Pc
+from parameters import cpc, Xs_0, default, Xs_eutectic, Acmb, Lc, Pc, automated
 
 #import required functions
 from T_cond import Tm_cond_calc, Tc_cond_calc
@@ -553,9 +553,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             tsolve[save_ind] = tsolve_old
         
         if i%int((tstart-tend)/(dt*out_interval))==0: #every 1/out_interval fraction of the run print the time
-            print('t={:.2f}Myr'.format(tsolve_new/Myr)) #useful to track progress of simulation
-        else: 
-            pass
+            if automated == False: #don't print on automated runs
+                print('t={:.2f}Myr'.format(tsolve_new/Myr)) #useful to track progress of simulation
  
         if f_new<=0.001: #stop integration if core is solid i.e.inner liquid core radius < 0.1%, 
             #save values at this point
