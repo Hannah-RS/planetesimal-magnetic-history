@@ -25,17 +25,17 @@ plt.suptitle('Effect of radius on dynamo timing')
 name = 'MAC'
 make_sub_scatter(data['r'],data[f'start_{name}'],'radius/km',f'{name} dynamo start /Myr',3,3,1,colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=5)
 make_sub_scatter(data['r'],data[f'end_{name}'],'radius/km',f'{name} dynamo end /Myr',3,3,2,colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=5)
-make_sub_scatter(data['r'],data[f'duration_{name}'],'radius/km',f'{name}dynamo start /Myr',3,3,3,colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=5)
+make_sub_scatter(data['r'],data[f'duration_{name}'],'radius/km',f'{name}dynamo duration /Myr',3,3,3,colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=5)
 #CIA dynamo
 name = 'CIA'
 make_sub_scatter(data['r'],data[f'start_{name}'],'radius/km',f'{name} dynamo start /Myr',3,3,4,colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=5)
 make_sub_scatter(data['r'],data[f'end_{name}'],'radius/km',f'{name} dynamo end /Myr',3,3,5,colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=5)
-make_sub_scatter(data['r'],data[f'duration_{name}'],'radius/km',f'{name}dynamo start /Myr',3,3,6,colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=5)
+make_sub_scatter(data['r'],data[f'duration_{name}'],'radius/km',f'{name}dynamo duration /Myr',3,3,6,colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=5)
 #compositional dynamo
 name = 'comp'
 make_sub_scatter(data['r'],data[f'start_{name}'],'radius/km',f'{name} dynamo start /Myr',3,3,7,colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=5)
 make_sub_scatter(data['r'],data[f'end_{name}'],'radius/km',f'{name} dynamo end /Myr',3,3,8,colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=5)
-make_sub_scatter(data['r'],data[f'duration_{name}'],'radius/km',f'{name}dynamo start /Myr',3,3,9,colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=5)
+make_sub_scatter(data['r'],data[f'duration_{name}'],'radius/km',f'{name}dynamo duration /Myr',3,3,9,colour=data['Xs_0'],colourlabel='X$_{S,0}$',ss=5)
 if save == True:
     plt.savefig('../Plots/Xs_r_tests/dynamo_duration_r.png')
 
@@ -46,17 +46,17 @@ plt.suptitle('Effect of radius and sulfur content on dynamo timing')
 name = 'MAC'
 make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,1,colour=data[f'start_{name}'],colourlabel=f'{name} dynamo start /Myr',ss=5)
 make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,2,colour=data[f'end_{name}'],colourlabel=f'{name} dynamo end /Myr',ss=5)
-make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,3,colour=data[f'duration_{name}'],colourlabel=f'{name}dynamo start /Myr',ss=5)
+make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,3,colour=data[f'duration_{name}'],colourlabel=f'{name}dynamo duration /Myr',ss=5)
 #CIA dynamo
 name = 'CIA'
 make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,4,colour=data[f'start_{name}'],colourlabel=f'{name} dynamo start /Myr',ss=5)
 make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,5,colour=data[f'end_{name}'],colourlabel=f'{name} dynamo end /Myr',ss=5)
-make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,6,colour=data[f'duration_{name}'],colourlabel=f'{name}dynamo start /Myr',ss=5)
+make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,6,colour=data[f'duration_{name}'],colourlabel=f'{name}dynamo duration /Myr',ss=5)
 #compositional dynamo
 name = 'comp'
 make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,7,colour=data[f'start_{name}'],colourlabel=f'{name} dynamo start /Myr',ss=5)
 make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,8,colour=data[f'end_{name}'],colourlabel=f'{name} dynamo end /Myr',ss=5)
-make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,9,colour=data[f'duration_{name}'],colourlabel=f'{name}dynamo start /Myr',ss=5)
+make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,9,colour=data[f'duration_{name}'],colourlabel=f'{name}dynamo duration /Myr',ss=5)
 if save == True:
     plt.savefig('../Plots/Xs_r_tests/dynamo_duration_rxs.png')
     
@@ -103,6 +103,12 @@ make_scatter(data['r'],data['Xs_0'],'radius /km','X$_{S,0}$',colour=data['peakT'
 if save == True:
    plt.savefig('../Plots/Xs_r_tests/peakT_colour.png',dpi=450) 
    
+# peak core temperature
+# r as xaxis, sulfur as y, peak T as colour
+make_scatter(data['r'],data['Xs_0'],'radius /km','X$_{S,0}$',colour=data['peak_coreT'],colourlabel='peak core temperature /K',ss=2.5)
+if save == True:
+   plt.savefig('../Plots/Xs_r_tests/peakT_colour.png',dpi=450)
+   
 #################### Thermal history timings ###############################
 #y axis is r, x axis is time
 plt.figure(figsize=[15,5])
@@ -117,7 +123,7 @@ plt.xlabel('Time/Myr')
 plt.xscale('log')
 plt.ylabel('radius/km')
 plt.colorbar(label='x$_{S,0}$')
-plt.legend()
+plt.legend(ncols=1,bbox_to_anchor=(1.45,0.9))
 if save == True:
    plt.savefig('../Plots/Xs_r_tests/thermal_timings.png',dpi=450)
 
@@ -134,7 +140,7 @@ plt.xlabel('Time/Myr')
 plt.xscale('log')
 plt.ylabel('radius/km')
 plt.colorbar(label='x$_{S,0}$')
-plt.legend(ncols=2,bbox_to_anchor=(0.3,0.5))
+plt.legend(ncols=1,bbox_to_anchor=(1.45,0.9))
 ax = plt.gca()
 leg = ax.get_legend()
 for i, lab in enumerate(leg.legendHandles):
@@ -143,7 +149,8 @@ for i, lab in enumerate(leg.legendHandles):
     #lab.set_facecolor('black')
 if save == True:
    plt.savefig('../Plots/Xs_r_tests/dynamo_timings.png',dpi=450) 
-#same as above but with dynamo timings too
+
+#dynamo and thermal timings
 #y axis is r, x axis is time
 plt.figure(figsize=[15,5])
 plt.title('Thermal history and dynamo timings')
@@ -163,7 +170,7 @@ plt.xlabel('Time/Myr')
 plt.xscale('log')
 plt.ylabel('radius/km')
 plt.colorbar(label='x$_{S,0}$')
-plt.legend(ncols=2,bbox_to_anchor=(0.3,0.5))
+plt.legend(ncols=1,bbox_to_anchor=(1.45,0.9))
 ax = plt.gca()
 leg = ax.get_legend()
 for i, lab in enumerate(leg.legendHandles):
@@ -172,6 +179,32 @@ for i, lab in enumerate(leg.legendHandles):
     #lab.set_facecolor('black')
 if save == True:
    plt.savefig('../Plots/Xs_r_tests/all_timings.png',dpi=450) 
+
+#one sulfur content
+#choose fixed sulfur values and filter data
+Xs_val = 30 
+data_fil = data[data['Xs_0']==Xs_val]
+plt.figure(figsize=[15,5])
+plt.title(f'Thermal history and dynamo timings \n core sulfur content = {Xs_val} wt%')
+plt.scatter(data_fil['diff_time'],data_fil['r'],label='differentiation',marker='s',color='darkred')
+plt.scatter(data_fil['tmax'],data_fil['r'],label='peak mantle temp',marker='+',color='firebrick')
+plt.scatter(data_fil['tcoremax'],data_fil['r'],label='peak core temp',marker='x',color='rosybrown')
+plt.scatter(data_fil['tstrat_remove'],data_fil['r'],label='erosion of core stratification',marker='o',color='indianred')
+plt.scatter(data_fil['terode'],data_fil['r'],label='core stratification removed',marker='p',color='lightcoral')
+plt.scatter(data_fil['start_MAC'],data_fil['r'],label='MAC dynamo start',marker='<',color='darkblue')
+plt.scatter(data_fil['end_MAC'],data_fil['r'],label='MAC dynamo end',marker='>',color='darkblue')
+plt.scatter(data_fil['start_CIA'],data_fil['r'],label='CIA dynamo start',marker='3',color='royalblue')
+plt.scatter(data_fil['end_CIA'],data_fil['r'],label='CIA dynamo end',marker='4',color='royalblue')
+plt.scatter(data_fil['cond_t'],data_fil['r'],label='end of mantle convection',marker='*',color='palevioletred')
+plt.scatter(data_fil['start_comp'],data_fil['r'],label='compositional dynamo start',marker='^',color='skyblue')
+plt.scatter(data_fil['end_comp'],data_fil['r'],label='compositional dynamo end',marker='v',color='skyblue')
+plt.scatter(data_fil['tsolid'],data_fil['r'],label='core solidified',marker='d',color='pink')
+plt.xlabel('Time/Myr')
+plt.xscale('log')
+plt.ylabel('radius/km')
+plt.legend(ncols=1,bbox_to_anchor=(1,0.9))
+if save == True:
+   plt.savefig('../Plots/Xs_r_tests/all_timings_fixS.png',dpi=450) 
    
 #early times
 plt.figure(figsize=[15,5])
@@ -190,7 +223,7 @@ plt.xlim(right=10)
 plt.ylabel('radius/km')
 plt.colorbar(label='x$_{S,0}$')
 plt.title('Thermal history and dynamo timings  \n 0.8-10Myr')
-plt.legend(ncols=2,bbox_to_anchor=(0.3,0.5))
+plt.legend(ncols=1,bbox_to_anchor=(1.45,0.8))
 ax = plt.gca()
 leg = ax.get_legend()
 for i, lab in enumerate(leg.legendHandles):
@@ -212,7 +245,7 @@ plt.xlim(left=10)
 plt.ylabel('radius/km')
 plt.colorbar(label='x$_{S,0}$')
 plt.title('Thermal history and dynamo timings  \n >10Myr')
-plt.legend(ncols=2)
+plt.legend(ncols=1)
 ax = plt.gca()
 leg = ax.get_legend()
 for i, lab in enumerate(leg.legendHandles):
@@ -221,5 +254,3 @@ for i, lab in enumerate(leg.legendHandles):
     #lab.set_facecolor('black')
 if save == True:
    plt.savefig('../Plots/Xs_r_tests/all_timings_late.png',dpi=450)
-   
-#early and late times as combined subplot
