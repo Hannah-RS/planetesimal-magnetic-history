@@ -39,6 +39,27 @@ make_sub_scatter(data['r'],data[f'duration_{name}'],'radius/km',f'{name}dynamo s
 if save == True:
     plt.savefig('../Plots/Xs_r_tests/dynamo_duration_r.png')
 
+#r as x axis, y axis as sulfur, colour as dynamo value
+plt.figure(tight_layout=True,figsize=[15,15])
+plt.suptitle('Effect of radius and sulfur content on dynamo timing')
+#MAC dynamo
+name = 'MAC'
+make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,1,colour=data[f'start_{name}'],colourlabel=f'{name} dynamo start /Myr',ss=5)
+make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,2,colour=data[f'end_{name}'],colourlabel=f'{name} dynamo end /Myr',ss=5)
+make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,3,colour=data[f'duration_{name}'],colourlabel=f'{name}dynamo start /Myr',ss=5)
+#CIA dynamo
+name = 'CIA'
+make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,4,colour=data[f'start_{name}'],colourlabel=f'{name} dynamo start /Myr',ss=5)
+make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,5,colour=data[f'end_{name}'],colourlabel=f'{name} dynamo end /Myr',ss=5)
+make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,6,colour=data[f'duration_{name}'],colourlabel=f'{name}dynamo start /Myr',ss=5)
+#compositional dynamo
+name = 'comp'
+make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,7,colour=data[f'start_{name}'],colourlabel=f'{name} dynamo start /Myr',ss=5)
+make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,8,colour=data[f'end_{name}'],colourlabel=f'{name} dynamo end /Myr',ss=5)
+make_sub_scatter(data['r'],data['Xs_0'],'radius/km','X$_{S,0}$',3,3,9,colour=data[f'duration_{name}'],colourlabel=f'{name}dynamo start /Myr',ss=5)
+if save == True:
+    plt.savefig('../Plots/Xs_r_tests/dynamo_duration_rxs.png')
+    
 #sulfur as x axis, radius as size
 plt.figure(tight_layout=True,figsize=[15,15])
 plt.suptitle('Effect of initial sulfur content on dynamo timing')
