@@ -8,7 +8,7 @@ Dodds et. al. (2021) and references within or it is a fundamental constant
 
 import numpy as np
 import pandas as pd
-
+import sys
 #Constants
 G = 6.67e-11 # gravitational constant [N kg^-2 m^2]
 year = 60*60*24*365 #number of seconds in a year
@@ -25,7 +25,8 @@ save_interval_t = 0.1*Myr # how often do you want each variable to be saved duri
 
 # Parameters that will vary
 if automated == True:
-    auto = pd.read_csv('auto_params.csv',skiprows=[1])
+    folder = sys.argv[1]
+    auto = pd.read_csv(f'{folder}auto_params.csv',skiprows=[1])
     ind = np.where((auto['status']!=1)&(auto['status']!=0))[0][0] #find index of first uncalculated run
     r = auto.loc[ind,'r']
     default = auto.loc[ind,'default']
@@ -45,7 +46,7 @@ else: #set manually
     Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
     run = 1
     t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 10 # max end time [Myr]
+    t_end_m = 2 # max end time [Myr]
 
 # Size of body
 rc = r/2 #radius of core [m]
