@@ -125,7 +125,7 @@ plt.ylabel('radius/km')
 plt.colorbar(label='x$_{S,0}$')
 plt.legend(ncols=1,bbox_to_anchor=(1.45,0.9))
 if save == True:
-   plt.savefig('../Plots/Xs_r_tests/thermal_timings.png',dpi=450)
+    plt.savefig('../Plots/Xs_r_tests/thermal_timings.png',dpi=450,bbox_inches='tight')
 
 #dynamo timings only
 plt.figure(figsize=[15,5])
@@ -148,7 +148,7 @@ for i, lab in enumerate(leg.legendHandles):
     lab.set_facecolor([[0,0,0,1]])
     #lab.set_facecolor('black')
 if save == True:
-   plt.savefig('../Plots/Xs_r_tests/dynamo_timings.png',dpi=450) 
+   plt.savefig('../Plots/Xs_r_tests/dynamo_timings.png',dpi=450,bbox_inches='tight') 
 
 #dynamo and thermal timings
 #y axis is r, x axis is time
@@ -178,7 +178,7 @@ for i, lab in enumerate(leg.legendHandles):
     lab.set_facecolor([[0,0,0,1]])
     #lab.set_facecolor('black')
 if save == True:
-   plt.savefig('../Plots/Xs_r_tests/all_timings.png',dpi=450) 
+   plt.savefig('../Plots/Xs_r_tests/all_timings.png',dpi=450,bbox_inches='tight') 
 
 #one sulfur content
 #choose fixed sulfur values and filter data
@@ -204,7 +204,7 @@ plt.xscale('log')
 plt.ylabel('radius/km')
 plt.legend(ncols=1,bbox_to_anchor=(1,0.9))
 if save == True:
-   plt.savefig('../Plots/Xs_r_tests/all_timings_fixS.png',dpi=450) 
+   plt.savefig('../Plots/Xs_r_tests/all_timings_fixS.png',dpi=450,bbox_inches='tight') 
    
 #early times
 plt.figure(figsize=[15,5])
@@ -231,7 +231,7 @@ for i, lab in enumerate(leg.legendHandles):
     lab.set_facecolor([[0,0,0,1]])
     #lab.set_facecolor('black')
 if save == True:
-   plt.savefig('../Plots/Xs_r_tests/all_timings_early.png',dpi=450) 
+   plt.savefig('../Plots/Xs_r_tests/all_timings_early.png',dpi=450,bbox_inches='tight') 
    
 #late times
 plt.figure(figsize=[15,3.5])
@@ -253,4 +253,4 @@ for i, lab in enumerate(leg.legendHandles):
     lab.set_facecolor([[0,0,0,1]])
     #lab.set_facecolor('black')
 if save == True:
-   plt.savefig('../Plots/Xs_r_tests/all_timings_late.png',dpi=450)
+   plt.savefig('../Plots/Xs_r_tests/all_timings_late.png',dpi=450,bbox_inches='tight')
