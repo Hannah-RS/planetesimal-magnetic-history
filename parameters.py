@@ -150,7 +150,7 @@ t_cond_mantle = dr**2/kappa #conductive timestep for mantle
 if automated == True:
     step_m = auto.loc[ind,'dt']*t_cond_core
 else:
-    step_m = 0.1*t_cond_core
+    step_m = 0.075*t_cond_core
     
 #Modified specific heat capacities
 #before differentiation
