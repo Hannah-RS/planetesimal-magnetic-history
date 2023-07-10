@@ -26,12 +26,11 @@ def combine_info(folder,params,results,Bfile):
         run parameters and results
 
     """
-    indata = pd.read_csv(folder+params,delimiter=',',skiprows=[1]) #import run parameters
-    outdata = pd.read_csv(folder+results,delimiter=',',skiprows=[1]) #import run results
+    indata = pd.read_csv(folder+params,delimiter=',',skiprows=[1],header=0) #import run parameters
+    outdata = pd.read_csv(folder+results,delimiter=',',skiprows=[1],header=0) #import run results
     data = pd.merge(indata, outdata, on="run") #join together on matching runs
-    
     for file in Bfile:
-        magdata = pd.read_csv(folder+file,delimiter=',',skiprows=[1]) #import B field data
+        magdata = pd.read_csv(folder+file,delimiter=',',skiprows=[1],header=0) #import B field data
     #rename columns
         newname = magdata.columns[2:]+'_'+magdata.loc[0,'label']
         magdata.rename(columns={"start":newname[0],"end":newname[1],"duration":newname[2]},inplace=True)
@@ -40,3 +39,4 @@ def combine_info(folder,params,results,Bfile):
         data = pd.merge(data,magdata,on='run')
     return data
 
+data1 = pd.read_csv('../Results_combined/Xs_r_tests/run_results.csv',skiprows=[1])
