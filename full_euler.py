@@ -13,7 +13,7 @@ Flow:
 #import modules
 import numpy as np
 from parameters import Ts, Myr, dr, out_interval, save_interval_t, km, kc, alpha_c, r, rc, rhoc, gc, Vm, rhom, As
-from parameters import cpc, Xs_0, default, Xs_eutectic, Acmb, Lc, Pc, automated
+from parameters import cpc, Xs_0, default, Xs_eutectic, Acmb, Lc, Pc, automated, conv_tol
 
 #import required functions
 from T_cond import Tm_cond_calc, Tc_cond_calc
@@ -101,8 +101,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         compositional magnetic field strength [T]
     tsolve: array
         time points corresponding to each of the values above [s]
-    cond_t: float
-        time when the mantle switched from conduction to convection, nan if didn't switch [s]
          
     """
 
@@ -110,7 +108,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     m = round((tend-tstart)/save_interval_t)+1 #add one so always enough space
     n_cells = len(T0) #number of cells
     i_core = round(n_cells/2)-1 # index in array of last core cell (-1 as indexing starts at 0)
-    cond_t = 'nan' #set as string and then reset if switches to conduction
     mantle_conv = False #flag for mantle convection
     core_conv = False #flag for core convection
 
@@ -179,7 +176,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     T_new_mantle[0] = Tcmb_new
     Fcmb_new = -km*(T0_mantle[0]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020
     
-    if (Ra_new < Racrit_new) | (d0_new > (r-rc)):# not convecting
+    if (Ra_new/Racrit_new < conv_tol) | (d0_new > (r-rc)):# not convecting
         Tm_conv_new = 0 # convective mantle temperature is 0 if mantle not convecting
        
     else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile
@@ -317,7 +314,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             dTdt_mantle_conv = dTmdt_calc(tsolve_old,T_old_mantle[1],d0_old,Flid_old,Fcmb_old) #convective dTdt - use base mantle temp as convective temp
             
             if (dTdt_mantle_conv<0): #mantle is cooling
-                if (Ra_new <= Racrit_new) | (Tm_conv_old ==0): #check for Ra and switch to conduction
+                if Ra_new/Racrit_new < conv_tol: #check for Ra and switch to conduction
                     mantle_conv = False
                     Tm_conv_new = 0 # convective mantle temperature is 0 if mantle not convecting
                     
@@ -334,7 +331,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                         Flid_new = -km*(T_new_mantle[lid_start+1]-T_new_mantle[lid_start])/dr
                         
             else: #mantle still heating up
-                if Ra_new <= Racrit_new: #check Ra
+                if Ra_new/Racrit_new < conv_tol: #check Ra
                     mantle_conv = False
                     Tm_conv_new = 0 # convective mantle temperature is 0 if mantle not convecting
     
@@ -353,11 +350,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         else:
             mantle_conv = False
             Tm_conv_new = 0
-
-        if (Tm_conv_old !=0) & (Tm_conv_new ==0): #record time for switch to conduction
-            cond_t = tsolve_new
-            print(f"Mantle conducting, time is {tsolve_new/Myr}")
-            
             
         # Calculate Urey ratio with correct heat flux
         h = Al_heating(tsolve_new)
@@ -648,4 +640,4 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Bcomp = Bcomp[:save_ind+1]
     tsolve = tsolve[:save_ind+1]
             
-    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, RaRob, Racrit, Fs, Flid, Fad, Fcmb, Rem_c, Bcomp, tsolve, cond_t
+    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, RaRob, Racrit, Fs, Flid, Fad, Fcmb, Rem_c, Bcomp, tsolve

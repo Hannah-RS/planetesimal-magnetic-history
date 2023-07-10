@@ -17,7 +17,7 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-automated = True
+automated = False
 full_save = True #do you want to save temp profiles etc or just summary stats
 out_interval = 20 #how many times do you want t to be printed in the whole run
 save_interval_d = 0.01*Myr # how often do you want each variable to be saved during differentiation
@@ -44,9 +44,9 @@ else: #set manually
     rcmf = 0.2 #rheologically critical melt fraction - melting required for differentiation
     Xs_0 = 28 # initial wt % sulfur in core 
     Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 1
+    run = 3
     t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 2 # max end time [Myr]
+    t_end_m = 500 # max end time [Myr]
 
 # Size of body
 rc = r/2 #radius of core [m]
@@ -68,7 +68,7 @@ rhom = 3000 # density [kg m^-3] Bryson et. al. (2019)
 km = 2.16 # thermal conductivity of silicate [W /m /K] needs to be consistent with cp, kappa and rhom
 kappa = 9e-7 # thermal diffusivity of silicate [m^2 /s] - 4 options are given in Dodds (2021) have picked the middle one - needs to be consistent with other choices
 alpha_m = 4e-5 # thermal expansivity of mantle [/K]
-
+conv_tol = 0.9 #convective tolerance Ra/Ra_crit<conv_tol = no convection
 Rac = 1000  #critical Rayleigh number for isoviscous convection
 
 

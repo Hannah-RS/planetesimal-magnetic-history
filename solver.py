@@ -10,13 +10,14 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, kappa_c, save_interval_d, save_interval_t, km, Vm, As, rhom, step_m, Xs_0, default, rcmf, Fe0, full_save
+from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, kappa_c, save_interval_d, save_interval_t, km, Vm, As
+from parameters import rhom, step_m, Xs_0, default, rcmf, Fe0, full_save, conv_tol
 
 if automated == True: #should say true am just testing
     import sys
     folder = sys.argv[1]
 else:
-    folder = 'Results_combined/Xs_r_tests/' #folder where you want to save the results
+    folder = 'Results_combined/' #folder where you want to save the results
 
 #set flag for run started
 if automated == True:
@@ -93,7 +94,7 @@ print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtim
 
 #integrate
 tic = time.perf_counter()
-Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, RaRob, Racrit, Fs, Flid, Fad, Fcmb, Rem_c, Bcomp, t, cond_t = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, RaRob, Racrit, Fs, Flid, Fad, Fcmb, Rem_c, Bcomp, t = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time2 = toc - tic    
 
@@ -133,6 +134,11 @@ if np.any(min_unstable==0):
 else:
     strat_end = np.inf
 
+#switch to conduction
+if np.any(Ra<Racrit):
+    fcond_t = t[Ra/Racrit<0.5][0]/Myr #half the critical value (end of buffering)
+    lconv_t = t[Ra/Racrit>(2-conv_tol)][-1]/Myr #last supercritical time (start of buffering)
+    
 # Frad - radiogenic heat flux, normalised to surface of body
 from heating import Al_heating
 h = Al_heating(t) 
@@ -190,7 +196,7 @@ if full_save == True:
 from csv import writer
   
 var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_remove, 
-             strat_end, cond_t, max_Rem[0], max_Remt[0], max_Rem[1], max_Remt[1], max_Rem[2], 
+             strat_end, fcond_t, lconv_t, max_Rem[0], max_Remt[0], max_Rem[1], max_Remt[1], max_Rem[2], 
              max_Remt[2],max_B[0],max_Bt[0],max_B[1],max_Bt[1],max_B[2],max_Bt[2],max_B[3],max_Bt[3]]
 
 with open(f'{folder}run_results.csv','a') as f_object:

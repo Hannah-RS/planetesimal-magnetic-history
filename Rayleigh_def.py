@@ -9,7 +9,7 @@ Also script for Rayleigh number and critical Rayleigh number for differentiation
 from viscosity_def import viscosity #import viscosity model
 from heating import Al_heating, AlFe_heating
 
-from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, km, Rac, Ts, default, c1, G, convect_ratio, cpm_p
+from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, km, Rac, Ts, default, c1, G, convect_ratio, cpm_p, conv_tol
 
 def Rayleigh_crit(Tb):
     """
@@ -168,7 +168,7 @@ def Rayleigh_differentiate(t,Tb,dTmdt,Ur,model=default):
         d0H = 0.633*r*(gamma*abs(Tb-Ts)/c1)**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
     
     Ra_crit = Rayleigh_crit(Tb)
-    if (d0H/r < convect_ratio) & (RaH>Ra_crit): #still working on this criteria
+    if (d0H/r < convect_ratio) & (RaH/Ra_crit>conv_tol): #still working on this criteria
         convect = True
     else: 
         convect = False
