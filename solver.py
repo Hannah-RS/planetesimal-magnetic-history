@@ -137,8 +137,12 @@ else:
 #switch to conduction
 if np.any(Ra/Racrit<0.5):
     fcond_t = t[Ra/Racrit<0.5][0]/Myr #half the critical value (end of buffering)
+else:
+    fcond_t = np.nan
 if np.any(Ra/Racrit>(2-conv_tol)):
     lconv_t = t[Ra/Racrit>(2-conv_tol)][-1]/Myr #last supercritical time (start of buffering)
+else:
+    lconv_t = np.nan
     
 # Frad - radiogenic heat flux, normalised to surface of body
 from heating import Al_heating
