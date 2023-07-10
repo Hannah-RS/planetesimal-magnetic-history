@@ -11,7 +11,7 @@ import time #use this to time the integration
 
 #import time constants and initial conditions
 from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, kappa_c, save_interval_d, save_interval_t, km, Vm, As
-from parameters import rhom, step_m, Xs_0, default, rcmf, Fe0, full_save, conv_tol
+from parameters import rhom, step_m, Xs_0, default, rcmf, Fe0, full_save, B_save, conv_tol
 
 if automated == True: #should say true am just testing
     import sys
@@ -87,7 +87,7 @@ t_diff = t_diff[0::n_save_d]
 H = H[0::n_save_d]
 
 if full_save == True:
-    np.savez(f'{folder}run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, d0=d0, t_diff = t_diff, H=H)
+    np.savez_compressed(f'{folder}run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, d0=d0, t_diff = t_diff, H=H)
 
 print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time1)))
 ######################## Thermal evolution ####################################
@@ -188,10 +188,13 @@ on_off_save(t_plot_t, Fdrive, 0, save_interval_t, f'{folder}coreconv_onoff.csv',
 ############################ Save results #####################################
 # save variables to file
 if full_save == True:
-    np.savez(f'{folder}run_{run}', Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, 
+    np.savez_compressed(f'{folder}run_{run}', Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, 
              T_profile = Tprofile, Flid = Flid, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, Ur=Ur, 
              Ra = Ra, RaH= RaH, RanoH = RanoH, RaRob = RaRob, Racrit = Racrit, t=t, Rem_t = Rem_t, B = B, Rem_c = Rem_c, Flux = Flux) 
 
+if B_save == True:
+    np.savez_compressed(f'{folder}run_{run}_B', t=t, Rem_t = Rem_t, B = B, Rem_c = Rem_c)
+    
 #write parameters to the run file
 from csv import writer
   

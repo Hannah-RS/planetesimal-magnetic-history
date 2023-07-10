@@ -19,6 +19,7 @@ mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 #Run parameters
 automated = False
 full_save = True #do you want to save temp profiles etc or just summary stats
+B_save = False #do you want to save field strengths and Rem
 out_interval = 20 #how many times do you want t to be printed in the whole run
 save_interval_d = 0.01*Myr # how often do you want each variable to be saved during differentiation
 save_interval_t = 0.1*Myr # how often do you want each variable to be saved during thermal evolution
@@ -46,7 +47,7 @@ else: #set manually
     Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
     run = 3
     t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 500 # max end time [Myr]
+    t_end_m = 50 # max end time [Myr]
 
 # Size of body
 rc = r/2 #radius of core [m]
