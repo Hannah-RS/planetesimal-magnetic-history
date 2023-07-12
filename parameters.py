@@ -32,6 +32,8 @@ if automated == True:
     r = auto.loc[ind,'r']
     default = auto.loc[ind,'default']
     rcmf = auto.loc[ind,'rcmf']
+    eta0 = auto.loc[ind,'eta0']
+    frht = auto.loc[ind,'frht']
     Xs_0 = auto.loc[ind,'Xs_0']
     Fe0 = auto.loc[ind,'Fe0']
     run = int(auto.loc[ind,'run'])
@@ -41,13 +43,15 @@ if automated == True:
 else: #set manually
     r = 400e3 # radius of asteroid [m]
     dr = 500 # grid size [m]
-    default ='Dodds' #default viscosity model
-    rcmf = 0.2 #rheologically critical melt fraction - melting required for differentiation
+    default ='vary' #default viscosity model
+    rcmf = 0.5 #rheologically critical melt fraction - melting required for differentiation
+    eta0 = 1e21 #reference viscosity at Tms [Pas]
+    frht ='old' #frh*(DeltaT)
     Xs_0 = 28 # initial wt % sulfur in core 
     Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 3
+    run = 4
     t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 50 # max end time [Myr]
+    t_end_m = 800 # max end time [Myr]
 
 # Size of body
 rc = r/2 #radius of core [m]
@@ -74,11 +78,8 @@ Rac = 1000  #critical Rayleigh number for isoviscous convection
 
 
 # Viscosity parameters
-E = 300e3 # activation energy [J /mol]
-Tref = 1800 # viscosity reference temperature [K] 
-c1 = 8 # constant in boundary layer thickness (Sterenborg & Crowley, 2013)
 
-#viscosity models - some parameters here are needed for viscosity comparison code
+#old viscosity models - some parameters here are needed for viscosity comparison code
 # Bryson 2019 law (all values from Bryson 2019)
 eta0 = 1e21 # reference viscosity [Pa s] - assumed constant in this model
 eta0_50 = 1e14 #viscosity of material at 50% melting [Pas]
@@ -89,8 +90,18 @@ Tm50 = 1600 # 50% melting temperature [K]
 eta_r50 = 9.358045457250838e+16 #viscosity of material at 50% melting [Pas] for Arrhenius model
 #Sterenborg & Crowley (2013)
 Tcrit = Tms+(Tml-Tms)/2 #50% melting temperature (Sterenborg and Crowley 2013
+E = 300e3 # activation energy [J /mol]
+Tref = 1800 # viscosity reference temperature [K] 
+c1 = 8 # constant in boundary layer thickness (Sterenborg & Crowley, 2013)
 gamma = E/(R*T0eta**2)
 
+#my model - also uses alpha_n from above
+w = 50 #width of linear decrease region [K]
+etal = 100 # liquid viscosity [Pas]
+Trcmf = rcmf*(Tml-Tms)+Tms #temperature at critical melt fraction
+if frht == 'old':
+    frht = E/(R*Tref**2)
+    
 #Undifferentiated parameters
 #Authors tend to use same value as silicates
 ka = km # [W /m /K] same as mantle (correct for post sintering - Dodds 2021)

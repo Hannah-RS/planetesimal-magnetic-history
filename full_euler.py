@@ -17,6 +17,7 @@ from parameters import cpc, Xs_0, default, Xs_eutectic, Acmb, Lc, Pc, automated,
 
 #import required functions
 from T_cond import Tm_cond_calc, Tc_cond_calc
+from viscosity_def import viscosity
 from dTmdt_def import dTmdt_calc
 from dTcdt_def import dTcdt_calc, dTcdt_calc_solid 
 from Rayleigh_def import Rayleigh_calc, Rayleigh_crit
@@ -140,7 +141,16 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Bcomp = np.zeros([m])
     tsolve = np.zeros([m])
 
-    
+    #Check viscosity profile is monotonically decreasing before start
+    Ttest = np.linspace(1200,1900,200)
+    #calculate viscosity
+    eta_test = viscosity(Ttest)
+    eta_diff = np.diff(eta_test) #calculate differences with sucessive elements
+    if np.all(eta_diff<=0):
+        print('Viscosity profile is monotonically decreasing - proceeding')
+    else:
+        raise ValueError('Invalid viscosity model')
+        
     #Step 0. Calculate time, get two separate temperature arrays
     # the last cell of the core array is the same as the first cell of the mantle array
     tsolve_new = tstart + dt
@@ -415,7 +425,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 if np.all(T_old_core[:-1] < Tcmb_old):
                     min_unstable_new = min_unstable_old  #continuity of stratification
                         # scenario 1 - just conduction in the core
-                        # use already calculated condctive profile and keep core in current state
+                        # use already calculated conductive profile and keep core in current state
 
                 else: #scenario 2 - erosion of stratification, convective layer at top of core
                     core_conv = True
@@ -425,7 +435,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     dTcdt = dTcdt_calc(tsolve_new,Fcmb_old, T_old_core, f_old, stratification = [True, min_unstable_old])
                     Tc_conv_new = T_old_core[min_unstable_old]+dTcdt*dt #replace convecting layer from last timestep with new temp - in later steps use i-1 and i
                     T_new_core[min_unstable_old:-1] = Tc_conv_new
-                                             
+                    print(Tcmb_old)                       
                     #now perform volume average over unstable layer
                     Tlayer = volume_average(T_new_core, b_ind,dr)
                     T_new_core[min_unstable_new:-1] = Tlayer #replace unstable layer with average temp
