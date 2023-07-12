@@ -100,7 +100,7 @@ w = 50 #width of linear decrease region [K]
 etal = 100 # liquid viscosity [Pas]
 Trcmf = rcmf*(Tml-Tms)+Tms #temperature at critical melt fraction
 if frht == 'old':
-    frht = E/(R*Tref**2)
+    frht = (E/(R*Tref**2))
     
 #Undifferentiated parameters
 #Authors tend to use same value as silicates
