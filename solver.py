@@ -11,7 +11,7 @@ import time #use this to time the integration
 
 #import time constants and initial conditions
 from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, kappa_c, save_interval_d, save_interval_t, km, Vm, As
-from parameters import rhom, step_m, Xs_0, default, rcmf, Fe0, full_save, B_save, conv_tol
+from parameters import rhom, step_m, Xs_0, default, rcmf, Fe0, full_save, B_save, conv_tol, frht, eta0
 
 if automated == True: #should say true am just testing
     import sys
@@ -26,7 +26,7 @@ if automated == True:
     auto.loc[ind+1,'status']=0 #indicates started
     auto.to_csv(f'{folder}auto_params.csv',index=False)
 else: #save run parameters in run_info file
-    run_info = {"run":[run],"r":[r],"default":[default],"rcmf":[rcmf],"Xs_0":[Xs_0], "Fe0":[Fe0], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"step_m":[step_m]}
+    run_info = {"run":[run],"r":[r],"default":[default],"rcmf":[rcmf],"eta0":[eta0],"frht":[frht],"Xs_0":[Xs_0], "Fe0":[Fe0], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"step_m":[step_m]}
     run_info = pd.DataFrame(run_info)
     run_info.to_csv(f'{folder}run_info.csv',index=False,mode='a',header=False)
 
