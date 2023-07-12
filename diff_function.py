@@ -107,7 +107,6 @@ def differentiation(Tint,tacc,r,dr,dt):
         
         #now loop
         i = 1
-        cond_i = 0 #convective switch
         
         while Xsi[int(ncells/2),i-1]<rcmf: #assume differentiation occurs at rcmf
             
@@ -138,11 +137,7 @@ def differentiation(Tint,tacc,r,dr,dt):
             T[-1,i] = Ts
             Flid_new = -ka*(Ts-T[-2,i])/dr #default surface flux
             
-            if convect[i-1] == True or cond_i==1: #overwrite convecting portion
-                if cond_i == 0:
-                    cond_i =1 
-                    print('Onset of convection')
-                    
+            if convect[i-1] == True: #overwrite convecting portion                   
                 nlid_cells = round(d0[i]/dr)
                 if nlid_cells ==0:
                     lid_start = ncells -2
@@ -286,7 +281,6 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     
     #now loop
     i = 1
-    cond_i = 0 #convective switch
     
     while Xsi[int(ncells/2),i-1]<rcmf: #differentiation occurs at rcmf
         
@@ -324,18 +318,13 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
             dTdt_new = 0 #no temp change
             T[melt,i] = T[melt,i-1] #melting region has constant temperature
         
-        if convect[i-1] == True or cond_i==1: #overwrite convecting portion
+        if convect[i-1] == True: #overwrite convecting portion
             nlid_cells = round(d0[i]/dr)
             if nlid_cells ==0:
                 lid_start = ncells -2
             else:
                 lid_start = ncells - nlid_cells - 1 #index in temp array where lid starts
             cp[:lid_start,i] = cp_calc_eut_int(T[lid_start-1,i-1],True)
-                        
-            if cond_i == 0: #first time it starts convecting
-                print('Onset of convection')             
-                cond_i =1
-                
             
             if int(T[lid_start-1,i-1]) >= Ts_fe and (Xfe[lid_start-1,i-1]<1): #no temp change only melting
                 Xfe[:lid_start,i] = Xfe[:lid_start,i-1]+(rhoa*H-Fs)/(rhoa*XFe_a*Lc)*dt
