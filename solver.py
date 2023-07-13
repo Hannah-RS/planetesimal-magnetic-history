@@ -51,7 +51,7 @@ n_save_d = int(save_interval_d/step_m)
 n_save_t = int(save_interval_t/step_m)
 
 # set initial temperature profile
-n_cells = int(r/dr) #number of cells needed to span body
+n_cells = int(r/dr)+1 #number of cells needed to span body - add one to include the centre
 Tint = np.ones([n_cells])*Ts#first element in the array is at r=0, accrete cold at surface temp 
 Tint[-1]=Ts
 
@@ -66,7 +66,7 @@ int_time1 = toc - tic
 
 # update user on progress and plot differentiated temperature profile 
 if automated == False:
-    rplot= np.arange(0,r,dr)/1e3
+    rplot= np.arange(0,r+dr,dr)/1e3
     
     plt.figure()
     plt.scatter(rplot,Tdiff[:,-1])

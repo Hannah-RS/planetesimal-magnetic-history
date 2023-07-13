@@ -13,7 +13,7 @@ Flow:
 #import modules
 import numpy as np
 from parameters import Ts, Myr, dr, out_interval, save_interval_t, km, kc, alpha_c, r, rc, rhoc, gc, Vm, rhom, As
-from parameters import cpc, Xs_0, default, Xs_eutectic, Acmb, Lc, Pc, automated, conv_tol
+from parameters import cpc, Xs_0, default, Xs_eutectic, Acmb, Lc, Pc, automated, conv_tol, n_cells
 
 #import required functions
 from T_cond import Tm_cond_calc, Tc_cond_calc
@@ -107,8 +107,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
 
     #initialise arrays for output
     m = round((tend-tstart)/save_interval_t)+1 #add one so always enough space
-    n_cells = len(T0) #number of cells
-    i_core = round(n_cells/2)-1 # index in array of last core cell (-1 as indexing starts at 0)
+    i_core = round(n_cells/2) # index in array of last core cell 
+    print(i_core)
     mantle_conv = False #flag for mantle convection
     core_conv = False #flag for core convection
 
@@ -158,6 +158,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     T0_mantle = T0[i_core:]
     nmantle_cells = len(T0_mantle)
     ncore_cells = len(T0_core)
+    print(f'ncorecells {ncore_cells}, nmantle_cells {nmantle_cells}')
     i=0 #counter for saving and printing
     
     # Initialise values that might not get calculated
@@ -165,7 +166,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Xs_new = Xs_0
     dc_new = 0
     dl_new = 0
-    min_unstable_new = int((i_core-1))
+    min_unstable_new = i_core-1
 
     
     ##################    Initial step    #########################
@@ -423,7 +424,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             if min_unstable_old>0:  #there is thermal stratification 
                 
                 if np.all(T_old_core[:-1] < Tcmb_old):
-                    min_unstable_new = min_unstable_old  #continuity of stratification
+                    pass
                         # scenario 1 - just conduction in the core
                         # use already calculated conductive profile and keep core in current state
 
@@ -435,7 +436,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     dTcdt = dTcdt_calc(tsolve_new,Fcmb_old, T_old_core, f_old, stratification = [True, min_unstable_old])
                     Tc_conv_new = T_old_core[min_unstable_old]+dTcdt*dt #replace convecting layer from last timestep with new temp - in later steps use i-1 and i
                     T_new_core[min_unstable_old:-1] = Tc_conv_new
-                    print(Tcmb_old)                       
                     #now perform volume average over unstable layer
                     Tlayer = volume_average(T_new_core, b_ind,dr)
                     T_new_core[min_unstable_new:-1] = Tlayer #replace unstable layer with average temp

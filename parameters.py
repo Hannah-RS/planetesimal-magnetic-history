@@ -44,17 +44,18 @@ else: #set manually
     r = 400e3 # radius of asteroid [m]
     dr = 500 # grid size [m]
     default ='vary' #default viscosity model
-    rcmf = 0.5 #rheologically critical melt fraction - melting required for differentiation
+    rcmf = 0.4 #rheologically critical melt fraction - melting required for differentiation
     eta0 = 1e21 #reference viscosity at Tms [Pas]
     frht ='old' #frh*(DeltaT)
     Xs_0 = 28 # initial wt % sulfur in core 
     Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 4
+    run = 5
     t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 800 # max end time [Myr]
+    t_end_m = 50 # max end time [Myr]
 
 # Size of body
 rc = r/2 #radius of core [m]
+n_cells = int(r/dr) +1 #number of cells needed to span the body including one at the centre
 Acmb = 4*np.pi*rc**2 #CMB surface area [m^2]
 As = 4*np.pi*r**2 # surface area of asteroid [m^2]
 V = 4/3*np.pi*r**3 #volume of asteroid [m^3]

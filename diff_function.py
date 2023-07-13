@@ -10,7 +10,7 @@ from dTmdt_def import dTadt_calc
 from scipy import sparse as sp
 from cp_func import cp_calc_arr, cp_calc_int, cp_calc_eut_arr, cp_calc_eut_int
 import numpy as np
-from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V, Rac, rcmf
+from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V, Rac, rcmf, n_cells
 def differentiation(Tint,tacc,r,dr,dt):
     """
     
@@ -53,16 +53,15 @@ def differentiation(Tint,tacc,r,dr,dt):
 
     """
     sparse_mat = sp.dia_matrix(cond_stencil_general(r,dr))
-    ncells = int(r/dr)
     dTphase_fe = Tl_fe - Ts_fe
     dTphase_si = Tml - Tms
 
     #Initial step
     # Create arrays - column is one timestep
-    Xfe = np.zeros([ncells,1]) #fraction of iron melted
-    Xsi = np.zeros([ncells,1]) #fraction of silicate melted
-    cp = np.zeros([ncells,1]) #specific heat capacity of each cell
-    T = np.zeros([ncells,1]) #temperature
+    Xfe = np.zeros([n_cells,1]) #fraction of iron melted
+    Xsi = np.zeros([n_cells,1]) #fraction of silicate melted
+    cp = np.zeros([n_cells,1]) #specific heat capacity of each cell
+    T = np.zeros([n_cells,1]) #temperature
     Ra = np.ones([1]) #Rayleigh number
     d0 = np.ones([1]) #stagnant lid thickness
     Ra_crit = np.ones([1]) # critical Rayleigh number
@@ -108,9 +107,9 @@ def differentiation(Tint,tacc,r,dr,dt):
         #now loop
         i = 1
         
-        while Xsi[int(ncells/2),i-1]<rcmf: #assume differentiation occurs at rcmf
+        while Xsi[int(n_cells/2),i-1]<rcmf: #assume differentiation occurs at rcmf
             
-            app_array = np.zeros([ncells,1])
+            app_array = np.zeros([n_cells,1])
             T = np.append(T,app_array,1)
             Xfe = np.append(Xfe, app_array, 1)
             Xsi = np.append(Xsi, app_array, 1)
@@ -140,9 +139,9 @@ def differentiation(Tint,tacc,r,dr,dt):
             if convect[i-1] == True: #overwrite convecting portion                   
                 nlid_cells = round(d0[i]/dr)
                 if nlid_cells ==0:
-                    lid_start = ncells -2
+                    lid_start = n_cells -2
                 else:
-                    lid_start = ncells - nlid_cells - 1 #index in temp array where lid starts
+                    lid_start = n_cells - nlid_cells - 1 #index in temp array where lid starts
                 
                 cp[:lid_start,i] = cp_calc_int(T[0,i-1],True)
                 cp[-1,i] = cpa
@@ -229,15 +228,14 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
 
     """
     sparse_mat = sp.dia_matrix(cond_stencil_general(r,dr))
-    ncells = int(r/dr)
     dTphase_si = Tml - Tms
 
     #Initial step
     # Create arrays - column is one timestep
-    Xfe = np.zeros([ncells,1]) #fraction of iron melted
-    Xsi = np.zeros([ncells,1]) #fraction of silicate melted
-    cp = np.zeros([ncells,1]) #specific heat capacity of each cell
-    T = np.zeros([ncells,1]) #temperature
+    Xfe = np.zeros([n_cells,1]) #fraction of iron melted
+    Xsi = np.zeros([n_cells,1]) #fraction of silicate melted
+    cp = np.zeros([n_cells,1]) #specific heat capacity of each cell
+    T = np.zeros([n_cells,1]) #temperature
     Ra = np.ones([1]) #Rayleigh number
     d0 = np.ones([1]) #stagnant lid thickness
     Ra_crit = np.ones([1]) # critical Rayleigh number
@@ -282,9 +280,9 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     #now loop
     i = 1
     
-    while Xsi[int(ncells/2),i-1]<rcmf: #differentiation occurs at rcmf
+    while Xsi[int(n_cells/2),i-1]<rcmf: #differentiation occurs at rcmf
         
-        app_array = np.zeros([ncells,1])
+        app_array = np.zeros([n_cells,1])
         T = np.append(T,app_array,1)
         Xfe = np.append(Xfe, app_array, 1) #automatically append previous timestep
         Xsi = np.append(Xsi, app_array, 1)
@@ -321,9 +319,9 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         if convect[i-1] == True: #overwrite convecting portion
             nlid_cells = round(d0[i]/dr)
             if nlid_cells ==0:
-                lid_start = ncells -2
+                lid_start = n_cells -2
             else:
-                lid_start = ncells - nlid_cells - 1 #index in temp array where lid starts
+                lid_start = n_cells - nlid_cells - 1 #index in temp array where lid starts
             cp[:lid_start,i] = cp_calc_eut_int(T[lid_start-1,i-1],True)
             
             if int(T[lid_start-1,i-1]) >= Ts_fe and (Xfe[lid_start-1,i-1]<1): #no temp change only melting
