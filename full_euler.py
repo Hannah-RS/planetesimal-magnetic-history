@@ -223,6 +223,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Tliquidus = fe_fes_liquidus_bw(Xs_0,Pc)
     if T0_core[-2] < Tliquidus: #core solidifies outside in - convecting so isothermal beneath CMB
         core_conv = False
+        stratification_old = False #no stratification when solidifying
         if Xs_0>= Xs_eutectic:
             dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
             dfdt = -(Fcmb_new*Acmb-Qr(tsolve_new))/(4*np.pi*rc**3*f0**2*Lc*rhoc)                    
@@ -233,9 +234,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
             Rem_c_new = 0
             Bcomp_new = 0
-        else:
-
-            min_unstable_new = 0               
+        else:             
             dTcdt, f_new, Rem_c_new, Bcomp_new = dTcdt_calc_solid(tsolve_new,Fcmb_new, T0_core, f0, Xs_0, dt) 
             #find new convective temperature
             Tc_conv_new = T0_core[0] + dTcdt*dt 
@@ -243,18 +242,13 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Xs_new = Xs_0/(f_new**3) #update sulfur content
             
     # Is the core convecting  without solidification?
-    elif (Fcmb_new > Fad_new) and (min_unstable_new==0): #super adiabatic and no stratification, core convects
-        
+    elif Fcmb_new > Fad_new: #super adiabatic, core convects, don't check for stratification as haven't recalculated Tcmb yet
         core_conv = True
-        min_unstable_new = 0
         nbl_cells = round(dc_new/dr)
         bl_start = ncore_cells - nbl_cells - 1 #index in temp array where lid starts
-
         dTcdt = dTcdt_calc(tsolve_new,Fcmb_new, T0_core, f0)
-        
         #find new convective temperature
         Tc_conv_new = T0_core[bl_start-1] + dTcdt*dt 
-        
         T_new_core[:bl_start] = Tc_conv_new #replace everything with the convective temperature up to b.l
         
     else: # don't have whole core convection, for first step don't check for stratification as haven't recalculated Tcmb yet
@@ -269,6 +263,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Fcmb_new = -km*(T_new_mantle[0]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020
     Tc_new = T_new_core[0] #temperature of core is always taken at centre
     
+    #Check for initial stratification
+    if np.any(T_new_core[:-1]<Tcmb_new):
+        stratification_old = True
+    else:
+        stratifcation_old = False
+        
     # Step 6. Replace old array with new ready for next step
     T_old_core = T_new_core
     T_old_mantle = T_new_mantle
@@ -382,6 +382,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Tliquidus = round(fe_fes_liquidus_bw(Xs_old,Pc)) #round as Buono & Walker data to nearest integer
         if T_old_core[-2] < Tliquidus: #core solidifies from outside in- convecting so isothermal beneath CMB
             core_conv = False #core convects but b.l. thickness set by rho not T so use conductive Fcmb
+            stratification_new = False #thermal stratification is removed by solidification
             if Xs_old>= Xs_eutectic:
                 dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
                 dfdt = -(Fcmb_old*Acmb-Qr(tsolve_new))/(4*np.pi*rc**3*f_old**2*Lc*rhoc)                    
@@ -391,20 +392,17 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 Tc_conv_new = T_old_core[0] 
                 T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
                 
-            else:
-                min_unstable_new = 0               
+            else:              
                 dTcdt, f_new, Rem_c_new, Bcomp_new = dTcdt_calc_solid(tsolve_new,Fcmb_old, T_old_core, f_old, Xs_old, dt) 
                 #find new convective temperature
                 Tc_conv_new = T_old_core[0] + dTcdt*dt 
                 T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
                 Xs_new = Xs_0/(f_new**3) #update sulfur content
-                
-            
-        
+         
         # Is the core convecting  without solidification?
-        elif (Fcmb_old > Fad_old) and (min_unstable_old==0): #super adiabatic and no stratification, core convects
+        elif (Fcmb_old > Fad_old) and (stratification_old==False): #super adiabatic and no stratification, core convects
             core_conv = True
-            min_unstable_new = 0
+            stratification_new = False
             nbl_cells = round(dc_old/dr)
             bl_start = ncore_cells - nbl_cells - 1 #index in temp array where lid starts
 
@@ -419,10 +417,10 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             #check if there is thermal stratification
             core_conv = False 
             
-            if min_unstable_old>0:  #there is thermal stratification 
+            if stratification_old == True:  #there is thermal stratification 
                 
-                if np.all(T_old_core[:-1] < Tcmb_old):
-                    pass
+                if np.all(T_old_core[:-1] < Tcmb_old): #stratification stable
+                    stratification_new = True
                         # scenario 1 - just conduction in the core
                         # use already calculated conductive profile and keep core in current state
 
@@ -430,16 +428,21 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     core_conv = True
                     b_ind = np.where( T_old_core[:-1] >= Tcmb_old)[0] #indices of unstable layer as array
                     min_unstable_new = b_ind[0]
-                    
                     dTcdt = dTcdt_calc(tsolve_new,Fcmb_old, T_old_core, f_old, stratification = [True, min_unstable_old])
                     Tc_conv_new = T_old_core[min_unstable_old]+dTcdt*dt #replace convecting layer from last timestep with new temp - in later steps use i-1 and i
                     T_new_core[min_unstable_old:-1] = Tc_conv_new
                     #now perform volume average over unstable layer
                     Tlayer = volume_average(T_new_core, b_ind,dr)
                     T_new_core[min_unstable_new:-1] = Tlayer #replace unstable layer with average temp
-    
-            else: #there is no stratification (min_unstable ==0) and the core is not thermally convecting 
-                pass #keep conductive profile
+                    if min_unstable_new ==0:
+                        stratification_new = False #the whole core is now convecting in the next step
+                    else:
+                        stratification_new = True
+            else: #there was no stratification in previous step, the core is not convecting
+                if np.all(T_old_core[:-1] < Tcmb_old): #is there now stratification?
+                    stratification_new = True #add stratification for next step
+                else: #core is hotter than the mantle and the core is not thermally convecting 
+                    stratification_new = False #keep conductive profile
                  
         Tc_new = T_new_core[0] #temperature of core is always taken at centre
         Fad_new = kc*T_new_core[-2]*alpha_c*gc/cpc   
@@ -509,6 +512,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         dc_old = dc_new
         d0_old = d0_new
         min_unstable_old = min_unstable_new
+        stratification_old = stratification_new
         Ur_old = Ur_new
         Ra_old = Ra_new
         RaH_old = RaH_new
