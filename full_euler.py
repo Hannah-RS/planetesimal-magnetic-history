@@ -108,7 +108,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     #initialise arrays for output
     m = round((tend-tstart)/save_interval_t)+1 #add one so always enough space
     i_core = round(n_cells/2) # index in array of last core cell 
-    print(i_core)
     mantle_conv = False #flag for mantle convection
     core_conv = False #flag for core convection
 
@@ -158,7 +157,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     T0_mantle = T0[i_core:]
     nmantle_cells = len(T0_mantle)
     ncore_cells = len(T0_core)
-    print(f'ncorecells {ncore_cells}, nmantle_cells {nmantle_cells}')
     i=0 #counter for saving and printing
     
     # Initialise values that might not get calculated
