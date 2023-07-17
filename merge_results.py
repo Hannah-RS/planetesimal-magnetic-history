@@ -3,15 +3,13 @@
 """
 Stitch results of runs into one csv
 """
-import pandas as pd
+from load_info import combine_info
 
 folder = 'Results_combined/Test/' #folder
-files = 'params_' #subfolder
-num_runs = 4 #number of subruns
+subfolder = 'params_' #subfolder
+num_runs = 2 #number of subruns
 
 for i in range(num_runs):
-    #combine run info
-    params = pd.read_csv(folder+files+f'{(i+1)}'+'/auto_params.csv',skiprows=[1])
-    params.to_csv(f'{folder}auto_params.csv',index=False,mode='a',header=False)
-    results = pd.read_csv(folder+files+f'{(i+1)}'+'/run_results.csv',skiprows=[1])
-    results.to_csv(f'{folder}run_results.csv',index=False,mode='a',header=False)
+    #combine all run params and results
+    results = combine_info(folder+subfolder+f'{(i+1)}/','auto_params.csv','run_results.csv',['MAC_onoff.csv','CIA_onoff.csv','comp_onoff.csv','coreconv_onoff.csv'])
+    results.to_csv(f'{folder}all_info.csv',index=False,mode='a',header=False)
