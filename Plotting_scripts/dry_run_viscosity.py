@@ -3,14 +3,14 @@
 """
 Make scatter plots for viscosity test run
 """
-from analysis_functions import combine_info
 from scatter_function import make_scatter, make_sub_scatter
-
-import matplotlib.pyplot as plt
-import numpy as np
 import sys
 # setting path
 sys.path.append('../')
+from load_info import combine_info
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 folder = 'Viscosity_test/'
 data_in = combine_info(f'../Results_combined/{folder}','auto_params.csv','run_results.csv',['MAC_onoff.csv','CIA_onoff.csv','comp_onoff.csv','coreconv_onoff.csv'])

@@ -3,13 +3,13 @@
 """
 Make scatter plots for Xs-r test run
 """
-from analysis_functions import combine_info
 from scatter_function import make_scatter, make_sub_scatter
 
 import matplotlib.pyplot as plt
 import sys
 # setting path
 sys.path.append('../')
+from load_info import combine_info
 
 data = combine_info('../Results_combined/Xs_r_tests/','auto_params.csv','run_results.csv',['MAC_onoff.csv','CIA_onoff.csv','comp_onoff.csv','coreconv_onoff.csv'])
 data['r']=data['r']/1e3 #rescale to km
