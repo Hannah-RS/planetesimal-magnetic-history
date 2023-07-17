@@ -1,3 +1,2 @@
-run,r,default,rcmf,Xs_0,Fe0,t_acc_m,t_end_m,dr,dt,status
-,m,,,Wt %,,Myr,Myr,m,s,
-0,400000,Dodds,0.2,30,1E-07,0.8,1000,500,,
+run,r,default,rcmf,eta0,frht,Xs_0,Fe0,t_acc_m,t_end_m,dr,dt,status
+,m,,,Pas,K^-1,Wt %,,Myr,Myr,m,s,
