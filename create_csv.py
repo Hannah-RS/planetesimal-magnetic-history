@@ -34,7 +34,7 @@ maxfrht = 0.08
 frht = np.linspace(minfrht,maxfrht,nfrht)
 
 #sulfur content
-nxs = 5
+nxs = 3
 minxs = 28.5 #will vary by body size later
 maxxs = 32
 Xs_0 = np.linspace(minxs,maxxs,nxs)
@@ -56,20 +56,24 @@ dt = 0.075 #timestep [fraction of core conductive timestep]
 # create dictionaries and write to csv
 run = 1
 csv_num = 1
-run_info = pd.DataFrame()
+run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','frht','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
+unit_row = ['','m','','','Pas','K^-1','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core',''] #first row is units
+run_info.loc[len(run_info)] = unit_row
 for i, rval in enumerate(r):
     for j, rcmfval in enumerate(rcmf):
         for k, eta0val in enumerate(eta0):
             for l, frhtval in enumerate(frht):
                 if run > 1:
                     #skip this step on the first step down
-                    run_info.to_csv(f'Run_params/auto_params_{csv_num}.csv',index=False,mode='a',header=False)
+                    run_info.to_csv(f'Run_params/auto_params_{csv_num}.csv',index=False)
                     csv_num = csv_num + 1 #start making a new csv
-                    run_info = pd.DataFrame() #empty dataframe for new csv
+                    run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','frht','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
+                    unit_row = ['','m','','','Pas','K^-1','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core',''] #first row is units
+                    run_info.loc[len(run_info)] = unit_row
                 for m, xsval in enumerate(Xs_0):
                     for n, feval in enumerate(Fe0):
-#this is the line I need to sort out                       run_info = pd.append({"run":[run],"r":[rval],"default":[default],"rcmf":[rcmfval],"eta0":[eta0val],"frht":[frhtval],"Xs_0":[xsval], "Fe0":[feval], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"dt":[dt],"status":""})
+                        run_info = pd.concat([run_info, pd.DataFrame({"run":[run],"r":[rval],"default":[default],"rcmf":[rcmfval],"eta0":[eta0val],"frht":[frhtval],"Xs_0":[xsval], "Fe0":[feval], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"dt":[dt],"status":""})],ignore_index=True)
                         run = run+1
 
 #call once more at the end for the final csv                        
-run_info.to_csv(f'Run_params/auto_params_{csv_num}.csv',index=False,mode='a',header=False)                        
+run_info.to_csv(f'Run_params/auto_params_{csv_num}.csv',index=False)                        
