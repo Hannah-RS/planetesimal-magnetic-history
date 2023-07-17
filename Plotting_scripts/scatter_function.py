@@ -44,7 +44,7 @@ def make_scatter(x,y,xlabel,ylabel,colour='black',size=10,ss=10,log=[False, Fals
     
     plt.figure()
     if log[2] == True:
-        plt.scatter(x,y,s=ss*size,c=colour,norm=mcolors.LogNorm)
+        plt.scatter(x,y,s=ss*size,c=colour,norm=mcolors.LogNorm())
     else:
         plt.scatter(x,y,s=ss*size,c=colour)
     if log[0] == True:
@@ -54,7 +54,7 @@ def make_scatter(x,y,xlabel,ylabel,colour='black',size=10,ss=10,log=[False, Fals
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     if colourlabel != None:
-        plt.colorbar(label=colourlabel)
+        plt.colorbar(label=colourlabel) 
     if sizelabel != None:
         for val in [min(size), np.mean(size), max(size)]:
             plt.scatter([], [], c='k', alpha=0.3, s=ss*val,label=f'{val:.2f}')
@@ -104,7 +104,7 @@ def make_sub_scatter(x,y,xlabel,ylabel,row,column,n,colour='lightseagreen',size=
     
     plt.subplot(row,column,n)
     if log[2] == True:
-        plt.scatter(x,y,s=ss*size,c=colour,norm=mcolors.LogNorm)
+        plt.scatter(x,y,s=ss*size,c=colour,norm=mcolors.LogNorm())
     else:
         plt.scatter(x,y,s=ss*size,c=colour)
     if log[0] == True:
