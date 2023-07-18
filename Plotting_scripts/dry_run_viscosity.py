@@ -7,26 +7,31 @@ from scatter_function import make_scatter, make_sub_scatter
 import sys
 # setting path
 sys.path.append('../')
-from load_info import combine_info
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
-folder = 'Viscosity_test/'
-data_in = combine_info(f'../Results_combined/{folder}','auto_params.csv','run_results.csv',['MAC_onoff.csv','CIA_onoff.csv','comp_onoff.csv','coreconv_onoff.csv'])
+folder = 'Fullrun1/'
+data_in = pd.read_csv(f'../Results_combined/{folder}/all_sucess_info.csv',delimiter=',',skiprows=[1],header=0,index_col=False)
 data_in['r']=data_in['r']/1e3 #rescale to km
 
 #filter for the variable you are interested in
-var = 'frht' #variable of interest for these plots
-varlab = 'frht' 
+var = 'eta0' #variable of interest for these plots
+varlab = '$\\eta_0$' 
 logval = True #should the yaxis of this variable be scaled logarithmically
 #fixed values of other quantities
-eta0=1e21
+#eta0=1e21
 rcmf = 0.5
-#frht=0.011
-r=200
-Xs_0 = 30
-data = data_in[(data_in['eta0']==eta0)&(data_in['rcmf']==rcmf)]#runs where other two variables are reference values
+frht=0.02375
+Xs_0 = 30.25
+Fe0 = 1e-7
+if var =='frht':
+    data = data_in[(data_in['eta0']==eta0)&(data_in['rcmf']==rcmf)&(data_in['Xs_0']==Xs_0)&(data_in['Fe0']==Fe0)]#runs where other two variables are reference values
+elif var == 'rcmf':
+    data = data_in[(data_in['eta0']==eta0)&(data_in['frht']==frht)&(data_in['Xs_0']==Xs_0)&(data_in['Fe0']==Fe0)]#runs where other two variables are reference values
+elif var == 'eta0':
+    data = data_in[(data_in['rcmf']==rcmf)&(data_in['frht']==frht)&(data_in['Xs_0']==Xs_0)&(data_in['Fe0']==Fe0)]
 save = False #do you want to save the figures
 ###################### Effect on dynamo timing ################################
 #r as x axis, rcmf as colour
@@ -91,7 +96,7 @@ if save == True:
 x = var
 xlab = varlab
 plt.figure(tight_layout=True,figsize=[15,15])
-plt.suptitle('Effect of initial sulfur content on dynamo timing')
+plt.suptitle(f'Effect of {varlab} on dynamo timing')
 #MAC dynamo
 name = 'MAC'
 if np.all(np.isnan(data[f'start_{name}'])==True):
@@ -154,9 +159,15 @@ if save == True:
 #################### Thermal history timings ###############################
 #only one variable on y axis, keep all other variables fixed and filter data 
 #for final version could try James suggestion and only display a few y axis values in horizontal bars
+r=200
 data_fil = data[(data['Xs_0']==Xs_0)&(data['r']==r)]
 plt.figure(figsize=[15,5])
-plt.title(f'Thermal history and dynamo timings \n for r={r}, X$_{{s,0}}$={Xs_0}, rcmf={rcmf}, $\\eta_0$={eta0}')
+if var =='frht':
+    plt.title(f'Thermal history and dynamo timings \n for r={r}, X$_{{s,0}}$={Xs_0}, rcmf={rcmf}, $\\eta_0$={eta0}, $^{{60}}$Fe/$^{{56}}$Fe ={Fe0} ')
+elif var == 'rcmf':
+    plt.title(f'Thermal history and dynamo timings \n for r={r}, X$_{{s,0}}$={Xs_0}, frht={frht}, $\\eta_0$={eta0}, $^{{60}}$Fe/$^{{56}}$Fe ={Fe0}')
+elif var =='eta0':
+    plt.title(f'Thermal history and dynamo timings \n for r={r}, X$_{{s,0}}$={Xs_0}, frht{frht}, rcmf={rcmf}')
 plt.scatter(data_fil['diff_time'],data_fil[var],label='differentiation',marker='s',color='darkred')
 plt.scatter(data_fil['tmax'],data_fil[var],label='peak mantle temp',marker='+',color='firebrick')
 plt.scatter(data_fil['tcoremax'],data_fil[var],label='peak core temp',marker='x',color='rosybrown')
