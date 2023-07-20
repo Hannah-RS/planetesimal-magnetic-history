@@ -313,7 +313,7 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
             raise ValueError(f'{Xfe[:,i]}. Iron melt fraction cannot be less than zero')
         print('d')
         if np.any((T[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)): #see if there are any melting cells
-            melt = np.where((T[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)&(rhs>=0)) #only melting where heating up
+            melt = np.where((T[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)&(rhs>0)) #only melting where heating up
             print(melt)
             print(rhs[melt])
             Xfe[melt,i] = Xfe[melt,i-1]+rhs[melt]/(rhoa*XFe_a*Lc)*dt
@@ -328,10 +328,16 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
             else:
                 lid_start = n_cells - nlid_cells - 1 #index in temp array where lid starts
             cp[:lid_start,i] = cp_calc_eut_int(T[lid_start-1,i-1],True)
-            
+            print('Convect')
             if (int(T[lid_start-1,i-1]) >= Ts_fe) & (Xfe[lid_start-1,i-1]<1): #no temp change only melting
-                Xfe[:lid_start,i] = Xfe[:lid_start,i-1]+(rhoa*H[i]-Fs)/(rhoa*XFe_a*Lc)*dt
+                Vocean = 4/3*np.pi*(r-d0)**3
+                Alid = 4*np.pi*(r-d0)**2
+                Xfe[:lid_start,i] = Xfe[:lid_start,i-1]+(Vocean*rhoa*H[i]-Flid_old*Alid)/(rhoa*XFe_a*Lc*Vocean)*dt
                 Xfe[-1,i]=0 #surface node is unmelted by default
+                if d0[i] < dr:
+                    Flid_new = -ka*(Ts-T[lid_start,i])/d0[i] #if less than grid thickness choose d0 so don't overestimate thickness
+                else:
+                    Flid_new = -ka*(T[lid_start+1,i]-T[lid_start,i])/dr   
             else:
                 cp[:lid_start,i] = cp_calc_eut_int(T[0,i-1],True)
                 cp[-1,i] = cpa
