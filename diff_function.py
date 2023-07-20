@@ -308,14 +308,19 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         T[-1,i] = Ts
         Flid_new = -ka*(Ts-T[-2,i])/dr #default surface flux
         Fs = -ka*(Ts-T[-2,i])/dr #surface flux for Ur ratio
-        Xfe[:,i] = Xfe[:,i-1] #continuity of Xfe between timesteps  
-        
-        if np.any((np.int_(T)[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)): #see if there are any melting cells
-            melt = np.where((np.int_(T)[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1))
+        Xfe[:,i] = Xfe[:,i-1] #continuity of Xfe between timesteps
+        if np.any(Xfe[:,i-1]<0):
+            raise ValueError(f'{Xfe[:,i]}. Iron melt fraction cannot be less than zero')
+        print('d')
+        if np.any((T[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)): #see if there are any melting cells
+            melt = np.where((T[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)&(rhs>=0)) #only melting where heating up
+            print(melt)
+            print(rhs[melt])
             Xfe[melt,i] = Xfe[melt,i-1]+rhs[melt]/(rhoa*XFe_a*Lc)*dt
+            Xfe[-1,i]=0 #surface node is unmelted by default
             dTdt_new = 0 #no temp change
             T[melt,i] = T[melt,i-1] #melting region has constant temperature
-        
+            print('a',T[0,i],Xfe[0,i])
         if convect[i-1] == True: #overwrite convecting portion
             nlid_cells = round(d0[i]/dr)
             if nlid_cells ==0:
@@ -324,22 +329,22 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
                 lid_start = n_cells - nlid_cells - 1 #index in temp array where lid starts
             cp[:lid_start,i] = cp_calc_eut_int(T[lid_start-1,i-1],True)
             
-            if int(T[lid_start-1,i-1]) >= Ts_fe and (Xfe[lid_start-1,i-1]<1): #no temp change only melting
-                Xfe[:lid_start,i] = Xfe[:lid_start,i-1]+(rhoa*H-Fs)/(rhoa*XFe_a*Lc)*dt
+            if (int(T[lid_start-1,i-1]) >= Ts_fe) & (Xfe[lid_start-1,i-1]<1): #no temp change only melting
+                Xfe[:lid_start,i] = Xfe[:lid_start,i-1]+(rhoa*H[i]-Fs)/(rhoa*XFe_a*Lc)*dt
+                Xfe[-1,i]=0 #surface node is unmelted by default
             else:
                 cp[:lid_start,i] = cp_calc_eut_int(T[0,i-1],True)
                 cp[-1,i] = cpa
                 dTdt_new = dTadt_calc(t[i-1],T[lid_start-1,i-1],d0[i-1],Flid_old)
                 T[:lid_start,i] = T[:lid_start,i-1] + dTdt_new*dt 
                 T[-1,i] = Ts 
-                
                 if d0[i] < dr:
                     Flid_new = -ka*(Ts-T[lid_start,i])/d0[i] #if less than grid thickness choose d0 so don't overestimate thickness
                 else:
                     Flid_new = -ka*(T[lid_start+1,i]-T[lid_start,i])/dr      
         
         #calculate Urey ratio
-        
+        print(i)
         Ur = rhoa*V*H[i]/(abs(Fs*As))
         #relabel for next step
         Flid_old = Flid_new
