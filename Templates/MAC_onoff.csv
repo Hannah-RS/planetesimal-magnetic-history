@@ -1,2 +1,2 @@
-run,label,start,end,duration
-,,Myr,Myr,Myr
+run,label,start1,end1,duration1,start2,end2,duration2
+,,Myr,Myr,Myr,Myr,Myr,Myr

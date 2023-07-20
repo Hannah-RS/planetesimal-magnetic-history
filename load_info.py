@@ -92,7 +92,7 @@ def combine_info(folder,params,results,Bfile,save=False):
         magdata = pd.read_csv(folder+file,delimiter=',',skiprows=[1],header=0) #import B field data
     #rename columns
         newname = magdata.columns[2:]+'_'+magdata.loc[0,'label']
-        magdata.rename(columns={"start":newname[0],"end":newname[1],"duration":newname[2]},inplace=True)
+        magdata.rename(columns={"start1":newname[0],"end1":newname[1],"duration1":newname[2],"start2":newname[3],"end2":newname[4],"duration2":newname[5]},inplace=True)
         #print()
         magdata.drop('label',axis=1,inplace = True) #drop label column
         data = pd.merge(data,magdata,on='run')

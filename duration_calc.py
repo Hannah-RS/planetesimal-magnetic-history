@@ -76,7 +76,14 @@ def on_off_save(tarray,out_array,threshold,save_interval,file,label,run):
     None
     """
     start, end, duration = on_off_test(tarray,out_array,threshold,save_interval)
-    data = {"run":run,"label":label,"start":start, "end":end, "duration":duration}
+    if len(start)==2: #2 on-off periods
+        data = {"run":[run],"label":[label],"start1":[start[0]], "end1":[end[0]], "duration1":[duration[0]],"start2":[start[1]], "end2":[end[1]], "duration2":[duration[1]]}
+    elif len(start)==1: #1 on-off periods
+        data = {"run":[run],"label":[label],"start1":[start[0]], "end1":[end[0]], "duration1":[duration[0]],"start2":[""], "end2":[""], "duration2":[""]}
+    elif len(start)==0: #n on off periods
+        data = {"run":[run],"label":[label],"start1":[""], "end1":[""], "duration1":[""],"start2":[""], "end2":[""], "duration2":[""]}
+    else: #more on off periods than are saved
+        raise ValueError(f'More than 2 on periods for {label} dynamo')
     data = pd.DataFrame(data)
     data.to_csv(file,index=False,mode='a',header=False)
     return None
@@ -113,4 +120,11 @@ def on_off_load(file,run=0):
 # threshold =30
 # save_interval = 1
 # on_off_test(tarray,Rem,threshold,save_interval)#,'test_import.csv','MAC',1)
+# npzfile = np.load('Results_combined/run_7.npz')
+# t = npzfile['t'] #time in s
+# Rem_t = npzfile['Rem_t'] # magnetic Reynolds number from thermal convection 
+# Rem_mac = Rem_t[0,:] #Rem from MAC balance
+# Rem_cia = Rem_t[1,:] #Rem from CIA balance
 
+# print(np.array(on_off_test(t,Rem_cia,10,0.1*Myr))/Myr)
+# on_off_save(t/Myr,Rem_cia,10,0.1,'test_CIA.csv','CIA',7)
