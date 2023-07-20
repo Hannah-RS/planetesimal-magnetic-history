@@ -141,8 +141,10 @@ else:
     fcond_t = np.nan
 if np.any(Ra/Racrit>(2-conv_tol)):
     lconv_t = t[Ra/Racrit>(2-conv_tol)][-1]/Myr #last supercritical time (start of buffering)
+    lconv_T = Tprofile[Ra/Racrit>(2-conv_tol),nmantle+1][-1] #temperature when Ra first starts buffering
 else:
     lconv_t = np.nan
+    lconv_T = np.nan
     
 # Frad - radiogenic heat flux, normalised to surface of body
 from heating import Al_heating
@@ -204,7 +206,7 @@ if B_save == True:
 from csv import writer
   
 var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_remove, 
-             strat_end, fcond_t, lconv_t, max_Rem[0], max_Remt[0], max_Rem[1], max_Remt[1], max_Rem[2], 
+             strat_end, fcond_t, lconv_t,lconv_T, max_Rem[0], max_Remt[0], max_Rem[1], max_Remt[1], max_Rem[2], 
              max_Remt[2],max_B[0],max_Bt[0],max_B[1],max_Bt[1],max_B[2],max_Bt[2],max_B[3],max_Bt[3]]
 
 with open(f'{folder}run_results.csv','a') as f_object:
