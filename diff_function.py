@@ -303,24 +303,22 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         cp[:,i] = cp_calc_eut_arr(T[:,i-1],True) #calculate cp
                 
         #calculate temperature change
-        dTdt_new = rhs/(rhoa*cp[:,i])
+        dTdt = rhs/(rhoa*cp[:,i])
+        dTdt_new = dTdt[0]
         T[:-1,i] = T[:-1,i-1] + dt*dTdt[:-1]
         T[-1,i] = Ts
         Flid_new = -ka*(Ts-T[-2,i])/dr #default surface flux
         Fs = -ka*(Ts-T[-2,i])/dr #surface flux for Ur ratio
-        Xfe[:,i] = Xfe[:,i-1] #continuity of Xfe between timesteps
-        if np.any(Xfe[:,i-1]<0):
-            raise ValueError(f'{Xfe[:,i]}. Iron melt fraction cannot be less than zero')
-        print('d')
+        Xfe[:,i] = Xfe[:,i-1] #continuity of Xfe between timesteps       
         if np.any((T[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)): #see if there are any melting cells
-            melt = np.where((T[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)&(rhs>0)) #only melting where heating up
+            melt = np.where((T[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)&(dTdt>=0)) #only melting where heating up
             print(melt)
             print(rhs[melt])
             Xfe[melt,i] = Xfe[melt,i-1]+rhs[melt]/(rhoa*XFe_a*Lc)*dt
             Xfe[-1,i]=0 #surface node is unmelted by default
             dTdt_new = 0 #no temp change
             T[melt,i] = T[melt,i-1] #melting region has constant temperature
-            print('a',T[0,i],Xfe[0,i])
+            print('a',T[-2,i],Xfe[-2,i],rhs[-5:])
         if convect[i-1] == True: #overwrite convecting portion
             nlid_cells = round(d0[i]/dr)
             if nlid_cells ==0:
@@ -328,10 +326,9 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
             else:
                 lid_start = n_cells - nlid_cells - 1 #index in temp array where lid starts
             cp[:lid_start,i] = cp_calc_eut_int(T[lid_start-1,i-1],True)
-            print('Convect')
             if (int(T[lid_start-1,i-1]) >= Ts_fe) & (Xfe[lid_start-1,i-1]<1): #no temp change only melting
-                Vocean = 4/3*np.pi*(r-d0)**3
-                Alid = 4*np.pi*(r-d0)**2
+                Vocean = 4/3*np.pi*(r-d0[i])**3
+                Alid = 4*np.pi*(r-d0[i])**2
                 Xfe[:lid_start,i] = Xfe[:lid_start,i-1]+(Vocean*rhoa*H[i]-Flid_old*Alid)/(rhoa*XFe_a*Lc*Vocean)*dt
                 Xfe[-1,i]=0 #surface node is unmelted by default
                 if d0[i] < dr:
