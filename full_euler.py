@@ -385,6 +385,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         elif (Fcmb_old > Fad_old) and (stratification_old==False): #super adiabatic and no stratification, core convects
             core_conv = True
             stratification_new = False
+            min_unstable_new = 0
             nbl_cells = round(dc_old/dr)
             bl_start = ncore_cells - nbl_cells - 1 #index in temp array where lid starts
 
@@ -403,12 +404,13 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 
                 if np.all(T_old_core[:-1] < Tcmb_old): #stratification stable
                     stratification_new = True
+                    min_unstable_new = i_core - 1
                         # scenario 1 - just conduction in the core
                         # use already calculated conductive profile and keep core in current state
 
                 else: #scenario 2 - erosion of stratification, convective layer at top of core
                     core_conv = True
-                    b_ind = np.where( T_old_core[:-1] >= Tcmb_old)[0] #indices of unstable layer as array
+                    b_ind = np.where(T_old_core[:-1] >= Tcmb_old)[0] #indices of unstable layer as array
                     min_unstable_new = b_ind[0]
                     dTcdt = dTcdt_calc(tsolve_new,Fcmb_old, T_old_core, f_old, stratification = [True, min_unstable_old])
                     Tc_conv_new = T_old_core[min_unstable_old]+dTcdt*dt #replace convecting layer from last timestep with new temp - in later steps use i-1 and i
@@ -423,8 +425,10 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             else: #there was no stratification in previous step, the core is not convecting
                 if np.all(T_old_core[:-1] < Tcmb_old): #is there now stratification?
                     stratification_new = True #add stratification for next step
+                    min_unstable_new = i_core - 1
                 else: #core is hotter than the mantle and the core is not thermally convecting 
                     stratification_new = False #keep conductive profile
+                    min_unstable_new = 0
                  
         Tc_new = T_new_core[0] #temperature of core is always taken at centre
         Fad_new = kc*T_new_core[-2]*alpha_c*gc/cpc   
