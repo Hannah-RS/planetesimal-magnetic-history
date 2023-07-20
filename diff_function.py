@@ -312,13 +312,10 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         Xfe[:,i] = Xfe[:,i-1] #continuity of Xfe between timesteps       
         if np.any((T[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)): #see if there are any melting cells
             melt = np.where((T[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)&(dTdt>=0)) #only melting where heating up
-            print(melt)
-            print(rhs[melt])
             Xfe[melt,i] = Xfe[melt,i-1]+rhs[melt]/(rhoa*XFe_a*Lc)*dt
             Xfe[-1,i]=0 #surface node is unmelted by default
             dTdt_new = 0 #no temp change
             T[melt,i] = T[melt,i-1] #melting region has constant temperature
-            print('a',T[-2,i],Xfe[-2,i],rhs[-5:])
         if convect[i-1] == True: #overwrite convecting portion
             nlid_cells = round(d0[i]/dr)
             if nlid_cells ==0:
@@ -347,7 +344,6 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
                     Flid_new = -ka*(T[lid_start+1,i]-T[lid_start,i])/dr      
         
         #calculate Urey ratio
-        print(i)
         Ur = rhoa*V*H[i]/(abs(Fs*As))
         #relabel for next step
         Flid_old = Flid_new
