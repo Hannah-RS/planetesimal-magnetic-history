@@ -34,6 +34,8 @@ if automated == True:
     rcmf = auto.loc[ind,'rcmf']
     eta0 = auto.loc[ind,'eta0']
     frht = auto.loc[ind,'frht']
+    w = auto.loc[ind,'w']
+    etal = auto.loc[ind,'etal']
     Xs_0 = auto.loc[ind,'Xs_0']
     Fe0 = auto.loc[ind,'Fe0']
     run = int(auto.loc[ind,'run'])
@@ -41,17 +43,19 @@ if automated == True:
     t_end_m = auto.loc[ind,'t_end_m']
     dr = auto.loc[ind,'dr']
 else: #set manually
-    r = 400e3 # radius of asteroid [m]
+    r = 300e3 # radius of asteroid [m]
     dr = 500 # grid size [m]
     default ='vary' #default viscosity model
-    rcmf = 0.4 #rheologically critical melt fraction - melting required for differentiation
+    rcmf = 0.5 #rheologically critical melt fraction - melting required for differentiation
     eta0 = 1e21 #reference viscosity at Tms [Pas]
-    frht ='old' #frh*(DeltaT)
-    Xs_0 = 28 # initial wt % sulfur in core 
+    frht =0.005 #frh*(DeltaT)
+    w = 20 #width of log linear region [K]
+    etal = 10 #liquid viscsoity [Pas]
+    Xs_0 = 30# initial wt % sulfur in core 
     Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 5
+    run = 8
     t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 50 # max end time [Myr]
+    t_end_m = 10 # max end time [Myr]
 
 # Size of body
 rc = r/2 #radius of core [m]
