@@ -185,14 +185,13 @@ for i in range(m-1):
         max_Remt[i] = t[Rem[i+1,:]==max_Rem[i]][0]/Myr
         
 ########################## on and off times - calculate and save ####################
+#set 10*save_interval (1Myr) as on off tolerance to smooth on-off periods smaller than 1Myr
 t_plot_t = t/Myr
 
-on_off_save(t_plot_t, Rem_t[0], threshold, save_interval_t/Myr, f'{folder}MAC_onoff.csv', 'MAC', run) #MAC on off
-on_off_save(t_plot_t, Rem_t[1], threshold, save_interval_t/Myr, f'{folder}CIA_onoff.csv', 'CIA', run) #CIA on off
-#calculate Bcomp on times - set 10*save_interval (1Myr) as on off tolerance as numerically on for single times spaced by <1Myr
-on_off_save(t_plot_t, Rem_c, threshold, 10*save_interval_t/Myr, f'{folder}comp_onoff.csv', 'comp', run) #comp on off
-#use 0.2Myr save interval for core convection to remove isolated core_convection events
-on_off_save(t_plot_t, Fdrive, 0, 2*save_interval_t/Myr, f'{folder}coreconv_onoff.csv', 'core_conv', run) #core convection on off
+on_off_save(t_plot_t, Rem_t[0],threshold,save_interval_t/Myr, f'{folder}MAC_onoff.csv', 'MAC', run) #MAC on off
+on_off_save(t_plot_t, Rem_t[1],threshold,10*save_interval_t/Myr, f'{folder}CIA_onoff.csv', 'CIA', run) #CIA on off
+on_off_save(t_plot_t, Rem_c, threshold,10*save_interval_t/Myr, f'{folder}comp_onoff.csv', 'comp', run) #comp on off
+on_off_save(t_plot_t, Fdrive,0,10*save_interval_t/Myr, f'{folder}coreconv_onoff.csv', 'core_conv', run) #core convection on off
 
 ############################ Save results #####################################
 # save variables to file

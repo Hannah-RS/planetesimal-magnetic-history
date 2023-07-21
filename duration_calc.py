@@ -13,13 +13,13 @@ def on_off_test(tarray,out_array,threshold,save_interval):
     Parameters
     ----------
     tarray : float
-        time series
+        time series [Myr]
     out_array : float
         output to test condition on - must be same length as time series
     threshold : float
         threshold value to compare out_array
     save_interval : float
-        spacing between time saves
+        spacing between time saves [Myr]
 
     Returns
     -------
@@ -36,6 +36,7 @@ def on_off_test(tarray,out_array,threshold,save_interval):
         t = tarray[out_array>=threshold]
         #find difference between sucessive tvalues
         tdiff = np.ediff1d(t)
+        tdiff = tdiff.round(1) #round to same precision as save interval to avoid floating point errors
         tend_ind = np.where(tdiff>save_interval)[0]
         tend = t[tend_ind]
         tstart_ind = np.where(tdiff>save_interval)[0]+1
@@ -58,13 +59,13 @@ def on_off_save(tarray,out_array,threshold,save_interval,file,label,run):
     Parameters
     ----------
     tarray : float
-        time series
+        time series [Myr]
     out_array : float
         output to test condition on - must be same length as time series
     threshold : float
         threshold value to compare out_array
     save_interval : float
-        spacing between time saves
+        spacing between time saves [Myr]
     file : string
         file to save to
     label : string
