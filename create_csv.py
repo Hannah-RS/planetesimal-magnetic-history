@@ -6,7 +6,7 @@ Script to create auto_params.csv for chosen parameters ranges
 import pandas as pd
 import numpy as np
  
-    
+folder = 'Run_params/Fullrun2/' #folder to save parameters in   
 #for parameter list
 #each variable
 #radius [m]
@@ -52,7 +52,7 @@ maxetal = 3 #log10(etal)
 etal = np.logspace(minetal,maxetal,3)
 
 #diffusion vs dislocation creep
-alpha_n = np.array([25,30]) #diffusion vs (diffusion+dislocation) creep (S&C)
+#alpha_n = np.array([25,30]) #diffusion vs (diffusion+dislocation) creep (S&C)
 
 
 #parameters fixed in this combination
@@ -63,7 +63,7 @@ w = 10 #width of linear region [K]
 #etal = 100 #liquid viscosity [Pas]
 dr = 500 # grid space [m]
 dt = 0.075 #timestep [fraction of core conductive timestep]
-
+alpha_n = 25 #melt weakening, diffusion creep
 
 # create dictionaries and write to csv
 run = 1
@@ -71,21 +71,22 @@ csv_num = 1
 run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','frht','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
 unit_row = ['','m','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core',''] #first row is units
 run_info.loc[len(run_info)] = unit_row
-for i, rval in enumerate(r):
+for n, feval in enumerate(Fe0):
     for j, rcmfval in enumerate(rcmf):
         for k, eta0val in enumerate(eta0):
             for l, frhtval in enumerate(frht):
-                if run > 1:
-                    #skip this step on the first step down
-                    run_info.to_csv(f'Run_params/auto_params_{csv_num}.csv',index=False)
-                    csv_num = csv_num + 1 #start making a new csv
-                    run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','frht','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
-                    unit_row = ['','m','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core',''] #first row is units
-                    run_info.loc[len(run_info)] = unit_row
-                for m, xsval in enumerate(Xs_0):
-                    for n, feval in enumerate(Fe0):
-                        run_info = pd.concat([run_info, pd.DataFrame({"run":[run],"r":[rval],"default":[default],"rcmf":[rcmfval],"eta0":[eta0val],"frht":[frhtval],"w":[w],"etal":[etal],"alpha_n":[alpha_n],"Xs_0":[xsval], "Fe0":[feval], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"dt":[dt],"status":""})],ignore_index=True)
-                        run = run+1
+                for p, etalval in enumerate(etal):
+                    if run > 1:
+                        #skip this step on the first step down
+                        run_info.to_csv(f'{folder}auto_params_{csv_num}.csv',index=False)
+                        csv_num = csv_num + 1 #start making a new csv
+                        run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','frht','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
+                        unit_row = ['','m','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core',''] #first row is units
+                        run_info.loc[len(run_info)] = unit_row
+                    for m, xsval in enumerate(Xs_0):
+                        for i, rval in enumerate(r): #run r as last so all sets of files take similar time
+                            run_info = pd.concat([run_info, pd.DataFrame({"run":[run],"r":[rval],"default":[default],"rcmf":[rcmfval],"eta0":[eta0val],"frht":[frhtval],"w":[w],"etal":[etalval],"alpha_n":[alpha_n],"Xs_0":[xsval], "Fe0":[feval], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"dt":[dt],"status":""})],ignore_index=True)
+                            run = run+1
 
 #call once more at the end for the final csv                        
-run_info.to_csv(f'Run_params/auto_params_{csv_num}.csv',index=False)                        
+run_info.to_csv(f'{folder}auto_params_{csv_num}.csv',index=False)                        
