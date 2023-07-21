@@ -12,5 +12,11 @@ Thermal evolution model of an asteroid improving on Dodds et. al. (2021), Bryson
 8. Run `extract.sh dir_name` where `dir_name` is your new directory to copy all results off the hpc and merge locally
 8. Now enjoy analysing your data!
 
+## Multiple runs on local machine
+1. Create the directory where you wish to have the results.
+2. Create auto_params.csv with run parameters in the desired folder.
+3. Run "bash multi_run.sh filepath" in the main directory where filepath is the path from the model directory to where you want to save results
+
 ## Single run
-To perform a single model run, set `automated=False` in `parameters.py` and then change your desired parameters below. Then run `solver.py`
+1. Set `automated=False` in `parameters.py` and then change your desired parameters below. 
+2. Run `solver.py`. Results will appear in Results_combined
