@@ -17,8 +17,8 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-automated = False
-full_save = True #do you want to save temp profiles etc or just summary stats
+automated = True
+full_save = False #do you want to save temp profiles etc or just summary stats
 B_save = False #do you want to save field strengths and Rem
 out_interval = 20 #how many times do you want t to be printed in the whole run
 save_interval_d = 0.01*Myr # how often do you want each variable to be saved during differentiation
@@ -50,7 +50,7 @@ else: #set manually
     rcmf = 0.5 #rheologically critical melt fraction - melting required for differentiation
     eta0 = 1e21 #reference viscosity at Tms [Pas]
     frht =0.005 #frh*(DeltaT)
-    w = 20 #width of log linear region [K]
+    w = 1 #width of log linear region [K]
     etal = 10 #liquid viscsoity [Pas]
     alpha_n = 25 #melt weakening (diffusion creep)
     Xs_0 = 30# initial wt % sulfur in core 
@@ -102,8 +102,6 @@ c1 = 8 # constant in boundary layer thickness (Sterenborg & Crowley, 2013)
 gamma = E/(R*T0eta**2)
 
 #my model - also uses alpha_n from above
-w = 50 #width of linear decrease region [K]
-etal = 100 # liquid viscosity [Pas]
 Trcmf = rcmf*(Tml-Tms)+Tms #temperature at critical melt fraction
 if frht == 'old':
     frht = (E/(R*Tref**2))
