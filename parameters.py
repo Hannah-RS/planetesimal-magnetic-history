@@ -36,6 +36,7 @@ if automated == True:
     frht = auto.loc[ind,'frht']
     w = auto.loc[ind,'w']
     etal = auto.loc[ind,'etal']
+    alpha_n = auto.loc[ind,'alpha_n']
     Xs_0 = auto.loc[ind,'Xs_0']
     Fe0 = auto.loc[ind,'Fe0']
     run = int(auto.loc[ind,'run'])
@@ -51,11 +52,12 @@ else: #set manually
     frht =0.005 #frh*(DeltaT)
     w = 20 #width of log linear region [K]
     etal = 10 #liquid viscsoity [Pas]
+    alpha_n = 25 #melt weakening (diffusion creep)
     Xs_0 = 30# initial wt % sulfur in core 
     Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 8
+    run = 9
     t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 10 # max end time [Myr]
+    t_end_m = 500 # max end time [Myr]
 
 # Size of body
 rc = r/2 #radius of core [m]
@@ -88,7 +90,6 @@ Rac = 1000  #critical Rayleigh number for isoviscous convection
 # Bryson 2019 law (all values from Bryson 2019)
 eta0 = 1e21 # reference viscosity [Pa s] - assumed constant in this model
 eta0_50 = 1e14 #viscosity of material at 50% melting [Pas]
-alpha_n = 25 # constant in viscosity model
 T0eta = 1400 # reference temperature [K]
 Tm50 = 1600 # 50% melting temperature [K]
 #Arrhenius model

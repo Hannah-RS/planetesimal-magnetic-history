@@ -45,12 +45,22 @@ minfe = 0
 maxfe = 1e-7
 Fe0 = np.array([0,1e-8,1e-7])
 
+#liquid viscosity
+netal = 3
+minetal = 1 #log10(etal)
+maxetal = 3 #log10(etal)
+etal = np.logspace(minetal,maxetal,3)
+
+#diffusion vs dislocation creep
+alpha_n = np.array([25,30]) #diffusion vs (diffusion+dislocation) creep (S&C)
+
+
 #parameters fixed in this combination
 default = 'vary' #viscosity profile will change
 t_acc_m = 0.8 #accretion time [Myr]
 t_end_m = 1000 #maximum end time of simulation [Myr]
 w = 10 #width of linear region [K]
-etal = 100 #liquid viscosity [Pas]
+#etal = 100 #liquid viscosity [Pas]
 dr = 500 # grid space [m]
 dt = 0.075 #timestep [fraction of core conductive timestep]
 
@@ -58,8 +68,8 @@ dt = 0.075 #timestep [fraction of core conductive timestep]
 # create dictionaries and write to csv
 run = 1
 csv_num = 1
-run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','frht','w','etal','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
-unit_row = ['','m','','','Pas','K^-1','K','Pas','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core',''] #first row is units
+run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','frht','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
+unit_row = ['','m','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core',''] #first row is units
 run_info.loc[len(run_info)] = unit_row
 for i, rval in enumerate(r):
     for j, rcmfval in enumerate(rcmf):
@@ -69,12 +79,12 @@ for i, rval in enumerate(r):
                     #skip this step on the first step down
                     run_info.to_csv(f'Run_params/auto_params_{csv_num}.csv',index=False)
                     csv_num = csv_num + 1 #start making a new csv
-                    run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','frht','w','etal','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
-                    unit_row = ['','m','','','Pas','K^-1','K','Pas','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core',''] #first row is units
+                    run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','frht','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
+                    unit_row = ['','m','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core',''] #first row is units
                     run_info.loc[len(run_info)] = unit_row
                 for m, xsval in enumerate(Xs_0):
                     for n, feval in enumerate(Fe0):
-                        run_info = pd.concat([run_info, pd.DataFrame({"run":[run],"r":[rval],"default":[default],"rcmf":[rcmfval],"eta0":[eta0val],"frht":[frhtval],"w":[w],"etal":[etal],"Xs_0":[xsval], "Fe0":[feval], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"dt":[dt],"status":""})],ignore_index=True)
+                        run_info = pd.concat([run_info, pd.DataFrame({"run":[run],"r":[rval],"default":[default],"rcmf":[rcmfval],"eta0":[eta0val],"frht":[frhtval],"w":[w],"etal":[etal],"alpha_n":[alpha_n],"Xs_0":[xsval], "Fe0":[feval], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"dt":[dt],"status":""})],ignore_index=True)
                         run = run+1
 
 #call once more at the end for the final csv                        
