@@ -97,5 +97,5 @@ def combine_info(folder,params,results,Bfile,save=False):
         magdata.drop('label',axis=1,inplace = True) #drop label column
         data = pd.merge(data,magdata,on='run')
     if save == True:
-        data.to_csv(folder+'all_results.csv',index=False,headers=True)
+        data.to_csv(folder+'all_results.csv',index=False)
     return data
