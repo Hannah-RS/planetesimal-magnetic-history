@@ -83,7 +83,8 @@ def on_off_save(tarray,out_array,threshold,save_interval,file,label,run):
     elif len(start)==0: #n on off periods
         data = {"run":[run],"label":[label],"start1":[""], "end1":[""], "duration1":[""],"start2":[""], "end2":[""], "duration2":[""]}
     else: #more on off periods than are saved
-        raise ValueError(f'More than 2 on periods for {label} dynamo')
+        print(start,end,duration)
+        raise ValueError(f'There are {len(start)} on periods for {label} dynamo with an average duration of {np.average(duration):.2e}Myr')
     data = pd.DataFrame(data)
     data.to_csv(file,index=False,mode='a',header=False)
     return None
