@@ -63,7 +63,7 @@ def make_scatter(x,y,xlabel,ylabel,colour='black',size=10,ss=10,log=[False, Fals
         plt.savefig(save[1],dpi=450)
     return None
 
-def make_sub_scatter(x,y,xlabel,ylabel,row,column,n,colour='lightseagreen',size=10,ss=10,log=[False, False, False], colourlabel=None,sizelabel=None):
+def make_sub_scatter(x,y,xlabel,ylabel,row,column,n,colour='lightseagreen',size=10,ss=10,log=[False, False, False], colourlabel=None,sizelabel=None,mstyle='.'):
     """
     Draw a scatter plot as a subplot
 
@@ -95,6 +95,8 @@ def make_sub_scatter(x,y,xlabel,ylabel,row,column,n,colour='lightseagreen',size=
         label for colorbar The default is None.
     sizelabel : string, optional
         label for point size scale. The default is None.
+    mstyle : str
+        marker style for scatter points, default is point
 
     Returns
     -------
@@ -104,9 +106,9 @@ def make_sub_scatter(x,y,xlabel,ylabel,row,column,n,colour='lightseagreen',size=
     
     plt.subplot(row,column,n)
     if log[2] == True:
-        plt.scatter(x,y,s=ss*size,c=colour,norm=mcolors.LogNorm())
+        plt.scatter(x,y,s=ss*size,c=colour,norm=mcolors.LogNorm(),marker=mstyle)
     else:
-        plt.scatter(x,y,s=ss*size,c=colour)
+        plt.scatter(x,y,s=ss*size,c=colour,marker=mstyle)
     if log[0] == True:
         plt.xscale('log')
     if log[1] == True:
