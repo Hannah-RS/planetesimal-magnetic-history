@@ -74,21 +74,35 @@ def on_off_save(tarray,out_array,threshold,save_interval,file,label,run):
         run number
     Returns
     -------
-    None
+    first_on : float
+        first time of switch on [Myr]
+    last_off : float
+        last time of switch off [Myr]
+    tot_dur : float
+        total on duration, different to last_off - first_on as there may be gaps [Myr]
+    n_on : float
+        number of on periods
+    ng_l10 : float
+        number of gaps in generation < 10 Myr
+    ngl100 : float 
+        number of gaps in generation < 100 Myr, >10 Myr
+        
     """
     start, end, duration = on_off_test(tarray,out_array,threshold,save_interval)
-    if len(start)==2: #2 on-off periods
-        data = {"run":[run],"label":[label],"start1":[start[0]], "end1":[end[0]], "duration1":[duration[0]],"start2":[start[1]], "end2":[end[1]], "duration2":[duration[1]]}
-    elif len(start)==1: #1 on-off periods
-        data = {"run":[run],"label":[label],"start1":[start[0]], "end1":[end[0]], "duration1":[duration[0]],"start2":[""], "end2":[""], "duration2":[""]}
-    elif len(start)==0: #n on off periods
-        data = {"run":[run],"label":[label],"start1":[""], "end1":[""], "duration1":[""],"start2":[""], "end2":[""], "duration2":[""]}
-    else: #more on off periods than are saved
-        print(start,end,duration)
-        raise ValueError(f'There are {len(start)} on periods for {label} dynamo with an average duration of {np.average(duration):.2e}Myr')
+    data = {"run":run,"label":label,"start":start, "end":end, "duration":duration}
     data = pd.DataFrame(data)
     data.to_csv(file,index=False,mode='a',header=False)
-    return None
+    first_on = start[0]
+    last_off = end[-1]
+    tot_dur = np.sum(duration)
+    n_on = len(duration)
+    if n_on > 1: #intermittent dynamo
+        ng_l10 = len((np.diff(start)<10)==True)
+        ng_l100 = len((np.diff(start)<100)==True) - ng_l10
+    else:
+        ng_l10 = 0
+        ng_l100 = 0
+    return first_on, last_off, tot_dur, n_on, ng_l10, ng_l100
 
 def on_off_load(file,run=0):
     """

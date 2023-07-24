@@ -140,7 +140,7 @@ if np.any(Ra/Racrit<0.5):
 else:
     fcond_t = np.nan
 if np.any(Ra/Racrit>(2-conv_tol)):
-    lconv_t = t[Ra/Racrit>(2-conv_tol)][-1]/Myr #last supercritical time (start of buffering)
+    fcond_t = t[Ra/Racrit>(2-conv_tol)][-1]/Myr #last supercritical time (start of buffering)
     lconv_T = Tprofile[Ra/Racrit>(2-conv_tol),nmantle+1][-1] #temperature when Ra first starts buffering
 else:
     lconv_t = np.nan
@@ -188,10 +188,10 @@ for i in range(m-1):
 #set 10*save_interval (1Myr) as on off tolerance to smooth on-off periods smaller than 1Myr
 t_plot_t = t/Myr
 
-on_off_save(t_plot_t, Rem_t[0],threshold,save_interval_t/Myr, f'{folder}MAC_onoff.csv', 'MAC', run) #MAC on off
-on_off_save(t_plot_t, Rem_t[1],threshold,10*save_interval_t/Myr, f'{folder}CIA_onoff.csv', 'CIA', run) #CIA on off
-on_off_save(t_plot_t, Rem_c, threshold,10*save_interval_t/Myr, f'{folder}comp_onoff.csv', 'comp', run) #comp on off
-on_off_save(t_plot_t, Fdrive,0,10*save_interval_t/Myr, f'{folder}coreconv_onoff.csv', 'core_conv', run) #core convection on off
+mac_on, mac_off, mac_dur, mac_n, mac_ngl10, mac_ngl100 = on_off_save(t_plot_t, Rem_t[0],threshold,save_interval_t/Myr, f'{folder}MAC_onoff.csv', 'MAC', run) #MAC on off
+cia_on, cia_off, cia_dur, cia_n, cia_ngl10, cia_ngl100 = on_off_save(t_plot_t, Rem_t[1],threshold,10*save_interval_t/Myr, f'{folder}CIA_onoff.csv', 'CIA', run) #CIA on off
+comp_on, comp_off, comp_dur, comp_n, comp_ngl10, comp_ngl100 = on_off_save(t_plot_t, Rem_c, threshold,10*save_interval_t/Myr, f'{folder}comp_onoff.csv', 'comp', run) #comp on off
+coreconv_on, coreconv_off, coreconv_dur, coreconv_n, coreconv_ngl10, coreconv_ngl100 = on_off_save(t_plot_t, Fdrive,0,10*save_interval_t/Myr, f'{folder}coreconv_onoff.csv', 'core_conv', run) #core convection on off
 
 ############################ Save results #####################################
 # save variables to file
@@ -208,7 +208,9 @@ from csv import writer
   
 var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_remove, 
              strat_end, fcond_t, lconv_t,lconv_T, max_Rem[0], max_Remt[0], max_Rem[1], max_Remt[1], max_Rem[2], 
-             max_Remt[2],max_B[0],max_Bt[0],max_B[1],max_Bt[1],max_B[2],max_Bt[2],max_B[3],max_Bt[3]]
+             max_Remt[2],max_B[0],max_Bt[0],max_B[1],max_Bt[1],max_B[2],max_Bt[2],max_B[3],max_Bt[3], mac_on, 
+             mac_off, mac_dur, mac_n, mac_ngl10, mac_ngl100, cia_on, cia_off, cia_dur, cia_n, cia_ngl10, 
+             cia_ngl100,comp_on, comp_off, comp_dur, comp_n, comp_ngl10, comp_ngl100,coreconv_on, coreconv_off, coreconv_dur, coreconv_n, coreconv_ngl10, coreconv_ngl100]
 
 with open(f'{folder}run_results.csv','a') as f_object:
      writer_object = writer(f_object) #pass file object to csv.writer

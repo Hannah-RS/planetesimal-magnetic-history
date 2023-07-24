@@ -8,15 +8,17 @@ import pandas as pd
 
 import sys
 folder1 = sys.argv[1]
+folder1='Fullrun2/'
 folder = 'Results_combined/'+folder1 #folder
 subfolder = 'params_' #subfolder
 num_runs = int(sys.argv[2]) #number of subruns
+num_runs=1260
 nfails = 0 #total number of fails
 nsuc = 0 #total number of sucesses
 for i in range(num_runs):
     #combine all run params and results
     # by default the merging here will remove unfinished runs which didn't save mag field parameters
-    results = combine_info(folder+subfolder+f'{(i+1)}/','auto_params.csv','run_results.csv',['MAC_onoff.csv','CIA_onoff.csv','comp_onoff.csv','coreconv_onoff.csv'])   
+    results = combine_info(folder+subfolder+f'{(i+1)}/','auto_params.csv','run_results.csv')   
     sucesses = results[results['status']==1]
     nsuc = nsuc + len(sucesses)
     sucesses.to_csv(f'{folder}all_sucess_info.csv',index=False,mode='a',header=False)

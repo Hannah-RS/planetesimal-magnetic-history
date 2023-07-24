@@ -62,9 +62,9 @@ def load_run_results(run,file):
     run_results.reset_index(inplace=True,drop=True) #reset indices of sub data frame
     return run_results
 
-def combine_info(folder,params,results,Bfile,save=False):
+def combine_info(folder,params,results,save=False):
     """
-    Combine results from runs with magfield duration data - only works for one on-off period at the moment
+    Combine results from runs with their parameters
 
     Parameters
     ----------
@@ -74,8 +74,6 @@ def combine_info(folder,params,results,Bfile,save=False):
         name of parameters file
     results : str
         name of results file
-    Bfile : str
-        names of magnetic field files
     save : bool
         should the dataframe be saved to file, default False
 
@@ -88,15 +86,6 @@ def combine_info(folder,params,results,Bfile,save=False):
     indata = pd.read_csv(folder+params,delimiter=',',skiprows=[1],header=0) #import run parameters
     outdata = pd.read_csv(folder+results,delimiter=',',skiprows=[1],header=0) #import run results
     data = pd.merge(indata, outdata, on="run") #join together on matching runs
-    for file in Bfile:
-        magdata = pd.read_csv(folder+file,delimiter=',',skiprows=[1],header=0) #import B field data
-        if len(magdata)!=0: #check file has entries
-            #rename columns
-            newname = magdata.columns[2:]+'_'+magdata.loc[0,'label']
-            magdata.rename(columns={"start1":newname[0],"end1":newname[1],"duration1":newname[2],"start2":newname[3],"end2":newname[4],"duration2":newname[5]},inplace=True)
-            #print()
-            magdata.drop('label',axis=1,inplace = True) #drop label column
-            data = pd.merge(data,magdata,on='run')
     if save == True:
         data.to_csv(folder+'all_results.csv',index=False)
     return data
