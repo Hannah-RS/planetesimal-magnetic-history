@@ -140,7 +140,7 @@ if np.any(Ra/Racrit<0.5):
 else:
     fcond_t = np.nan
 if np.any(Ra/Racrit>(2-conv_tol)):
-    fcond_t = t[Ra/Racrit>(2-conv_tol)][-1]/Myr #last supercritical time (start of buffering)
+    lconv_t = t[Ra/Racrit>(2-conv_tol)][-1]/Myr #last supercritical time (start of buffering)
     lconv_T = Tprofile[Ra/Racrit>(2-conv_tol),nmantle+1][-1] #temperature when Ra first starts buffering
 else:
     lconv_t = np.nan
