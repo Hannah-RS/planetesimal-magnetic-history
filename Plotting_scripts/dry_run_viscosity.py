@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-folder = 'w_test'
+folder = 'Fullrun2'
 data = pd.read_csv(f'../Results_combined/{folder}/all_sucess_info.csv',delimiter=',',skiprows=[1],header=0,index_col=False)
 data['r']=data['r']/1e3 #rescale to km
 
@@ -54,77 +54,49 @@ if (var1 != 'alpha_n') & (var2 !='alpha_n'):
 ###################### Effect on dynamo timing ################################
 #### var2 as x axis, var1 as colour
 plt.figure(tight_layout=True,figsize=[15,15])
-plt.suptitle(f'Effect of {varlab2} on dynamo timing - 1st generation period')
+plt.suptitle(f'Effect of {varlab2} on dynamo timing')
 #MAC dynamo
-name = 'MAC'
-if np.all(np.isnan(data[f'start1_{name}'])==True):
+name = 'mac'
+if np.all(np.isnan(data[f'{name}_on'])==True):
     pass #don't plot this dynamo
 else:
-    make_sub_scatter(data[var2],data[f'start1_{name}'],varlab2,f'{name} dynamo start /Myr',3,3,1,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-    make_sub_scatter(data[var2],data[f'end1_{name}'],varlab2,f'{name} dynamo end /Myr',3,3,2,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-    make_sub_scatter(data[var2],data[f'duration1_{name}'],varlab2,f'{name}dynamo duration /Myr',3,3,3,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
+    make_sub_scatter(data[var2],data[f'{name}_on'],varlab2,f'{name} dynamo start /Myr',3,3,1,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
+    make_sub_scatter(data[var2],data[f'{name}_off'],varlab2,f'{name} dynamo end /Myr',3,3,2,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
+    make_sub_scatter(data[var2],data[f'{name}_dur'],varlab2,f'{name}dynamo duration /Myr',3,3,3,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
 #CIA dynamo
-name = 'CIA'
-make_sub_scatter(data[var2],data[f'start1_{name}'],varlab2,f'{name} dynamo start /Myr',3,3,4,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-make_sub_scatter(data[var2],data[f'end1_{name}'],varlab2,f'{name} dynamo end /Myr',3,3,5,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-make_sub_scatter(data[var2],data[f'duration1_{name}'],varlab2,f'{name}dynamo duration /Myr',3,3,6,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
+name = 'cia'
+make_sub_scatter(data[var2],data[f'{name}_on'],varlab2,f'{name} dynamo start /Myr',3,3,4,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
+make_sub_scatter(data[var2],data[f'{name}_off'],varlab2,f'{name} dynamo end /Myr',3,3,5,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
+make_sub_scatter(data[var2],data[f'{name}_dur'],varlab2,f'{name}dynamo duration /Myr',3,3,6,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
 #compositional dynamo
 name = 'comp'
-make_sub_scatter(data[var2],data[f'start1_{name}'],varlab2,f'{name} dynamo start /Myr',3,3,7,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-make_sub_scatter(data[var2],data[f'end1_{name}'],varlab2,f'{name} dynamo end /Myr',3,3,8,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-make_sub_scatter(data[var2],data[f'duration1_{name}'],varlab2,f'{name}dynamo duration /Myr',3,3,9,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
+make_sub_scatter(data[var2],data[f'{name}_on'],varlab2,f'{name} dynamo start /Myr',3,3,7,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
+make_sub_scatter(data[var2],data[f'{name}_off'],varlab2,f'{name} dynamo end /Myr',3,3,8,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
+make_sub_scatter(data[var2],data[f'{name}_dur'],varlab2,f'{name}dynamo duration /Myr',3,3,9,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
 #if save == True:
 plt.savefig(f'../Plots/{folder}dynamo_duration1_{var2}{var1}_col.png')
 
-plt.figure(tight_layout=True,figsize=[15,15])
-plt.suptitle(f'Effect of {varlab2} on dynamo timing - second generation period')
-#MAC dynamo
-name = 'MAC'
-if np.all(np.isnan(data[f'start2_{name}'])==True):
-    pass #don't plot this dynamo
-else:
-    make_sub_scatter(data[var2],data[f'start2_{name}'],varlab2,f'{name} dynamo start /Myr',3,3,1,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-    make_sub_scatter(data[var2],data[f'end2_{name}'],varlab2,f'{name} dynamo end /Myr',3,3,2,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-    make_sub_scatter(data[var2],data[f'duration2_{name}'],varlab2,f'{name}dynamo duration /Myr',3,3,3,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-#CIA dynamo
-name = 'CIA'
-if np.all(np.isnan(data[f'start2_{name}'])==True):
-    pass #don't plot this dynamo
-else:
-    make_sub_scatter(data[var2],data[f'start2_{name}'],varlab2,f'{name} dynamo start /Myr',3,3,4,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-    make_sub_scatter(data[var2],data[f'end2_{name}'],varlab2,f'{name} dynamo end /Myr',3,3,5,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-    make_sub_scatter(data[var2],data[f'duration2_{name}'],varlab2,f'{name}dynamo duration /Myr',3,3,6,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-#compositional dynamo
-name = 'comp'
-if np.all(np.isnan(data[f'start2_{name}'])==True):
-    pass #don't plot this dynamo
-else:
-    make_sub_scatter(data[var2],data[f'start2_{name}'],varlab2,f'{name} dynamo start /Myr',3,3,7,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-    make_sub_scatter(data[var2],data[f'end2_{name}'],varlab2,f'{name} dynamo end /Myr',3,3,8,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-    make_sub_scatter(data[var2],data[f'duration2_{name}'],varlab2,f'{name}dynamo duration /Myr',3,3,9,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-#if save == True:
-plt.savefig(f'../Plots/{folder}dynamo_duration2_{var2}{var1}_col.png')
 #### var2 as x axis, y axis as var1, colour as dynamo value
 # plt.figure(tight_layout=True,figsize=[15,15])
 # plt.suptitle(f'Effect of {varlab2} and {varlab1} on dynamo timing')
 # #MAC dynamo
-# name = 'MAC'
-# if np.all(np.isnan(data[f'start1_{name}'])==True):
+# name = 'mac'
+# if np.all(np.isnan(data[f'{name}_on'])==True):
 #     pass #don't plot this dynamo
 # else:
-#     make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,1,colour=data[f'start1_{name}'],log=[logval2,logval1,False],colourlabel=f'{name} dynamo start /Myr',ss=5)
-#     make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,2,colour=data[f'end1_{name}'],log=[logval2,logval1,False],colourlabel=f'{name} dynamo end /Myr',ss=5)
-#     make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,3,colour=data[f'duration1_{name}'],log=[logval2,logval1,False],colourlabel=f'{name}dynamo duration /Myr',ss=5)
+#     make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,1,colour=data[f'{name}_on'],log=[logval2,logval1,False],colourlabel=f'{name} dynamo start /Myr',ss=5)
+#     make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,2,colour=data[f'{name}_off'],log=[logval2,logval1,False],colourlabel=f'{name} dynamo end /Myr',ss=5)
+#     make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,3,colour=data[f'{name}_dur'],log=[logval2,logval1,False],colourlabel=f'{name}dynamo duration /Myr',ss=5)
 # #CIA dynamo
-# name = 'CIA'
-# make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,4,colour=data[f'start1_{name}'],log=[logval2,logval1,False],colourlabel=f'{name} dynamo start /Myr',ss=5)
-# make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,5,colour=data[f'end1_{name}'],log=[logval2,logval1,False],colourlabel=f'{name} dynamo end /Myr',ss=5)
-# make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,6,colour=data[f'duration1_{name}'],log=[logval2,logval1,False],colourlabel=f'{name}dynamo duration /Myr',ss=5)
+# name = 'cia'
+# make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,4,colour=data[f'{name}_on'],log=[logval2,logval1,False],colourlabel=f'{name} dynamo start /Myr',ss=5)
+# make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,5,colour=data[f'{name}_off'],log=[logval2,logval1,False],colourlabel=f'{name} dynamo end /Myr',ss=5)
+# make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,6,colour=data[f'{name}_dur'],log=[logval2,logval1,False],colourlabel=f'{name}dynamo duration /Myr',ss=5)
 # #compositional dynamo
 # name = 'comp'
-# make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,7,colour=data[f'start1_{name}'],log=[logval2,logval1,False],colourlabel=f'{name} dynamo start /Myr',ss=5)
-# make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,8,colour=data[f'end1_{name}'],log=[logval2,logval1,False],colourlabel=f'{name} dynamo end /Myr',ss=5)
-# make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,9,colour=data[f'duration1_{name}'],log=[logval2,logval1,False],colourlabel=f'{name}dynamo duration /Myr',ss=5)
+# make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,7,colour=data[f'{name}_on'],log=[logval2,logval1,False],colourlabel=f'{name} dynamo start /Myr',ss=5)
+# make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,8,colour=data[f'{name}_off'],log=[logval2,logval1,False],colourlabel=f'{name} dynamo end /Myr',ss=5)
+# make_sub_scatter(data[var2],data[var1],varlab2,varlab1,3,3,9,colour=data[f'{name}_dur'],log=[logval2,logval1,False],colourlabel=f'{name}dynamo duration /Myr',ss=5)
 # if save == True:
 #     plt.savefig(f'../Plots/{folder}dynamo_duration1_{var2}{var1}.png')
     
@@ -132,23 +104,23 @@ plt.savefig(f'../Plots/{folder}dynamo_duration2_{var2}{var1}_col.png')
 # plt.figure(tight_layout=True,figsize=[15,15])
 # plt.suptitle(f'Effect of {varlab1} on dynamo timing')
 # #MAC dynamo
-# name = 'MAC'
-# if np.all(np.isnan(data[f'start1_{name}'])==True):
+# name = 'mac'
+# if np.all(np.isnan(data[f'{name}_on'])==True):
 #     pass #don't plot this dynamo
 # else:
-#     make_sub_scatter(data[var1],data[f'start1_{name}'],varlab1,f'{name} dynamo start /Myr',3,3,1,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
-#     make_sub_scatter(data[var1],data[f'end1_{name}'],varlab1,f'{name} dynamo end /Myr',3,3,2,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
-#     make_sub_scatter(data[var1],data[f'duration1_{name}'],varlab1,f'{name}dynamo duration/Myr',3,3,3,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
+#     make_sub_scatter(data[var1],data[f'{name}_on'],varlab1,f'{name} dynamo start /Myr',3,3,1,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
+#     make_sub_scatter(data[var1],data[f'{name}_off'],varlab1,f'{name} dynamo end /Myr',3,3,2,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
+#     make_sub_scatter(data[var1],data[f'{name}_dur'],varlab1,f'{name}dynamo duration/Myr',3,3,3,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
 # #CIA dynamo
-# name = 'CIA'
-# make_sub_scatter(data[var1],data[f'start1_{name}'],varlab1,f'{name} dynamo start /Myr',3,3,4,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
-# make_sub_scatter(data[var1],data[f'end1_{name}'],varlab1,f'{name} dynamo end /Myr',3,3,5,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
-# make_sub_scatter(data[var1],data[f'duration1_{name}'],varlab1,f'{name}dynamo duration /Myr',3,3,6,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
+# name = 'cia'
+# make_sub_scatter(data[var1],data[f'{name}_on'],varlab1,f'{name} dynamo start /Myr',3,3,4,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
+# make_sub_scatter(data[var1],data[f'{name}_off'],varlab1,f'{name} dynamo end /Myr',3,3,5,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
+# make_sub_scatter(data[var1],data[f'{name}_dur'],varlab1,f'{name}dynamo duration /Myr',3,3,6,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
 # #compositional dynamo
 # name = 'comp'
-# make_sub_scatter(data[var1],data[f'start1_{name}'],varlab1,f'{name} dynamo start /Myr',3,3,7,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
-# make_sub_scatter(data[var1],data[f'end1_{name}'],varlab1,f'{name} dynamo end /Myr',3,3,8,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
-# make_sub_scatter(data[var1],data[f'duration1_{name}'],varlab1,f'{name}dynamo duration /Myr',3,3,9,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
+# make_sub_scatter(data[var1],data[f'{name}_on'],varlab1,f'{name} dynamo start /Myr',3,3,7,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
+# make_sub_scatter(data[var1],data[f'{name}_off'],varlab1,f'{name} dynamo end /Myr',3,3,8,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
+# make_sub_scatter(data[var1],data[f'{name}_dur'],varlab1,f'{name}dynamo duration /Myr',3,3,9,log=[logval1,False,False],size=data['r'],sizelabel='radius /km',ss=1.5)
 # if save == True:
 #     plt.savefig(f'../Plots/{folder}dynamo_duration1_{var1}.png')
     
