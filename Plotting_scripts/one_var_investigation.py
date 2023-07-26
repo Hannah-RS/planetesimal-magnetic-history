@@ -28,7 +28,7 @@ import pandas as pd
 folder = 'Fullrun2'
 data = pd.read_csv(f'../Results_combined/{folder}/all_sucess_info.csv',delimiter=',',skiprows=[1],header=0,index_col=False)
 data['r']=data['r']/1e3 #rescale to km
-save = False
+save = True
 
 varlist =['r','Xs_0','rcmf','frht','etal','eta0','Fe0']
 varlabel =['radius /km','$X_{S,0}$ /wt%','rcmf','frht','liquid viscosity /Pas','reference viscosity /Pas','$^{60}Fe/^{56}Fe$']
@@ -57,7 +57,7 @@ ylist = ['ngl10','ngl100','ngg100']
 ylab = ['Gaps <10 Myr','10Myr < gap < 100 Myr','gap >100Myr']
 names = ['mac_','cia_','comp_']
 for name in names:
-    data[name+'ngg100']=data[name+'n']-data[name+'ngl100']-data[name+'ngl10']
+    data[name+'ngg100']=data[name+'n']-data[name+'ngl100']-data[name+'ngl10']-1
 fig, ax = plt.subplots(nrows=len(ylist),ncols=len(varlist),sharey='row',sharex='col',figsize=[15,15]) 
 for j, lab in enumerate(ylist):
     i=0
