@@ -35,7 +35,7 @@ logval1 = False #should the yaxis of this variable be scaled logarithmically
 var2 = 'rcmf'
 varlab2 = 'rcmf'
 logval2 = False 
-save = False #do you want to save the figures
+save = True #do you want to save the figures
 #fixed values of other quantities
 eta0=1e14
 r = 100
@@ -151,7 +151,7 @@ for i, name in enumerate(names):
     else:
         make_sub_scatter(data[var2],data[f'{name}_ngl10'],varlab2,f'{name} intermittence <10Myr spacing',3,3,3*i+1,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
         make_sub_scatter(data[var2],data[f'{name}_ngl100'],varlab2,f'{name} intermittence 10Myr < x < 100Myr spacing',3,3,3*i+2,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
-        make_sub_scatter(data[var2],data[f'{name}_n']-(data[f'{name}_ngl10']+data[f'{name}_ngl100']),varlab2,f'{name} intermittence > 100Myr spacing',3,3,3*i+3,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
+        make_sub_scatter(data[var2],data[f'{name}_n']-(data[f'{name}_ngl10']+data[f'{name}_ngl100']+1),varlab2,f'{name} intermittence > 100Myr spacing',3,3,3*i+3,log=[logval2,False,logval1],colour=data[var1],colourlabel=varlab1,ss=5)
     i = i+1
 if save == True:
     plt.savefig(f'../Plots/{folder}dynamo_intermit_{var2}{var1}_col.png')
