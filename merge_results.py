@@ -8,11 +8,9 @@ import pandas as pd
 
 import sys
 folder1 = sys.argv[1]
-folder1='Fullrun2/'
 folder = 'Results_combined/'+folder1 #folder
 subfolder = 'params_' #subfolder
 num_runs = int(sys.argv[2]) #number of subruns
-num_runs=1260
 nfails = 0 #total number of fails
 nsuc = 0 #total number of sucesses
 for i in range(num_runs):
