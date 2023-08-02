@@ -1,3 +1,0 @@
-run,r,default,rcmf,eta0,frht,w,etal,alpha_n,Xs_0,Fe0,t_acc_m,t_end_m,dr,dt,status
-,m,,,,,K,Pas,,Wt %,,Myr,Myr,m,t_cond_core,
-0,400000,Dodds,0.2,1000000000000,old,10,100,25,30,1E-07,0.8,1000,500,0.075,1
