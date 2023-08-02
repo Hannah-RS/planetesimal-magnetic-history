@@ -9,7 +9,7 @@ Also script for Rayleigh number and critical Rayleigh number for differentiation
 from viscosity_def import viscosity #import viscosity model
 from heating import Al_heating, AlFe_heating
 
-from parameters import gamma, rhom, alpha_m, g, r, rc, kappa, km, Rac, Ts, default, c1, G, convect_ratio, cpm_p
+from parameters import frht, rhom, alpha_m, g, r, rc, kappa, km, Rac, Ts, default, G, convect_ratio, cpm_p, conv_tol
 
 def Rayleigh_crit(Tb):
     """
@@ -26,7 +26,7 @@ def Rayleigh_crit(Tb):
         critical Rayleigh number
 
     """
-    Ra_crit = 20.9*(gamma*(Tb-Ts))**4 
+    Ra_crit = 20.9*(frht*(Tb-Ts))**4 
     return Ra_crit
     
 def Rayleigh_calc(t,Tb,dTmdt,Ur,model=default):
@@ -56,9 +56,9 @@ def Rayleigh_calc(t,Tb,dTmdt,Ur,model=default):
     RanoH, d0 = Rayleigh_noH(Tb,model)
 
     if Ur > 1:
-        d0 = 0.667*(r-rc)*(gamma*(Tb-Ts)/c1)**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
+        d0 = 0.667*(r-rc)*(frht*(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
     else:
-        d0 = 0.633*(r-rc)*(gamma*(Tb-Ts)/c1)**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
+        d0 = 0.633*(r-rc)*(frht*(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
         
     if RaH > RanoH:
         Ram = RaH
@@ -86,7 +86,7 @@ def Rayleigh_noH(Tb,model=default):
 
     """
     eta = viscosity(Tb,model)
-    d0 = (gamma/c1)**(4/3)*(Tb-Ts)*((Rac*kappa*eta)/(rhom*g*alpha_m))**(1/3) #upper bl
+    d0 = frht**(4/3)*(Tb-Ts)*((Rac*kappa*eta)/(rhom*g*alpha_m))**(1/3) #upper bl
     Ram= rhom*g*alpha_m*abs(Tb-Ts)*(r-rc)**3/(kappa*eta)
     
     return Ram, d0
@@ -163,14 +163,14 @@ def Rayleigh_differentiate(t,Tb,dTmdt,Ur,model=default):
     RanoH, d0_noH = Rayleigh_noH(Tb,model)
     
     if Ur > 1:
-        d0H = 0.667*r*(gamma*abs(Tb-Ts)/c1)**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
+        d0H = 0.667*r*(frht*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
     else:
-        d0H = 0.633*r*(gamma*abs(Tb-Ts)/c1)**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
+        d0H = 0.633*r*(frht*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
     
     Ra_crit = Rayleigh_crit(Tb)
-    if (d0H/r < convect_ratio) & (RaRob>Ra_crit): #still working on this criteria
+    if (d0H/r < convect_ratio) & (RaH/Ra_crit>conv_tol): #still working on this criteria
         convect = True
     else: 
         convect = False
-    
+
     return RaH, d0H,  Ra_crit, convect

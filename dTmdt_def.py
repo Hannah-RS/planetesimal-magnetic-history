@@ -42,7 +42,7 @@ def dTmdt_calc(t,Tconv,d0,Flid,Fcmb):
     cp = cp_calc_int(Tconv,False)
     return 1/(rhom*cp*Vocean)*(rad-Flid*Alid+Fcmb*Acmb)
 
-def dTadt_calc(t,Tconv,d0,Flid): #not sure if this is called anywhere
+def dTadt_calc(t,Tconv,d0,Flid): 
     """
 
     Parameters

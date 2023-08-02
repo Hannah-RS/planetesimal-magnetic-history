@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from parameters import eta0, gamma, alpha_n, Tms, Tml, eta0_50, eta_r50, Tm50, E, R, Tcrit, T0eta, default
+from variable_viscosity import eta_calc
+
 def viscosity(Tm, model = default):
     """
     Different viscosity models
@@ -22,7 +24,9 @@ def viscosity(Tm, model = default):
     # Viscosity model from Dodds et al (2021)
         log10_eta = 64 - Tm/29 - 5*np.tanh((Tm-1625)/15)
         eta = 10**log10_eta
-        
+    
+    elif model == 'vary':
+        eta = eta_calc(Tm)
     elif model == 'Bryson':
         # Viscosity model from Bryson et al. (2019)
         if type(Tm)==np.ndarray: # if an array will need to loop

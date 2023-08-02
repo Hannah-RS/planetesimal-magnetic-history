@@ -1,5 +1,11 @@
 Plots
 Results
-__pycache__
+__pycache__/
 .ipynb_checkpoints
 Results_combined
+test.sh
+output.txt
+runtime.csv
+auto_params.csv
+run_info.csv
+Run_params/

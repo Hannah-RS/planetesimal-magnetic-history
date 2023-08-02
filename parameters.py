@@ -7,8 +7,8 @@ Dodds et. al. (2021) and references within or it is a fundamental constant
 """
 
 import numpy as np
-
-
+import pandas as pd
+import sys
 #Constants
 G = 6.67e-11 # gravitational constant [N kg^-2 m^2]
 year = 60*60*24*365 #number of seconds in a year
@@ -17,20 +17,51 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-dr = 500 # size of cells [m]
+automated = True
+full_save = True #do you want to save temp profiles etc or just summary stats
+B_save = False #do you want to save field strengths and Rem
 out_interval = 20 #how many times do you want t to be printed in the whole run
 save_interval_d = 0.01*Myr # how often do you want each variable to be saved during differentiation
 save_interval_t = 0.1*Myr # how often do you want each variable to be saved during thermal evolution
 
 # Parameters that will vary
-r = 400e3 # radius of asteroid [m]
-default ='Dodds' #default viscosity model
-rcmf = 0.2 #rheologically critical melt fraction - melting required for differentiation
-Xs_0 = 30 # initial wt % sulfur in core 
-Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
+if automated == True:
+    folder = sys.argv[1]
+    auto = pd.read_csv(f'{folder}auto_params.csv',skiprows=[1])
+    ind = np.where((auto['status']!=1)&(auto['status']!=0))[0][0] #find index of first uncalculated run
+    r = auto.loc[ind,'r']
+    default = auto.loc[ind,'default']
+    rcmf = auto.loc[ind,'rcmf']
+    eta0 = auto.loc[ind,'eta0']
+    frht = auto.loc[ind,'frht']
+    w = auto.loc[ind,'w']
+    etal = auto.loc[ind,'etal']
+    alpha_n = auto.loc[ind,'alpha_n']
+    Xs_0 = auto.loc[ind,'Xs_0']
+    Fe0 = auto.loc[ind,'Fe0']
+    run = int(auto.loc[ind,'run'])
+    t_acc_m = auto.loc[ind,'t_acc_m']
+    t_end_m = auto.loc[ind,'t_end_m']
+    dr = auto.loc[ind,'dr']
+else: #set manually
+    r = 300e3 # radius of asteroid [m]
+    dr = 500 # grid size [m]
+    default ='vary' #default viscosity model
+    rcmf = 0.5 #rheologically critical melt fraction - melting required for differentiation
+    eta0 = 1e21 #reference viscosity at Tms [Pas]
+    frht =0.005 #frh*(DeltaT)
+    w = 5 #width of log linear region [K]
+    etal = 10 #liquid viscsoity [Pas]
+    alpha_n = 25 #melt weakening (diffusion creep)
+    Xs_0 = 30# initial wt % sulfur in core 
+    Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
+    run = 9
+    t_acc_m = 0.8 #accretion time [Myr]
+    t_end_m = 500 # max end time [Myr]
 
 # Size of body
 rc = r/2 #radius of core [m]
+n_cells = int(r/dr) +1 #number of cells needed to span the body including one at the centre
 Acmb = 4*np.pi*rc**2 #CMB surface area [m^2]
 As = 4*np.pi*r**2 # surface area of asteroid [m^2]
 V = 4/3*np.pi*r**3 #volume of asteroid [m^3]
@@ -49,28 +80,31 @@ rhom = 3000 # density [kg m^-3] Bryson et. al. (2019)
 km = 2.16 # thermal conductivity of silicate [W /m /K] needs to be consistent with cp, kappa and rhom
 kappa = 9e-7 # thermal diffusivity of silicate [m^2 /s] - 4 options are given in Dodds (2021) have picked the middle one - needs to be consistent with other choices
 alpha_m = 4e-5 # thermal expansivity of mantle [/K]
-
+conv_tol = 0.9 #convective tolerance Ra/Ra_crit<conv_tol = no convection
 Rac = 1000  #critical Rayleigh number for isoviscous convection
 
 
 # Viscosity parameters
-E = 300e3 # activation energy [J /mol]
-Tref = 1800 # viscosity reference temperature [K] 
-c1 = 8 # constant in boundary layer thickness (Sterenborg & Crowley, 2013)
 
-#viscosity models - some parameters here are needed for viscosity comparison code
+#old viscosity models - some parameters here are needed for viscosity comparison code
 # Bryson 2019 law (all values from Bryson 2019)
-eta0 = 1e21 # reference viscosity [Pa s] - assumed constant in this model
 eta0_50 = 1e14 #viscosity of material at 50% melting [Pas]
-alpha_n = 25 # constant in viscosity model
 T0eta = 1400 # reference temperature [K]
 Tm50 = 1600 # 50% melting temperature [K]
 #Arrhenius model
 eta_r50 = 9.358045457250838e+16 #viscosity of material at 50% melting [Pas] for Arrhenius model
 #Sterenborg & Crowley (2013)
 Tcrit = Tms+(Tml-Tms)/2 #50% melting temperature (Sterenborg and Crowley 2013
+E = 300e3 # activation energy [J /mol]
+Tref = 1800 # viscosity reference temperature [K] 
+c1 = 8 # constant in boundary layer thickness (Sterenborg & Crowley, 2013)
 gamma = E/(R*T0eta**2)
 
+#my model - also uses alpha_n from above
+Trcmf = rcmf*(Tml-Tms)+Tms #temperature at critical melt fraction
+if frht == 'old':
+    frht = (E/(R*Tref**2))
+    
 #Undifferentiated parameters
 #Authors tend to use same value as silicates
 ka = km # [W /m /K] same as mantle (correct for post sintering - Dodds 2021)
@@ -128,6 +162,11 @@ Tl_fe = fe_fes_liquidus_bw(Xs_0,Pc)
 t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle
 
+if automated == True:
+    step_m = auto.loc[ind,'dt']*t_cond_core
+else:
+    step_m = 0.075*t_cond_core
+    
 #Modified specific heat capacities
 #before differentiation
 if Xs_0 != Xs_eutectic:

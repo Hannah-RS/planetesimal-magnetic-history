@@ -10,7 +10,7 @@ from dTmdt_def import dTadt_calc
 from scipy import sparse as sp
 from cp_func import cp_calc_arr, cp_calc_int, cp_calc_eut_arr, cp_calc_eut_int
 import numpy as np
-from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V, Rac, rcmf, t_cond_core
+from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V, Rac, rcmf, n_cells
 def differentiation(Tint,tacc,r,dr,dt):
     """
     
@@ -53,16 +53,15 @@ def differentiation(Tint,tacc,r,dr,dt):
 
     """
     sparse_mat = sp.dia_matrix(cond_stencil_general(r,dr))
-    ncells = int(r/dr)
     dTphase_fe = Tl_fe - Ts_fe
     dTphase_si = Tml - Tms
 
     #Initial step
     # Create arrays - column is one timestep
-    Xfe = np.zeros([ncells,1]) #fraction of iron melted
-    Xsi = np.zeros([ncells,1]) #fraction of silicate melted
-    cp = np.zeros([ncells,1]) #specific heat capacity of each cell
-    T = np.zeros([ncells,1]) #temperature
+    Xfe = np.zeros([n_cells,1]) #fraction of iron melted
+    Xsi = np.zeros([n_cells,1]) #fraction of silicate melted
+    cp = np.zeros([n_cells,1]) #specific heat capacity of each cell
+    T = np.zeros([n_cells,1]) #temperature
     Ra = np.ones([1]) #Rayleigh number
     d0 = np.ones([1]) #stagnant lid thickness
     Ra_crit = np.ones([1]) # critical Rayleigh number
@@ -107,11 +106,10 @@ def differentiation(Tint,tacc,r,dr,dt):
         
         #now loop
         i = 1
-        cond_i = 0 #convective switch
         
-        while Xsi[int(ncells/2),i-1]<rcmf: #assume differentiation occurs at rcmf
+        while Xsi[int(n_cells/2),i-1]<rcmf: #assume differentiation occurs at rcmf
             
-            app_array = np.zeros([ncells,1])
+            app_array = np.zeros([n_cells,1])
             T = np.append(T,app_array,1)
             Xfe = np.append(Xfe, app_array, 1)
             Xsi = np.append(Xsi, app_array, 1)
@@ -138,16 +136,12 @@ def differentiation(Tint,tacc,r,dr,dt):
             T[-1,i] = Ts
             Flid_new = -ka*(Ts-T[-2,i])/dr #default surface flux
             
-            if convect[i-1] == True or cond_i==1: #overwrite convecting portion
-                if cond_i == 0:
-                    cond_i =1 
-                    print('Onset of convection')
-                    
+            if convect[i-1] == True: #overwrite convecting portion                   
                 nlid_cells = round(d0[i]/dr)
                 if nlid_cells ==0:
-                    lid_start = ncells -2
+                    lid_start = n_cells -2
                 else:
-                    lid_start = ncells - nlid_cells - 1 #index in temp array where lid starts
+                    lid_start = n_cells - nlid_cells - 1 #index in temp array where lid starts
                 
                 cp[:lid_start,i] = cp_calc_int(T[0,i-1],True)
                 cp[-1,i] = cpa
@@ -184,7 +178,7 @@ def differentiation(Tint,tacc,r,dr,dt):
             Tdiff = T
             t_diff = t
     else:
-        Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, t_diff, H = differentiation_eutectic(Tint,tacc,r,dr,dt)
+        Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H = differentiation_eutectic(Tint,tacc,r,dr,dt)
               
     return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H
 
@@ -234,15 +228,14 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
 
     """
     sparse_mat = sp.dia_matrix(cond_stencil_general(r,dr))
-    ncells = int(r/dr)
     dTphase_si = Tml - Tms
 
     #Initial step
     # Create arrays - column is one timestep
-    Xfe = np.zeros([ncells,1]) #fraction of iron melted
-    Xsi = np.zeros([ncells,1]) #fraction of silicate melted
-    cp = np.zeros([ncells,1]) #specific heat capacity of each cell
-    T = np.zeros([ncells,1]) #temperature
+    Xfe = np.zeros([n_cells,1]) #fraction of iron melted
+    Xsi = np.zeros([n_cells,1]) #fraction of silicate melted
+    cp = np.zeros([n_cells,1]) #specific heat capacity of each cell
+    T = np.zeros([n_cells,1]) #temperature
     Ra = np.ones([1]) #Rayleigh number
     d0 = np.ones([1]) #stagnant lid thickness
     Ra_crit = np.ones([1]) # critical Rayleigh number
@@ -267,8 +260,11 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     #calculate temperature change
     cp[:,0] = cp_calc_eut_arr(Tint,True) #calculate c
     dTdt = rhs/(rhoa*cp[:,0])
+    dTdt_old = dTdt[0] #take temp change at centre for Rayeligh-Roberts number
     T[:-1,0] = Tint[:-1] + dt*dTdt[:-1] 
     T[-1,0] = Tint[-1] #pin top cell to 200K
+    Flid_old = -ka*(Ts - T[-2,0])/dr
+    Ur = rhoa*H[0]*V/abs(Flid_old*As) #calculate Urey ratio
     
     #check for melting
     if np.any((np.int_(Tint)>=Ts_fe) & (Xfe[:,0]<1)): #once solidus is crossed initiate melting
@@ -283,11 +279,10 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     
     #now loop
     i = 1
-    cond_i = 0 #convective switch
     
-    while Xsi[int(ncells/2),i-1]<rcmf: #differentiation occurs at rcmf
+    while Xsi[int(n_cells/2),i-1]<rcmf: #differentiation occurs at rcmf
         
-        app_array = np.zeros([ncells,1])
+        app_array = np.zeros([n_cells,1])
         T = np.append(T,app_array,1)
         Xfe = np.append(Xfe, app_array, 1) #automatically append previous timestep
         Xsi = np.append(Xsi, app_array, 1)
@@ -299,7 +294,7 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         
         t = np.append(t,t[i-1]+dt)
         
-        Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1])
+        Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1],dTdt_old,Ur)
         #calculate radiogenic heating
         H = np.append(H,AlFe_heating(t[i]))
         Tk = ka*T[:,i-1]
@@ -309,43 +304,56 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
                 
         #calculate temperature change
         dTdt = rhs/(rhoa*cp[:,i])
+        dTdt_new = dTdt[0]
         T[:-1,i] = T[:-1,i-1] + dt*dTdt[:-1]
         T[-1,i] = Ts
-        Xfe[:,i] = Xfe[:,i-1] #continuity of Xfe between timesteps  
-        
-        if np.any((np.int_(T)[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)): #see if there are any melting cells
-            melt = np.where((np.int_(T)[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1))
+        Flid_new = -ka*(Ts-T[-2,i])/dr #default surface flux
+        Fs = -ka*(Ts-T[-2,i])/dr #surface flux for Ur ratio
+        Xfe[:,i] = Xfe[:,i-1] #continuity of Xfe between timesteps       
+        if np.any((T[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)): #see if there are any melting cells
+            melt = np.where((T[:,i-1]>=Ts_fe) & (Xfe[:,i-1]<1)&(dTdt>=0)) #only melting where heating up
             Xfe[melt,i] = Xfe[melt,i-1]+rhs[melt]/(rhoa*XFe_a*Lc)*dt
+            Xfe[-1,i]=0 #surface node is unmelted by default
+            dTdt_new = 0 #no temp change
             T[melt,i] = T[melt,i-1] #melting region has constant temperature
-        
-        if convect[i-1] == True or cond_i==1: #overwrite convecting portion
+        if convect[i-1] == True: #overwrite convecting portion
             nlid_cells = round(d0[i]/dr)
             if nlid_cells ==0:
-                lid_start = ncells -2
+                lid_start = n_cells -2
             else:
-                lid_start = ncells - nlid_cells - 1 #index in temp array where lid starts
+                lid_start = n_cells - nlid_cells - 1 #index in temp array where lid starts
             cp[:lid_start,i] = cp_calc_eut_int(T[lid_start-1,i-1],True)
-                        
-            if cond_i == 0: #first time it starts convecting
-                print('Onset of convection')             
-                cond_i =1
-                
-            Fs = -ka*(Ts-T[lid_start,i-1])/d0[i]
-            if int(T[lid_start-1,i-1]) >= Ts_fe and (Xfe[lid_start-1,i-1]<1): #no temp change only melting
-                Xfe[:lid_start,i] = Xfe[:lid_start,i-1]+(rhoa*H-Fs)/(rhoa*XFe_a*Lc)*dt
+            if (int(T[lid_start-1,i-1]) >= Ts_fe) & (Xfe[lid_start-1,i-1]<1): #no temp change only melting
+                Vocean = 4/3*np.pi*(r-d0[i])**3
+                Alid = 4*np.pi*(r-d0[i])**2
+                Xfe[:lid_start,i] = Xfe[:lid_start,i-1]+(Vocean*rhoa*H[i]-Flid_old*Alid)/(rhoa*XFe_a*Lc*Vocean)*dt
+                Xfe[-1,i]=0 #surface node is unmelted by default
+                if d0[i] < dr:
+                    Flid_new = -ka*(Ts-T[lid_start,i])/d0[i] #if less than grid thickness choose d0 so don't overestimate thickness
+                else:
+                    Flid_new = -ka*(T[lid_start+1,i]-T[lid_start,i])/dr   
             else:
-                cp[:lid_start,i] = cp_calc_eut_int(T[:lid_start,i-1],True)
-                cp[lid_start:,i] = cp_calc_eut_arr(T[lid_start:,i-1],True)
-                dTdt = (rhoa*H[i]-Fs)/(rhoa*cp[0,i])
-                T[:lid_start,i] = T[:lid_start,i-1] + dTdt*dt
+                cp[:lid_start,i] = cp_calc_eut_int(T[0,i-1],True)
+                cp[-1,i] = cpa
+                dTdt_new = dTadt_calc(t[i-1],T[lid_start-1,i-1],d0[i-1],Flid_old)
+                T[:lid_start,i] = T[:lid_start,i-1] + dTdt_new*dt 
                 T[-1,i] = Ts 
-                
-     
+                if d0[i] < dr:
+                    Flid_new = -ka*(Ts-T[lid_start,i])/d0[i] #if less than grid thickness choose d0 so don't overestimate thickness
+                else:
+                    Flid_new = -ka*(T[lid_start+1,i]-T[lid_start,i])/dr      
+        
+        #calculate Urey ratio
+        Ur = rhoa*V*H[i]/(abs(Fs*As))
+        #relabel for next step
+        Flid_old = Flid_new
+        dTdt_old = dTdt_new
+            
         #calculate silicate melting        
         Xsi[T[:,i]<Tms,i] = 0 #subsolidus
         Xsi[((T[:,i]>=Tms) & (T[:,i]<Tml)),i] = (T[((T[:,i]>=Tms) & (T[:,i]<Tml)),i]-Tms)/dTphase_si #melting
         Xsi[T[:,i]>=Tml,i] = 1 #above liquidus
-        
+                
         i = i+1
         
         #relabel for returning
