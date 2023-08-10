@@ -6,7 +6,7 @@ Function for choosing correct specific heat capacity
 from parameters import Tml, Tms, Ts_fe, Tl_fe, cpa, cpa_fe, cpa_fesi, cpa_si, cpm, cpm_p
 import numpy as np
 
-def cp_calc_int(T,differentiate):
+def cp_calc_int(T,differentiate,eutectic=False):
     """
     
     Calculate specific heat capacity for a single temperature
@@ -17,6 +17,8 @@ def cp_calc_int(T,differentiate):
         temperature [K]
     differentiate : bool
         is the body differentiated
+    eutectic : bool
+        is the initial sulfur content eutectic
 
     Returns
     -------
@@ -25,7 +27,7 @@ def cp_calc_int(T,differentiate):
 
     """
     
-    if differentiate == True:
+    if (differentiate == True) & (eutectic==False):
        if T < Ts_fe:
            cp = cpa
        elif T >= Ts_fe and T <= Tl_fe and T < Tms:
@@ -41,6 +43,11 @@ def cp_calc_int(T,differentiate):
        else:
            print(f"T={T},Ts_fe={Ts_fe},Tl_fe={Tl_fe}")
            raise ValueError ('Cp scenario not coded')
+    elif (differentiate == True) & (eutectic==True): #cp only calculated when fe not melting/melted
+       if T >= Tms and T < Tml: #silicate part of body is melting
+           cp = cpa_si
+       else: #silicate part of body is not melting
+           cp = cpa
         
     else:
         if T <= Tml and T >= Tms: #mantle is melting
