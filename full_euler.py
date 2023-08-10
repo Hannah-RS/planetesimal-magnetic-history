@@ -110,7 +110,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     i_core = round(n_cells/2) # index in array of last core cell 
     mantle_conv = False #flag for mantle convection
     core_conv = False #flag for core convection
-
     
     #output variables
     Xs = np.ones([m])*Xs_0 #core sulfur fraction

@@ -7,12 +7,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-folder = 'Fullrun2'
+folder = 'Fullrun2' #original run
+folder2='Fullrun3' #run with smaller solidification timestep
 data = pd.read_csv(f'../Results_combined/{folder}/all_sucess_info.csv',delimiter=',',skiprows=[1],header=0,index_col=False)
+data_s = pd.read_csv(f'../Results_combined/{folder2}/all_sucess_info.csv',delimiter=',',skiprows=[1],header=0,index_col=False)
+data_s['comp_diff']=data['comp_n']-data_s['comp_n']
 data['r']=data['r']/1e3 #rescale to km
-
+data_s['r']=data_s['r']/1e3 #rescale to km
 #filter for more than 1 dynamo generation period
 data2 = data[(data['mac_n']>1)|(data['cia_n']>1)|(data['comp_n']>1)]
+data_s2 = data_s[(data_s['mac_n']>1)|(data_s['cia_n']>1)|(data_s['comp_n']>1)]
+
 data4 = data[data['comp_n']>1]
 #filter for ones with gaps >10Myr 
 data3=data2[(data2['cia_ngl100']>0)|(data2['comp_ngl100']>0)|((data2['cia_n']-data2['cia_ngl100']-data2['cia_ngl10']-1)>0)]
@@ -24,19 +29,40 @@ print('There are',len(data2[data2['comp_n']>1]),'intermittent compositional dyna
 
 #percent on
 data2.loc[:,'comp_perc_on']=data2['comp_dur']/(data2['comp_off']-data2['comp_on'])
+data_s2.loc[:,'comp_perc_on']=data_s2['comp_dur']/(data_s2['comp_off']-data_s2['comp_on'])
+#difference between datasets
+data_s.loc[:,'comp_diff']=data['comp_n']-data_s['comp_n'] #difference in number of on periods for same run
+data_s2.loc[:,'comp_perc_diff']=data_s2['comp_perc_on']-data2['comp_perc_on'] #difference in percentage on for same run
 
-data2.loc[:,'cia_perc_on']=data2['cia_dur']/(data2['cia_off']-data2['cia_on'])
 
 ######### try numpy histogram instead #####################################
 w=1/len(data)
-plt.figure()
-plt.hist((data2[data2['r']==100]['comp_perc_on'],data2[data2['r']==200]['comp_perc_on'],data2[data2['r']==300]['comp_perc_on'],data2[data2['r']==400]['comp_perc_on']),range=(0,1),weights=(np.ones([len(data2[data2['r']==100])])*w,np.ones([len(data2[data2['r']==200])])*w,np.ones([len(data2[data2['r']==300])])*w,np.ones([len(data2[data2['r']==400])])*w),stacked=True)
-plt.legend(labels=['100km','200km','300km','400km'])
-plt.xlabel('Fraction of time dynamo is on \n between first and last generation times')
-plt.ylabel('Fraction of total runs')
-plt.title('Compositional dynamo')
-plt.savefig('../Plots/intermittent_hist.png',bbox_inches='tight')
+fig, ax = plt.subplots(nrows=2,ncols=1,sharex=True,tight_layout=True)
+ax[0].hist((data2[data2['r']==100]['comp_perc_on'],data2[data2['r']==200]['comp_perc_on'],data2[data2['r']==300]['comp_perc_on'],data2[data2['r']==400]['comp_perc_on']),range=(0,1),weights=(np.ones([len(data2[data2['r']==100])])*w,np.ones([len(data2[data2['r']==200])])*w,np.ones([len(data2[data2['r']==300])])*w,np.ones([len(data2[data2['r']==400])])*w),stacked=True)
+ax[0].set_ylabel('Fraction of total runs')
+ax[0].set_title('Same timestep in solidification')
+ax[0].set_ylim([0,0.2])
+ax[1].hist((data_s2[data_s2['r']==100]['comp_perc_on'],data_s2[data_s2['r']==200]['comp_perc_on'],data_s2[data_s2['r']==300]['comp_perc_on'],data_s2[data_s2['r']==400]['comp_perc_on']),range=(0,1),weights=(np.ones([len(data_s2[data_s2['r']==100])])*w,np.ones([len(data_s2[data_s2['r']==200])])*w,np.ones([len(data_s2[data_s2['r']==300])])*w,np.ones([len(data_s2[data_s2['r']==400])])*w),stacked=True)
+ax[1].set_xlabel('Fraction of time dynamo is on \n between first and last generation times')
+ax[1].set_ylabel('Fraction of total runs')
+ax[1].set_title('Smaller timestep in solidification')
+ax[1].set_ylim([0,0.2])
+ax[0].legend(labels=['100km','200km','300km','400km'])
+fig.suptitle('Compositional dynamo')
+#plt.savefig('../Plots/intermittent_hist.png',bbox_inches='tight')
 ########## How many have fractional on times < 80% ###########################
 frac80=len(data2[data2['comp_perc_on']<0.8])*100/len(data)
 frac70=len(data2[data2['comp_perc_on']<0.7])*100/len(data)
-print(f"{frac80:.0f} % of compositional dynamos are on less than 80% of the time ")
+print(f"Originally {frac80:.0f} % of compositional dynamos are on less than 80% of the time ")
+frac80=len(data_s2[data_s2['comp_perc_on']<0.8])*100/len(data_s)
+frac70=len(data_s2[data_s2['comp_perc_on']<0.7])*100/len(data_s)
+print(f"After the change {frac80:.0f} % of compositional dynamos are on less than 80% of the time ")
+#### how much did changing the timestep improve things
+impn = len(data_s2[data_s2['comp_diff']>0]) #reduction in on periods
+impperc = len(data_s2[data_s2['comp_perc_diff']>0]) #increase in percentage of time on
+
+print(f'{impn/len(data)*100:.1f}% of runs had a reduction in on periods')
+print(f'{impperc*100/len(data):.1f}% of runs had an increase in fractional duration')
+
+print('In the first run',len(data2[data2['comp_n']>1])/len(data)*100,'% of compositional dynamos are intermittent')
+print('In the second run',len(data_s2[data_s2['comp_n']>1])/len(data_s)*100,'% of compositional dynamos are intermittent')

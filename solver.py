@@ -137,6 +137,10 @@ else:
 #switch to conduction
 if np.any(Ra/Racrit<0.5):
     fcond_t = t[Ra/Racrit<0.5][0]/Myr #half the critical value (end of buffering)
+    if np.any(d0>(r-rc)):
+        fcond_t2 = t[d0>(r-rc)][0]/Myr #check convection not ended by stagnant lid thickening
+        if fcond_t2 < fcond_t:
+            fcond_t = fcond_t2 #lid thickening shuts off convection first
 else:
     fcond_t = np.nan
 if np.any(Ra/Racrit>(2-conv_tol)):
