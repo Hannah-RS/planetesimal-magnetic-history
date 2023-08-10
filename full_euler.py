@@ -27,7 +27,7 @@ from fe_fes_liquidus import fe_fes_liquidus_bw
 from stratification import volume_average
 from heating import Al_heating
 
-def thermal_evolution(tstart,tend,dt_in,T0,f0,sparse_mat_c,sparse_mat_m):
+def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     """
     
 
@@ -37,7 +37,7 @@ def thermal_evolution(tstart,tend,dt_in,T0,f0,sparse_mat_c,sparse_mat_m):
         start time [s]
     tend : float
         end time [s]
-    dt_in : float
+    dt : float
         time step [s]
     T0 : array
         initial temperature profile [K]
@@ -110,8 +110,6 @@ def thermal_evolution(tstart,tend,dt_in,T0,f0,sparse_mat_c,sparse_mat_m):
     i_core = round(n_cells/2) # index in array of last core cell 
     mantle_conv = False #flag for mantle convection
     core_conv = False #flag for core convection
-    core_t = False #flag for smaller timestep for core solidification
-    dt = dt_in #create timestep variable initially same size as set externally
     
     #output variables
     Xs = np.ones([m])*Xs_0 #core sulfur fraction
@@ -302,9 +300,6 @@ def thermal_evolution(tstart,tend,dt_in,T0,f0,sparse_mat_c,sparse_mat_m):
     while tsolve_new < tend:
 
         #Step 0. Calculate time
-        if core_t == True:
-            dt = 0.8*dt_in #use a timestep that is 10 times smaller
-            
         tsolve_new = tsolve_old + dt
         
         # Step 1. Calculate conductive profile for mantle
@@ -368,9 +363,6 @@ def thermal_evolution(tstart,tend,dt_in,T0,f0,sparse_mat_c,sparse_mat_m):
         Tliquidus = round(fe_fes_liquidus_bw(Xs_old,Pc)) #round as Buono & Walker data to nearest integer
         if T_old_core[-2] < Tliquidus: #core solidifies from outside in- convecting so isothermal beneath CMB
             core_conv = False #core convects but b.l. thickness set by rho not T so use conductive Fcmb
-            if core_t == False:
-                print(f'Beginning core solidification, time is {tsolve_new/Myr}')
-            core_t = True #switch for core solidification timestep change
             stratification_new = False #thermal stratification is removed by solidification
             if Xs_old>= Xs_eutectic:
                 dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
