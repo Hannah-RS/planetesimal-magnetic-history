@@ -12,13 +12,14 @@ import time #use this to time the integration
 #import time constants and initial conditions
 from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, kappa_c, save_interval_d, save_interval_t, km, Vm, As
 from parameters import rhom, step_m, Xs_0, default, rcmf, Fe0, full_save, B_save, conv_tol, frht, eta0, etal, w, alpha_n
+from viscosity_def import viscosity
 
 if automated == True: #should say true am just testing
     import sys
     folder = sys.argv[1]
 else:
     folder = 'Results_combined/' #folder where you want to save the results
-
+    ind = None #no index for csv
 #set flag for run started
 if automated == True:
     from parameters import ind
@@ -55,6 +56,20 @@ n_cells = int(r/dr)+1 #number of cells needed to span body - add one to include 
 Tint = np.ones([n_cells])*Ts#first element in the array is at r=0, accrete cold at surface temp 
 Tint[-1]=Ts
 
+#Check viscosity profile is monotonically decreasing before start
+Ttest = np.linspace(1200,1900,200)
+#calculate viscosity
+eta_test = viscosity(Ttest)
+eta_diff = np.diff(eta_test) #calculate differences with sucessive elements
+if np.all(eta_diff<=0):
+    print('Viscosity profile is monotonically decreasing - proceeding')
+else: #put marker in csv
+    if automated == True: #no need to reimport ind as will have been imported earlier
+        auto = pd.read_csv(f'{folder}auto_params.csv')
+        auto.loc[ind+1,'status']=-1 #indicates viscosity error
+        auto.to_csv(f'{folder}auto_params.csv',index=False)
+    raise ValueError('Invalid viscosity model')
+    
 print(f'Beginning run {run}')
 print('Initial conditions set')
 
