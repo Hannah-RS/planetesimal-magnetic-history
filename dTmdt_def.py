@@ -74,7 +74,5 @@ def dTadt_calc(t,Tconv,d0,Flid,eutectic):
     h = AlFe_heating(t)
     rad = h*rhoa*Vocean #radiogenic heating contribution
     cp = cp_calc_int(Tconv,True,eutectic)
-    print(type(cp))
-    print(Tconv)
    
     return 1/(rhoa*cp*Vocean)*(rad-Flid*Alid)
