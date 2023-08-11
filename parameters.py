@@ -18,7 +18,7 @@ mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
 automated = True
-full_save = True #do you want to save temp profiles etc or just summary stats
+full_save = False #do you want to save temp profiles etc or just summary stats
 B_save = False #do you want to save field strengths and Rem
 out_interval = 20 #how many times do you want t to be printed in the whole run
 save_interval_d = 0.01*Myr # how often do you want each variable to be saved during differentiation
@@ -28,7 +28,7 @@ save_interval_t = 0.1*Myr # how often do you want each variable to be saved duri
 if automated == True:
     folder = sys.argv[1]
     auto = pd.read_csv(f'{folder}auto_params.csv',skiprows=[1])
-    ind = np.where((auto['status']!=1)&(auto['status']!=0))[0][0] #find index of first uncalculated run
+    ind = np.where((auto['status']!=1)&(auto['status']!=0)&(auto['status']!=-1))[0][0] #find index of first uncalculated run
     r = auto.loc[ind,'r']
     default = auto.loc[ind,'default']
     rcmf = auto.loc[ind,'rcmf']
@@ -44,17 +44,17 @@ if automated == True:
     t_end_m = auto.loc[ind,'t_end_m']
     dr = auto.loc[ind,'dr']
 else: #set manually
-    r = 300e3 # radius of asteroid [m]
+    r = 100e3 # radius of asteroid [m]
     dr = 500 # grid size [m]
     default ='vary' #default viscosity model
-    rcmf = 0.5 #rheologically critical melt fraction - melting required for differentiation
-    eta0 = 1e21 #reference viscosity at Tms [Pas]
-    frht =0.005 #frh*(DeltaT)
+    rcmf = 0.4 #rheologically critical melt fraction - melting required for differentiation
+    eta0 = 1e14 #reference viscosity at Tms [Pas]
+    frht =0.08 #frh*(DeltaT)
     w = 5 #width of log linear region [K]
-    etal = 10 #liquid viscsoity [Pas]
+    etal = 100 #liquid viscsoity [Pas]
     alpha_n = 25 #melt weakening (diffusion creep)
-    Xs_0 = 30# initial wt % sulfur in core 
-    Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
+    Xs_0 = 28.5# initial wt % sulfur in core 
+    Fe0 = 0 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
     run = 9
     t_acc_m = 0.8 #accretion time [Myr]
     t_end_m = 500 # max end time [Myr]
