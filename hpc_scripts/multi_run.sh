@@ -10,11 +10,11 @@ else
     fi
     #run script
     i=0
-    nruns=$(awk '(NR>2)' $1/auto_params.csv | awk -F',' '$NF<0' | wc -l) #only count unrun lines
+    nruns=$(awk '(NR>2)' $1/auto_params.csv | awk -F',' '$NF<-1' | wc -l) #only count unrun lines
     echo $nruns
     while [ $i -lt $nruns ]
     do
-        runi=$(awk '(NR>2)' $1/auto_params.csv | awk -F',' '$NF<0' | awk -F',' 'NR==1{print $1}') #get run number
+        runi=$(awk '(NR>2)' $1/auto_params.csv | awk -F',' '$NF<-1' | awk -F',' 'NR==1{print $1}') #get run number
         SECONDS=0 #start timer
         python solver.py $1/ >> $1/output.txt 2>&1 #run model and write terminal output to file, send error there too
         runt=$SECONDS #stop timer
