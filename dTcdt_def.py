@@ -12,11 +12,11 @@ Can toggle on and off solidification
 
 """
 #import constants and parameters    
-from parameters import Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Pc, gc
+from parameters import Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Pc, gc, alpha_c
 from q_funcs import Qlt, Qr
 from fe_fes_liquidus import fe_fes_liquidus_dp
 import numpy as np
-from Rem_calc import Rem_comp
+from Rem_calc import Rem_comp, Rem_b
 from heating import Fe_heating
 
 def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
@@ -41,6 +41,10 @@ def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
     -------
     dTcdt : float
             rate of change of core temperature (if negative core is cooling)
+    Rem : float
+        magnetic Reynolds number
+    Bdip_cmb : float
+        dipole magnetic field strength at the surface [T]
 
     """
     
@@ -60,8 +64,10 @@ def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
     Qrad = rhoc*Vconv*Fe_heating(t)
        
     dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb+Qrad)/Qst
-        
-    return dTcdt
+    #calculate magnetic field
+    Rem, Bdip_cmb = Rem_b(f, 0, Xs, Tcore, Fcmb, False) #dfdt = 0 for  non-solidifying   
+    
+    return dTcdt, Rem, Bdip_cmb
 
 def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     """
@@ -87,10 +93,10 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
             rate of change of core temperature (if negative core is cooling)
     f_new : float
         new fractional inner core radius
-    Rem_c : float
-        compositional magnetic Reynolds number
-    Bcomp : float
-        flux based magnetic field strength [T]
+    Rem : float
+        magnetic Reynolds number
+    Bdip_cmb : float
+        dipole magnetic field strength at the surface [T]
 
     """
     dTl_dP = fe_fes_liquidus_dp(Xs, Pc)
@@ -103,6 +109,6 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     dfdt = - dTcdt/(rhoc*gc*dTl_dP*rc)
 
     f_new = f+dfdt*dt
-    Rem_c, Bcomp = Rem_comp(dfdt,f,Xs) 
+    Rem, Bdip_cmb = Rem_b(f, dfdt, Xs, Tcore, Fcmb, True) 
    
-    return dTcdt, f_new, Rem_c, Bcomp
+    return dTcdt, f_new, Rem, Bdip_cmb

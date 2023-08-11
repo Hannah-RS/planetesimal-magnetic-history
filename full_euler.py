@@ -236,7 +236,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         core_conv = True
         nbl_cells = round(dc_new/dr)
         bl_start = ncore_cells - nbl_cells - 1 #index in temp array where lid starts
-        dTcdt = dTcdt_calc(tsolve_new,Fcmb_new, T0_core, f0)
+        dTcdt, Rem_c_new, Bcomp_new = dTcdt_calc(tsolve_new,Fcmb_new, T0_core, f0,Xs_0)
         #find new convective temperature
         Tc_conv_new = T0_core[bl_start-1] + dTcdt*dt 
         T_new_core[:bl_start] = Tc_conv_new #replace everything with the convective temperature up to b.l
@@ -379,7 +379,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             nbl_cells = round(dc_old/dr)
             bl_start = ncore_cells - nbl_cells - 1 #index in temp array where lid starts
 
-            dTcdt = dTcdt_calc(tsolve_new,Fcmb_old, T_old_core, f_old)
+            dTcdt, Rem_c_new, Bcomp_new = dTcdt_calc(tsolve_new,Fcmb_old, T_old_core, f_old,Xs_old)
             
             #find new convective temperature
             Tc_conv_new = T_old_core[bl_start-1] + dTcdt*dt 
@@ -402,7 +402,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     core_conv = True
                     b_ind = np.where(T_old_core[:-1] >= Tcmb_old)[0] #indices of unstable layer as array
                     min_unstable_new = b_ind[0]
-                    dTcdt = dTcdt_calc(tsolve_new,Fcmb_old, T_old_core, f_old, stratification = [True, min_unstable_old])
+                    dTcdt, Rem_c_new, Bcomp_new = dTcdt_calc(tsolve_new,Fcmb_old, T_old_core, f_old, Xs_old, stratification = [True, min_unstable_old])
                     Tc_conv_new = T_old_core[min_unstable_old]+dTcdt*dt #replace convecting layer from last timestep with new temp - in later steps use i-1 and i
                     T_new_core[min_unstable_old:-1] = Tc_conv_new
                     #now perform volume average over unstable layer
