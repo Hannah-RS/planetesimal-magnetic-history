@@ -169,20 +169,7 @@ Frad = h*rhom*Vm/As #radiogenic heatflux
 
 #combine these in a single array
 Flux = [Fs, Fcmb, Fad, Frad]
-
-#### This code is deprecated and will be deleted later ##################
-# calculate thermal magnetic reynolds number
-from Rem_calc import Rem_therm, B_flux_therm
-# need Fdrive for Rem_therm
-#only calculate this for Fdrive >0
-Fdrive = Fcmb - Fad
-Fdrive_nn = Fdrive.copy()
-Fdrive_nn[Fdrive<0]=0
-Rem_t = Rem_therm(Fdrive_nn,f,min_unstable) # magnetic Reynolds number for thermal convection - tuple of MAC and CIA balance
-Bml, Bmac, Bcia = B_flux_therm(Fdrive_nn,f,min_unstable) # field strength for thermal convection based on energy flux scaling 
-B = np.array([Bml, Bmac, Bcia, Bcomp])
-Rem = np.array([Rem_t[0],Rem_t[0],Rem_t[1],Rem_c]) #use conservative MAC Rem for ML
-        
+Fdrive = Fcmb - Fad        
 ##########################new post processing ##########################
 therm_Rem = Rem_c[f==f0]
 therm_B = Bcomp[f==f0]
@@ -191,6 +178,10 @@ therm_t = t[f==f0]/Myr
 comp_Rem = Rem_c[f<f0]
 comp_B = Bcomp[f<f0]
 comp_t = t[f<f0]/Myr
+
+#concatenate for saving
+therm = [therm_Rem,therm_B,therm_t]
+comp = [comp_Rem,comp_B,comp_t]
 
 ################# Threshold for magnetic field being on ########################
 threshold1 = 10 
@@ -232,10 +223,10 @@ coreconv_on, coreconv_off, coreconv_dur, coreconv_n, coreconv_ngl10, coreconv_ng
 if full_save == True:
     np.savez_compressed(f'{folder}run_{run}', Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, 
              T_profile = Tprofile, Flid = Flid, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, Ur=Ur, 
-             Ra = Ra, RaH= RaH, RanoH = RanoH, RaRob = RaRob, Racrit = Racrit, t=t, Rem_t = Rem_t, B = B, Rem_c = Rem_c, Flux = Flux) 
+             Ra = Ra, RaH= RaH, RanoH = RanoH, RaRob = RaRob, Racrit = Racrit, t=t, therm=therm, comp=comp, Flux = Flux) 
 
 if B_save == True:
-    np.savez_compressed(f'{folder}run_{run}_B', t=t, Rem_t = Rem_t, B = B, Rem_c = Rem_c)
+    np.savez_compressed(f'{folder}run_{run}_B', therm=therm, comp=comp)
     
 #write parameters to the run file
 from csv import writer
