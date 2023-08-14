@@ -62,7 +62,7 @@ def conv_power(f,dfdt,Xs,Tcore,Fcmb,solid):
     
     return p
 
-def Rem_b(f,dfdt,Xs,Tcore,Fcmb,solid):
+def Rem_b(f,dfdt,Xs,Tcore,Fcmb,solid,min_unstable):
     """
     Calculation of dipole field strength on the surface and magnetic Reynolds number
     Based on scaling laws of Aubert 2009, Davidson 2013 and Davies 2022
@@ -81,7 +81,8 @@ def Rem_b(f,dfdt,Xs,Tcore,Fcmb,solid):
         CMB heat flux [Wm^-2]
     solid : bool
         whether the core is solidifying or not
-
+    min_unstable : int
+        minimum index of unstable layer
     Returns
     -------
     Rem : float
@@ -89,14 +90,15 @@ def Rem_b(f,dfdt,Xs,Tcore,Fcmb,solid):
     Bdip_surf : float
         RMS dipole magnetic field strength at the surface [T]
     """
+    l = f*rc - min_unstable*dr 
     p = conv_power(f, dfdt, Xs, Tcore, Fcmb, solid)
     if p<0: #no dynamo
         Rem = 0
         Bdip_surf = 0 
     else:
-        uconv = cu*p**0.42*Omega*f*rc
-        Rem = uconv*f*rc/lambda_mag
-        Bdip_cmb = cb*p**0.31*(fohm*mu0*rhoc)**0.5*Omega*f*rc
+        uconv = cu*p**0.42*Omega*l
+        Rem = uconv*l/lambda_mag
+        Bdip_cmb = cb*p**0.31*(fohm*mu0*rhoc)**0.5*Omega*l
         Bdip_surf = Bdip_cmb*((f*rc)/r)**3
         
     return Rem, Bdip_surf

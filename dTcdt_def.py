@@ -55,9 +55,9 @@ def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
         Vconv = 4/3*np.pi*(rc**3-rstrat**3) #calculate Vconv - volume of cmb boundary layer has negligible volume 
     else:
         f3 = 0 #if there is an inner core treat as isothermal
+        min_unstable_ind = 0
         rstrat = 0
         Vconv = 4/3*np.pi*rc**3*(f**3)
-        #nic_cells = round(f*rc/dr)
         
     
     Qst = rhoc*cpc*Vconv
@@ -65,7 +65,7 @@ def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
        
     dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb+Qrad)/Qst
     #calculate magnetic field
-    Rem, Bdip_cmb = Rem_b(f, 0, Xs, Tcore, Fcmb, False) #dfdt = 0 for  non-solidifying   
+    Rem, Bdip_cmb = Rem_b(f, 0, Xs, Tcore, Fcmb, False,min_unstable_ind) #dfdt = 0 for  non-solidifying   
     
     return dTcdt, Rem, Bdip_cmb
 
@@ -109,6 +109,6 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     dfdt = - dTcdt/(rhoc*gc*dTl_dP*rc)
 
     f_new = f+dfdt*dt
-    Rem, Bdip_cmb = Rem_b(f, dfdt, Xs, Tcore, Fcmb, True) 
+    Rem, Bdip_cmb = Rem_b(f, dfdt, Xs, Tcore, Fcmb, True,0) #if core is solidifying there is no thermal stratification
    
     return dTcdt, f_new, Rem, Bdip_cmb
