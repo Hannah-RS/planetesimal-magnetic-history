@@ -52,6 +52,30 @@ def on_off_test(tarray,out_array,threshold,save_interval):
             
     return tstart, tend, duration
 
+def on_off_basic(tarray,out_array,threshold,save_interval):
+    """
+    Function for beginning of first dynamo generation period and end of last
+
+    Parameters
+    ----------
+    tarray : float
+        time series [Myr]
+    out_array : float
+        output to test condition on - must be same length as time series
+    threshold : float
+        threshold value to compare out_array
+    Returns
+    -------
+    first_on : float
+        first time of switch on [Myr]
+    last_off : float
+        last time of switch off [Myr]        
+    """
+    start, end, duration = on_off_test(tarray,out_array,threshold,save_interval)
+    first_on = start[0]
+    last_off = end[-1]
+    return first_on, last_off
+
 def on_off_save(tarray,out_array,threshold,save_interval,file,label,run):
     """
     Function for finding start and end periods e.g. for a dynamo and saving to csv

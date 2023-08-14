@@ -124,9 +124,6 @@ if automated == False:
 print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time2)))
 
 ############################# Process data ####################################
-########## Current comparitive parameters ####################
-from duration_calc import on_off_save
-
 ################ all processes which happen once  #############################
 int_time = int_time1+int_time2 #total time for the two scripts
 nmantle = int((r/dr)/2)
@@ -173,6 +170,7 @@ Frad = h*rhom*Vm/As #radiogenic heatflux
 #combine these in a single array
 Flux = [Fs, Fcmb, Fad, Frad]
 
+#### This code is deprecated and will be deleted later ##################
 # calculate thermal magnetic reynolds number
 from Rem_calc import Rem_therm, B_flux_therm
 # need Fdrive for Rem_therm
@@ -184,34 +182,51 @@ Rem_t = Rem_therm(Fdrive_nn,f,min_unstable) # magnetic Reynolds number for therm
 Bml, Bmac, Bcia = B_flux_therm(Fdrive_nn,f,min_unstable) # field strength for thermal convection based on energy flux scaling 
 B = np.array([Bml, Bmac, Bcia, Bcomp])
 Rem = np.array([Rem_t[0],Rem_t[0],Rem_t[1],Rem_c]) #use conservative MAC Rem for ML
+        
+##########################new post processing ##########################
+therm_Rem = Rem_c[f==f0]
+therm_B = Bcomp[f==f0]
+therm_t = t[f==f0]/Myr
 
-#calculate maximum field strengths
-m = 4
-threshold = 10 
-max_B = np.zeros([m])
-max_Bt = np.zeros([m])
-for i in range(m):
-    if np.any(Rem[i,:]>threshold):
-        max_B[i] = np.max(B[i,Rem[i,:]>threshold])
-        max_Bt[i] = t[B[i,:]==max_B[i]][0]/Myr
-        
-# maximum Rem - ignore first entry as Rem_mac is duplicated
-max_Rem = np.zeros([m-1])
-max_Remt = np.zeros([m-1])
-for i in range(m-1):
-    if np.any(Rem[i+1,:]>threshold):
-        max_Rem[i] = np.max(Rem[i+1,Rem[i+1,:]>threshold])
-        max_Remt[i] = t[Rem[i+1,:]==max_Rem[i]][0]/Myr
-        
+comp_Rem = Rem_c[f<f0]
+comp_B = Bcomp[f<f0]
+comp_t = t[f<f0]/Myr
+
+################# Threshold for magnetic field being on ########################
+threshold1 = 10 
+threshold2 = 40
+threshold3 = 100
+
+########### Dynamo maxima - must be greater than threshold1 to be on ##########
+#thermal dynamo
+if np.any(therm_Rem>threshold1):
+    max_Btherm = max(therm_B[therm_Rem>threshold1])
+    max_Bthermt = therm_t[therm_B==max_Btherm][0]/Myr
+max_Rtherm = max(therm_Rem)
+max_Rthermt = therm_t[therm_Rem==max_Rtherm][0]/Myr
+
+#compositional dynamo
+if np.any(comp_Rem>threshold1):
+    max_Bcomp = max(comp_B[comp_Rem>threshold1])
+    max_Bcompt = comp_t[comp_B==max_Bcomp][0]/Myr
+max_Rcomp = max(comp_Rem)
+max_Rcompt = comp_t[comp_Rem==max_Rcomp][0]/Myr
+
 ########################## on and off times - calculate and save ####################
 #set 10*save_interval (1Myr) as on off tolerance to smooth on-off periods smaller than 1Myr
-t_plot_t = t/Myr
 
-mac_on, mac_off, mac_dur, mac_n, mac_ngl10, mac_ngl100 = on_off_save(t_plot_t, Rem_t[0],threshold,save_interval_t/Myr, f'{folder}MAC_onoff.csv', 'MAC', run) #MAC on off
-cia_on, cia_off, cia_dur, cia_n, cia_ngl10, cia_ngl100 = on_off_save(t_plot_t, Rem_t[1],threshold,10*save_interval_t/Myr, f'{folder}CIA_onoff.csv', 'CIA', run) #CIA on off
-comp_on, comp_off, comp_dur, comp_n, comp_ngl10, comp_ngl100 = on_off_save(t_plot_t, Rem_c, threshold,10*save_interval_t/Myr, f'{folder}comp_onoff.csv', 'comp', run) #comp on off
-coreconv_on, coreconv_off, coreconv_dur, coreconv_n, coreconv_ngl10, coreconv_ngl100 = on_off_save(t_plot_t, Fdrive,0,10*save_interval_t/Myr, f'{folder}coreconv_onoff.csv', 'core_conv', run) #core convection on off
+from duration_calc import on_off_save, on_off_basic
+# for Rem>10 save all info
+comp_on, comp_off, comp_dur, comp_n, comp_ngl10, comp_ngl100 = on_off_save(comp_t, comp_Rem, threshold1,10*save_interval_t/Myr, f'{folder}comp_onoff.csv', 'comp', run) #comp on off
+therm_on, therm_off, therm_dur, therm_n, therm_ngl10, therm_ngl100 = on_off_save(therm_t, therm_Rem, threshold1,10*save_interval_t/Myr, f'{folder}therm_onoff.csv', 'therm', run) #comp on off
+# Rem>40
+comp_on2, comp_off2 = on_off_basic(comp_t, comp_Rem, threshold2, 10*save_interval_t/Myr)
+therm_on2, therm_off2 = on_off_basic(therm_t, therm_Rem, threshold2, 10*save_interval_t/Myr)
+# Rem > 100
+comp_on3, comp_off3 = on_off_basic(comp_t, comp_Rem, threshold3, 10*save_interval_t/Myr)
+therm_on3, therm_off3 = on_off_basic(therm_t, therm_Rem, threshold3, 10*save_interval_t/Myr)
 
+coreconv_on, coreconv_off, coreconv_dur, coreconv_n, coreconv_ngl10, coreconv_ngl100 = on_off_save(t/Myr, Fdrive,0,10*save_interval_t/Myr, f'{folder}coreconv_onoff.csv', 'core_conv', run) #core convection on off
 ############################ Save results #####################################
 # save variables to file
 if full_save == True:
@@ -226,10 +241,9 @@ if B_save == True:
 from csv import writer
   
 var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_remove, 
-             strat_end, fcond_t, lconv_t,lconv_T, max_Rem[0], max_Remt[0], max_Rem[1], max_Remt[1], max_Rem[2], 
-             max_Remt[2],max_B[0],max_Bt[0],max_B[1],max_Bt[1],max_B[2],max_Bt[2],max_B[3],max_Bt[3], mac_on, 
-             mac_off, mac_dur, mac_n, mac_ngl10, mac_ngl100, cia_on, cia_off, cia_dur, cia_n, cia_ngl10, 
-             cia_ngl100,comp_on, comp_off, comp_dur, comp_n, comp_ngl10, comp_ngl100,coreconv_on, coreconv_off, coreconv_dur, coreconv_n, coreconv_ngl10, coreconv_ngl100]
+             strat_end, fcond_t, lconv_t,lconv_T, max_Rtherm, max_Rthermt, max_Btherm, max_Bthermt, max_Rcomp, 
+             max_Rcompt,max_Bcomp,max_Bcompt, therm_on, therm_off, therm_dur, therm_n, therm_ngl10, 
+             therm_ngl100, therm_on2, therm_off2, therm_on3, therm_off3, comp_on, comp_off, comp_dur, comp_n, comp_ngl10, comp_ngl100, comp_on2, comp_off2, comp_on3, comp_off3, coreconv_on, coreconv_off, coreconv_dur, coreconv_n, coreconv_ngl10, coreconv_ngl100]
 
 with open(f'{folder}run_results.csv','a') as f_object:
      writer_object = writer(f_object) #pass file object to csv.writer
