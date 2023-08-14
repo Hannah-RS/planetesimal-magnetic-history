@@ -103,7 +103,7 @@ def Rem_b(f,dfdt,Xs,Tcore,Fcmb,solid):
     else:
         uconv = cu*p**0.42*Omega*f*rc
         Rem = uconv*f*rc/lambda_mag
-        Bdip_cmb = 0.23*p**0.31*(fohm*mu0*rhoc)*Omega*f*rc
+        Bdip_cmb = cb*p**0.31*(fohm*mu0*rhoc)**0.5*Omega*f*rc
         Bdip_surf = Bdip_cmb*((f*rc)/r)**3
         
     return Rem, Bdip_surf
@@ -164,58 +164,6 @@ def Rem_therm(Fdrive,f,min_unstable):
     Rem_mac = umac*l/lambda_mag
     Rem_cia = ucia*l/lambda_mag
     return Rem_mac, Rem_cia
-
-
-def Rem_comp(dfdt,f, Xs):
-    """
-    
-    Parameters
-    ----------
-    dfdt : float
-        rate of change of inner core radius
-    f: float
-        fractional inner core radius
-    Xs : float
-        sulfur content of core [wt %]
-    Returns
-    -------
-    Rec : float
-        compositional magnetic reynolds number
-    Bcomp : float
-        compositional magnetic field strength [T]
-
-    """
-    ucomp, p = ucomp_aubert(dfdt,f,Xs)
-    Bcomp = Bp_frac*(rc/r)**3*cb*p**0.34*(rhoc*mu0*fohm)**0.5*Omega*f*rc
-    Re_c = ucomp*rc*f/lambda_mag
-    return Re_c, Bcomp
-
-def ucomp_aubert(dfdt,f,Xs):
-    """
-    RMS velocity of compositional convection from equation 24 in Aubert 2009
-
-    Parameters
-    ----------
-    dfdt : float
-        rate of change of inner core radius
-    f: float
-        fractional inner core radius
-    Xs : float
-        sulfur content of core [wt %]
-
-    Returns
-    -------
-    ucomp : float
-        rms velocity
-
-    """
-    rhol = fe_fes_density(Xs)*rho_exp
-    Raq = rc*gc*abs(dfdt)*(rhofe_s - rhol)/(rhol*Omega**3*(f*rc)**2)
-    p = 3/5*Raq #convective power per unit volume
-    
-    ucomp = cu*p**0.42*Omega*f*rc
-    
-    return ucomp, p
 
 def B_flux_therm(Fdrive,f,min_unstable):
     """

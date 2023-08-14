@@ -12,11 +12,11 @@ Can toggle on and off solidification
 
 """
 #import constants and parameters    
-from parameters import Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Pc, gc, alpha_c
+from parameters import Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Pc, gc
 from q_funcs import Qlt, Qr
 from fe_fes_liquidus import fe_fes_liquidus_dp
 import numpy as np
-from Rem_calc import Rem_comp, Rem_b
+from Rem_calc import Rem_b
 from heating import Fe_heating
 
 def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
