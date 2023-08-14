@@ -63,7 +63,7 @@ def conv_power(f,dfdt,Xs,Tcore,Fcmb,solid):
     
     therm = alpha_c/cpc*(Ficb-Fad)
     #convert total buoyancy to convective power per unit volume
-    buoy = -4*np.pi*f**2*rc**2*(therm+comp)
+    buoy = 4*np.pi*f**2*rc**2*(therm+comp)
     Raq = gc*buoy/(4*np.pi*rhoc*Omega**3*(f*rc)**4)
     p = 3/5*Raq #convective power per unit volume
     
