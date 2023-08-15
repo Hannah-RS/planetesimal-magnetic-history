@@ -129,12 +129,12 @@ int_time = int_time1+int_time2 #total time for the two scripts
 nmantle = int((r/dr)/2)
 diff_time = t_diff[-1]/Myr
 diff_T = Tdiff[int(nmantle),-1]
-peakT = np.amax(Tprofile[:,nmantle:])
-loc_max = np.where(Tprofile[:,nmantle:]==peakT)[0][0] #take the set of time coordinates and first value (they should all be the same)
-tmax = t[loc_max]/Myr
+peakT = np.amax(Tprofile[:,nmantle+1:])
+loc_max1 = np.where(Tprofile[:,nmantle+1:]==peakT)[0][0] #take the set of time coordinates and first value (they should all be the same)
+tmax = t[loc_max1]/Myr
 peak_coreT = np.amax(Tprofile[:,:nmantle])
-loc_max = np.where(Tprofile[:,:nmantle]==peak_coreT)[0][0] #take the set of time coordinates and first value (they should all be the same)
-tcoremax = t[loc_max]/Myr
+loc_max2 = np.where(Tprofile[:,:nmantle]==peak_coreT)[0][0] #take the set of time coordinates and first value (they should all be the same)
+tcoremax = t[loc_max2]/Myr
 tsolid = t[-1]/Myr #time of core solidification
 if np.all(Tprofile[:,int(nmantle)-2]<Tcmb):
     tstrat_remove = np.inf
