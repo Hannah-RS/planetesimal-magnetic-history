@@ -193,6 +193,10 @@ threshold3 = 100
 if np.any(therm_Rem>threshold1):
     max_Btherm = max(therm_B[therm_Rem>threshold1])
     max_Bthermt = therm_t[therm_B==max_Btherm][0]/Myr
+else:
+    max_Btherm = 0
+    max_Bthermt = np.nan
+    
 max_Rtherm = max(therm_Rem)
 max_Rthermt = therm_t[therm_Rem==max_Rtherm][0]/Myr
 
@@ -200,6 +204,9 @@ max_Rthermt = therm_t[therm_Rem==max_Rtherm][0]/Myr
 if np.any(comp_Rem>threshold1):
     max_Bcomp = max(comp_B[comp_Rem>threshold1])
     max_Bcompt = comp_t[comp_B==max_Bcomp][0]/Myr
+else:
+    max_Bcomp = 0
+    max_Bcompt = np.nan
 max_Rcomp = max(comp_Rem)
 max_Rcompt = comp_t[comp_Rem==max_Rcomp][0]/Myr
 
