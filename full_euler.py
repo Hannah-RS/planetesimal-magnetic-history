@@ -12,13 +12,11 @@ Flow:
 """
 #import modules
 import numpy as np
-import pandas as pd
 from parameters import Ts, Myr, dr, out_interval, save_interval_t, km, kc, alpha_c, r, rc, rhoc, gc, Vm, rhom, As
-from parameters import cpc, Xs_0, default, Xs_eutectic, Acmb, Lc, Pc, automated, conv_tol, n_cells, automated
+from parameters import cpc, Xs_0, default, Xs_eutectic, Acmb, Lc, Pc, automated, conv_tol, n_cells
 
 #import required functions
 from T_cond import Tm_cond_calc, Tc_cond_calc
-from viscosity_def import viscosity
 from dTmdt_def import dTmdt_calc
 from dTcdt_def import dTcdt_calc, dTcdt_calc_solid 
 from Rayleigh_def import Rayleigh_calc, Rayleigh_crit
