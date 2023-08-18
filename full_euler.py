@@ -95,10 +95,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         adiabatic CMB heat flux [W m^-2]
     Fcmb: array
         CMB heat flux [W m^-2]
-    Rem_c : array
-        compositional magnetic Reynolds number
-    Bcomp : float
-        compositional magnetic field strength [T]
+    Rem : array
+        magnetic Reynolds number
+    B : float
+         magnetic field strength [T]
+    buoyr : float
+        ratio of compositional and thermal buoyancy fluxes in the dynamo
     tsolve: array
         time points corresponding to each of the values above [s]
          
@@ -134,8 +136,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Flid = np.zeros([m])
     Fad = np.zeros([m])
     Fcmb = np.zeros([m])
-    Rem_c = np.zeros([m])
-    Bcomp = np.zeros([m])
+    Rem = np.zeros([m])
+    B = np.zeros([m])
+    buoyr = np.zeros([m])
     tsolve = np.zeros([m])
         
     #Step 0. Calculate time, get two separate temperature arrays
@@ -202,8 +205,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     # Step 3. Calculate conductive profile for the core
     T_new_core = Tc_cond_calc(tsolve_new,dt,T0_core,sparse_mat_c,True)
     Tc_conv_new = 0 #0 by default 
-    Rem_c_new = 0 # by default
-    Bcomp_new = 0
+    Rem_new = 0 # by default
+    B_new = 0
     
     Fad_new = kc*T0_core[-2]*alpha_c*gc/cpc
     # Step 4. Is the core solidifying? 
@@ -220,10 +223,10 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             #find new convective temperature
             Tc_conv_new = T0_core[0] 
             T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
-            Rem_c_new = 0
-            Bcomp_new = 0
+            Rem_new = 0
+            B_new = 0
         else:             
-            dTcdt, f_new, Rem_c_new, Bcomp_new = dTcdt_calc_solid(tsolve_new,Fcmb_new, T0_core, f0, Xs_0, dt) 
+            dTcdt, f_new, Rem_new, B_new, buoyr_new = dTcdt_calc_solid(tsolve_new,Fcmb_new, T0_core, f0, Xs_0, dt) 
             #find new convective temperature
             Tc_conv_new = T0_core[0] + dTcdt*dt 
             T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
@@ -234,7 +237,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         core_conv = True
         nbl_cells = round(dc_new/dr)
         bl_start = ncore_cells - nbl_cells - 1 #index in temp array where lid starts
-        dTcdt, Rem_c_new, Bcomp_new = dTcdt_calc(tsolve_new,Fcmb_new, T0_core, f0,Xs_0)
+        dTcdt, Rem_new, B_new, buoyr_new = dTcdt_calc(tsolve_new,Fcmb_new, T0_core, f0,Xs_0)
         #find new convective temperature
         Tc_conv_new = T0_core[bl_start-1] + dTcdt*dt 
         T_new_core[:bl_start] = Tc_conv_new #replace everything with the convective temperature up to b.l
@@ -341,8 +344,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         # Step 3. Calculate conductive profile for the core
         T_new_core = Tc_cond_calc(tsolve_new,dt,T_old_core,sparse_mat_c,True)
         Tc_conv_new = 0 #by default, over write if core convects
-        Rem_c_new = 0 #by default assume no compositional convection
-        Bcomp_new = 0
+        Rem_new = 0 #by default assume no compositional convection
+        B_new = 0
         f_new = f_old #by default overwrite if solidifies
         Xs_new = Xs_old
         min_unstable_new = min_unstable_old #continuity of mixed layer thickness by default
@@ -363,7 +366,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
                 
             else:              
-                dTcdt, f_new, Rem_c_new, Bcomp_new = dTcdt_calc_solid(tsolve_new,Fcmb_old, T_old_core, f_old, Xs_old, dt) 
+                dTcdt, f_new, Rem_new, B_new, buoyr_new = dTcdt_calc_solid(tsolve_new,Fcmb_old, T_old_core, f_old, Xs_old, dt) 
                 #find new convective temperature
                 Tc_conv_new = T_old_core[0] + dTcdt*dt 
                 T_new_core[:] = Tc_conv_new #replace everything with the convective temperature
@@ -377,7 +380,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             nbl_cells = round(dc_old/dr)
             bl_start = ncore_cells - nbl_cells - 1 #index in temp array where lid starts
 
-            dTcdt, Rem_c_new, Bcomp_new = dTcdt_calc(tsolve_new,Fcmb_old, T_old_core, f_old,Xs_old)
+            dTcdt, Rem_new, B_new, buoyr_new = dTcdt_calc(tsolve_new,Fcmb_old, T_old_core, f_old,Xs_old)
             
             #find new convective temperature
             Tc_conv_new = T_old_core[bl_start-1] + dTcdt*dt 
@@ -400,7 +403,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     core_conv = True
                     b_ind = np.where(T_old_core[:-1] >= Tcmb_old)[0] #indices of unstable layer as array
                     min_unstable_new = b_ind[0]
-                    dTcdt, Rem_c_new, Bcomp_new = dTcdt_calc(tsolve_new,Fcmb_old, T_old_core, f_old, Xs_old, stratification = [True, min_unstable_old])
+                    dTcdt, Rem_new, B_new, buoyr_new = dTcdt_calc(tsolve_new,Fcmb_old, T_old_core, f_old, Xs_old, stratification = [True, min_unstable_old])
                     Tc_conv_new = T_old_core[min_unstable_old]+dTcdt*dt #replace convecting layer from last timestep with new temp - in later steps use i-1 and i
                     T_new_core[min_unstable_old:-1] = Tc_conv_new
                     #now perform volume average over unstable layer
@@ -526,8 +529,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Flid[save_ind] = Flid_old
             Fad[save_ind] = Fad_old
             Fcmb[save_ind] = Fcmb_old
-            Rem_c[save_ind] = Rem_c_new
-            Bcomp[save_ind] = Bcomp_new
+            Rem[save_ind] = Rem_new
+            B[save_ind] = B_new
+            buoyr[save_ind] = buoyr_new
             tsolve[save_ind] = tsolve_old
         
         if i%int((tstart-tend)/(dt*out_interval))==0: #every 1/out_interval fraction of the run print the time
@@ -562,8 +566,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 Flid[save_ind] = Flid_new
                 Fad[save_ind] = Fad_old
                 Fcmb[save_ind] = Fcmb_old
-                Rem_c[save_ind] = Rem_c_new
-                Bcomp[save_ind] = Bcomp_new
+                Rem[save_ind] = Rem_new
+                B[save_ind] = B_new
+                buoyr[save_ind] = buoyr_new
                 tsolve[save_ind] = tsolve_old
             
             #truncate arrays to only return non-zero values
@@ -590,8 +595,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Flid = Flid[:save_ind+1]
             Fad = Fad[:save_ind+1]
             Fcmb = Fcmb[:save_ind+1]
-            Rem_c = Rem_c[:save_ind+1]
-            Bcomp = Bcomp[:save_ind+1]
+            Rem = Rem[:save_ind+1]
+            B = B[:save_ind+1]
+            buoyr = buoyr[:save_ind+1]
             tsolve = tsolve[:save_ind+1]
             
             break
@@ -622,8 +628,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Flid = Flid[:save_ind+1]
     Fad = Fad[:save_ind+1]
     Fcmb = Fcmb[:save_ind+1]
-    Rem_c = Rem_c[:save_ind+1]
-    Bcomp = Bcomp[:save_ind+1]
+    Rem = Rem[:save_ind+1]
+    B = B[:save_ind+1]
+    buoyr = buoyr[:save_ind+1]
     tsolve = tsolve[:save_ind+1]
             
-    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, RaRob, Racrit, Fs, Flid, Fad, Fcmb, Rem_c, Bcomp, tsolve
+    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, RaRob, Racrit, Fs, Flid, Fad, Fcmb, Rem, B, buoyr, tsolve

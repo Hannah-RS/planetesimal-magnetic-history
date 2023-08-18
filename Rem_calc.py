@@ -34,6 +34,8 @@ def conv_power(f,dfdt,Xs,Tcore,Fcmb,solid):
     -------
     p : float
         convective power per unit volume as defined in equation 17 in Aubert 2009
+    comp/therm : float
+        ratio of compositional and buoyancy fluxes
     """
     
     if solid == True:
@@ -60,7 +62,7 @@ def conv_power(f,dfdt,Xs,Tcore,Fcmb,solid):
     Raq = gc*buoy/(4*np.pi*rhoc*Omega**3*(f*rc)**4)
     p = 3/5*Raq #convective power per unit volume
     
-    return p
+    return p, comp/therm
 
 def Rem_b(f,dfdt,Xs,Tcore,Fcmb,solid,min_unstable):
     """
@@ -89,9 +91,11 @@ def Rem_b(f,dfdt,Xs,Tcore,Fcmb,solid,min_unstable):
         magnetic Reynolds number
     Bdip_surf : float
         RMS dipole magnetic field strength at the surface [T]
+    buoyr : float
+        ratio of compositional and buoyancy fluxes
     """
     l = f*rc - min_unstable*dr 
-    p = conv_power(f, dfdt, Xs, Tcore, Fcmb, solid)
+    p, buoyr = conv_power(f, dfdt, Xs, Tcore, Fcmb, solid)
     if p<0: #no dynamo
         Rem = 0
         Bdip_surf = 0 
@@ -101,4 +105,4 @@ def Rem_b(f,dfdt,Xs,Tcore,Fcmb,solid,min_unstable):
         Bdip_cmb = cb*p**0.31*(fohm*mu0*rhoc)**0.5*Omega*l
         Bdip_surf = Bdip_cmb*((f*rc)/r)**3
         
-    return Rem, Bdip_surf
+    return Rem, Bdip_surf, buoyr
