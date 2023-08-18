@@ -109,7 +109,7 @@ print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtim
 
 #integrate
 tic = time.perf_counter()
-Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, RaRob, Racrit, Fs, Flid, Fad, Fcmb, Rem_c, Bcomp, t = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, RaRob, Racrit, Fs, Flid, Fad, Fcmb, Rem, B, t = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time2 = toc - tic    
 
@@ -170,18 +170,6 @@ Frad = h*rhom*Vm/As #radiogenic heatflux
 #combine these in a single array
 Flux = [Fs, Fcmb, Fad, Frad]
 Fdrive = Fcmb - Fad        
-##########################new post processing ##########################
-therm_Rem = Rem_c[f==f0]
-therm_B = Bcomp[f==f0]
-therm_t = t[f==f0]/Myr
-
-comp_Rem = Rem_c[f<f0]
-comp_B = Bcomp[f<f0]
-comp_t = t[f<f0]/Myr
-
-#concatenate for saving
-therm = [therm_Rem,therm_B,therm_t]
-comp = [comp_Rem,comp_B,comp_t]
 
 ################# Threshold for magnetic field being on ########################
 threshold1 = 10 
@@ -190,58 +178,85 @@ threshold3 = 100
 
 ########### Dynamo maxima - must be greater than threshold1 to be on ##########
 #thermal dynamo
-if np.any(therm_Rem>threshold1):
-    max_Btherm = max(therm_B[therm_Rem>threshold1])
-    max_Bthermt = therm_t[therm_B==max_Btherm][0]/Myr
+if np.any(Rem>threshold1):
+    max_B = max(B[Rem>threshold1])
+    max_Bt = t[B==max_B][0]/Myr
 else:
-    max_Btherm = 0
-    max_Bthermt = np.nan
+    max_B = 0
+    max_Bt = np.nan
     
-max_Rtherm = max(therm_Rem)
-max_Rthermt = therm_t[therm_Rem==max_Rtherm][0]/Myr
-
-#compositional dynamo
-if np.any(comp_Rem>threshold1):
-    max_Bcomp = max(comp_B[comp_Rem>threshold1])
-    max_Bcompt = comp_t[comp_B==max_Bcomp][0]/Myr
-else:
-    max_Bcomp = 0
-    max_Bcompt = np.nan
-max_Rcomp = max(comp_Rem)
-max_Rcompt = comp_t[comp_Rem==max_Rcomp][0]/Myr
+max_R = max(Rem)
+max_Rt = t[Rem==max_R][0]/Myr
 
 ########################## on and off times - calculate and save ####################
-#set 10*save_interval (1Myr) as on off tolerance to smooth on-off periods smaller than 1Myr
+from duration_calc import on_off_test
 
-from duration_calc import on_off_save, on_off_basic
-# for Rem>10 save all info
-comp_on, comp_off, comp_dur, comp_n, comp_ngl10, comp_ngl100 = on_off_save(comp_t, comp_Rem, threshold1,10*save_interval_t/Myr, f'{folder}comp_onoff.csv', 'comp', run) #comp on off
-therm_on, therm_off, therm_dur, therm_n, therm_ngl10, therm_ngl100 = on_off_save(therm_t, therm_Rem, threshold1,10*save_interval_t/Myr, f'{folder}therm_onoff.csv', 'therm', run) #comp on off
-# Rem>40
-comp_on2, comp_off2 = on_off_basic(comp_t, comp_Rem, threshold2, 10*save_interval_t/Myr)
-therm_on2, therm_off2 = on_off_basic(therm_t, therm_Rem, threshold2, 10*save_interval_t/Myr)
+#Rem > 10  
+on, off, dur = on_off_test(t/Myr,Rem,threshold1,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
+Bn1 = len(on) #number of on periods
+if len(on) > 0:
+    magon_1 = on[0]
+    magoff_1 = off[0]
+else:
+    magon_1 = 0
+    magoff_1 = 0    
+if len(on) > 1:
+    magon_2 = on[1]
+    magoff_2 = off[1]
+else:
+    magon_2 = 0
+    magoff_2 = 0
+
+#Rem > 40
+on, off, dur = on_off_test(t/Myr,Rem,threshold2,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
+Bn2 = len(on) #number of on periods
+if len(on) > 0:
+    magon_3 = on[0]
+    magoff_3 = off[0]
+else:
+    magon_3 = 0
+    magoff_3 = 0
+    
+if len(on) > 1:
+    magon_4 = on[1]
+    magoff_4 = off[1]
+else:
+    magon_4 = 0
+    magoff_4 = 0
+    
 # Rem > 100
-comp_on3, comp_off3 = on_off_basic(comp_t, comp_Rem, threshold3, 10*save_interval_t/Myr)
-therm_on3, therm_off3 = on_off_basic(therm_t, therm_Rem, threshold3, 10*save_interval_t/Myr)
+on, off, dur = on_off_test(t/Myr,Rem,threshold3,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
+Bn3 = len(on) #number of on periods
+if len(on) > 0:
+    magon_5 = on[0]
+    magoff_5 = off[0]
+else:
+    magon_5 = 0
+    magoff_5 = 0
+    
+if len(on) > 1:
+    magon_6 = on[1]
+    magoff_6 = off[1]
+else:
+    magon_6 = 0
+    magoff_6 = 0
 
-coreconv_on, coreconv_off, coreconv_dur, coreconv_n, coreconv_ngl10, coreconv_ngl100 = on_off_save(t/Myr, Fdrive,0,10*save_interval_t/Myr, f'{folder}coreconv_onoff.csv', 'core_conv', run) #core convection on off
 ############################ Save results #####################################
 # save variables to file
 if full_save == True:
     np.savez_compressed(f'{folder}run_{run}', Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, 
              T_profile = Tprofile, Flid = Flid, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, Ur=Ur, 
-             Ra = Ra, RaH= RaH, RanoH = RanoH, RaRob = RaRob, Racrit = Racrit, t=t, therm=therm, comp=comp, Flux = Flux) 
+             Ra = Ra, RaH= RaH, RanoH = RanoH, RaRob = RaRob, Racrit = Racrit, t=t, Rem = Rem, B=B, Flux = Flux) 
 
 if B_save == True:
-    np.savez_compressed(f'{folder}run_{run}_B', therm=therm, comp=comp)
+    np.savez_compressed(f'{folder}run_{run}_B', B=B, Rem = Rem, t = t)
     
 #write parameters to the run file
 from csv import writer
   
 var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_remove, 
-             strat_end, fcond_t, lconv_t,lconv_T, max_Rtherm, max_Rthermt, max_Btherm, max_Bthermt, max_Rcomp, 
-             max_Rcompt,max_Bcomp,max_Bcompt, therm_on, therm_off, therm_dur, therm_n, therm_ngl10, 
-             therm_ngl100, therm_on2, therm_off2, therm_on3, therm_off3, comp_on, comp_off, comp_dur, comp_n, comp_ngl10, comp_ngl100, comp_on2, comp_off2, comp_on3, comp_off3, coreconv_on, coreconv_off, coreconv_dur, coreconv_n, coreconv_ngl10, coreconv_ngl100]
+             strat_end, fcond_t, lconv_t,lconv_T, max_R, max_Rt, max_B, max_Bt, Bn1, magon_1, magoff_1, magon_2, magoff_2, Bn2, magon_3, magoff_3, 
+             magon_4, magoff_4, Bn3, magon_5, magoff_5, magon_6, magoff_6]
 
 with open(f'{folder}run_results.csv','a') as f_object:
      writer_object = writer(f_object) #pass file object to csv.writer
