@@ -156,7 +156,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     dc_new = 0
     dl_new = 0
     min_unstable_new = i_core-1
-
+    buoyr_new = 0
     
     ##################    Initial step    #########################
     # Step 1. Calculate conductive profile for mantle
@@ -346,6 +346,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Tc_conv_new = 0 #by default, over write if core convects
         Rem_new = 0 #by default assume no compositional convection
         B_new = 0
+        buoyr_new = 0
         f_new = f_old #by default overwrite if solidifies
         Xs_new = Xs_old
         min_unstable_new = min_unstable_old #continuity of mixed layer thickness by default
