@@ -27,11 +27,11 @@ r = np.linspace(minr,maxr,nr)
 # maxeta0 = 25 
 # eta0 = np.logspace(mineta0,maxeta0,neta0)
 
-# #frht
-# nfrht = 5
-# minfrht = 0.005
-# maxfrht = 0.08
-# frht = np.linspace(minfrht,maxfrht,nfrht)
+# #beta
+# nbeta = 5
+# minbeta = 0.005
+# maxbeta = 0.08
+# beta = np.linspace(minbeta,maxbeta,nbeta)
 
 # #sulfur content
 # nxs = 3
@@ -68,7 +68,7 @@ alpha_nval = 25 #melt weakening, diffusion creep
 feval = 1e-7
 xsval = 30
 eta0val=1e21
-frhtval = 0.011
+betaval = 0.011
 rcmfval= 0.3
 
 # create dictionaries and write to csv - change these three lines
@@ -76,19 +76,19 @@ run = 39
 csv_num = 8
 var = r #choose your variable
 
-run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','frht','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
+run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','beta','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
 unit_row = ['','m','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core',''] #first row is units
 run_info.loc[len(run_info)] = unit_row
 
 
 for val in var:
     if val == var[0]: #create csv headers
-        run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','frht','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
+        run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','beta','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
         unit_row = ['','m','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core',''] #first row is units
         run_info.loc[len(run_info)] = unit_row
     #change this line
     rval = val #assign variable to val for addition to data frame
-    run_info = pd.concat([run_info, pd.DataFrame({"run":[run],"r":[rval],"default":[default],"rcmf":[rcmfval],"eta0":[eta0val],"frht":[frhtval],"w":[w],"etal":[etalval],"alpha_n":[alpha_nval],"Xs_0":[xsval], "Fe0":[feval], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"dt":[dt],"status":""})],ignore_index=True)
+    run_info = pd.concat([run_info, pd.DataFrame({"run":[run],"r":[rval],"default":[default],"rcmf":[rcmfval],"eta0":[eta0val],"beta":[betaval],"w":[w],"etal":[etalval],"alpha_n":[alpha_nval],"Xs_0":[xsval], "Fe0":[feval], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"dt":[dt],"status":""})],ignore_index=True)
     run = run+1
 
 #create csv                      
