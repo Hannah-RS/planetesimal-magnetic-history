@@ -135,6 +135,7 @@ tmax = t[loc_max1]/Myr
 peak_coreT = np.amax(Tprofile[:,:nmantle])
 loc_max2 = np.where(Tprofile[:,:nmantle]==peak_coreT)[0][0] #take the set of time coordinates and first value (they should all be the same)
 tcoremax = t[loc_max2]/Myr
+tsolid_start = t[f<f0][0]/Myr #start of core solidification
 tsolid = t[-1]/Myr #time of core solidification
 if np.all(Tprofile[:,int(nmantle)-2]<Tcmb):
     tstrat_remove = np.inf
@@ -194,7 +195,7 @@ from duration_calc import on_off_test
 #Rem > 10  
 on, off, dur = on_off_test(t/Myr,Rem,threshold1,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn1 = len(on) #number of on periods
-if len(on) > 0:
+if len(np.where(on>0)) > 0:
     magon_1 = on[0]
     magoff_1 = off[0]
 else:
@@ -210,7 +211,7 @@ else:
 #Rem > 40
 on, off, dur = on_off_test(t/Myr,Rem,threshold2,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn2 = len(on) #number of on periods
-if len(on) > 0:
+if len(np.where(on>0)) > 0: #i.e. there is one on value > nan
     magon_3 = on[0]
     magoff_3 = off[0]
 else:
@@ -227,7 +228,7 @@ else:
 # Rem > 100
 on, off, dur = on_off_test(t/Myr,Rem,threshold3,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn3 = len(on) #number of on periods
-if len(on) > 0:
+if len(np.where(on>0)) > 0:
     magon_5 = on[0]
     magoff_5 = off[0]
 else:
@@ -255,7 +256,7 @@ if B_save == True:
 from csv import writer
   
 var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_remove, 
-             strat_end, fcond_t, lconv_t,lconv_T, max_R, max_Rt, max_B, max_Bt, Bn1, magon_1, magoff_1, magon_2, magoff_2, Bn2, magon_3, magoff_3, 
+             strat_end, fcond_t, lconv_t,lconv_T, tsolid_start, max_R, max_Rt, max_B, max_Bt, Bn1, magon_1, magoff_1, magon_2, magoff_2, Bn2, magon_3, magoff_3, 
              magon_4, magoff_4, Bn3, magon_5, magoff_5, magon_6, magoff_6]
 
 with open(f'{folder}run_results.csv','a') as f_object:
