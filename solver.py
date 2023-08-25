@@ -169,7 +169,7 @@ h = Al_heating(t)
 Frad = h*rhom*Vm/As #radiogenic heatflux
 
 #combine these in a single array
-Flux = [Fs, Fcmb, Fad, Frad]
+Flux = [Fs, Fcmb, Fad, Frad, Flid]
 Fdrive = Fcmb - Fad        
 
 ################# Threshold for magnetic field being on ########################
