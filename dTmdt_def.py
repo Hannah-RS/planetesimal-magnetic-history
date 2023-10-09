@@ -42,7 +42,7 @@ def dTmdt_calc(t,Tconv,d0,Flid,Fcmb):
     cp = cp_calc_int(Tconv,False)
     return 1/(rhom*cp*Vocean)*(rad-Flid*Alid+Fcmb*Acmb)
 
-def dTadt_calc(t,Tconv,d0,Flid): 
+def dTadt_calc(t,Tconv,d0,Flid,eutectic): 
     """
 
     Parameters
@@ -55,6 +55,8 @@ def dTadt_calc(t,Tconv,d0,Flid):
         stagnant lid thickness [m]
     Flid: float
         heat flux through top of stagnant lid [W m^-2]
+    eutectic : bool
+        if the initial sulfur content is eutectic composition
 
     Returns
     -------
@@ -71,6 +73,6 @@ def dTadt_calc(t,Tconv,d0,Flid):
     #calculate radiogenic heating 
     h = AlFe_heating(t)
     rad = h*rhoa*Vocean #radiogenic heating contribution
-    cp = cp_calc_int(Tconv,True)
-    
+    cp = cp_calc_int(Tconv,True,eutectic)
+   
     return 1/(rhoa*cp*Vocean)*(rad-Flid*Alid)

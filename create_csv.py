@@ -27,11 +27,11 @@ mineta0 = 14 #10^{mineta0}
 maxeta0 = 21 
 eta0 = np.logspace(mineta0,maxeta0,neta0)
 
-#frht
-nfrht = 5
-minfrht = 0.005
-maxfrht = 0.08
-frht = np.linspace(minfrht,maxfrht,nfrht)
+#beta
+nbeta = 5
+minbeta = 0.005
+maxbeta = 0.08
+beta = np.linspace(minbeta,maxbeta,nbeta)
 
 #sulfur content
 nxs = 3
@@ -68,24 +68,24 @@ alpha_n = 25 #melt weakening, diffusion creep
 # create dictionaries and write to csv
 run = 1
 csv_num = 1
-run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','frht','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
+run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','beta','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
 unit_row = ['','m','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core',''] #first row is units
 run_info.loc[len(run_info)] = unit_row
 for n, feval in enumerate(Fe0):
     for j, rcmfval in enumerate(rcmf):
         for k, eta0val in enumerate(eta0):
-            for l, frhtval in enumerate(frht):
+            for l, betaval in enumerate(beta):
                 for p, etalval in enumerate(etal):
                     if run > 1:
                         #skip this step on the first step down
                         run_info.to_csv(f'{folder}auto_params_{csv_num}.csv',index=False)
                         csv_num = csv_num + 1 #start making a new csv
-                        run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','frht','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
+                        run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','beta','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
                         unit_row = ['','m','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core',''] #first row is units
                         run_info.loc[len(run_info)] = unit_row
                     for m, xsval in enumerate(Xs_0):
                         for i, rval in enumerate(r): #run r as last so all sets of files take similar time
-                            run_info = pd.concat([run_info, pd.DataFrame({"run":[run],"r":[rval],"default":[default],"rcmf":[rcmfval],"eta0":[eta0val],"frht":[frhtval],"w":[w],"etal":[etalval],"alpha_n":[alpha_n],"Xs_0":[xsval], "Fe0":[feval], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"dt":[dt],"status":""})],ignore_index=True)
+                            run_info = pd.concat([run_info, pd.DataFrame({"run":[run],"r":[rval],"default":[default],"rcmf":[rcmfval],"eta0":[eta0val],"beta":[betaval],"w":[w],"etal":[etalval],"alpha_n":[alpha_n],"Xs_0":[xsval], "Fe0":[feval], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"dt":[dt],"status":""})],ignore_index=True)
                             run = run+1
 
 #call once more at the end for the final csv                        

@@ -4,7 +4,7 @@
 Function for variable viscosity
 """
 import numpy as np
-from parameters import alpha_n, Tml, Tms, rcmf, eta0, etal, w, Trcmf, frht 
+from parameters import alpha_n, Tml, Tms, rcmf, eta0, etal, w, Trcmf, beta 
 
 def part_a(T):
     """
@@ -21,7 +21,7 @@ def part_a(T):
         viscosity [Pas]
 
     """
-    eta = eta0*np.exp(-frht*(T-Tms))
+    eta = eta0*np.exp(-beta*(T-Tms))
     return eta
 
 def part_b(T):
@@ -39,7 +39,7 @@ def part_b(T):
         viscosity [Pas]
 
     """
-    eta = eta0*np.exp(-(frht+alpha_n/(Tml-Tms))*(T-Tms))
+    eta = eta0*np.exp(-(beta+alpha_n/(Tml-Tms))*(T-Tms))
     return eta
 
 def part_c(T):

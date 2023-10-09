@@ -17,7 +17,7 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-automated = True
+automated = False
 full_save = True #do you want to save temp profiles etc or just summary stats
 B_save = False #do you want to save field strengths and Rem
 out_interval = 20 #how many times do you want t to be printed in the whole run
@@ -28,12 +28,12 @@ save_interval_t = 0.1*Myr # how often do you want each variable to be saved duri
 if automated == True:
     folder = sys.argv[1]
     auto = pd.read_csv(f'{folder}auto_params.csv',skiprows=[1])
-    ind = np.where((auto['status']!=1)&(auto['status']!=0))[0][0] #find index of first uncalculated run
+    ind = np.where((auto['status']!=1)&(auto['status']!=0)&(auto['status']!=-1))[0][0] #find index of first uncalculated run
     r = auto.loc[ind,'r']
     default = auto.loc[ind,'default']
     rcmf = auto.loc[ind,'rcmf']
     eta0 = auto.loc[ind,'eta0']
-    frht = auto.loc[ind,'frht']
+    beta = auto.loc[ind,'beta']
     w = auto.loc[ind,'w']
     etal = auto.loc[ind,'etal']
     alpha_n = auto.loc[ind,'alpha_n']
@@ -47,17 +47,18 @@ else: #set manually
     r = 300e3 # radius of asteroid [m]
     dr = 500 # grid size [m]
     default ='vary' #default viscosity model
-    rcmf = 0.5 #rheologically critical melt fraction - melting required for differentiation
+    rcmf = 0.3 #rheologically critical melt fraction - melting required for differentiation
     eta0 = 1e21 #reference viscosity at Tms [Pas]
-    frht =0.005 #frh*(DeltaT)
+    beta =0.011 #E/RTref^2
     w = 5 #width of log linear region [K]
-    etal = 10 #liquid viscsoity [Pas]
+    etal = 100 #liquid viscsoity [Pas]
     alpha_n = 25 #melt weakening (diffusion creep)
     Xs_0 = 30# initial wt % sulfur in core 
-    Fe0 = 1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 9
+    Fe0 = 6e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
+    run = 3
     t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 500 # max end time [Myr]
+    t_end_m = 100 # max end time [Myr]
+
 
 # Size of body
 rc = r/2 #radius of core [m]
@@ -82,7 +83,7 @@ kappa = 9e-7 # thermal diffusivity of silicate [m^2 /s] - 4 options are given in
 alpha_m = 4e-5 # thermal expansivity of mantle [/K]
 conv_tol = 0.9 #convective tolerance Ra/Ra_crit<conv_tol = no convection
 Rac = 1000  #critical Rayleigh number for isoviscous convection
-
+frht = beta + alpha_n/(Tml-Tms) #viscous temperature scale
 
 # Viscosity parameters
 
@@ -146,10 +147,9 @@ rhofe_l = fe_fes_density(0)*rho_exp # density of pure liquid iron [kg m^-3] Mora
 rhofe_s = 7800 # density of pure solid iron [kg m^-3] Bryson 2015
 rho_eut = fe_fes_density(Xs_eutectic)*rho_exp # density of eutectic Fe-FeS solid [kg m^-3] Morard (2019)
 rhoc = fe_fes_density(Xs_0)*rho_exp # density of core [kg m^-3]
-Bp_frac = 0.1 #fraction of poloidal field at CMB to total field in the core (Weiss 2010)
 fohm = 1 #fraction of energy dissipated via Ohmic dissipation in the dynamo (Weiss 2010)
 cu = 1.65 #  Aubert 2009
-cb = 1.31 # Aubert 2009
+cb = 0.23 # Davies et. al. 2022 median value of c for Bdip,cmb
 
 #Calculated parameters
 rhoa = 1/(XFe_a/rhofe_s +(1-XFe_a)/rhom) # kg m^-3 density of undifferentiated material (Sturtz 2022b eqn. 1)

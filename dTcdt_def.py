@@ -16,7 +16,7 @@ from parameters import Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Pc, gc
 from q_funcs import Qlt, Qr
 from fe_fes_liquidus import fe_fes_liquidus_dp
 import numpy as np
-from Rem_calc import Rem_comp
+from Rem_calc import Rem_b
 from heating import Fe_heating
 
 def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
@@ -41,7 +41,12 @@ def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
     -------
     dTcdt : float
             rate of change of core temperature (if negative core is cooling)
-
+    Rem : float
+        magnetic Reynolds number
+    Bdip_cmb : float
+        dipole magnetic field strength at the surface [T]
+    buoyr : float
+        ratio of compositional and buoyancy fluxes
     """
     
     if stratification[0] == True:
@@ -51,17 +56,19 @@ def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
         Vconv = 4/3*np.pi*(rc**3-rstrat**3) #calculate Vconv - volume of cmb boundary layer has negligible volume 
     else:
         f3 = 0 #if there is an inner core treat as isothermal
+        min_unstable_ind = 0
         rstrat = 0
         Vconv = 4/3*np.pi*rc**3*(f**3)
-        #nic_cells = round(f*rc/dr)
         
     
     Qst = rhoc*cpc*Vconv
     Qrad = rhoc*Vconv*Fe_heating(t)
        
     dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb+Qrad)/Qst
-        
-    return dTcdt
+    #calculate magnetic field
+    Rem, Bdip_cmb, buoyr = Rem_b(f, 0, Xs, Tcore, Fcmb, False,min_unstable_ind) #dfdt = 0 for  non-solidifying   
+    
+    return dTcdt, Rem, Bdip_cmb, buoyr
 
 def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     """
@@ -87,11 +94,12 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
             rate of change of core temperature (if negative core is cooling)
     f_new : float
         new fractional inner core radius
-    Rem_c : float
-        compositional magnetic Reynolds number
-    Bcomp : float
-        flux based magnetic field strength [T]
-
+    Rem : float
+        magnetic Reynolds number
+    Bdip_cmb : float
+        dipole magnetic field strength at the surface [T]
+    buoyr : float
+        ratio of compositional and buoyancy fluxes
     """
     dTl_dP = fe_fes_liquidus_dp(Xs, Pc)
     Qst = rhoc*cpc*Vc
@@ -103,6 +111,6 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     dfdt = - dTcdt/(rhoc*gc*dTl_dP*rc)
 
     f_new = f+dfdt*dt
-    Rem_c, Bcomp = Rem_comp(dfdt,f,Xs) 
+    Rem, Bdip_cmb, buoyr = Rem_b(f, dfdt, Xs, Tcore, Fcmb, True,0) #if core is solidifying there is no thermal stratification
    
-    return dTcdt, f_new, Rem_c, Bcomp
+    return dTcdt, f_new, Rem, Bdip_cmb, buoyr

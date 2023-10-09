@@ -145,7 +145,7 @@ def differentiation(Tint,tacc,r,dr,dt):
                 
                 cp[:lid_start,i] = cp_calc_int(T[0,i-1],True)
                 cp[-1,i] = cpa
-                dTdt_new = dTadt_calc(t[i-1],T[lid_start-1,i-1],d0[i-1],Flid_old)
+                dTdt_new = dTadt_calc(t[i-1],T[lid_start-1,i-1],d0[i-1],Flid_old,False)
                 T[:lid_start,i] = T[:lid_start,i-1] + dTdt_new*dt 
                 T[-1,i] = Ts 
                 
@@ -335,7 +335,7 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
             else:
                 cp[:lid_start,i] = cp_calc_eut_int(T[0,i-1],True)
                 cp[-1,i] = cpa
-                dTdt_new = dTadt_calc(t[i-1],T[lid_start-1,i-1],d0[i-1],Flid_old)
+                dTdt_new = dTadt_calc(t[i-1],T[lid_start-1,i-1],d0[i-1],Flid_old,True)
                 T[:lid_start,i] = T[:lid_start,i-1] + dTdt_new*dt 
                 T[-1,i] = Ts 
                 if d0[i] < dr:
