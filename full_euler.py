@@ -338,7 +338,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 if tsolve_new/Myr > 5: #turn off convection if mantle no longer heating up
                     conv_off = True
                     fcond_t = tsolve_new/Myr
-                    print(f'Lid is too thick convection turned off at {tsolve_new/Myr:.2g}')
+                    print(f'Lid is too thick convection turned off at {tsolve_new/Myr:.2f} Myr')
                 mantle_conv = False
                 Tm_conv_new = 0
         else: #lids too thick convection turned off
