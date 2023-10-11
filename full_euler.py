@@ -101,6 +101,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         ratio of compositional and thermal buoyancy fluxes in the dynamo
     tsolve: array
         time points corresponding to each of the values above [s]
+    fcond_t : float
+        time for cessation of convection [Myr]
          
     """
 
@@ -109,6 +111,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     i_core = round(n_cells/2) # index in array of last core cell 
     mantle_conv = False #flag for mantle convection
     core_conv = False #flag for core convection
+    fcond_t = np.nan #end time of convection - default nan
+    conv_off = False #whether lid has thickened sufficiently to switch off convection
     
     #output variables
     Xs = np.ones([m])*Xs_0 #core sulfur fraction
@@ -174,7 +178,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     T_new_mantle[0] = Tcmb_new
     Fcmb_new = -km*(T0_mantle[0]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020
     
-    if (Ra_new/Racrit_new < conv_tol) | ((d0_new + dl_new) > (r-rc)):# not convecting
+    if (Ra_new/Racrit_new < conv_tol) | (np.round((d0_new + dl_new)/(r-rc),1) > 1):# not convecting
         Tm_conv_new = 0 # convective mantle temperature is 0 if mantle not convecting
        
     else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile
@@ -287,7 +291,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     tsolve_old = tsolve_new
     
     while tsolve_new < tend:
-        
+
         #Step -1. Check for unphysicality
         if f_old > f0:
             raise ValueError("Inner core exceeds core size")
@@ -307,20 +311,18 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Racrit_new = Rayleigh_crit(T_old_mantle[1])
         dl_new = delta_l(T_old_mantle[1],Tcmb_old,Ur_old) #first estimate of mantle cmb b.l. thickness - raises an error on early steps when isothermal 
         
-        if (d0_old + dl_old) < (r-rc): #other convection criteria are meaningless if lid thickness is greater than mantle thickness
-            nlid_cells = round(d0_old/dr)
-            if nlid_cells ==0:
-                lid_start = nmantle_cells -2
-            else:
-                lid_start = nmantle_cells - nlid_cells - 1  #index in temp array where lid starts
-                          
-            dTdt_mantle_conv = dTmdt_calc(tsolve_old,T_old_mantle[1],d0_old,Flid_old,Fcmb_old) #convective dTdt - use base mantle temp as convective temp
-                        
-            if Ra_new/Racrit_new < conv_tol: #check for Ra 
-                mantle_conv = False
-                Tm_conv_new = 0 # convective mantle temperature is 0 if mantle not convecting
+        if conv_off == False:
+            if (np.round((d0_old + dl_old)/(r-rc),1) < 1): #other convection criteria are meaningless if lid thickness is greater than mantle thickness
                 
-            else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile 
+                nlid_cells = round(d0_old/dr)
+                if nlid_cells ==0:
+                    lid_start = nmantle_cells -2
+                else:
+                    lid_start = nmantle_cells - nlid_cells - 1  #index in temp array where lid starts
+                              
+                dTdt_mantle_conv = dTmdt_calc(tsolve_old,T_old_mantle[1],d0_old,Flid_old,Fcmb_old) #convective dTdt - use base mantle temp as convective temp
+                            
+                
                 mantle_conv = True
                 dTdt_mantle_new = dTdt_mantle_conv
                 Tm_conv_new = T_old_mantle[1] + dTdt_mantle_new*dt #temperature of convecting region 
@@ -331,8 +333,15 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     Fs_new = Flid_new #lid determines flux out of surface
                 else:
                     Flid_new = -km*(T_new_mantle[lid_start+1]-T_new_mantle[lid_start])/dr
-                             
-        else:
+                                 
+            else:
+                if tsolve_new/Myr > 5: #turn off convection if mantle no longer heating up
+                    conv_off = True
+                    fcond_t = tsolve_new/Myr
+                    print(f'Lid is too thick convection turned off at {tsolve_new/Myr:.2g}')
+                mantle_conv = False
+                Tm_conv_new = 0
+        else: #lids too thick convection turned off
             mantle_conv = False
             Tm_conv_new = 0
             
@@ -633,4 +642,4 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     buoyr = buoyr[:save_ind+1]
     tsolve = tsolve[:save_ind+1]
             
-    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, Racrit, Fs, Flid, Fad, Fcmb, Rem, B, buoyr, tsolve
+    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, Racrit, Fs, Flid, Fad, Fcmb, Rem, B, buoyr, tsolve, fcond_t
