@@ -195,7 +195,7 @@ from duration_calc import on_off_test
 #Rem > 10  
 on, off, dur = on_off_test(t/Myr,Rem,threshold1,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn1 = len(on) #number of on periods
-if len(np.where(on>0)) > 0:
+if on.size > 0:
     magon_1 = on[0]
     magoff_1 = off[0]
 else:
@@ -211,7 +211,7 @@ else:
 #Rem > 40
 on, off, dur = on_off_test(t/Myr,Rem,threshold2,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn2 = len(on) #number of on periods
-if len(np.where(on>0)) > 0: #i.e. there is one on value > nan
+if on.size > 0: #i.e. there is one on value > nan
     magon_3 = on[0]
     magoff_3 = off[0]
 else:
@@ -228,7 +228,7 @@ else:
 # Rem > 100
 on, off, dur = on_off_test(t/Myr,Rem,threshold3,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn3 = len(on) #number of on periods
-if len(np.where(on>0)) > 0:
+if on.size > 0:
     magon_5 = on[0]
     magoff_5 = off[0]
 else:
