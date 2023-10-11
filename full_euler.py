@@ -83,8 +83,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         radiogenic Rayleigh number for convecting mantle
     RanoH: array
         non-radiogenic Rayleigh number for convecting mantle
-    RaRob : array
-        modified Rayleigh Roberst number for convecting mantle (eqn 25 of Sturtz 2022b)
     Racrit: array
         critical Rayleigh number for convecting mantle
     Flid: array
@@ -118,7 +116,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Racrit = np.zeros([m])
     RaH = np.zeros([m])
     RanoH = np.zeros([m])
-    RaRob = np.zeros([m])
     d0 = np.zeros([m])
     dl = np.zeros([m])
     dc = np.zeros([m])
@@ -168,7 +165,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Ur_new = rhom*Vm*h/abs(Fs_new*As) #calculate Urey ratio
     
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
-    Ra_new, d0_new, RaH_new, RanoH_new, RaRob_new = Rayleigh_calc(tsolve_new,T0_mantle[1],dTdt_mantle_new,Ur_new,default) #use temp at base of mantle 
+    Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T0_mantle[1],Ur_new,default) #use temp at base of mantle 
     Racrit_new = Rayleigh_crit(T0_mantle[1])   
       
     # in initial step use balance of eqn 23 and 24 to find Tcmb
@@ -281,7 +278,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Ra_old = Ra_new
     RaH_old = RaH_new
     RanoH_old = RanoH_new
-    RaRob_old = RaRob_new
     Racrit_old = Racrit_new
     Flid_old = Flid_new
     Fs_old = Fs_new
@@ -306,7 +302,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         dTdt_mantle_new = (T_new_mantle-T_old_mantle)[1] #default use temp change at base just above CMB
         
         # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
-        Ra_new, d0_new, RaH_new, RanoH_new, RaRob_new = Rayleigh_calc(tsolve_new,T_old_mantle[1],dTdt_mantle_old,Ur_old,default) #use temp at base of mantle 
+        Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T_old_mantle[1],Ur_old,default) #use temp at base of mantle 
         Racrit_new = Rayleigh_crit(T_old_mantle[1])
        
         if d0_new<(r-rc): #other convection criteria are meaningless if lid thickness is greater than mantle thickness
@@ -500,7 +496,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Ra_old = Ra_new
         RaH_old = RaH_new
         RanoH_old = RanoH_new
-        RaRob_old = RaRob_new
         Racrit_old = Racrit_new
         Flid_old = Flid_new
         Fs_old = Fs_new
@@ -529,7 +524,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Ra[save_ind] = Ra_old
             RaH[save_ind] = RaH_old
             RanoH[save_ind] = RanoH_old
-            RaRob[save_ind] = RaRob_old
             Racrit[save_ind] = Racrit_old
             Fs[save_ind] = Fs_old
             Flid[save_ind] = Flid_old
@@ -566,7 +560,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 Ra[save_ind] = Ra_old
                 RaH[save_ind] = RaH_old
                 RanoH[save_ind] = RanoH_old
-                RaRob[save_ind] = RaRob_old
                 Racrit[save_ind] = Racrit_old
                 Fs[save_ind] = Fs_old
                 Flid[save_ind] = Flid_new
@@ -595,7 +588,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Ra = Ra[:save_ind+1]
             RaH = RaH[:save_ind+1]
             RanoH = RanoH[:save_ind+1]
-            RaRob = RaRob[:save_ind+1]
             Racrit = Racrit[:save_ind+1]
             Fs = Fs[:save_ind+1]
             Flid = Flid[:save_ind+1]
@@ -629,7 +621,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     RaH = RaH[:save_ind+1]
     RanoH = RanoH[:save_ind+1]
     Racrit = Racrit[:save_ind+1]
-    RaRob = RaRob[:save_ind+1]
     Fs = Fs[:save_ind+1]
     Flid = Flid[:save_ind+1]
     Fad = Fad[:save_ind+1]
@@ -639,4 +630,4 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     buoyr = buoyr[:save_ind+1]
     tsolve = tsolve[:save_ind+1]
             
-    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, RaRob, Racrit, Fs, Flid, Fad, Fcmb, Rem, B, buoyr, tsolve
+    return Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, Racrit, Fs, Flid, Fad, Fcmb, Rem, B, buoyr, tsolve
