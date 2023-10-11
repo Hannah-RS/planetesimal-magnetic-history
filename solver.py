@@ -72,7 +72,7 @@ else: #put marker in csv
     
 print(f'Beginning run {run}')
 print('Initial conditions set')
-
+#%%
 ########################### Differentiation ###################################
 tic = time.perf_counter()
 Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H  = differentiation(Tint,t_acc,r, dr, step_m)
@@ -105,6 +105,7 @@ if full_save == True:
     np.savez_compressed(f'{folder}run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, d0=d0, t_diff = t_diff, H=H)
 
 print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time1)))
+#%%
 ######################## Thermal evolution ####################################
 
 #integrate
@@ -122,7 +123,7 @@ if automated == False:
     plt.title('Temperature profile post thermal evolution')
 
 print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time2)))
-
+#%%
 ############################# Process data ####################################
 ################ all processes which happen once  #############################
 int_time = int_time1+int_time2 #total time for the two scripts
