@@ -153,20 +153,13 @@ else:
     strat_end = np.inf
 
 #switch to conduction
-if np.any(Ra/Racrit<0.5):
-    fcond_t = t[Ra/Racrit<0.5][0]/Myr #half the critical value (end of buffering)
-    if np.any(d0>(r-rc)):
-        fcond_t2 = t[d0>(r-rc)][0]/Myr #check convection not ended by stagnant lid thickening
-        if fcond_t2 < fcond_t:
-            fcond_t = fcond_t2 #lid thickening shuts off convection first
+
+if np.any((d0+dl)>(r-rc)):
+    fcond_t = t[(d0+dl)>(r-rc)][0]/Myr #check convection not ended by stagnant lid thickening
+    fcond_T = Tprofile[(d0+dl)>(r-rc),nmantle+1][0] #temperature when mantle stops convecting
 else:
     fcond_t = np.nan
-if np.any(Ra/Racrit>(2-conv_tol)):
-    lconv_t = t[Ra/Racrit>(2-conv_tol)][-1]/Myr #last supercritical time (start of buffering)
-    lconv_T = Tprofile[Ra/Racrit>(2-conv_tol),nmantle+1][-1] #temperature when Ra first starts buffering
-else:
-    lconv_t = np.nan
-    lconv_T = np.nan
+    fcond_T = np.nan
     
 # Frad - radiogenic heat flux, normalised to surface of body
 from heating import Al_heating
@@ -261,7 +254,7 @@ if B_save == True:
 from csv import writer
   
 var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_remove, 
-             strat_end, fcond_t, lconv_t,lconv_T, tsolid_start, max_R, max_Rt, max_B, max_Bt, Bn1, magon_1, magoff_1, magon_2, magoff_2, Bn2, magon_3, magoff_3, 
+             strat_end, fcond_t, fcond_T, tsolid_start, max_R, max_Rt, max_B, max_Bt, Bn1, magon_1, magoff_1, magon_2, magoff_2, Bn2, magon_3, magoff_3, 
              magon_4, magoff_4, Bn3, magon_5, magoff_5, magon_6, magoff_6]
 
 with open(f'{folder}run_results.csv','a') as f_object:
