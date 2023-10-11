@@ -135,8 +135,13 @@ tmax = t[loc_max1]/Myr
 peak_coreT = np.amax(Tprofile[:,:nmantle])
 loc_max2 = np.where(Tprofile[:,:nmantle]==peak_coreT)[0][0] #take the set of time coordinates and first value (they should all be the same)
 tcoremax = t[loc_max2]/Myr
-tsolid_start = t[f<f0][0]/Myr #start of core solidification
-tsolid = t[-1]/Myr #time of core solidification
+if np.any(f<f0):
+    tsolid_start = t[f<f0][0]/Myr #start of core solidification
+    tsolid = t[-1]/Myr #time of core solidification
+else:
+    tsolid_start = np.nan
+    tsolid = np.nan
+
 if np.all(Tprofile[:,int(nmantle)-2]<Tcmb):
     tstrat_remove = np.inf
 else:
