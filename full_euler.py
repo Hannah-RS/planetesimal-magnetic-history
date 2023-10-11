@@ -449,7 +449,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 Tcmb_new = (Tm_conv_new + factor*Tc_conv_new)/(1+factor) 
                 dc_new = delta_c(Tc_conv_new,Tcmb_new) #find core cmb b.l. thickness
                 dl_new = delta_l(Tm_conv_new,Tcmb_new,Ur_old) #find mantle cmb b.l. thickness
-                Fcmb_new = -km*(Tm_conv_new-Tcmb_new)/dr#dl_new
+                Fcmb_new = -km*(Tm_conv_new-Tcmb_new)/dl_new
             else: #eqn 23 = 24  
                 
                 Tcmb_new = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
