@@ -290,7 +290,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     tsolve_old = tsolve_new
     
     while tsolve_new < tend:
-
+        
+        #Step -1. Check for unphysicality
+        if f_old > f0:
+            raise ValueError("Inner core exceeds core size")
+        if np.any(T_old_mantle > 2000):
+            raise ValueError("Mantle overheating! Temperature exceeds 2000K.")
         #Step 0. Calculate time
         tsolve_new = tsolve_old + dt
         
