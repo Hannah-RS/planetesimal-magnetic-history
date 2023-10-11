@@ -167,17 +167,18 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
     Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T0_mantle[1],Ur_new,default) #use temp at base of mantle 
     Racrit_new = Rayleigh_crit(T0_mantle[1])   
-      
+    dl_new = delta_l(T0_mantle[1],T0_mantle[0],Ur_new)
+    
     # in initial step use balance of eqn 23 and 24 to find Tcmb
     Tcmb_new = (km/kc*T0_mantle[0]+T0_core[0])/(km/kc+1)
     T_new_mantle[0] = Tcmb_new
     Fcmb_new = -km*(T0_mantle[0]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020
     
-    if (Ra_new/Racrit_new < conv_tol) | (d0_new > (r-rc)):# not convecting
+    if (Ra_new/Racrit_new < conv_tol) | ((d0_new + dl_new) > (r-rc)):# not convecting
         Tm_conv_new = 0 # convective mantle temperature is 0 if mantle not convecting
        
     else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile
-        dl_new = delta_l(T0_mantle[1],T0_mantle[0],Ur_new)
+        
         nlid_cells = round(d0_new/dr)
         if nlid_cells ==0:
             lid_start = nmantle_cells -2
@@ -304,8 +305,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
         Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T_old_mantle[1],Ur_old,default) #use temp at base of mantle 
         Racrit_new = Rayleigh_crit(T_old_mantle[1])
-       
-        if d0_new<(r-rc): #other convection criteria are meaningless if lid thickness is greater than mantle thickness
+        dl_new = delta_l(T_old_mantle[1],Tcmb_old,Ur_old) #first estimate of mantle cmb b.l. thickness - raises an error on early steps when isothermal 
+        
+        if (d0_old + dl_old) < (r-rc): #other convection criteria are meaningless if lid thickness is greater than mantle thickness
             nlid_cells = round(d0_old/dr)
             if nlid_cells ==0:
                 lid_start = nmantle_cells -2
@@ -466,6 +468,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 Tcmb_new = (T_new_mantle[1]+factor*T_new_core[-2])/(1+factor)
                 dc_new = delta_c(Tc_conv_new,Tcmb_new) #find core cmb b.l. thickness
                 Fcmb_new = -km*(T_new_mantle[1]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020
+            
             else: # eqn 23 = 24
                 Tcmb_new = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
                 Fcmb_new = -km*(T_new_mantle[1]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020
