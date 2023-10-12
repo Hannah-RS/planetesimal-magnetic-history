@@ -40,6 +40,7 @@ def Tm_cond_calc(t,dt,T,sparse_mat):
     dTdt = cpdTdt/cp + h/cp
 
     Tnew = dTdt*dt + T
+    Tnew[0] = Tnew[0] - h*dt/cp[0] #no radiogenic heating at cmb
     Tnew[-1] = T[-1]   #top cell of mantle is always at surface temp so need to overwrite so radiogenic heating term doesn't heat it up 
     return Tnew
 
