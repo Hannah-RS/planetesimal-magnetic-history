@@ -465,13 +465,18 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 else: #balance mantle b.l. flux and diffusive flux from core  
                     factor = (kc*dl_old)/(km*dr)
                     Tcmb_new = (Tm_conv_new + factor*T_new_core[-2])/(1+factor)
-                    #Tcmb_new = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
                     dl_new = delta_l(Tm_conv_new,Tcmb_new,Ur_old) #find mantle cmb b.l. thickness
                     Fcmb_new = -km*(T_new_mantle[1]-Tcmb_new)/dl_new # CMB heat flux eqn 23 in Dodds 2020 - until core starts to convect heat transport is modelled as diffusive
         
-        else: #model flux balance as diffusive
-            Tcmb_new = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
-            Fcmb_new = -km*(T_new_mantle[1]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020  
+        else: 
+            if core_conv == True:
+                factor = (kc*dr)/(km*dc_old)
+                Tcmb_new = (T_new_mantle[1]+ factor*Tc_conv_new)/(1+factor)
+                dc_new = delta_c(Tc_conv_new,Tcmb_new) #find core cmb b.l. thickness
+                Fcmb_new = -km*(T_new_mantle[1]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020
+            else:                
+                Tcmb_new = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
+                Fcmb_new = -km*(T_new_mantle[1]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020  
 
 
         #replace CMB nodes
