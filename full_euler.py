@@ -439,34 +439,36 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
 
         # Step 5. Find the CMB temperature, how you do this depends on if core and mantle are convecting
         if mantle_conv == True:
-            if core_conv == True:
-                # eqn 26 and 29 in Dodds 2020 - use bl from previous timestep
-                # check if non zero if just switched to convection b.l. at previous timestep = 0
-                if dl_old == 0 and dc_old == 0:
-                    dc_old = delta_c(Tc_conv_new,Tcmb_old) #find approximate core cmb b.l. thickness
-                    dl_old = delta_l(Tm_conv_new,Tcmb_old,Ur_old) #find approximate mantle cmb b.l. thickness
-                    factor = (kc*dl_old)/(km*dc_old)
-                    
-                elif dl_old != 0 and dc_old == 0:
-                     dc_old = delta_c(Tc_conv_new,Tcmb_old) #find approximate core cmb b.l. thickness
-                     factor = (kc*dl_old)/(km*dc_old)
-                     
-                elif dl_old == 0 and dc_old != 0:
-                     dl_old = delta_l(Tm_conv_new,Tcmb_old,Ur_old) #find approximate mantle cmb b.l. thickness
-                     factor = (kc*dl_old)/(km*dc_old)
-                     
-                else: #both convective b.l. are non zero
-                    factor = (kc*dl_old)/(km*dc_old)
-                    
-                Tcmb_new = (Tm_conv_new + factor*Tc_conv_new)/(1+factor) 
-                dc_new = delta_c(Tc_conv_new,Tcmb_new) #find core cmb b.l. thickness
-                dl_new = delta_l(Tm_conv_new,Tcmb_new,Ur_old) #find mantle cmb b.l. thickness
-                Fcmb_new = -km*(Tm_conv_new-Tcmb_new)/dl_new
-            else: #eqn 23 = 24  
-                 
-                Tcmb_new = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
-                dl_new = delta_l(Tm_conv_new,Tcmb_new,Ur_old) #find mantle cmb b.l. thickness
-                Fcmb_new = -km*(T_new_mantle[1]-Tcmb_new)/dl_new # CMB heat flux eqn 23 in Dodds 2020 - until core starts to convect heat transport is modelled as diffusive
+                if core_conv == True:
+                    # eqn 26 and 29 in Dodds 2020 - use bl from previous timestep
+                    # check if non zero if just switched to convection b.l. at previous timestep = 0
+                    if dl_old == 0 and dc_old == 0:
+                        dc_old = delta_c(Tc_conv_new,Tcmb_old) #find approximate core cmb b.l. thickness
+                        dl_old = delta_l(Tm_conv_new,Tcmb_old,Ur_old) #find approximate mantle cmb b.l. thickness
+                        factor = (kc*dl_old)/(km*dc_old)
+                        
+                    elif dl_old != 0 and dc_old == 0:
+                         dc_old = delta_c(Tc_conv_new,Tcmb_old) #find approximate core cmb b.l. thickness
+                         factor = (kc*dl_old)/(km*dc_old)
+                         
+                    elif dl_old == 0 and dc_old != 0:
+                         dl_old = delta_l(Tm_conv_new,Tcmb_old,Ur_old) #find approximate mantle cmb b.l. thickness
+                         factor = (kc*dl_old)/(km*dc_old)
+                         
+                    else: #both convective b.l. are non zero
+                        factor = (kc*dl_old)/(km*dc_old)
+                        
+                    Tcmb_new = (Tm_conv_new + factor*Tc_conv_new)/(1+factor) 
+                    dc_new = delta_c(Tc_conv_new,Tcmb_new) #find core cmb b.l. thickness
+                    dl_new = delta_l(Tm_conv_new,Tcmb_new,Ur_old) #find mantle cmb b.l. thickness
+                    Fcmb_new = -km*(Tm_conv_new-Tcmb_new)/dl_new
+                else: #balance mantle b.l. flux and diffusive flux from core  
+                    factor = (kc*dl_old)/(km*dr)
+                    Tcmb_new = (Tm_conv_new + factor*T_new_core[-2])/(1+factor)
+                    #Tcmb_new = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
+                    dl_new = delta_l(Tm_conv_new,Tcmb_new,Ur_old) #find mantle cmb b.l. thickness
+                    Fcmb_new = -km*(T_new_mantle[1]-Tcmb_new)/dl_new # CMB heat flux eqn 23 in Dodds 2020 - until core starts to convect heat transport is modelled as diffusive
+        
         else: #model flux balance as diffusive
             Tcmb_new = (T_new_mantle[1]+kc/km*T_new_core[-2])/(1+kc/km)
             Fcmb_new = -km*(T_new_mantle[1]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020  
