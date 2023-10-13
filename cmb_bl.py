@@ -4,7 +4,7 @@
 Functions for calculating CMB boundary layer thicknesses
 """
 from parameters import kappa_c, eta_c, rhoc, alpha_c, gc, r, rc
-from parameters import Ts, alpha_m, kappa, rhom, g
+from parameters import Ts, alpha_m, kappa, rhom, g, Rac
 from viscosity_def import viscosity
 
 def delta_l(Tm,Tcmb,Ur):
@@ -42,4 +42,4 @@ def delta_c(Tc,Tcmb):
     -------
     core cmb boundary layer thickness
     """
-    return ((kappa_c*eta_c)/(rhoc*alpha_c*gc*abs(Tc-Tcmb)))**(1/3)
+    return ((kappa_c*eta_c*Rac)/(rhoc*alpha_c*gc*abs(Tc-Tcmb)))**(1/3)
