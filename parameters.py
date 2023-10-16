@@ -44,7 +44,7 @@ if automated == True:
     t_end_m = auto.loc[ind,'t_end_m']
     dr = auto.loc[ind,'dr']
 else: #set manually
-    r = 300e3 # radius of asteroid [m]
+    r = 100e3 # radius of asteroid [m]
     dr = 500 # grid size [m]
     default ='vary' #default viscosity model
     rcmf = 0.3 #rheologically critical melt fraction - melting required for differentiation
@@ -54,10 +54,10 @@ else: #set manually
     etal = 100 #liquid viscsoity [Pas]
     alpha_n = 25 #melt weakening (diffusion creep)
     Xs_0 = 30# initial wt % sulfur in core 
-    Fe0 = 6e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 3
+    Fe0 = 1e-8#1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
+    run = 19
     t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 100 # max end time [Myr]
+    t_end_m = 1000 # max end time [Myr]
 
 
 # Size of body
@@ -83,7 +83,7 @@ kappa = 9e-7 # thermal diffusivity of silicate [m^2 /s] - 4 options are given in
 alpha_m = 4e-5 # thermal expansivity of mantle [/K]
 conv_tol = 0.9 #convective tolerance Ra/Ra_crit<conv_tol = no convection
 Rac = 1000  #critical Rayleigh number for isoviscous convection
-frht = beta + alpha_n/(Tml-Tms) #viscous temperature scale
+frht = beta #viscous temperature scale - consistent with Deschamps & Villela (2021)
 
 # Viscosity parameters
 
