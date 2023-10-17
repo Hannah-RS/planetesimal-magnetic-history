@@ -416,7 +416,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             
             if stratification_old == True:  #there is thermal stratification 
                 
-                if np.all(T_old_core[:-1] < Tcmb_old): #stratification stable
+                if np.all(np.round(T_old_core[:-1]/Tcmb_old,3) <= 1): #stratification stable
                     stratification_new = True
                     min_unstable_new = i_core - 1
                         # scenario 1 - just conduction in the core
