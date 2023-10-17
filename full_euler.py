@@ -322,8 +322,11 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             nbase_cells = 0 #no cmb b.l.
             
         if conv_off == False:
-            
-            if (np.round((d0_old + dl_old)/(r-rc),1) < 1): #other convection criteria are meaningless if lid thickness is greater than mantle thickness
+            if stratification_old == False:
+                lid_thickness = d0_old + dl_old #only include cmb b.l. when core not stratified
+            else:
+                lid_thickness = d0_old 
+            if (np.round(lid_thickness/(r-rc),1) < 1): #other convection criteria are meaningless if lid thickness is greater than mantle thickness
                 
                 nlid_cells = round(d0_old/dr)
                 if nlid_cells ==0:
