@@ -488,6 +488,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         
             else: 
                 if core_conv == True:
+                    if dc_old == 0: #if core wasn't convecting in previous step
+                         dc_old = delta_c(Tc_conv_new,Tcmb_old) #find approximate core cmb b.l. thickness
                     factor = (kc*dr)/(km*dc_old)
                     Tcmb_new = (T_new_mantle[1]+ factor*Tc_conv_new)/(1+factor)
                     dc_new = delta_c(Tc_conv_new,Tcmb_new) #find core cmb b.l. thickness
