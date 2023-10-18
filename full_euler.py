@@ -318,8 +318,9 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         else: #either Ra doesn't matter any more or core is thermally stratified
             Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T_old_mantle[1],Ur_old,default) #use temp at base of mantle 
             Racrit_new = Rayleigh_crit(T_old_mantle[1])
-            dl_new = delta_l(T_old_mantle[1],Tcmb_old,Ur_old) 
-            nbase_cells = 0 #no cmb b.l.
+            if conv_off == False: #don't calculate dl once convection stops
+                dl_new = delta_l(T_old_mantle[1],Tcmb_old,Ur_old) 
+                nbase_cells = 0 #no cmb b.l.
             
         if conv_off == False:
             if stratification_old == False:
