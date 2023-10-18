@@ -421,7 +421,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             
             if stratification_old == True:  #there is thermal stratification 
                 
-                if np.all(np.round(T_old_core[:-1]/Tcmb_old,3) <= 1): #stratification stable
+                #if np.all(T_old_core[:-1]-Tcmb_old < 1e-1): #stratification stable
+                if np.all(T_old_core[:-1]<Tcmb_old):
                     stratification_new = True
                     min_unstable_new = i_core - 1
                         # scenario 1 - just conduction in the core
@@ -429,7 +430,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
 
                 else: #scenario 2 - erosion of stratification, convective layer at top of core
                     core_conv = True
-                    b_ind = np.where(np.round(T_old_core[:-1]/Tcmb_old,3) >1)[0] #indices of unstable layer as array
+                    #b_ind = np.where(T_old_core[:-1]-Tcmb_old >= 1e-1)[0] #indices of unstable layer as array
+                    b_ind = np.where(T_old_core[:-1] >= Tcmb_old)[0]
                     min_unstable_new = b_ind[0]
                     dTcdt, Rem_new, B_new, buoyr_new = dTcdt_calc(tsolve_new,Fcmb_old, T_old_core, f_old, Xs_old, stratification = [True, min_unstable_old])
                     Tc_conv_new = T_old_core[min_unstable_old]+dTcdt*dt #replace convecting layer from last timestep with new temp - in later steps use i-1 and i
@@ -442,7 +444,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     else:
                         stratification_new = True
             else: #there was no stratification in previous step, the core is not convecting
-                if np.all(np.round(T_old_core[:-1]/Tcmb_old,3) <= 1): #is there now stratification?
+                #if np.all(T_old_core[:-1]-Tcmb_old < 1e-1): #is there now stratification?
+                if np.all(T_old_core[:-1] < Tcmb_old):
                     stratification_new = True #add stratification for next step
                     min_unstable_new = i_core - 1
                 else: #core is hotter than the mantle and the core is not thermally convecting 
