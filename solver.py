@@ -204,6 +204,12 @@ if len(on) > 1:
 else:
     magon_2 = 0
     magoff_2 = 0
+if len(on) > 2:
+    magon_3 = on[2]
+    magoff_3 = off[2]
+else:
+    magon_3 = 0
+    magoff_3 = 0
 
 #Rem > 40
 on, off, dur = on_off_test(t/Myr,Rem,threshold2,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
