@@ -17,7 +17,7 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-automated = False
+automated = True
 full_save = True #do you want to save temp profiles etc or just summary stats
 B_save = False #do you want to save field strengths and Rem
 out_interval = 20 #how many times do you want t to be printed in the whole run
@@ -54,10 +54,10 @@ else: #set manually
     etal = 100 #liquid viscsoity [Pas]
     alpha_n = 25 #melt weakening (diffusion creep)
     Xs_0 = 30# initial wt % sulfur in core 
-    Fe0 = 1e-8#1e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 19
+    Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
+    run = 28
     t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 1000 # max end time [Myr]
+    t_end_m = 200 # max end time [Myr]
 
 
 # Size of body
@@ -150,6 +150,7 @@ rhoc = fe_fes_density(Xs_0)*rho_exp # density of core [kg m^-3]
 fohm = 1 #fraction of energy dissipated via Ohmic dissipation in the dynamo (Weiss 2010)
 cu = 1.65 #  Aubert 2009
 cb = 0.23 # Davies et. al. 2022 median value of c for Bdip,cmb
+temp_tol = 1e-8 #minimum usable temp difference
 
 #Calculated parameters
 rhoa = 1/(XFe_a/rhofe_s +(1-XFe_a)/rhom) # kg m^-3 density of undifferentiated material (Sturtz 2022b eqn. 1)
