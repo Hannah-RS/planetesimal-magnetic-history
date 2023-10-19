@@ -215,35 +215,35 @@ else:
 on, off, dur = on_off_test(t/Myr,Rem,threshold2,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn2 = len(on) #number of on periods
 if on.size > 0: #i.e. there is one on value > nan
-    magon_3 = on[0]
-    magoff_3 = off[0]
-else:
-    magon_3 = 0
-    magoff_3 = 0
-    
-if len(on) > 1:
-    magon_4 = on[1]
-    magoff_4 = off[1]
+    magon_4 = on[0]
+    magoff_4 = off[0]
 else:
     magon_4 = 0
     magoff_4 = 0
+    
+if len(on) > 1:
+    magon_5 = on[1]
+    magoff_5 = off[1]
+else:
+    magon_5 = 0
+    magoff_5 = 0
     
 # Rem > 100
 on, off, dur = on_off_test(t/Myr,Rem,threshold3,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn3 = len(on) #number of on periods
 if on.size > 0:
-    magon_5 = on[0]
-    magoff_5 = off[0]
-else:
-    magon_5 = 0
-    magoff_5 = 0
-    
-if len(on) > 1:
-    magon_6 = on[1]
-    magoff_6 = off[1]
+    magon_6 = on[0]
+    magoff_6 = off[0]
 else:
     magon_6 = 0
     magoff_6 = 0
+    
+if len(on) > 1:
+    magon_7 = on[1]
+    magoff_7 = off[1]
+else:
+    magon_7 = 0
+    magoff_7 = 0
 
 ############################ Save results #####################################
 # save variables to file
@@ -259,8 +259,8 @@ if B_save == True:
 from csv import writer
   
 var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_remove, 
-             strat_end, fcond_t, fcond_T, tsolid_start, max_R, max_Rt, max_B, max_Bt, Bn1, magon_1, magoff_1, magon_2, magoff_2, Bn2, magon_3, magoff_3, 
-             magon_4, magoff_4, Bn3, magon_5, magoff_5, magon_6, magoff_6]
+             strat_end, fcond_t, fcond_T, tsolid_start, max_R, max_Rt, max_B, max_Bt, Bn1, magon_1, magoff_1, magon_2, magoff_2, magon_3, magoff_3, Bn2, 
+             magon_4, magoff_4, magon_5, magoff_5, Bn3, magon_6, magoff_6, magon_7, magoff_7]
 
 with open(f'{folder}run_results.csv','a') as f_object:
      writer_object = writer(f_object) #pass file object to csv.writer
