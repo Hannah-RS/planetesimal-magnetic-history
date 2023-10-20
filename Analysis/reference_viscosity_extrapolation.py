@@ -102,3 +102,22 @@ print(f'The minimum asteroid Arrhenius reference viscosity is {np.min(reta_ast):
 print(f'The maximum asteroid Arrhenius reference viscosity is {np.max(reta_ast):0e} Pas')
 print(f'The minimum asteroid FK reference viscosity is {np.min(reta_fk):0e} Pas')
 print(f'The maximum asteroid FK reference viscosity is {np.max(reta_fk):0e} Pas')
+
+#%% Extrapolation case 3: Scott & Kohlstedt 2006 experimental pararmeters
+eta0 = 1e14
+Tref = 1523 #but no melt so 1400 may be more appropriate
+pref = 300*1e6 #confining pressure [Pa]
+
+#find spread in values
+seta_ast = np.zeros([l,m,n])
+seta_fk = np.zeros([l,m,n])
+
+for i, p in enumerate(pmid):
+    for j, Vin in enumerate(V):
+            seta_ast[i,:,j], seta_fk[i,:,j] = viscosity_converter(p, pref, Tref, Vin, E, eta0)
+            
+# find minimum and maximum reference viscosities
+print(f'The minimum asteroid Arrhenius reference viscosity is {np.min(seta_ast):0e} Pas')
+print(f'The maximum asteroid Arrhenius reference viscosity is {np.max(seta_ast):0e} Pas')
+print(f'The minimum asteroid FK reference viscosity is {np.min(seta_fk):0e} Pas')
+print(f'The maximum asteroid FK reference viscosity is {np.max(seta_fk):0e} Pas')
