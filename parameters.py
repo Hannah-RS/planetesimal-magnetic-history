@@ -17,7 +17,7 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-automated = True
+automated = False
 full_save = True #do you want to save temp profiles etc or just summary stats
 B_save = False #do you want to save field strengths and Rem
 out_interval = 20 #how many times do you want t to be printed in the whole run
@@ -55,9 +55,9 @@ else: #set manually
     alpha_n = 25 #melt weakening (diffusion creep)
     Xs_0 = 30# initial wt % sulfur in core 
     Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 28
+    run = 35
     t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 200 # max end time [Myr]
+    t_end_m = 20 # max end time [Myr]
 
 
 # Size of body
@@ -158,7 +158,7 @@ XAl_d = (rhoa/rhom*(r**3/(r**3-rc**3)))*XAl_a
 kappa_c = kc/(cpc*rhoc) #thermal diffusivity of core material
 g = G*(Vm*rhom+4/3*np.pi*rc**3*rhoc)/r**2 # surface gravity [m/s^2]
 gc = 4/3*np.pi*rc*rhoc*G #gravitational field strength at CMB [m/s^2]
-Pc = 2*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre of core [GPa]
+Pc = 2/3*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre of core [GPa]
 Tl_fe = fe_fes_liquidus_bw(Xs_0,Pc)
 t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle
