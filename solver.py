@@ -11,7 +11,7 @@ import time #use this to time the integration
 
 #import time constants and initial conditions
 from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, kappa_c, save_interval_d, save_interval_t, km, Vm, As
-from parameters import rhom, step_m, Xs_0, default, rcmf, Fe0, full_save, B_save, conv_tol, eta0, etal, w, alpha_n, beta
+from parameters import rhom, step_m, Xs_0, default, rcmf, Fe0, full_save, B_save, eta0, etal, w, alpha_n, beta, n_cells
 from viscosity_def import viscosity
 
 if automated == True: #should say true am just testing
@@ -143,15 +143,23 @@ else:
     tsolid_start = np.nan
     tsolid = np.nan
 
-if np.all(Tprofile[:,int(nmantle)-2]<Tcmb):
+#erosion of stratification
+tstrat = t[min_unstable!=0] #all times when the core is stratified
+
+if len(tstrat)==0: #core never stratified
+    tstrat_start = t[0]/Myr
+    tstrat_remove = t[0]/Myr
+    strat_end = t[0]/Myr
+elif np.all(min_unstable!=0): # stratification never removed
+    tstrat_start = t[0]/Myr
     tstrat_remove = np.inf
-else:
-    tstrat_remove = t[Tcmb < Tprofile[:,int(nmantle)-2]][0]/Myr
-    
-if np.any(min_unstable==0):
-     strat_end = t[np.where(min_unstable==0)[0]][0]/Myr
-else:
     strat_end = np.inf
+else:
+    tstrat_start = tstrat[0]/Myr
+    max_strat = round(n_cells/2)-1 #max height of stratification
+    tstrat_remove = t[(min_unstable<max_strat)&(min_unstable>0)][0]/Myr #beginning of stratification erosion
+    strat_end = tstrat[-1]/Myr #end of stratification erosion
+  
 
 #switch to conduction
 
@@ -258,7 +266,7 @@ if B_save == True:
 #write parameters to the run file
 from csv import writer
   
-var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_remove, 
+var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_start, tstrat_remove, 
              strat_end, fcond_t, fcond_T, tsolid_start, max_R, max_Rt, max_B, max_Bt, Bn1, magon_1, magoff_1, magon_2, magoff_2, magon_3, magoff_3, Bn2, 
              magon_4, magoff_4, magon_5, magoff_5, Bn3, magon_6, magoff_6, magon_7, magoff_7]
 
