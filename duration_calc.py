@@ -46,9 +46,9 @@ def on_off_test(tarray,out_array,threshold,save_interval):
         tstart = np.insert(tstart, 0, t[0])
         duration = tend-tstart
     else: #no on periods
-        tstart = np.array([np.nan])
-        tend = np.array([np.nan])
-        duration = np.array([np.nan])
+        tstart = np.array([])
+        tend = np.array([])
+        duration = np.array([])
             
     return tstart, tend, duration
 

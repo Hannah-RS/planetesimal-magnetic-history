@@ -29,7 +29,7 @@ def Rayleigh_crit(Tb):
     Ra_crit = 20.9*(frht*(Tb-Ts))**4 
     return Ra_crit
     
-def Rayleigh_calc(t,Tb,dTmdt,Ur,model=default):
+def Rayleigh_calc(t,Tb,Ur,model=default):
     """
     
 
@@ -39,8 +39,6 @@ def Rayleigh_calc(t,Tb,dTmdt,Ur,model=default):
         time [s]
     Tb : float
         mantle base temperature [K]
-    dTmdt : float
-        rate of temperature change of convecting mantle [K/s]
     Ur : float
         Urey ratio
     model : str
@@ -52,8 +50,8 @@ def Rayleigh_calc(t,Tb,dTmdt,Ur,model=default):
 
     """
 
-    RaH, RaRob = Rayleigh_H(t,Tb,dTmdt,model=model)
-    RanoH, d0 = Rayleigh_noH(Tb,model)
+    RaH = Rayleigh_H(t,Tb,model=model)
+    RanoH= Rayleigh_noH(Tb,model)
 
     if Ur > 1:
         d0 = 0.667*(r-rc)*(frht*(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
@@ -65,7 +63,7 @@ def Rayleigh_calc(t,Tb,dTmdt,Ur,model=default):
     else:
         Ram = RanoH
     
-    return Ram, d0, RaH, RanoH, RaRob
+    return Ram, d0, RaH, RanoH
 
 def Rayleigh_noH(Tb,model=default): 
     """
@@ -86,12 +84,11 @@ def Rayleigh_noH(Tb,model=default):
 
     """
     eta = viscosity(Tb,model)
-    d0 = frht**(4/3)*(Tb-Ts)*((Rac*kappa*eta)/(rhom*g*alpha_m))**(1/3) #upper bl
     Ram= rhom*g*alpha_m*abs(Tb-Ts)*(r-rc)**3/(kappa*eta)
     
-    return Ram, d0
-    
-def Rayleigh_H(t,Tb,dTmdt,rcore = rc, model=default,Fe=False):
+    return Ram
+
+def Rayleigh_H(t,Tb,rcore = rc, model=default,Fe=False):
     """
     Rayleigh number for radiogenic heating
 
@@ -101,8 +98,6 @@ def Rayleigh_H(t,Tb,dTmdt,rcore = rc, model=default,Fe=False):
         time [s]
     Tb : float
         temperature at the base of the convecting region [K]
-    dTmdt : float
-        rate of temperature change of convecting mantle [K/s]
     rcore: float
         core radius, defaults to value in parameters [m]   
     model : str, optional
@@ -121,14 +116,12 @@ def Rayleigh_H(t,Tb,dTmdt,rcore = rc, model=default,Fe=False):
     else:
         h = AlFe_heating(t)
     
-    hstar = abs(rhom*h-rhom*cpm_p*dTmdt)
     Ra = rhom**3*alpha_m*h*G*(r-rcore)**6/(km*kappa*eta) #Internally heated sphere (Schubert 2001)
-    RaRob = rhom*alpha_m*hstar*g*(r-rcore)**5/(km*kappa*eta)
-    
-    return Ra, RaRob
+
+    return Ra
 
 
-def Rayleigh_differentiate(t,Tb,dTmdt,Ur,model=default):
+def Rayleigh_differentiate(t,Tb,Ur,model=default):
     """
     Check for onset of differentiation
 
@@ -138,8 +131,6 @@ def Rayleigh_differentiate(t,Tb,dTmdt,Ur,model=default):
         time [s]
     Tb : float
         temperature at the base of the convecting region [K]
-    dTmdt : float
-        rate of temperature change of convecting mantle [K/s]
     Ur : float
         Urey ratio
     model : str, optional
@@ -158,9 +149,9 @@ def Rayleigh_differentiate(t,Tb,dTmdt,Ur,model=default):
 
     """
    
-    RaH, RaRob = Rayleigh_H(t,Tb,dTmdt,0,model,Fe=True)
+    RaH = Rayleigh_H(t,Tb,0,model,Fe=True)
 
-    RanoH, d0_noH = Rayleigh_noH(Tb,model)
+    RanoH = Rayleigh_noH(Tb,model)
     
     if Ur > 1:
         d0H = 0.667*r*(frht*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 

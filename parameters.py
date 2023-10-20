@@ -44,7 +44,7 @@ if automated == True:
     t_end_m = auto.loc[ind,'t_end_m']
     dr = auto.loc[ind,'dr']
 else: #set manually
-    r = 300e3 # radius of asteroid [m]
+    r = 100e3 # radius of asteroid [m]
     dr = 500 # grid size [m]
     default ='vary' #default viscosity model
     rcmf = 0.3 #rheologically critical melt fraction - melting required for differentiation
@@ -54,10 +54,10 @@ else: #set manually
     etal = 100 #liquid viscsoity [Pas]
     alpha_n = 25 #melt weakening (diffusion creep)
     Xs_0 = 30# initial wt % sulfur in core 
-    Fe0 = 6e-7 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 3
+    Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
+    run = 35
     t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 100 # max end time [Myr]
+    t_end_m = 20 # max end time [Myr]
 
 
 # Size of body
@@ -83,7 +83,7 @@ kappa = 9e-7 # thermal diffusivity of silicate [m^2 /s] - 4 options are given in
 alpha_m = 4e-5 # thermal expansivity of mantle [/K]
 conv_tol = 0.9 #convective tolerance Ra/Ra_crit<conv_tol = no convection
 Rac = 1000  #critical Rayleigh number for isoviscous convection
-frht = beta + alpha_n/(Tml-Tms) #viscous temperature scale
+frht = beta #viscous temperature scale - consistent with Deschamps & Villela (2021)
 
 # Viscosity parameters
 
@@ -150,6 +150,7 @@ rhoc = fe_fes_density(Xs_0)*rho_exp # density of core [kg m^-3]
 fohm = 1 #fraction of energy dissipated via Ohmic dissipation in the dynamo (Weiss 2010)
 cu = 1.65 #  Aubert 2009
 cb = 0.23 # Davies et. al. 2022 median value of c for Bdip,cmb
+temp_tol = 1e-8 #minimum usable temp difference
 
 #Calculated parameters
 rhoa = 1/(XFe_a/rhofe_s +(1-XFe_a)/rhom) # kg m^-3 density of undifferentiated material (Sturtz 2022b eqn. 1)
@@ -157,7 +158,7 @@ XAl_d = (rhoa/rhom*(r**3/(r**3-rc**3)))*XAl_a
 kappa_c = kc/(cpc*rhoc) #thermal diffusivity of core material
 g = G*(Vm*rhom+4/3*np.pi*rc**3*rhoc)/r**2 # surface gravity [m/s^2]
 gc = 4/3*np.pi*rc*rhoc*G #gravitational field strength at CMB [m/s^2]
-Pc = 2*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre of core [GPa]
+Pc = 2/3*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre of core [GPa]
 Tl_fe = fe_fes_liquidus_bw(Xs_0,Pc)
 t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle

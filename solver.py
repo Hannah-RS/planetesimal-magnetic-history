@@ -11,7 +11,7 @@ import time #use this to time the integration
 
 #import time constants and initial conditions
 from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, kappa_c, save_interval_d, save_interval_t, km, Vm, As
-from parameters import rhom, step_m, Xs_0, default, rcmf, Fe0, full_save, B_save, conv_tol, eta0, etal, w, alpha_n, beta
+from parameters import rhom, step_m, Xs_0, default, rcmf, Fe0, full_save, B_save, eta0, etal, w, alpha_n, beta, n_cells
 from viscosity_def import viscosity
 
 if automated == True: #should say true am just testing
@@ -72,7 +72,7 @@ else: #put marker in csv
     
 print(f'Beginning run {run}')
 print('Initial conditions set')
-
+#%%
 ########################### Differentiation ###################################
 tic = time.perf_counter()
 Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H  = differentiation(Tint,t_acc,r, dr, step_m)
@@ -105,11 +105,12 @@ if full_save == True:
     np.savez_compressed(f'{folder}run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, d0=d0, t_diff = t_diff, H=H)
 
 print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time1)))
+#%%
 ######################## Thermal evolution ####################################
 
 #integrate
 tic = time.perf_counter()
-Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, RaRob, Racrit, Fs, Flid, Fad, Fcmb, Rem, B, buoyr, t = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, Racrit, Fs, Flid, Fad, Fcmb, Rem, B, buoyr, t, fcond_t = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time2 = toc - tic    
 
@@ -122,7 +123,7 @@ if automated == False:
     plt.title('Temperature profile post thermal evolution')
 
 print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time2)))
-
+#%%
 ############################# Process data ####################################
 ################ all processes which happen once  #############################
 int_time = int_time1+int_time2 #total time for the two scripts
@@ -135,33 +136,37 @@ tmax = t[loc_max1]/Myr
 peak_coreT = np.amax(Tprofile[:,:nmantle])
 loc_max2 = np.where(Tprofile[:,:nmantle]==peak_coreT)[0][0] #take the set of time coordinates and first value (they should all be the same)
 tcoremax = t[loc_max2]/Myr
-tsolid_start = t[f<f0][0]/Myr #start of core solidification
-tsolid = t[-1]/Myr #time of core solidification
-if np.all(Tprofile[:,int(nmantle)-2]<Tcmb):
+if np.any(f<f0):
+    tsolid_start = t[f<f0][0]/Myr #start of core solidification
+    tsolid = t[-1]/Myr #time of core solidification
+else:
+    tsolid_start = np.nan
+    tsolid = np.nan
+
+#erosion of stratification
+tstrat = t[min_unstable!=0] #all times when the core is stratified
+
+if len(tstrat)==0: #core never stratified
+    tstrat_start = t[0]/Myr
+    tstrat_remove = t[0]/Myr
+    strat_end = t[0]/Myr
+elif np.all(min_unstable!=0): # stratification never removed
+    tstrat_start = t[0]/Myr
     tstrat_remove = np.inf
-else:
-    tstrat_remove = t[Tcmb < Tprofile[:,int(nmantle)-2]][0]/Myr
-    
-if np.any(min_unstable==0):
-     strat_end = t[np.where(min_unstable==0)[0]][0]/Myr
-else:
     strat_end = np.inf
+else:
+    tstrat_start = tstrat[0]/Myr
+    max_strat = round(n_cells/2)-1 #max height of stratification
+    tstrat_remove = t[(min_unstable<max_strat)&(min_unstable>0)][0]/Myr #beginning of stratification erosion
+    strat_end = tstrat[-1]/Myr #end of stratification erosion
+  
 
 #switch to conduction
-if np.any(Ra/Racrit<0.5):
-    fcond_t = t[Ra/Racrit<0.5][0]/Myr #half the critical value (end of buffering)
-    if np.any(d0>(r-rc)):
-        fcond_t2 = t[d0>(r-rc)][0]/Myr #check convection not ended by stagnant lid thickening
-        if fcond_t2 < fcond_t:
-            fcond_t = fcond_t2 #lid thickening shuts off convection first
+
+if np.any((d0+dl)>(r-rc)):
+    fcond_T = Tprofile[(t/Myr)<fcond_t,nmantle+1][-1] #temperature when mantle stops convecting
 else:
-    fcond_t = np.nan
-if np.any(Ra/Racrit>(2-conv_tol)):
-    lconv_t = t[Ra/Racrit>(2-conv_tol)][-1]/Myr #last supercritical time (start of buffering)
-    lconv_T = Tprofile[Ra/Racrit>(2-conv_tol),nmantle+1][-1] #temperature when Ra first starts buffering
-else:
-    lconv_t = np.nan
-    lconv_T = np.nan
+    fcond_T = np.nan
     
 # Frad - radiogenic heat flux, normalised to surface of body
 from heating import Al_heating
@@ -195,7 +200,7 @@ from duration_calc import on_off_test
 #Rem > 10  
 on, off, dur = on_off_test(t/Myr,Rem,threshold1,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn1 = len(on) #number of on periods
-if len(np.where(on>0)) > 0:
+if on.size > 0:
     magon_1 = on[0]
     magoff_1 = off[0]
 else:
@@ -207,47 +212,53 @@ if len(on) > 1:
 else:
     magon_2 = 0
     magoff_2 = 0
+if len(on) > 2:
+    magon_3 = on[2]
+    magoff_3 = off[2]
+else:
+    magon_3 = 0
+    magoff_3 = 0
 
 #Rem > 40
 on, off, dur = on_off_test(t/Myr,Rem,threshold2,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn2 = len(on) #number of on periods
-if len(np.where(on>0)) > 0: #i.e. there is one on value > nan
-    magon_3 = on[0]
-    magoff_3 = off[0]
-else:
-    magon_3 = 0
-    magoff_3 = 0
-    
-if len(on) > 1:
-    magon_4 = on[1]
-    magoff_4 = off[1]
+if on.size > 0: #i.e. there is one on value > nan
+    magon_4 = on[0]
+    magoff_4 = off[0]
 else:
     magon_4 = 0
     magoff_4 = 0
     
-# Rem > 100
-on, off, dur = on_off_test(t/Myr,Rem,threshold3,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
-Bn3 = len(on) #number of on periods
-if len(np.where(on>0)) > 0:
-    magon_5 = on[0]
-    magoff_5 = off[0]
+if len(on) > 1:
+    magon_5 = on[1]
+    magoff_5 = off[1]
 else:
     magon_5 = 0
     magoff_5 = 0
     
-if len(on) > 1:
-    magon_6 = on[1]
-    magoff_6 = off[1]
+# Rem > 100
+on, off, dur = on_off_test(t/Myr,Rem,threshold3,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
+Bn3 = len(on) #number of on periods
+if on.size > 0:
+    magon_6 = on[0]
+    magoff_6 = off[0]
 else:
     magon_6 = 0
     magoff_6 = 0
+    
+if len(on) > 1:
+    magon_7 = on[1]
+    magoff_7 = off[1]
+else:
+    magon_7 = 0
+    magoff_7 = 0
 
 ############################ Save results #####################################
 # save variables to file
 if full_save == True:
     np.savez_compressed(f'{folder}run_{run}', Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, 
              T_profile = Tprofile, Flid = Flid, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, Ur=Ur, 
-             Ra = Ra, RaH= RaH, RanoH = RanoH, RaRob = RaRob, Racrit = Racrit, t=t, Rem = Rem, B=B, buoyr = buoyr, Flux = Flux) 
+             Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, t=t, Rem = Rem, B=B, buoyr = buoyr, Flux = Flux) 
 
 if B_save == True:
     np.savez_compressed(f'{folder}run_{run}_B', B=B, Rem = Rem, t = t)
@@ -255,9 +266,9 @@ if B_save == True:
 #write parameters to the run file
 from csv import writer
   
-var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_remove, 
-             strat_end, fcond_t, lconv_t,lconv_T, tsolid_start, max_R, max_Rt, max_B, max_Bt, Bn1, magon_1, magoff_1, magon_2, magoff_2, Bn2, magon_3, magoff_3, 
-             magon_4, magoff_4, Bn3, magon_5, magoff_5, magon_6, magoff_6]
+var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_start, tstrat_remove, 
+             strat_end, fcond_t, fcond_T, tsolid_start, max_R, max_Rt, max_B, max_Bt, Bn1, magon_1, magoff_1, magon_2, magoff_2, magon_3, magoff_3, Bn2, 
+             magon_4, magoff_4, magon_5, magoff_5, Bn3, magon_6, magoff_6, magon_7, magoff_7]
 
 with open(f'{folder}run_results.csv','a') as f_object:
      writer_object = writer(f_object) #pass file object to csv.writer

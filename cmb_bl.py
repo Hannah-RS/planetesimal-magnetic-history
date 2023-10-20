@@ -3,8 +3,9 @@
 """
 Functions for calculating CMB boundary layer thicknesses
 """
-from parameters import gamma, c1, kappa_c, eta_c, rhoc, alpha_c, gc, r, rc, default
-from Rayleigh_def import Rayleigh_noH
+from parameters import kappa_c, eta_c, rhoc, alpha_c, gc, r, rc
+from parameters import Ts, alpha_m, kappa, rhom, g, Rac
+from viscosity_def import viscosity
 
 def delta_l(Tm,Tcmb,Ur):
     """
@@ -20,14 +21,11 @@ def delta_l(Tm,Tcmb,Ur):
 
     Returns
     -------
-    mantle bottom boundary layer thickness
+    mantle bottom boundary layer thickness  - Thiriet et. al. 2019 eqn. 13, 14, 16, 3
     """
-
-    RanoH, d0_noH = Rayleigh_noH(Tm,default)
-    if Ur > 1:
-        delta_l = 0.667*(r-rc)*(gamma*abs(Tcmb-Tm)/c1)**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
-    else:
-        delta_l = 0.633*(r-rc)*(gamma*abs(Tcmb-Tm)/c1)**(1.21)*RanoH**(-0.27)
+    eta1 = viscosity(Tm)
+    eta2 = viscosity((Tm+Tcmb)/2)
+    delta_l = 0.65*abs(Tcmb-Tm)**(-1/3)*(Tm-Ts)**0.07*(r-rc)**0.21*(kappa/(alpha_m*rhom))**0.26*(eta1/g)**(-0.07)*(eta2/gc)**(1/3) #Thiriet 2019
 
     return delta_l
 
@@ -44,4 +42,4 @@ def delta_c(Tc,Tcmb):
     -------
     core cmb boundary layer thickness
     """
-    return ((kappa_c*eta_c)/(rhoc*alpha_c*gc*abs(Tc-Tcmb)))**(1/3)
+    return ((kappa_c*eta_c*Rac)/(rhoc*alpha_c*gc*abs(Tc-Tcmb)))**(1/3)

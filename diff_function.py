@@ -121,7 +121,7 @@ def differentiation(Tint,tacc,r,dr,dt):
             
             t = np.append(t,t[i-1]+dt)
             
-            Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1], dTdt_old, Ur)
+            Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1], Ur)
             #calculate radiogenic heating
             H = np.append(H,AlFe_heating(t[i]))
             Tk = ka*T[:,i-1]
@@ -294,7 +294,7 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         
         t = np.append(t,t[i-1]+dt)
         
-        Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1],dTdt_old,Ur)
+        Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1],Ur)
         #calculate radiogenic heating
         H = np.append(H,AlFe_heating(t[i]))
         Tk = ka*T[:,i-1]
