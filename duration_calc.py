@@ -45,6 +45,10 @@ def on_off_test(tarray,out_array,threshold,save_interval):
         tend = np.append(tend,t[-1])
         tstart = np.insert(tstart, 0, t[0])
         duration = tend-tstart
+        #remove any zero duration periods
+        tend = np.delete(tend,np.round(duration,1)<0.1)
+        tstart = np.delete(tstart,np.round(duration,1)<0.1)
+        duration = np.delete(duration,np.round(duration,1)<0.1)
     else: #no on periods
         tstart = np.array([])
         tend = np.array([])

@@ -201,6 +201,13 @@ from duration_calc import on_off_test
 on, off, dur = on_off_test(t/Myr,Rem,threshold1,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn1 = len(on) #number of on periods
 if on.size > 0:
+    if (on[0] < strat_end) & (off[0]>strat_end): #dynamo generation extends through stratification
+        on[0] = strat_end
+    elif (on[0] < strat_end) & (off[0]<strat_end): #dynamo only on before stratification
+        on[0] = 0
+        off[0] = 0
+    else:
+        pass        
     magon_1 = on[0]
     magoff_1 = off[0]
 else:
@@ -223,6 +230,13 @@ else:
 on, off, dur = on_off_test(t/Myr,Rem,threshold2,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn2 = len(on) #number of on periods
 if on.size > 0: #i.e. there is one on value > nan
+    if (on[0] < strat_end) & (off[0]>strat_end): #dynamo generation extends through stratification
+        on[0] = strat_end
+    elif (on[0] < strat_end) & (off[0]<strat_end): #dynamo only on before stratification
+        on[0] = 0
+        off[0] = 0
+    else:
+        pass 
     magon_4 = on[0]
     magoff_4 = off[0]
 else:
@@ -240,6 +254,13 @@ else:
 on, off, dur = on_off_test(t/Myr,Rem,threshold3,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn3 = len(on) #number of on periods
 if on.size > 0:
+    if (on[0] < strat_end) & (off[0]>strat_end): #dynamo generation extends through stratification
+        on[0] = strat_end
+    elif (on[0] < strat_end) & (off[0]<strat_end): #dynamo only on before stratification
+        on[0] = 0
+        off[0] = 0
+    else:
+        pass 
     magon_6 = on[0]
     magoff_6 = off[0]
 else:
