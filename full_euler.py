@@ -490,15 +490,14 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     dc_new = delta_c(Tc_conv_new,Tcmb_new) #find core cmb b.l. thickness
                     dl_new = delta_l(Tm_conv_new,Tcmb_new,Ur_old) #find mantle cmb b.l. thickness
                     Fcmb_new = -km*(Tm_conv_new-Tcmb_new)/dl_new
-                
+                    
                 else: #balance mantle b.l. flux and diffusive flux from core  
                     factor = (kc*dl_old)/(km*dr)
                     Tcmb_new = (Tm_conv_new + factor*T_new_core[-2])/(1+factor)
                     dl_new = delta_l(Tm_conv_new,Tcmb_new,Ur_old) #find mantle cmb b.l. thickness
-                    nbase_cells = round(dl_new/dr)
                     Fcmb_new = -km*(T_new_mantle[nbase_cells+1]-Tcmb_new)/dl_new # CMB heat flux eqn 29 in Dodds 2020 - until core starts to convect heat transport is modelled as diffusive
         
-            else: 
+            else:
                 if core_conv == True:
                     if dc_old == 0: #if core wasn't convecting in previous step
                          dc_old = delta_c(Tc_conv_new,Tcmb_old) #find approximate core cmb b.l. thickness
