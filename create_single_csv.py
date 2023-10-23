@@ -41,7 +41,7 @@ etal = np.logspace(minetal,maxetal,3)
 #%%
 #sulfur content
 nxs = 3
-minxs = 27 #minimum for a 300km radius, rcmf = 0.3 
+minxs = 27.1 #minimum for a 300km radius, rcmf = 0.3 
 maxxs = 32
 Xs_0 = np.linspace(minxs,maxxs,nxs)
 

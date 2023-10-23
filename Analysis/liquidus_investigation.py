@@ -27,7 +27,7 @@ x = Xsd*mrr/(1-Xsd) #mole fraction of FeS
 r = np.array([300e3]) #for one radius just use this line
 #r = np.linspace(10,500,200)*1e3
 rc = r/2
-P = 2*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre [GPa]
+P = 2/3*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre [GPa]
 
 bw =np.zeros([len(r),100])
 Teut = 1260 #Buono & Walker eutectic temp
@@ -51,7 +51,7 @@ Delta = dTdP*(rhoc*cpc)/(alpha_c*Tc)
 
 #find lowest Xs for a given silicate melting
 #phi = np.linspace(0.01,0.5,200)
-phi = np.array([0.5]) #for one melt fraction just use this line
+phi = np.array([0.3]) #for one melt fraction just use this line
 minS = np.zeros([len(r),len(phi)])
 Tphi = Tms+phi*(Tml-Tms)
 for i in range(len(r)):
