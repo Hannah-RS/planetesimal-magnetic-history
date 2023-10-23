@@ -158,7 +158,7 @@ else:
     tstrat_start = tstrat[0]/Myr
     max_strat = round(n_cells/2)-1 #max height of stratification
     tstrat_remove = t[(min_unstable<max_strat)&(min_unstable>0)][0]/Myr #beginning of stratification erosion
-    strat_end = tstrat[-1]/Myr #end of stratification erosion
+    strat_end = tstrat[-1]/Myr+0.1 #end of stratification erosion
   
 
 #switch to conduction
