@@ -163,7 +163,7 @@ else:
 
 #switch to conduction
 
-if np.any((d0+dl)>(r-rc)):
+if np.any((t/Myr)<fcond_t):
     fcond_T = Tprofile[(t/Myr)<fcond_t,nmantle+1][-1] #temperature when mantle stops convecting
 else:
     fcond_T = np.nan
