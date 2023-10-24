@@ -150,16 +150,18 @@ if len(tstrat)==0: #core never stratified
     tstrat_start = t[0]/Myr
     tstrat_remove = t[0]/Myr
     strat_end = t[0]/Myr
-elif np.all(min_unstable!=0): # stratification never removed
-    tstrat_start = t[0]/Myr
-    tstrat_remove = np.inf
-    strat_end = np.inf
 else:
     tstrat_start = tstrat[0]/Myr
-    max_strat = round(n_cells/2)-1 #max height of stratification
-    tstrat_remove = t[(min_unstable<max_strat)&(min_unstable>0)][0]/Myr #beginning of stratification erosion
-    strat_end = tstrat[-1]/Myr+0.1 #end of stratification erosion
-  
+    if tstrat[-1]==t[-1]: #stratification never removed
+        tstrat_remove = np.inf
+        strat_end = np.inf
+    else:
+        strat_end = tstrat[-1]/Myr+0.1 #end of stratification erosion
+        max_strat = round(n_cells/2)-1 #max height of stratification
+        if len(t[(min_unstable<max_strat)&(min_unstable>0)])==0: #stratification removed instantaneously
+            tstrat_remove = strat_end
+        else:
+            tstrat_remove = t[(min_unstable<max_strat)&(min_unstable>0)][0]/Myr #beginning of stratification erosion
 
 #switch to conduction
 
