@@ -156,13 +156,13 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Xs_new = Xs_0
     dc_new = 0
     dl_new = 0
-    min_unstable_new = i_core-1
     buoyr_new = 0
     
     ##################    Initial step    #########################
     # Step 1. Calculate conductive profile for mantle
     T_new_mantle = Tm_cond_calc(tsolve_new,dt,T0_mantle,sparse_mat_m)
     dTdt_mantle_new = (T_new_mantle-T0_mantle)[1] #default use temp change at base above CMB
+    Tm_conv_new = 0 #default convective temp
     Fs_new = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
     Flid_new = Fs_new #by default lid flux is same as surface
     h = Al_heating(tsolve_new)
@@ -171,22 +171,26 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
     Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T0_mantle[1],Ur_new,default) #use temp at base of mantle 
     Racrit_new = Rayleigh_crit(T0_mantle[1])   
-    dl_new = delta_l(T0_mantle[1],T0_mantle[0],Ur_new)
     nlid_cells = round(d0_new/dr)
     if nlid_cells ==0:
         lid_start = nmantle_cells -2
     else:
         lid_start = nmantle_cells - nlid_cells - 1  #index in temp array where stagnant lid starts
     
-    # in initial step use balance of eqn 23 and 24 to find Tcmb
-    Tcmb_new = (km/kc*T0_mantle[0]+T0_core[0])/(km/kc+1)
+    # in initial step use balance of eqn 23 and 24 to find first estimate of Tcmb
+    Tcmb_new = (km/kc*T0_mantle[1]+T0_core[-2])/(km/kc+1)
     T_new_mantle[0] = Tcmb_new
-    Fcmb_new = -km*(T0_mantle[0]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020
+    Fcmb_new = -km*(T0_mantle[1]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020
     
-    if  np.round((d0_new + dl_new)/(r-rc),1) > 1:# not convecting
-        Tm_conv_new = 0 # convective mantle temperature is 0 if mantle not convecting
-       
-    else: #mantle is convecting replace mantle below stagnant lid with isothermal convective profile
+    #CMB and mantle isothermal at differentiation so assume no bottom b.l.
+    stratification_old = True 
+    lid_thickness = d0_new 
+    dl_new = 0 #no cmb b.l.
+    nbase_cells = 0 #no cmb b.l.
+    
+    if np.round((lid_thickness/(r-rc)),1)<1: #mantle convecting, 
+ 
+        mantle_conv = True               
         if d0_new < dr:
             Flid_new = -km*(Ts-T_new_mantle[lid_start])/d0_new #if less than grid thickness choose d0 so don't overestimate thickness
             Fs_new = Flid_new #lid determines flux out of surface
@@ -196,9 +200,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Tm_conv_new = T0_mantle[1] + dTdt_mantle_new*dt #take temp one above CMB
         T_new_mantle[:lid_start+1] = Tm_conv_new
         T_new_mantle[-1] = Ts #pin surface to 200K
-
-        
-        
+    
     #store values   
     Tm_mid_new = T_new_mantle[round(nmantle_cells/2)] # temperature at the mid mantle
     Tm_surf_new = T_new_mantle[-2] #temperature one cell above surface pinned to 200K
@@ -252,15 +254,21 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Tcmb_new = (km/kc*T_new_mantle[1]+T_new_core[-2])/(km/kc+1)
     T_new_mantle[0] = Tcmb_new
     T_new_core[-1] = Tcmb_new
-    Fcmb_new = -km*(T_new_mantle[0]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020
+    Fcmb_new = -km*(T_new_mantle[1]-Tcmb_new)/dr # CMB heat flux eqn 23 in Dodds 2020
     Tc_new = T_new_core[0] #temperature of core is always taken at centre
     
     #Check for initial stratification
-    if np.any(T_new_core[:-1]<Tcmb_new):
-        stratification_old = True
-        dl_new = 0 #reset dl as 0 when core is stratified
+    if np.any(T_new_core[:-1]-Tcmb_new < temp_tol):
+        stratification_new = True
+        if np.all(T_new_core[:-1]-Tcmb_new < temp_tol):
+            min_unstable_new = i_core -1
+        else:
+            b_ind = np.where(T_new_core[:-1]-Tcmb_new >= temp_tol)[0] #indices of unstable layer as array
+            min_unstable_new = b_ind[0]
+            dl_new = 0 #reset dl as 0 when core is stratified
     else:
-        stratifcation_old = False
+        stratifcation_new = False
+        min_unstable_new = 0
         
     # Step 6. Replace old array with new ready for next step
     T_old_core = T_new_core
@@ -279,6 +287,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     dc_old = dc_new
     d0_old = d0_new
     min_unstable_old = min_unstable_new
+    stratification_old = stratification_new
     Ur_old = Ur_new
     Ra_old = Ra_new
     RaH_old = RaH_new
@@ -307,7 +316,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Flid_new = Fs_new #by default lid flux is same as surface
         dTdt_mantle_new = (T_new_mantle-T_old_mantle)[1] #default use temp change at base just above CMB
         
-        #New implementation
+        #Step 2. Is the mantle convecting?
         if conv_off == False: #check convection hasn't switched off
             if stratification_old == False:
                 lid_thickness = d0_old + dl_old #only include cmb b.l. when core not stratified
@@ -317,19 +326,18 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 dl_new = 0 #no cmb b.l.
                 nbase_cells = 0 #no cmb b.l.
         
-        #calculate number of cells in stagnant lid - don't use if mantle conducting
-        nlid_cells = round(d0_old/dr)
-        if nlid_cells ==0:
-            lid_start = nmantle_cells -2
-        else:
-            lid_start = nmantle_cells - nlid_cells - 1  #index in temp array where lid starts
-            
         if conv_off == False: #convection still could be on
             if np.round((lid_thickness/(r-rc)),1)<1: #mantle convecting, use temp below stagnant lid
+                #calculate number of cells in stagnant lid 
+                nlid_cells = round(d0_old/dr)
+                if nlid_cells ==0:
+                    lid_start = nmantle_cells -2
+                else:
+                    lid_start = nmantle_cells - nlid_cells - 1  #index in temp array where lid starts
+                if Tm_conv_old ==0: #if was conducting use base temp
+                    Tm_conv_old = T_old_mantle[1] #use mantle base temp
                 Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T_old_mantle[lid_start-1],Ur_old,default) #Use the temperature just below the lid 
                 Racrit_new = Rayleigh_crit(T_old_mantle[lid_start-1])
-                if lid_start ==0:
-                    raise ValueError('Lid start = 0, wrong temp used in Ra')    
                 #calculate temp change
                 mantle_conv = True               
                 dTdt_mantle_conv = dTmdt_calc(tsolve_old,T_old_mantle[lid_start-1],d0_old,Flid_old,Fcmb_old) #convective dTdt - use temp below lid
@@ -338,11 +346,10 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 T_new_mantle[nbase_cells+1:lid_start+1] = Tm_conv_new
                 T_new_mantle[-1] = Ts #pin surface to 200K in case d0 < 1 cell thick
                 if d0_new < dr:
-                    Flid_new = -km*(Ts-T_new_mantle[lid_start])/d0_new #flux from convecting region to stagnant lid
+                    Flid_new = -km*(Ts-Tm_conv_new)/d0_new #flux from convecting region to stagnant lid
                     Fs_new = Flid_new #lid determines flux out of surface
                 else:
                     Flid_new = -km*(T_new_mantle[lid_start+1]-T_new_mantle[lid_start])/dr
-                print('choco')  
                 
             else: #mantle not convecting, use basal mantle temp
                 Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T_old_mantle[1],Ur_old,default) #use temp at base of mantle 
@@ -354,7 +361,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     print(f'Lid is too thick convection turned off at {tsolve_new/Myr:.2f} Myr')
                 mantle_conv = False
                 Tm_conv_new = 0
-                print('mousse')
+
         else: #lids too thick convection turned off
             mantle_conv = False
             Tm_conv_new = 0
