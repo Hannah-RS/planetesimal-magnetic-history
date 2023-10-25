@@ -336,13 +336,13 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     lid_start = nmantle_cells - nlid_cells - 1  #index in temp array where lid starts
                 if Tm_conv_old ==0: #if was conducting use base temp
                     Tm_conv_old = T_old_mantle[1] #use mantle base temp
-                Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T_old_mantle[lid_start-1],Ur_old,default) #Use the temperature just below the lid 
-                Racrit_new = Rayleigh_crit(T_old_mantle[lid_start-1])
+                Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,Tm_conv_old,Ur_old,default) #Use the temperature just below the lid 
+                Racrit_new = Rayleigh_crit(Tm_conv_old)
                 #calculate temp change
                 mantle_conv = True               
-                dTdt_mantle_conv = dTmdt_calc(tsolve_old,T_old_mantle[lid_start-1],d0_old,Flid_old,Fcmb_old) #convective dTdt - use temp below lid
+                dTdt_mantle_conv = dTmdt_calc(tsolve_old,Tm_conv_old,d0_old,Flid_old,Fcmb_old) #convective dTdt - use temp below lid
                 dTdt_mantle_new = dTdt_mantle_conv
-                Tm_conv_new = T_old_mantle[lid_start-1] + dTdt_mantle_new*dt #temperature of convecting region 
+                Tm_conv_new = Tm_conv_old + dTdt_mantle_new*dt #temperature of convecting region 
                 T_new_mantle[nbase_cells+1:lid_start+1] = Tm_conv_new
                 T_new_mantle[-1] = Ts #pin surface to 200K in case d0 < 1 cell thick
                 if d0_new < dr:
