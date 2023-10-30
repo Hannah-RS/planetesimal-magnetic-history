@@ -27,7 +27,6 @@ for i, var in enumerate(variables):
     unit = units[var]
     varlab = labels[var]
     logvar = logs[i]
-    save = False
     path = '../Results_combined/'+folder+f"params_{subfolders[var]}/"
     
     #find run numbers
@@ -53,6 +52,8 @@ for i, var in enumerate(variables):
     ax1.set_xlabel(varlab)
     if logvar == True:
         ax1.set_xscale('log')
+    if var == 'Fe0':
+        plt.xticks(data[var],var_data['Fe0'])
     fig.legend(['B','Rem'],bbox_to_anchor=[0.4,0.8])
     ax1.set_ylabel('Peak field strength /$\mu$T')
     ax2.set_ylabel('Peak magnetic Reynolds number')
