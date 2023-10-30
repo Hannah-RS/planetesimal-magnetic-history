@@ -38,9 +38,6 @@ for i, var in enumerate(variables):
         data[var] = data[var]/1e3 #convert to km
     if var == 'Fe0':
         data.loc[data['Fe0']==0,'Fe0']=1e-10
-    
-    var1=var_data.loc[var_data['run']==minrun,var].values[0]
-    var2=var_data.loc[var_data['run']==maxrun,var].values[0]
 
 #%% Make the plot
     if logvar == False:
@@ -52,6 +49,7 @@ for i, var in enumerate(variables):
     dur1 = data['magoff_1']-data['magon_1']
     dur2 = data['magoff_2']-data['magon_2']
     gap = data['magon_2']-data['magoff_1']
+    
     fig = plt.figure()
     ax = plt.axes()
     ax2 = ax.twinx()
