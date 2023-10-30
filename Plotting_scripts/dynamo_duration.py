@@ -22,7 +22,7 @@ for i, var in enumerate(variables):
     unit = units[var]
     varlab = labels[var]
     logvar = logs[i]
-    save = True
+    save = False
     path = '../Results_combined/'+folder+f"params_{subfolders[var]}/"
     
     #find run numbers
@@ -58,9 +58,9 @@ for i, var in enumerate(variables):
     ln1 = ax.bar(data[var],dur1,width=width,label='First dynamo',color='#4477AA')
     ln2 = ax.bar(data[var],dur2,bottom=dur1,width=width,label='Second dynamo',color='#66CCEE')
     if logvar == True:
-        ln3 = ax2.bar(data[var][gap>0],gap[gap>0],width=width[gap>0]/2,color='#AA3377',label='gap in generation')
+        ln3 = ax2.bar((data[var]+width)[gap>0],gap[gap>0],width=width[gap>0],color='#AA3377',label='gap in generation')
     else:
-        ln3 = ax2.bar(data[var][gap>0],gap[gap>0],width=width/2,color='#AA3377',label='gap in generation')
+        ln3 = ax2.bar((data[var]+width)[gap>0],gap[gap>0],width=width/2,color='#AA3377',label='gap in generation')
     ax.legend([ln1,ln2,ln3],['First dynamo','Second dynamo','Gap between dynamos'],framealpha=1,bbox_to_anchor=[0.7,-0.2])
     ax.set_ylim([0,max(dur1+dur2)+10])
     ax.set_ylabel('Dynamo duration /Myr')
