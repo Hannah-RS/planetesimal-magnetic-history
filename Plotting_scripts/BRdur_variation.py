@@ -69,17 +69,18 @@ save = True
 
 #%% Rem and B
 width = 0.3
+x = np.arange(len(variables))
 fig = plt.figure()
 ax = plt.axes()
 ax2 = ax.twinx()
-ln1 = ax.bar(variables,B[1,:],width=width,bottom=B[0,:],label='Max field strength',color='#4477AA')
-ln2 = ax2.bar(variables,Rem[1,:],width=width/2,bottom=Rem[0,:],label='Max Reynolds number',color='#AA3377',align='edge')
+ln1 = ax.bar(x-width/2,B[1,:],width=width,bottom=B[0,:],label='Max field strength',color='#4477AA')
+ln2 = ax2.bar(x+width/2,Rem[1,:],width=width,bottom=Rem[0,:],label='Max Reynolds number',color='#AA3377')
 ax.set_ylabel('Range of maximum field strengths /$\\mu$T')
 ax2.set_ylabel('Range of maximum Rem')
 ax.tick_params(axis='y',colors='#4477AA')
 ax2.tick_params(axis='y',colors='#AA3377')
 ax.set_xlabel('Variable')
-ax.set_xticks(variables,ticks)
+ax.set_xticks(x,ticks)
 if save == True:
     plt.savefig(f'../Plots/{folder}/RemB_summary.png',bbox_inches='tight')
     
