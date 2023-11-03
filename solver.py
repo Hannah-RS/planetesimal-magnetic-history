@@ -90,19 +90,20 @@ if automated == False:
     plt.title('Temperature profile post differentiation')
 
 #rescale data and save here in case thermal evolution crashes
-Tdiff = Tdiff[:,0::n_save_d]
-Xfe = Xfe[:,0::n_save_d]
-Xsi = Xsi[:,0::n_save_d]
-cp = cp[:,0::n_save_d]
-Ra = Ra[0::n_save_d]
-Ra_crit = Ra_crit[0::n_save_d]
-convect = convect[0::n_save_d]
-d0 = d0[0::n_save_d]
-t_diff = t_diff[0::n_save_d]
-H = H[0::n_save_d]
+#relabel so don't change input to model on next step
+Tdiffs = Tdiff[:,0::n_save_d]
+Xfes = Xfe[:,0::n_save_d]
+Xsis = Xsi[:,0::n_save_d]
+cps = cp[:,0::n_save_d]
+Ras = Ra[0::n_save_d]
+Ra_crits = Ra_crit[0::n_save_d]
+convects = convect[0::n_save_d]
+d0s = d0[0::n_save_d]
+t_diffs = t_diff[0::n_save_d]
+Hs = H[0::n_save_d]
 
 if full_save == True:
-    np.savez_compressed(f'{folder}run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, d0=d0, t_diff = t_diff, H=H)
+    np.savez_compressed(f'{folder}run_{run}_diff', Tdiff = Tdiffs, Xfe = Xfes, Xsi = Xsis, cp = cps, Ra = Ras, Ra_crit = Ra_crits, convect = convects, d0=d0s, t_diff = t_diffs, H=Hs)
 
 print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time1)))
 #%%
