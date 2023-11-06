@@ -82,11 +82,11 @@ variables = ['rcmf','eta0','beta','etal','Xs_0','Fe0','alpha_n','r']
 varlab = {'rcmf':rcmf,'eta0':eta0,'beta':beta,'etal':etal,'Xs_0':Xs_0,'Fe0':Fe0,'alpha_n':alpha_n,'r':r}
 
 run_nums = np.zeros([len(nruns)])
-for i, runs in enumerate(nruns):
+for i in range(len(nruns)):
     if i==0:
         run_nums[i] = 1
     else:
-        run_nums[i] = run_nums[i-1]+runs
+        run_nums[i] = run_nums[i-1]+nruns[i-1]
         
 
 #%%
