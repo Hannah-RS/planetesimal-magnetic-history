@@ -32,7 +32,7 @@ barcol2= '#04acc9'
 save = True
 
 #%% Start plot
-plt.figure(figsize=[12,5])
+plt.figure(figsize=[12,10])
 #%% Load a given variable
 
 for i, var in enumerate(variables):
@@ -72,7 +72,11 @@ fig, ax = plt.subplots(ncols=1)
 for i in range(nruns):
     ax.barh(yplot[i],var_results.loc[i,'magoff_1']-var_results.loc[i,'magon_1'],left=var_results.loc[i,'magon_1'],color=barcol,alpha=maxB_norm[i])
     ax.barh(yplot[i],var_results.loc[i,'magoff_2']-var_results.loc[i,'magon_2'],left=var_results.loc[i,'magon_2'],color=barcol2,alpha=maxB_norm[i])
-#plt.xscale('log')  
+    ax.vlines(var_results.loc[i,'tsolid_start'],yplot[i]-0.4,yplot[i]+0.4,color='black')
+    if (ytick_lab[i]!='')&(ytick_lab[i-1]!='')&(i>0):
+        ax.hlines(yplot[i]-1,0.8,500,color='grey',linestyle='dashed',alpha=0.5,linewidth=0.5) 
+#plt.xscale('log') 
+
 ax.set_xlabel('Time/Myr') 
 ax.set_ylabel('Variable') 
 ax.set_yticks(yplot,ytick_lab)
