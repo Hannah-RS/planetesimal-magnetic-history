@@ -15,16 +15,18 @@ folder = 'Paper_run4/'
 subfolders = {'rcmf':1,'eta0':2,'beta':3,'etal':4,'Xs_0':5,'Fe0':6,'alpha_n':7,'r':8}
 labels = {'rcmf':'$\\phi_{{RCMF}}$','eta0':'$\\eta_0$','beta':'$\\beta$','etal':'$\\eta_l$ ','Xs_0':'$X_{{s,0}}$','Fe0':'$^{{60}}Fe/^{{56}}Fe$','alpha_n':'$\\alpha_n$','r':'radius'}
 units = {'rcmf':'','eta0':'Pas','beta':'$K^{-1}$','etal':'Pas','Xs_0':'wt %','Fe0':'','alpha_n':'','r':'km'}
-logs =[False,True,False,True,False,True,False,False]
-variables = ['rcmf','eta0','beta','etal','Xs_0','Fe0','alpha_n','r']
+logs ={'rcmf':False,'eta0':True,'beta':False,'etal':True,'Xs_0':False,'Fe0':True,'alpha_n':False,'r':False}
+#variables = ['rcmf','eta0','beta','etal','Xs_0','Fe0','alpha_n','r']
+variables = ['etal','beta','alpha_n','rcmf','eta0','Xs_0','Fe0','r']
 
 varlabels = []
 paths = []
 ytick_lab = []
+runval = np.array([])
 Myr = 365*24*3600*1e6 #number of s in Myr
 
 save = False
-zoom = True #do you want to zoom into early times
+zoom = False #do you want to zoom into early times
 xmax = 10 #how much to zoom by
 #%% Load a given variable
 
@@ -33,7 +35,7 @@ for i, var in enumerate(variables):
     unit = units[var]
     varlab = labels[var]
     varlabels.append(varlab)
-    logvar = logs[i]
+    logvar = logs[var]
     path = '../Results_combined/'+folder+f"params_{subfolders[var]}/"
     
     #find run numbers
@@ -47,7 +49,7 @@ for i, var in enumerate(variables):
     data.reset_index(inplace=True,drop=True)
     nrun = len(data)
     paths.extend([path]*nrun) #save paths for opening files later
-    
+    runval = np.concatenate([runval,var_data['run'].to_numpy()])
     if logvar == True:
         ytick_lab.append(f'{varlab}={var1:.1e}{unit}')
         ytick_lab.extend(['']*(2*nrun-2))
@@ -77,10 +79,10 @@ fig, ax = plt.subplots(ncols=1)
 minrun = 1
 for i in range(nruns):
     #load Rem data
-    run = int(minrun+i)
+    #run = int(minrun+i)
+    run = int(runval[i])
     #import data
     npzfile = np.load(f'{paths[i]}run_{run}.npz')
-    #B = npzfile['B']
     Rem = npzfile['Rem']
     t = npzfile['t']/Myr
     #make the plot
@@ -93,7 +95,7 @@ for i in range(nruns):
         if (ytick_lab[2*i]!='')&(ytick_lab[2*i-1]!='')&(i>0):
             ax.hlines(yplot[2*i]-1,0.8,500,color='grey',linestyle='dashed',alpha=0.5,linewidth=0.5)
             ax.pcolormesh(t,yplot[2*i+1:2*i+3],np.zeros([2,len(Rem)]),cmap=cmap2,norm=norm2) #add gaps between variables
-    ax.vlines(var_results.loc[i,'tsolid_start'],yplot[2*i]-1,yplot[2*i]+1,color='black')
+    ax.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[2*i]-1,yplot[2*i]+1,color='black')
      
 
 
@@ -120,7 +122,7 @@ plt.figure()
 minrun = 1
 for i in range(nruns):
     #load Rem data
-    run = int(minrun+i)
+    run = int(runval[i])
     #import data
     npzfile = np.load(f'{paths[i]}run_{run}.npz')
     B = npzfile['B']/1e-6 #B in muT
@@ -131,7 +133,7 @@ for i in range(nruns):
         plt.colorbar(label='B/ $\mu$T')
         
     plt.pcolormesh(t,yplot[2*i+1:2*i+3],np.zeros([2,len(B)]),cmap=cmap2,norm=norm2) #add gaps between variables
-    plt.vlines(var_results.loc[i,'tsolid_start'],yplot[2*i]-0.5,yplot[2*i]+0.5,color='black')
+    plt.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[2*i]-0.5,yplot[2*i]+0.5,color='black')
     if (ytick_lab[2*i]!='')&(ytick_lab[2*i-1]!='')&(i>0):
         plt.hlines(yplot[2*i]-1,0.8,500,color='grey',linestyle='dashed',alpha=0.5,linewidth=0.5) 
     
