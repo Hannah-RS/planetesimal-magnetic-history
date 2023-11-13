@@ -9,19 +9,16 @@ import matplotlib.pyplot as plt
 
 #%% Load data for chosen variable
 folders = ['Paper_run100km/','Paper_run200km/','Paper_run4/','Paper_run400km/','Paper_run500km/']
-radius = [100,200,300,400,500]
-subfolders = {'rcmf':1,'eta0':2,'beta':3,'etal':4,'Xs_0':5,'Fe0':6,'alpha_n':7}
-labels = {'rcmf':'$\\phi_{{RCMF}}$','eta0':'$\\eta_0$','beta':'$\\beta$','etal':'$\\eta_l$ ','Xs_0':'$X_{{s,0}}$','Fe0':'$^{{60}}Fe/^{{56}}Fe$','alpha_n':'$\\alpha_n$'}
-units = {'rcmf':'','eta0':'Pas','beta':'$K^{-1}$','etal':'Pas','Xs_0':'wt %','Fe0':'','alpha_n':''}
-logs =[False,True,False,True,False,True,False]
-variables = ['rcmf','eta0','beta','etal','Xs_0','Fe0','alpha_n']
+
+from plot_params import subfolders, labels, units, logs, Myr
+variables = ['etal','beta','alpha_n','rcmf','Xs_0','Fe0']
 y = np.arange(len(variables)+1)
+radius = [100,200,300,400,500]
 varlabels = []
-Myr = 365*24*3600*1e6 #number of s in Myr
 bcol = 'white'
 ecol = 'gray'
-xmax = 400 #max xlimit in Myr
-save = True
+xmax = 525 #max xlimit in Myr
+save = False
 
 for k, folder in enumerate(folders):
     r = radius[k]
@@ -34,7 +31,7 @@ for k, folder in enumerate(folders):
         if k ==0: #create labels for y axis
             varlab = labels[var]
             varlabels.append(varlab)
-        logvar = logs[i]
+        logvar = logs[var]
         path = '../Results_combined/'+folder+f"params_{subfolders[var]}/"
         
         #find run numbers
