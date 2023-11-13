@@ -12,18 +12,14 @@ from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 
 #%% Load data for chosen variable
 folder = 'Paper_run4/'
-subfolders = {'rcmf':1,'eta0':2,'beta':3,'etal':4,'Xs_0':5,'Fe0':6,'alpha_n':7,'r':8}
-labels = {'rcmf':'$\\phi_{{RCMF}}$','eta0':'$\\eta_0$','beta':'$\\beta$','etal':'$\\eta_l$ ','Xs_0':'$X_{{s,0}}$','Fe0':'$^{{60}}Fe/^{{56}}Fe$','alpha_n':'$\\alpha_n$','r':'radius'}
-units = {'rcmf':'','eta0':'Pas','beta':'$K^{-1}$','etal':'Pas','Xs_0':'wt %','Fe0':'','alpha_n':'','r':'km'}
-logs ={'rcmf':False,'eta0':True,'beta':False,'etal':True,'Xs_0':False,'Fe0':True,'alpha_n':False,'r':False}
-#variables = ['rcmf','eta0','beta','etal','Xs_0','Fe0','alpha_n','r']
-variables = ['etal','beta','alpha_n','rcmf','eta0','Xs_0','Fe0','r']
+from plot_params import subfolders, labels, units, logs, variables, Myr
+ 
 
 varlabels = []
 paths = []
 ytick_lab = []
 runval = np.array([])
-Myr = 365*24*3600*1e6 #number of s in Myr
+
 
 save = False
 zoom = False #do you want to zoom into early times
