@@ -6,6 +6,7 @@ Make stacked timings heatmap for all body sizes
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 
 #%% Load data for chosen variable
 folders = ['Paper_run100km/','Paper_run200km/','Paper_run4/','Paper_run400km/','Paper_run500km/']
@@ -20,12 +21,20 @@ ecol = 'gray'
 xmax = 525 #max xlimit in Myr
 save = False
 
+#make colormap
+cmap = mpl.cm.viridis
+bounds = [0,1]
+norm = mpl.colors.Normalize(vmin=0, vmax=1)
+
+
+fig, ax = plt.subplots(5,1,sharey='row',sharex='col',tight_layout=True,figsize=[10,10])
+#ax[2,1].remove() #remove unneeded axis
+
 for k, folder in enumerate(folders):
     r = radius[k]
 #%% Start plot
-    plt.figure(figsize=[12,5])
-    #%% Load a given variable
     
+    #%% Load a given variable
     for i, var in enumerate(variables):
         unit = units[var]
         if k ==0: #create labels for y axis
@@ -61,24 +70,25 @@ for k, folder in enumerate(folders):
             
         #%% Make the plot
         if len(tdyn)>0: #check the dynamo is on at all
-            plt.pcolormesh(tdyn,y[i:i+2],np.transpose(weight),shading='flat',vmin=0,vmax=100)
+            ax[k].pcolormesh(tdyn,y[i:i+2],np.transpose(weight),shading='flat',vmin=0,vmax=100)
         
     #%% Customise the plot
-    plt.colorbar(label='% dynamos on')
-    plt.yticks((y[:-1]+y[1:])/2,varlabels)
-    plt.ylabel('Variable')
-    plt.xlabel('Time/Myr')
+   
+    ax[k].set_yticks((y[:-1]+y[1:])/2,varlabels)
+    ax[k].set_ylabel('Variable')
+    
+    
     if r==100: #force all variables to appear
-        plt.ylim([0,y[-1]])
-    plt.xlim([0.8,xmax])
+        ax[k].set_ylim([0,y[-1]])
+    ax[k].set_xlim([0.8,xmax])
+    ax[k].set_title(f' {r}km')
+
+ax[4].set_xlabel('Time/Myr')
+
+cax = fig.add_axes([1, 0.36, 0.01, 0.3])
+fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax, orientation='vertical', label='% dynamos on')
+if save == True:
     if xmax > 200:
-        plt.title(f'Chance of a dynamo being on across parameters for a {r}km body')
+        plt.savefig(f'../Plots/CoS/timing_heatmap_{r}.png',dpi=450,bbox_inches='tight')
     else:
-        plt.title(f'Onset times for a {r}km body')
-    #plt.text(210,3.5,'Core solidified',bbox=dict(edgecolor=ecol,facecolor=bcol))
-    #plt.text(1.4,3,'Core \n thermally \n stratified',bbox=dict(edgecolor=ecol,facecolor=bcol))
-    if save == True:
-        if xmax > 200:
-            plt.savefig(f'../Plots/CoS/timing_heatmap_{r}.png',dpi=450,bbox_inches='tight')
-        else:
-            plt.savefig(f'../Plots/CoS/onset_heatmap_{r}.png',dpi=450,bbox_inches='tight')
+        plt.savefig(f'../Plots/CoS/onset_heatmap_{r}.png',dpi=450,bbox_inches='tight')
