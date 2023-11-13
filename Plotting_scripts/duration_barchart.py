@@ -17,6 +17,8 @@ from plot_params import subfolders, labels, units, logs, variables, Myr
 folder = 'Paper_run4/'
 varlabels = []
 ytick_lab = []
+ytick_lab2 = []
+ytick_val2 = []
 paths = []
 runval = np.array([])
 #plot unchanged B
@@ -24,7 +26,7 @@ bcol = 'white'
 ecol = 'gray'
 barcol = '#0202c4'
 barcol2= '#04acc9'
-save = False
+save = True
 
 #%% Start plot
 plt.figure(figsize=[12,10])
@@ -50,6 +52,7 @@ for i, var in enumerate(variables):
     nrun = len(data)
     paths.extend([path]*nrun) #save paths for opening files later
     runval = np.concatenate([runval,var_data['run'].to_numpy()])
+    #for labelling min and max values
     if logvar == True:
         ytick_lab.append(f'{varlab}={var1:.1e}{unit}')
         ytick_lab.extend(['']*(nrun-2))
@@ -58,8 +61,10 @@ for i, var in enumerate(variables):
         ytick_lab.append(f'{varlab}={var1:.1g}{unit}')
         ytick_lab.extend(['']*(nrun-2))
         ytick_lab.append(f'{varlab}={var2:.1g}{unit}')   
-        
-
+    #for labelling midpoints
+    ytick_lab2.append(varlab)   
+    ytick_val2.append(len(ytick_lab)*2-nrun) #len(ytick_lab)-nrun/2 but yplot gets doubled later, so x2
+    
 #%% Find max B values
 nruns = len(var_results)
 B1max = np.zeros([nruns])
@@ -93,12 +98,13 @@ for i in range(nruns):
     ax.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[i]-0.4,yplot[i]+0.4,color='black')
     if (ytick_lab[i]!='')&(ytick_lab[i-1]!='')&(i>0):
         ax.hlines(yplot[i]-1,0.8,500,color='grey',linestyle='dashed',alpha=0.5,linewidth=0.5) 
+        
 #plt.xscale('log') 
 
 ax.set_xlabel('Time/Myr') 
 ax.set_ylabel('Variable') 
-ax.set_yticks(yplot,ytick_lab)
-
+#ax.set_yticks(yplot,ytick_lab)
+ax.set_yticks(ytick_val2,ytick_lab2)
 #first period colourbar
 transparency_ticks = 50
 color_out =[]
@@ -120,4 +126,4 @@ cax2 = fig.add_axes([0.83, 0.17, 0.01, 0.3])
 mpl.colorbar.ColorbarBase(cax2, cmap=cmap2, norm=norm2, orientation='vertical')
 
 if save == True:
-    plt.savefig(f'../Plots/{folder}timing_bars.png',dpi=450,bbox_inches='tight') 
+    plt.savefig(f'../Plots/{folder}timing_bars.pdf',dpi=450,bbox_inches='tight') 
