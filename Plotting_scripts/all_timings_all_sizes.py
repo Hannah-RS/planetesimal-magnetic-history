@@ -19,7 +19,7 @@ varlabels = []
 bcol = 'white'
 ecol = 'gray'
 xmax = 525 #max xlimit in Myr
-save = False
+save = True
 
 #make colormap
 cmap = mpl.cm.viridis
@@ -87,8 +87,6 @@ ax[4].set_xlabel('Time/Myr')
 
 cax = fig.add_axes([1, 0.36, 0.01, 0.3])
 fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax, orientation='vertical', label='% dynamos on')
+
 if save == True:
-    if xmax > 200:
-        plt.savefig(f'../Plots/CoS/timing_heatmap_{r}.png',dpi=450,bbox_inches='tight')
-    else:
-        plt.savefig(f'../Plots/CoS/onset_heatmap_{r}.png',dpi=450,bbox_inches='tight')
+    plt.savefig(f'../Plots/CoS/onset_heatmap_allr.png',dpi=450,bbox_inches='tight')
