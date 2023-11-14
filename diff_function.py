@@ -109,6 +109,7 @@ def differentiation(Tint,tacc,r,dr,dt):
         
         while Xsi[int(n_cells/2),i-1]<rcmf: #assume differentiation occurs at rcmf
             
+            #add to existing arrays ready for new timestep
             app_array = np.zeros([n_cells,1])
             T = np.append(T,app_array,1)
             Xfe = np.append(Xfe, app_array, 1)
@@ -171,12 +172,13 @@ def differentiation(Tint,tacc,r,dr,dt):
             Xsi[T[:,i]<Tms,i] = 0 #subsolidus
             Xsi[((T[:,i]>=Tms) & (T[:,i]<Tml)),i] = (T[((T[:,i]>=Tms) & (T[:,i]<Tml)),i]-Tms)/dTphase_si #melting
             Xsi[T[:,i]>=Tml,i] = 1 #above liquidus
-            
+            if np.any(Xsi[:,i]>rcmf):
+                print(Xsi[int(n_cells/2),i])
             i = i+1
             
-            #relabel for returning
-            Tdiff = T
-            t_diff = t
+        #relabel for returning
+        Tdiff = T
+        t_diff = t
     else:
         Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H = differentiation_eutectic(Tint,tacc,r,dr,dt)
               
@@ -355,9 +357,9 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         Xsi[T[:,i]>=Tml,i] = 1 #above liquidus
                 
         i = i+1
-        
-        #relabel for returning
-        Tdiff = T
-        t_diff = t
+           
+    #relabel for returning
+    Tdiff = T
+    t_diff = t
 
     return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H

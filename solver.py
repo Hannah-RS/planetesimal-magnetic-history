@@ -90,19 +90,20 @@ if automated == False:
     plt.title('Temperature profile post differentiation')
 
 #rescale data and save here in case thermal evolution crashes
-Tdiff = Tdiff[:,0::n_save_d]
-Xfe = Xfe[:,0::n_save_d]
-Xsi = Xsi[:,0::n_save_d]
-cp = cp[:,0::n_save_d]
-Ra = Ra[0::n_save_d]
-Ra_crit = Ra_crit[0::n_save_d]
-convect = convect[0::n_save_d]
-d0 = d0[0::n_save_d]
-t_diff = t_diff[0::n_save_d]
-H = H[0::n_save_d]
+#relabel so don't change input to model on next step
+Tdiffs = Tdiff[:,0::n_save_d]
+Xfes = Xfe[:,0::n_save_d]
+Xsis = Xsi[:,0::n_save_d]
+cps = cp[:,0::n_save_d]
+Ras = Ra[0::n_save_d]
+Ra_crits = Ra_crit[0::n_save_d]
+convects = convect[0::n_save_d]
+d0s = d0[0::n_save_d]
+t_diffs = t_diff[0::n_save_d]
+Hs = H[0::n_save_d]
 
 if full_save == True:
-    np.savez_compressed(f'{folder}run_{run}_diff', Tdiff = Tdiff, Xfe = Xfe, Xsi = Xsi, cp = cp, Ra = Ra, Ra_crit = Ra_crit, convect = convect, d0=d0, t_diff = t_diff, H=H)
+    np.savez_compressed(f'{folder}run_{run}_diff', Tdiff = Tdiffs, Xfe = Xfes, Xsi = Xsis, cp = cps, Ra = Ras, Ra_crit = Ra_crits, convect = convects, d0=d0s, t_diff = t_diffs, H=Hs)
 
 print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time1)))
 #%%
@@ -150,20 +151,22 @@ if len(tstrat)==0: #core never stratified
     tstrat_start = t[0]/Myr
     tstrat_remove = t[0]/Myr
     strat_end = t[0]/Myr
-elif np.all(min_unstable!=0): # stratification never removed
-    tstrat_start = t[0]/Myr
-    tstrat_remove = np.inf
-    strat_end = np.inf
 else:
     tstrat_start = tstrat[0]/Myr
-    max_strat = round(n_cells/2)-1 #max height of stratification
-    tstrat_remove = t[(min_unstable<max_strat)&(min_unstable>0)][0]/Myr #beginning of stratification erosion
-    strat_end = tstrat[-1]/Myr #end of stratification erosion
-  
+    if tstrat[-1]==t[-1]: #stratification never removed
+        tstrat_remove = np.inf
+        strat_end = np.inf
+    else:
+        strat_end = tstrat[-1]/Myr+0.1 #end of stratification erosion
+        max_strat = round(n_cells/2)-1 #max height of stratification
+        if len(t[(min_unstable<max_strat)&(min_unstable>0)])==0: #stratification removed instantaneously
+            tstrat_remove = strat_end
+        else:
+            tstrat_remove = t[(min_unstable<max_strat)&(min_unstable>0)][0]/Myr #beginning of stratification erosion
 
 #switch to conduction
 
-if np.any((d0+dl)>(r-rc)):
+if np.any((t/Myr)<fcond_t):
     fcond_T = Tprofile[(t/Myr)<fcond_t,nmantle+1][-1] #temperature when mantle stops convecting
 else:
     fcond_T = np.nan
@@ -201,6 +204,13 @@ from duration_calc import on_off_test
 on, off, dur = on_off_test(t/Myr,Rem,threshold1,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn1 = len(on) #number of on periods
 if on.size > 0:
+    if (on[0] < strat_end) & (off[0]>strat_end): #dynamo generation extends through stratification
+        on[0] = strat_end
+    elif (on[0] < strat_end) & (off[0]<strat_end): #dynamo only on before stratification
+        on[0] = 0
+        off[0] = 0
+    else:
+        pass        
     magon_1 = on[0]
     magoff_1 = off[0]
 else:
@@ -223,6 +233,13 @@ else:
 on, off, dur = on_off_test(t/Myr,Rem,threshold2,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn2 = len(on) #number of on periods
 if on.size > 0: #i.e. there is one on value > nan
+    if (on[0] < strat_end) & (off[0]>strat_end): #dynamo generation extends through stratification
+        on[0] = strat_end
+    elif (on[0] < strat_end) & (off[0]<strat_end): #dynamo only on before stratification
+        on[0] = 0
+        off[0] = 0
+    else:
+        pass 
     magon_4 = on[0]
     magoff_4 = off[0]
 else:
@@ -240,6 +257,13 @@ else:
 on, off, dur = on_off_test(t/Myr,Rem,threshold3,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn3 = len(on) #number of on periods
 if on.size > 0:
+    if (on[0] < strat_end) & (off[0]>strat_end): #dynamo generation extends through stratification
+        on[0] = strat_end
+    elif (on[0] < strat_end) & (off[0]<strat_end): #dynamo only on before stratification
+        on[0] = 0
+        off[0] = 0
+    else:
+        pass 
     magon_6 = on[0]
     magoff_6 = off[0]
 else:

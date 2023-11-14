@@ -17,7 +17,7 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-automated = False
+automated = True
 full_save = True #do you want to save temp profiles etc or just summary stats
 B_save = False #do you want to save field strengths and Rem
 out_interval = 20 #how many times do you want t to be printed in the whole run
@@ -44,20 +44,20 @@ if automated == True:
     t_end_m = auto.loc[ind,'t_end_m']
     dr = auto.loc[ind,'dr']
 else: #set manually
-    r = 100e3 # radius of asteroid [m]
+    r = 300e3 # radius of asteroid [m]
     dr = 500 # grid size [m]
     default ='vary' #default viscosity model
-    rcmf = 0.3 #rheologically critical melt fraction - melting required for differentiation
-    eta0 = 1e21 #reference viscosity at Tms [Pas]
-    beta =0.011 #E/RTref^2
+    rcmf = 0.2 #rheologically critical melt fraction - melting required for differentiation
+    eta0 = 1e19 #reference viscosity at Tms [Pas]
+    beta =0.0225 #E/RTref^2
     w = 5 #width of log linear region [K]
     etal = 100 #liquid viscsoity [Pas]
-    alpha_n = 25 #melt weakening (diffusion creep)
-    Xs_0 = 30# initial wt % sulfur in core 
+    alpha_n = 30 #melt weakening (diffusion creep)
+    Xs_0 = 29.5# initial wt % sulfur in core 
     Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 35
+    run = 14
     t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 20 # max end time [Myr]
+    t_end_m = 1.3 # max end time [Myr]
 
 
 # Size of body
