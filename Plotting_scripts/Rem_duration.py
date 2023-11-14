@@ -72,10 +72,9 @@ bounds2 = [0.5,1]
 norm2 = mpl.colors.BoundaryNorm(bounds2, cmap2.N)
 
 fig, ax = plt.subplots(ncols=1)
-minrun = 1
+
 for i in range(nruns):
     #load Rem data
-    #run = int(minrun+i)
     run = int(runval[i])
     #import data
     npzfile = np.load(f'{paths[i]}run_{run}.npz')
