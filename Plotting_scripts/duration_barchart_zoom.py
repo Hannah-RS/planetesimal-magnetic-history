@@ -91,7 +91,7 @@ maxB2_norm = (B2max)/(max(B2max)-0)
 #%% Massive stacked barchart
 yplot = np.arange(nruns)*2
 
-fig, axes = plt.subplots(1,2,sharey='col',figsize=[7.5,5],gridspec_kw={'width_ratios': [3,1]},tight_layout=True)
+fig, axes = plt.subplots(1,2,sharey='row',figsize=[7.5,5],gridspec_kw={'width_ratios': [3,1]},tight_layout=True)
 for ax in axes: 
     for i in range(nruns):
         run = int(runval[i])
