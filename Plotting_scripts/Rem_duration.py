@@ -95,12 +95,12 @@ for ax in axes:
         toff2 = var_results.loc[var_results['run']==run,'magoff_2'].values[0]
         toff3 = var_results.loc[var_results['run']==run,'magoff_3'].values[0]
         if toff3 != 0: #3 dynamo periods
-            Rem[(t>tsolid_start)&(t<toff3)]=np.average(Rem[(t>tsolid_start)&(t<toff3)])
+            Rem[(t>tsolid_start)&(t<toff3)&(Rem==0)]=np.average(Rem[(t>tsolid_start)&(t<toff3)])
         elif toff2 !=0: #2 dynamo periods
-            Rem[(t>tsolid_start)&(t<toff2)]=np.average(Rem[(t>tsolid_start)&(t<toff2)])
+            Rem[(t>tsolid_start)&(t<toff2)&(Rem==0)]=np.average(Rem[(t>tsolid_start)&(t<toff2)])
         else: #1 dynamo period
             toff1 = var_results.loc[var_results['run']==run,'magoff_1'].values[0]
-            Rem[(t>tsolid_start)&(t<toff1)]=np.average(Rem[(t>tsolid_start)&(t<toff1)])
+            Rem[(t>tsolid_start)&(t<toff1)&(Rem==0)]=np.average(Rem[(t>tsolid_start)&(t<toff1)])
         
         #make the plot
         ax.pcolormesh(t,yplot[2*i:2*i+2],[Rem,Rem],cmap=cmap,norm=norm)
