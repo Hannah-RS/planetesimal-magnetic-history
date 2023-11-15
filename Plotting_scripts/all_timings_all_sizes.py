@@ -57,11 +57,11 @@ for k, folder in enumerate(folders):
         nrun = len(data)
         
         #%% Create time array
-        tdyn = np.concatenate([data[data['magon_1']>0]['magon_1'],data[data['magon_1']>0]['magoff_1'],data[data['magon_2']>0]['magon_2'],data[data['magon_2']>0]['magoff_2']])
+        tdyn = np.concatenate([data[data['magon_1']>0]['magon_1'],data[data['magon_1']>0]['magoff_1'],data[data['magon_2']>0]['magon_2'],data[data['magon_2']>0]['magoff_2'],data[data['magon_3']>0]['magon_3'],data[data['magon_3']>0]['magoff_3']])
         tdyn = np.sort(tdyn) #range from low to high
         tmid = (tdyn[:-1]+tdyn[1:])/2 #find midpoints
-        ton = np.concatenate([data['magon_1'],data['magon_2']]) #on times
-        toff = np.concatenate([data['magoff_1'],data['magoff_2']]) #off times
+        ton = np.concatenate([data['magon_1'],data['magon_2'],data['magon_3']]) #on times
+        toff = np.concatenate([data['magoff_1'],data['magoff_2'],data['magoff_3']]) #off times
         weight=np.zeros([len(tmid),1])
         
         for j, t in enumerate(tmid):
