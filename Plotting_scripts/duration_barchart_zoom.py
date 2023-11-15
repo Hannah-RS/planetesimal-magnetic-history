@@ -26,7 +26,7 @@ ecol = 'gray'
 barcol = '#0202c4'
 barcol2= '#04acc9'
 xlim = 12 #limit of zoomed region
-save = False
+save = True
 ref = False #do you want reference run over the top
 ron = False #do you want r on the plot?
 
@@ -71,6 +71,7 @@ for i, var in enumerate(variables):
 nruns = len(runval)
 B1max = np.zeros([nruns])
 B2max = np.zeros([nruns])
+B3max = np.zeros([nruns])
 for i in range(nruns):
     #load B data
     run = int(runval[i])
@@ -80,14 +81,19 @@ for i in range(nruns):
     B = npzfile['B']
     #find max value in first interval
     toff1 = var_results.loc[var_results['run']==run,'magoff_1'].values[0]
+    toff2 = var_results.loc[var_results['run']==run,'magoff_2'].values[0]
     if toff1 > 0:
         B1max[i] = np.max(B[t<toff1])
+    if toff2> 0:
         #find max value in second interval
-        B2max[i] = np.max(B[t>toff1])
+        B2max[i] = np.max(B[(t>toff1)&(t<toff2)])
+        B3max[i] = np.max(B[(t>toff2)])
     
-#normalise, use min value of 0 so everything appears
-maxB1_norm = (B1max)/(max(B1max)-0)
-maxB2_norm = (B2max)/(max(B2max)-0)
+#normalise, use min value of 0 so everything appears and max value of all B values
+maxB = np.max([B1max,B2max,B3max])
+maxB1_norm = (B1max-0)/(maxB-0)
+maxB2_norm = (B2max-0)/(maxB-0)
+maxB3_norm = (B3max-0)/(maxB-0)
 #%% Massive stacked barchart
 yplot = np.arange(nruns)*2
 
@@ -97,7 +103,8 @@ for ax in axes:
         run = int(runval[i])
         #find max B for first and second period
         ax.barh(yplot[i],var_results.loc[var_results['run']==run,'magoff_1']-var_results.loc[var_results['run']==run,'magon_1'],left=var_results.loc[var_results['run']==run,'magon_1'],color=barcol,alpha=maxB1_norm[i])
-        ax.barh(yplot[i],var_results.loc[var_results['run']==run,'magoff_2']-var_results.loc[var_results['run']==run,'magon_2'],left=var_results.loc[var_results['run']==run,'magon_2'],color=barcol2,alpha=maxB2_norm[i])
+        ax.barh(yplot[i],var_results.loc[var_results['run']==run,'magoff_2']-var_results.loc[var_results['run']==run,'magon_2'],left=var_results.loc[var_results['run']==run,'magon_2'],color=barcol,alpha=maxB2_norm[i])
+        ax.barh(yplot[i],var_results.loc[var_results['run']==run,'magoff_3']-var_results.loc[var_results['run']==run,'magon_3'],left=var_results.loc[var_results['run']==run,'magon_3'],color=barcol,alpha=maxB3_norm[i])
         ax.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[i]-0.4,yplot[i]+0.4,color='black')
         if (ytick_lab[i]!='')&(ytick_lab[i-1]!='')&(i>0):
             ax.hlines(yplot[i]-1,0.8,210,color='grey',linestyle='dashed',alpha=0.5,linewidth=0.5) 
@@ -118,7 +125,7 @@ for ax in axes:
 #change limit of second graph
 axes[1].set_xlim([0,xlim])
 axes[0].set_ylabel('Variable')
-axes[0].set_title('Full history')
+axes[0].set_title('Full history - 300km body')
 axes[1].set_title(f'First {xlim} Myr')
 
 #first period colourbar
@@ -127,25 +134,25 @@ color_out =[]
 for trans in range(transparency_ticks):
     color_out.append(np.ndarray.tolist(mpl.colors.hsv_to_rgb((0.6667, trans/transparency_ticks, 0.77))))
 cmap = mpl.colors.ListedColormap(color_out)
-norm = mpl.colors.Normalize(vmin=0,vmax=max(B1max)/1e-6)
+norm = mpl.colors.Normalize(vmin=0,vmax=maxB/1e-6)
 if ron == True:
     cax = fig.add_axes([0.55, 0.17, 0.01, 0.3])
 else:
-    cax = fig.add_axes([1, 0.17, 0.01, 0.3])
+    cax = fig.add_axes([1, 0.3, 0.01, 0.3])
 mpl.colorbar.ColorbarBase(cax, cmap=cmap, norm=norm, orientation='vertical',label='Max B/$\\mu T$')
 
-#second period colourbar
-transparency_ticks = 50
-color_out =[]
-for trans in range(transparency_ticks):
-    color_out.append(np.ndarray.tolist(mpl.colors.hsv_to_rgb((0.525, trans/transparency_ticks, 0.79))))
-cmap2 = mpl.colors.ListedColormap(color_out)
-norm2 = mpl.colors.Normalize(vmin=0,vmax=max(B2max)/1e-6)
-if ron == True:
-    cax2 = fig.add_axes([0.63, 0.17, 0.01, 0.3])
-else:
-    cax2 = fig.add_axes([1, 0.5, 0.01, 0.3])
-mpl.colorbar.ColorbarBase(cax2, cmap=cmap2, norm=norm2, orientation='vertical')
+# #second period colourbar
+# transparency_ticks = 50
+# color_out =[]
+# for trans in range(transparency_ticks):
+#     color_out.append(np.ndarray.tolist(mpl.colors.hsv_to_rgb((0.525, trans/transparency_ticks, 0.79))))
+# cmap2 = mpl.colors.ListedColormap(color_out)
+# norm2 = mpl.colors.Normalize(vmin=0,vmax=maxB/1e-6)
+# if ron == True:
+#     cax2 = fig.add_axes([0.63, 0.17, 0.01, 0.3])
+# else:
+#     cax2 = fig.add_axes([1, 0.5, 0.01, 0.3])
+# mpl.colorbar.ColorbarBase(cax2, cmap=cmap2, norm=norm2, orientation='vertical')
 
 
 if save == True:
