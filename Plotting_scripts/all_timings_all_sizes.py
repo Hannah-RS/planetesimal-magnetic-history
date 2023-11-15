@@ -12,7 +12,7 @@ import matplotlib as mpl
 folders = ['Paper_run100km/','Paper_run200km/','Paper_run4/','Paper_run400km/','Paper_run500km/']
 
 from plot_params import subfolders, labels, units, logs, Myr
-variables = ['etal','beta','alpha_n','rcmf','Xs_0','Fe0']
+variables = ['Xs_0','etal','beta','alpha_n','rcmf','Fe0']
 y = np.arange(len(variables)+1)
 radius = [100,200,300,400,500]
 varlabels = []
@@ -28,7 +28,7 @@ norm = mpl.colors.Normalize(vmin=0, vmax=1)
 
 
 fig, ax = plt.subplots(5,1,sharey='row',sharex='col',tight_layout=True,figsize=[10,10])
-#ax[2,1].remove() #remove unneeded axis
+
 
 for k, folder in enumerate(folders):
     r = radius[k]
