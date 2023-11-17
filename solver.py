@@ -199,7 +199,7 @@ max_Rt = t[Rem==max_R][0]/Myr
 
 ########################## on and off times - calculate and save ####################
 from duration_calc import on_off_test
-
+#10Myr interval may miss lowest sulfur content turning off - double check manually
 #Rem > 10  
 on, off, dur = on_off_test(t/Myr,Rem,threshold1,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn1 = len(on) #number of on periods
