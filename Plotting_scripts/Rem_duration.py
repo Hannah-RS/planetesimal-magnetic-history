@@ -67,21 +67,18 @@ yplot = np.arange(2*nruns+1)
 ytick_arr = np.array([ytick_lab])
 
 #make colormap for Rem data
-#cmap = (mpl.colors.ListedColormap([ '#7D9CEB', '#DDAA33']).with_extremes(over='#BB5566', under='#FFFFFF'))
-cmap = (mpl.colors.ListedColormap([ '#7D9CEB', '#A77B00']).with_extremes(over='#87263C', under='#EBEBEB'))
+cmap = (mpl.colors.ListedColormap([ '#7D9CEB', '#DDAA33']).with_extremes(over='#BB5566', under='#FFFFFF'))
 
 bounds = [10,40,100]
 norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
 
 #make colormap that is all white to indicate gaps in data
-#cmap2 = (mpl.colors.ListedColormap([ '#004488', '#DDAA33']).with_extremes(over='#BB5566', under='#FFFFFF'))
-cmap2 = (mpl.colors.ListedColormap([ '#004488', '#DDAA33']).with_extremes(over='#BB5566', under='#EBEBEB'))
+cmap2 = (mpl.colors.ListedColormap([ '#004488', '#DDAA33']).with_extremes(over='#BB5566', under='#FFFFFF'))
 bounds2 = [0.5,1]
 norm2 = mpl.colors.BoundaryNorm(bounds2, cmap2.N)
 
-fig, axes = plt.subplots(1,2,sharey='row',figsize=[7.5,5],gridspec_kw={'width_ratios': [3,1]},tight_layout=True)
+fig, axes = plt.subplots(1,2,sharey='row',figsize=[7.5,5],gridspec_kw={'width_ratios': [1,3]},tight_layout=True)
 for ax in axes: 
-    ax.fill_betweenx([-1,yplot[-1]],0,500,color='#EBEBEB')
     for i in range(nruns):
         #load Rem data
         run = int(runval[i])
@@ -112,12 +109,12 @@ for ax in axes:
          
     ax.set_xlabel('Time/Myr') 
     ax.set_ylim([yplot[0]-1,yplot[-1]+0.5])
-axes[0].set_xlim([0.8,500])
-axes[1].set_xlim([0.8,xmax])
+axes[0].set_xlim([0.8,xmax])
+axes[1].set_xlim([0.8,500])
 axes[0].set_yticks(ytick_val2,ytick_lab2)
-axes[0].set_title('Full history')
-axes[1].set_title(f'First {xmax} Myr')
-cax = fig.add_axes([0.6, 0.17, 0.01, 0.3])
+axes[1].set_title('Full history')
+axes[0].set_title(f'First {xmax} Myr')
+cax = fig.add_axes([0.87, 0.17, 0.01, 0.3])
 fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax,extend='both',ticks=bounds,spacing='proportional',
              extendfrac=0.5, orientation='vertical', label='Rem')
 
