@@ -97,7 +97,7 @@ maxB3_norm = (B3max-0)/(maxB-0)
 #%% Massive stacked barchart
 yplot = np.arange(nruns)*2
 
-fig, axes = plt.subplots(1,2,sharey='row',figsize=[7.5,5],gridspec_kw={'width_ratios': [3,1]},tight_layout=True)
+fig, axes = plt.subplots(1,2,sharey='row',figsize=[7.5,5],gridspec_kw={'width_ratios': [1,3]},tight_layout=True)
 for ax in axes: 
     for i in range(nruns):
         run = int(runval[i])
@@ -123,10 +123,10 @@ for ax in axes:
     #ax.set_yticks(yplot,ytick_lab)
     ax.set_yticks(ytick_val2,ytick_lab2)
 #change limit of second graph
-axes[1].set_xlim([0,xlim])
-axes[0].set_ylabel('Variable')
-axes[0].set_title('Full history - 300km body')
-axes[1].set_title(f'First {xlim} Myr')
+axes[0].set_xlim([0,xlim])
+#axes[0].set_ylabel('Variable')
+axes[1].set_title('Full history - 300km body')
+axes[0].set_title(f'First {xlim} Myr')
 
 #first period colourbar
 transparency_ticks = 50
