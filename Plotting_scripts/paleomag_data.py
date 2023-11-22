@@ -23,9 +23,9 @@ paleo2.loc[:,'error'] = paleo2.loc[:,'midpoints']-paleo2.loc[:,'rel_age_lower']
 mclass = paleo2['Classification'].unique()
 yplot = np.arange(2*len(mclass)+1) #value to plot a class against
 midpoints = (yplot[1:]+yplot[:-1])/2
-fig, axes = plt.subplots(ncols=2,sharey='row',gridspec_kw={'width_ratios': [3,1]},figsize=[15,5],tight_layout=True)
-xlim = [300,12] #x axis limits
-title = ['Full record',f'First {xlim[1]} Myr']
+fig, axes = plt.subplots(ncols=2,sharey='row',gridspec_kw={'width_ratios': [1,3]},figsize=[15,5],tight_layout=True)
+xlim = [12,300] #x axis limits
+title = [f'First {xlim[0]} Myr','Full record']
 for ax, xlim, title in zip(axes,xlim,title):
     #plot all classes
     for i, met in enumerate(mclass):
@@ -70,12 +70,12 @@ for ax, xlim, title in zip(axes,xlim,title):
     ax.set_xlim([0,xlim])
     ax.set_title(title)
     
-plt.savefig('../Plots/CoS/paleomag_record.pdf',dpi=450,bbox_inches='tight')
+#plt.savefig('../Plots/CoS/paleomag_record.pdf',dpi=450,bbox_inches='tight')
 
 #%% Errorbar version
-fig, axes = plt.subplots(ncols=2,sharey='row',gridspec_kw={'width_ratios': [3,1]},figsize=[15,5],tight_layout=True)
-xlim = [300,12] #x axis limits
-title = ['Full record',f'First {xlim[1]} Myr']
+fig, axes = plt.subplots(ncols=2,sharey='row',gridspec_kw={'width_ratios': [1,3]},figsize=[15,5],tight_layout=True)
+xlim = [12,300] #x axis limits
+title = [f'First {xlim[1]} Myr','Full record']
 
 for ax, xlim, title in zip(axes,xlim,title):
     #plot all classes
@@ -110,7 +110,7 @@ for ax, xlim, title in zip(axes,xlim,title):
                     #upper limit from modelling
                     ax.errorbar(mdata.loc[j,'midpoints'],yplot[2*i],xerr=[[0],[mdata.loc[j,'error']]],ecolor='#2a2728',capsize=5)
                 else:
-                    ax.errorbar(mdata.loc[j,'midpoints'],yplot[2*i],xerr=mdata.loc[j,'error'],markerfacecolor=fcol,markeredgecolor=ecol,ecolor=ecol,capsize=5,marker='o')
+                    ax.errorbar(mdata.loc[j,'midpoints'],yplot[2*i],xerr=mdata.loc[j,'error'],markerfacecolor=fcol,markeredgecolor=ecol,ecolor=ecol,capsize=5,marker='o',fmt=linestyle)
             
             elif mdata.loc[j,'rel_age_lower']!=0: #plot single point for now
                 ax.scatter(mdata.loc[j,'rel_age_lower'],yplot[2*i],marker='|',color=fcol)
@@ -128,4 +128,4 @@ for ax, xlim, title in zip(axes,xlim,title):
     ax.set_xlim([0,xlim])
     ax.set_title(title)
     
-plt.savefig('../Plots/CoS/paleomag_record_dots.png',dpi=450,bbox_inches='tight')
+#plt.savefig('../Plots/CoS/paleomag_record_dots.png',dpi=450,bbox_inches='tight')
