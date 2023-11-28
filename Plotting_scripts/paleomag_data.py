@@ -27,12 +27,13 @@ midpoints = (yplot[1:]+yplot[:-1])/2
 
 #%% Arrow version
 fig, axes = plt.subplots(ncols=2,sharey='row',gridspec_kw={'width_ratios': [1,3]},figsize=[15,5],tight_layout=True)
-xlim = [12,300] #x axis limits
-title = [f'First {xlim[0]} Myr','Full record']
+xlim_up = [12,300] #x axis upper limits
+xlim_low = [0.8,12]
+title = [f'First {xlim_up[0]} Myr',f'{xlim_low[1]} to {xlim_up[1]} Myr']
 k = 0 #enumerates through axes
 hwidth = 1.5 #headwidth
 hlengths = [0.2,2] #head length - shorter in first plot
-for ax, xlim, title, hlength in zip(axes,xlim,title,hlengths):
+for ax, xlim_up, xlim_low, title, hlength in zip(axes,xlim_up,xlim_low,title,hlengths):
     #plot all classes
     for i, met in enumerate(mclass):
         mdata = paleo2.loc[paleo2['Classification']==met,:] #filter by class
@@ -52,11 +53,11 @@ for ax, xlim, title, hlength in zip(axes,xlim,title,hlengths):
                 if mdata.loc[j,'radiometric']==True:
                     fcol = 'white'
                     ecol = '#007aaf'
-                    ls = 'solid'
+                    ls = (5,(3,2))
                 else:
                     fcol = 'white'
                     ecol = '#2a2728'
-                    ls = 'solid'
+                    ls = (3.5,(2,1.5))
             
             if (mdata.loc[j,'rel_age_lower']!=0)&(mdata.loc[j,'rel_age_upper']!=0): #if range of values fill between
                 if (mdata.loc[j,'up_age_source']=='both'): #if upper and lower bounds use different methods
@@ -68,12 +69,12 @@ for ax, xlim, title, hlength in zip(axes,xlim,title,hlengths):
                     ax.arrow(mdata.loc[j,'midpoints'],midpoints[2*i],mdata.loc[j,'error'],0,head_width=hwidth,head_length=hlength,edgecolor=ecol,facecolor=fcol,linestyle=ls,linewidth=hwidth)
                     ax.arrow(mdata.loc[j,'midpoints'],midpoints[2*i],-mdata.loc[j,'error'],0,head_width=hwidth,head_length=hlength,edgecolor=ecol,facecolor=fcol,linestyle=ls,linewidth=hwidth)
 
-            elif mdata.loc[j,'rel_age_lower']!=0: #plot single point for now
+            elif (mdata.loc[j,'rel_age_upper']==0)&(mdata.loc[j,'rel_age_lower']!=0): #plot single point for now
                 ax.scatter(mdata.loc[j,'rel_age_lower'],midpoints[2*i],marker='|',color=fcol)
                 ax.arrow(mdata.loc[j,'rel_age_lower'],midpoints[2*i],mdata.loc[j,'rel_age_lower']*0.3,0,head_width=hwidth,head_length=hlength,capstyle='butt',edgecolor=ecol,facecolor=fcol)
-                if xlim > 100: #for big plot
-                    ax.annotate(' > 870 Myr',(xlim-10,midpoints[2*i]),(xlim-50,midpoints[2*i]),arrowprops=dict(arrowstyle=']->',facecolor=fcol,edgecolor=ecol))
-            elif mdata.loc[j,'rel_age_upper']!=0:
+                if xlim_up > 100: #for big plot
+                    ax.annotate(' > 870 Myr',(xlim_up-10,midpoints[2*i]),(xlim_up-50,midpoints[2*i]),arrowprops=dict(arrowstyle=']->',facecolor=fcol,edgecolor=ecol))
+            elif (mdata.loc[j,'rel_age_upper']!=0)&(mdata.loc[j,'rel_age_lower']==0):
                 ax.scatter(mdata.loc[j,'rel_age_upper'],midpoints[2*i],marker='|',color=fcol)
                 ax.arrow(mdata.loc[j,'rel_age_upper'],midpoints[2*i],-mdata.loc[j,'rel_age_upper']*0.3,0,head_width=hwidth,head_length=hlength,capstyle='butt',edgecolor=ecol,facecolor=fcol)
             else:
@@ -81,7 +82,7 @@ for ax, xlim, title, hlength in zip(axes,xlim,title,hlengths):
     #overall figure things
     ax.set_yticks(midpoints[::2],mclass)
     ax.set_xlabel('Time after CAIs /Myr')
-    ax.set_xlim([0,xlim])
+    ax.set_xlim([xlim_low,xlim_up])
     ax.set_title(title)
     
-plt.savefig('../Plots/CoS/paleomag_record.png',dpi=450,bbox_inches='tight')
+plt.savefig('../Plots/CoS/paleomag_record.pdf',dpi=450,bbox_inches='tight')
