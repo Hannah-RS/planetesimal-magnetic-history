@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 
 #%% Import data
 paleo = pd.read_csv("../meteorite_paleomagnetism.csv",skiprows=[1])
-
+savefolder = 'EPSL_paper'
+save = True
 #replace nan values in timing info
 values = {"rel_age_lower": 0, "rel_age_upper": 0}
 paleo2 = paleo.fillna(value=values)
@@ -85,5 +86,6 @@ for ax, xlim_up, xlim_low, title, hlength in zip(axes,xlim_up,xlim_low,title,hle
     ax.set_xlabel('Time /Ma')
     ax.set_xlim([xlim_low,xlim_up])
     ax.set_title(title)
-    
-#plt.savefig('../Plots/CoS/paleomag_record.pdf',dpi=450,bbox_inches='tight')
+
+if save == True:   
+    plt.savefig(f'../Plots/{savefolder}paleomag_record.pdf',dpi=450,bbox_inches='tight')
