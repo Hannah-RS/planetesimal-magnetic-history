@@ -12,6 +12,7 @@ from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 
 #%% Load data for chosen variable
 folder = 'Paper_run4/'
+savefolder = 'EPSL_paper/'
 from plot_params import subfolders, labels, units, logs, variables, Myr
  
 
@@ -107,20 +108,20 @@ for ax in axes:
         ax.pcolormesh(t,yplot[2*i+1:2*i+3],np.zeros([2,len(Rem)]),cmap=cmap2,norm=norm2) #add gaps between variables
         ax.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[2*i]-0.5,yplot[2*i]+0.5,color='black')
          
-    ax.set_xlabel('Time/Myr') 
+    ax.set_xlabel('Time/Ma') 
     ax.set_ylim([yplot[0]-1,yplot[-1]+0.5])
 axes[0].set_xlim([0.8,xmax])
-axes[1].set_xlim([0.8,500])
+axes[1].set_xlim([xmax,500])
 axes[0].set_yticks(ytick_val2,ytick_lab2)
-axes[1].set_title('Full history')
-axes[0].set_title(f'First {xmax} Myr')
+axes[1].set_title(f'>{xmax} Ma')
+axes[0].set_title(f'First {xmax} Ma')
 cax = fig.add_axes([0.87, 0.17, 0.01, 0.3])
 fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax,extend='both',ticks=bounds,spacing='proportional',
-             extendfrac=0.5, orientation='vertical', label='Rem')
+             extendfrac=0.5, orientation='vertical', label='Re$_m$')
 
 
 if save == True:
-    plt.savefig(f'../Plots/{folder}Rem_bars_full.png',dpi=450,bbox_inches='tight') 
+    plt.savefig(f'../Plots/{savefolder}Rem_bars_full.pdf',dpi=450,bbox_inches='tight') 
 
 #%% Continuous B version - this sucks so have commented it out
 #if do want to use it need to make 0 values unfilled rather than lightest colour 
