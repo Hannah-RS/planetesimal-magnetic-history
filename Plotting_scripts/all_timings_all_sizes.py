@@ -89,4 +89,4 @@ cax = fig.add_axes([1, 0.36, 0.01, 0.3])
 fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax, orientation='vertical', label='% dynamos on')
 
 if save == True:
-    plt.savefig(f'../Plots/EPSL_paper/onset_heatmap_allr.png',dpi=450,bbox_inches='tight')
+    plt.savefig(f'../Plots/EPSL_paper/onset_heatmap_allr.pdf',dpi=450,bbox_inches='tight')
