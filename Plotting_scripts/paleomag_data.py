@@ -29,7 +29,7 @@ midpoints = (yplot[1:]+yplot[:-1])/2
 fig, axes = plt.subplots(ncols=2,sharey='row',gridspec_kw={'width_ratios': [1,3]},figsize=[15,5],tight_layout=True)
 xlim_up = [12,300] #x axis upper limits
 xlim_low = [0.8,12]
-title = [f'First {xlim_up[0]} Myr',f'{xlim_low[1]} to {xlim_up[1]} Myr']
+title = [f'First {xlim_up[0]} Ma',f'{xlim_low[1]} to {xlim_up[1]} Ma']
 k = 0 #enumerates through axes
 hwidth = 1.5 #headwidth
 hlengths = [0.2,2] #head length - shorter in first plot
@@ -39,7 +39,7 @@ for ax, xlim_up, xlim_low, title, hlength in zip(axes,xlim_up,xlim_low,title,hle
         mdata = paleo2.loc[paleo2['Classification']==met,:] #filter by class
         mdata.reset_index(inplace=True)
         
-        for j in range(len(mdata)): #plot each value in class - probably want this to be fill between 
+        for j in range(len(mdata)): #plot each value in class - probably want this to be fill between
             if mdata.loc[j,'magnetised']==True:
                 if mdata.loc[j,'radiometric']==True:
                     fcol = '#007aaf'#'#5b93eb'
@@ -57,7 +57,7 @@ for ax, xlim_up, xlim_low, title, hlength in zip(axes,xlim_up,xlim_low,title,hle
                 else:
                     fcol = 'white'
                     ecol = '#2a2728'
-                    ls = (3.5,(2,1.5))
+                    ls = (5,(3,2))
             
             if (mdata.loc[j,'rel_age_lower']!=0)&(mdata.loc[j,'rel_age_upper']!=0): #if range of values fill between
                 if (mdata.loc[j,'up_age_source']=='both'): #if upper and lower bounds use different methods
