@@ -74,11 +74,12 @@ for ax, xlim_up, xlim_low, title, hlength in zip(axes,xlim_up,xlim_low,title,hle
                 ax.arrow(mdata.loc[j,'rel_age_lower'],midpoints[2*i],mdata.loc[j,'rel_age_lower']*0.3,0,head_width=hwidth,head_length=hlength,capstyle='butt',edgecolor=ecol,facecolor=fcol)
                 if xlim_up > 100: #for big plot
                     ax.annotate(' > 870 Myr',(xlim_up-10,midpoints[2*i]),(xlim_up-50,midpoints[2*i]),arrowprops=dict(arrowstyle=']->',facecolor=fcol,edgecolor=ecol))
-            elif (mdata.loc[j,'rel_age_upper']!=0)&(mdata.loc[j,'rel_age_lower']==0):
+            elif (mdata.loc[j,'rel_age_upper']!=0)&(mdata.loc[j,'rel_age_lower']==0): #extend arrow all the way to zero
                 ax.scatter(mdata.loc[j,'rel_age_upper'],midpoints[2*i],marker='|',color=fcol)
-                ax.arrow(mdata.loc[j,'rel_age_upper'],midpoints[2*i],-mdata.loc[j,'rel_age_upper']*0.3,0,head_width=hwidth,head_length=hlength,capstyle='butt',edgecolor=ecol,facecolor=fcol)
+                ax.arrow(mdata.loc[j,'rel_age_upper'],midpoints[2*i],-mdata.loc[j,'rel_age_upper']+1,0,head_width=hwidth,head_length=hlength,capstyle='butt',edgecolor=ecol,facecolor=fcol)
             else:
                 raise ValueError('Both values are 0')
+    
     #overall figure things
     ax.set_yticks(midpoints[::2],mclass)
     ax.set_xlabel('Time /Ma')
