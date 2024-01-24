@@ -14,7 +14,7 @@ import matplotlib as mpl
 from plot_params import subfolders, labels, units, logs, variables, Myr
 
 folder = 'Paper_run4/'
-savefolder='EPSL_paper'
+savefolder='EPSL_paper/'
 varlabels = []
 ytick_lab = []
 ytick_lab2 = []
@@ -177,4 +177,4 @@ if save == True:
     if ref == True:
         plt.savefig(f'../Plots/{savefolder}timing_bars_zoomref.png',dpi=450,bbox_inches='tight') 
     else:
-        plt.savefig(f'../Plots/{savefolder}timing_bars_zoom.png',dpi=450,bbox_inches='tight')
+        plt.savefig(f'../Plots/{savefolder}timing_bars_zoom.pdf',dpi=450,bbox_inches='tight')
