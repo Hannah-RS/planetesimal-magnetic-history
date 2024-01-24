@@ -14,6 +14,7 @@ import matplotlib as mpl
 from plot_params import subfolders, labels, units, logs, variables, Myr
 
 folder = 'Paper_run4/'
+savefolder='EPSL_paper'
 varlabels = []
 ytick_lab = []
 ytick_lab2 = []
@@ -26,14 +27,15 @@ ecol = 'gray'
 barcol = '#0202c4'
 barcol2= '#04acc9'
 xlim = 12 #limit of zoomed region
-save = False
+save = True
 ref = False #do you want reference run over the top
 ron = False #do you want r on the plot?
 
 if ron == False:
     variables = variables[:-1] #exclude r
 #%% Load a given variable
-
+var1_val = [27.1,10,25,0.2,0.01,'10$^{14}$',0]
+var2_val = [32,1000,45,0.5,0.035,'10$^{24}$','6$\\times10^{-7}$']
 for i, var in enumerate(variables):
 
     unit = units[var]
@@ -55,6 +57,7 @@ for i, var in enumerate(variables):
     paths.extend([path]*nrun) #save paths for opening files later
     runval = np.concatenate([runval,var_data['run'].to_numpy()])
     #for labelling min and max values
+
     if logvar == True:
         ytick_lab.append(f'{varlab}={var1:.1e}{unit}')
         ytick_lab.extend(['']*(nrun-2))
@@ -63,10 +66,21 @@ for i, var in enumerate(variables):
         ytick_lab.append(f'{varlab}={var1:.1g}{unit}')
         ytick_lab.extend(['']*(nrun-2))
         ytick_lab.append(f'{varlab}={var2:.1g}{unit}')   
-    #for labelling midpoints
-    ytick_lab2.append(varlab)   
-    ytick_val2.append(len(ytick_lab)*2-nrun) #len(ytick_lab)-nrun/2 but yplot gets doubled later, so x2
     
+    #for labelling midpoints and upper and lower bounds
+    if logvar == True:
+        ytick_lab2.append(f'{var1_val[i]} {unit}')
+    else:
+        ytick_lab2.append(f'{var1_val[i]} {unit}') 
+    #label midpoint with a symbol
+    ytick_val2.append(len(ytick_lab)*2-2*(nrun))
+    ytick_lab2.append(varlab)   
+    ytick_val2.append(len(ytick_lab)*2-nrun-1) #len(ytick_lab)-nrun/2 but yplot gets doubled later, so x2
+    if logvar == True:
+        ytick_lab2.append(f'{var2_val[i]} {unit}')
+    else:
+        ytick_lab2.append(f'{var2_val[i]} {unit}')   
+    ytick_val2.append(len(ytick_lab)*2-2)
 #%% Find max B values
 nruns = len(runval)
 B1max = np.zeros([nruns])
@@ -97,7 +111,7 @@ maxB3_norm = (B3max-0)/(maxB-0)
 #%% Massive stacked barchart
 yplot = np.arange(nruns)*2
 
-fig, axes = plt.subplots(1,2,sharey='row',figsize=[7.5,5],gridspec_kw={'width_ratios': [1,3]},tight_layout=True)
+fig, axes = plt.subplots(1,2,figsize=[7.5,5],gridspec_kw={'width_ratios': [1,3]},tight_layout=True)
 for ax in axes: 
     for i in range(nruns):
         run = int(runval[i])
@@ -120,10 +134,14 @@ for ax in axes:
     
     ax.set_xlabel('Time/Ma') 
      
-    #ax.set_yticks(yplot,ytick_lab)
-    ax.set_yticks(ytick_val2,ytick_lab2)
-#change limit of second graph
+#axes[0].set_yticks(yplot,ytick_lab)
+axes[0].set_yticks(ytick_val2,ytick_lab2)
+axes[0].tick_params(axis='y', labelsize=7) #make y labels smaller
+#no ticks on second y axis
+axes[1].yaxis.set_major_locator(plt.NullLocator())
+#change limits
 axes[0].set_xlim([0,xlim])
+axes[1].set_xlim(left=xlim)
 #axes[0].set_ylabel('Variable')
 axes[1].set_title(f'>{xlim} Ma')
 axes[0].set_title(f'First {xlim} Ma')
@@ -139,7 +157,7 @@ if ron == True:
     cax = fig.add_axes([0.55, 0.17, 0.01, 0.3])
 else:
     cax = fig.add_axes([1, 0.3, 0.01, 0.3])
-mpl.colorbar.ColorbarBase(cax, cmap=cmap, norm=norm, orientation='vertical',label='Max B/$\\mu T$')
+mpl.colorbar.ColorbarBase(cax, cmap=cmap, norm=norm, orientation='vertical',label='Peak magnetic field strength\n at surface/$\\mu T$')
 
 # #second period colourbar
 # transparency_ticks = 50
@@ -157,6 +175,6 @@ mpl.colorbar.ColorbarBase(cax, cmap=cmap, norm=norm, orientation='vertical',labe
 
 if save == True:
     if ref == True:
-        plt.savefig(f'../Plots/{folder}timing_bars_zoomref.png',dpi=450,bbox_inches='tight') 
+        plt.savefig(f'../Plots/{savefolder}timing_bars_zoomref.png',dpi=450,bbox_inches='tight') 
     else:
-        plt.savefig(f'../Plots/{folder}timing_bars_zoom.png',dpi=450,bbox_inches='tight')
+        plt.savefig(f'../Plots/{savefolder}timing_bars_zoom.png',dpi=450,bbox_inches='tight')
