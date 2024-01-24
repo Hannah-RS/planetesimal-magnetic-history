@@ -83,7 +83,7 @@ for k, folder in enumerate(folders):
     ax[k].set_xlim([0.8,xmax])
     ax[k].set_title(f' {r}km')
 
-ax[4].set_xlabel('Time/Myr')
+ax[4].set_xlabel('Time/Ma')
 
 cax = fig.add_axes([1, 0.36, 0.01, 0.3])
 fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax, orientation='vertical', label='% dynamos on')

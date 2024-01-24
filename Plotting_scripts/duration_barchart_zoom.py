@@ -26,7 +26,7 @@ ecol = 'gray'
 barcol = '#0202c4'
 barcol2= '#04acc9'
 xlim = 12 #limit of zoomed region
-save = True
+save = False
 ref = False #do you want reference run over the top
 ron = False #do you want r on the plot?
 
@@ -118,15 +118,15 @@ for ax in axes:
         ax.fill_betweenx(yplot[:-5],5,9.7,alpha=0.1,color='gray')
         ax.fill_betweenx(yplot[:-5],100,400,alpha=0.1,color='gray') #estimate Rem>Remc in Fig 1 for lower limit from fig 3 for 300km for upper limit
     
-    ax.set_xlabel('Time/Myr') 
+    ax.set_xlabel('Time/Ma') 
      
     #ax.set_yticks(yplot,ytick_lab)
     ax.set_yticks(ytick_val2,ytick_lab2)
 #change limit of second graph
 axes[0].set_xlim([0,xlim])
 #axes[0].set_ylabel('Variable')
-axes[1].set_title('Full history - 300km body')
-axes[0].set_title(f'First {xlim} Myr')
+axes[1].set_title(f'>{xlim} Ma')
+axes[0].set_title(f'First {xlim} Ma')
 
 #first period colourbar
 transparency_ticks = 50

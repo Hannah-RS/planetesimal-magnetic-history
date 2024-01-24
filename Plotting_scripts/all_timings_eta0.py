@@ -85,7 +85,7 @@ for p in  range(2):
         ax[k,p].set_xlim([0.8,xmax])
         ax[k,p].set_title(f' {r}km')
     
-    ax[3,p].set_xlabel('Time/Myr')
+    ax[3,p].set_xlabel('Time/Ma')
 ax[0,0].set_title('200km - all $\\eta_0$')
 ax[0,1].set_title('200km - $\\eta_0$ > 10$^{18}$Pas')
 cax = fig.add_axes([1, 0.36, 0.01, 0.3])

@@ -81,8 +81,8 @@ for ax, xlim_up, xlim_low, title, hlength in zip(axes,xlim_up,xlim_low,title,hle
                 raise ValueError('Both values are 0')
     #overall figure things
     ax.set_yticks(midpoints[::2],mclass)
-    ax.set_xlabel('Time after CAIs /Myr')
+    ax.set_xlabel('Time /Ma')
     ax.set_xlim([xlim_low,xlim_up])
     ax.set_title(title)
     
-plt.savefig('../Plots/CoS/paleomag_record.pdf',dpi=450,bbox_inches='tight')
+#plt.savefig('../Plots/CoS/paleomag_record.pdf',dpi=450,bbox_inches='tight')
