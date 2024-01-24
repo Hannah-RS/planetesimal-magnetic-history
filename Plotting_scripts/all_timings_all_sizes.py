@@ -23,8 +23,8 @@ save = True
 
 #make colormap
 cmap = mpl.cm.viridis
-bounds = [0,1]
-norm = mpl.colors.Normalize(vmin=0, vmax=1)
+bounds = [0,100]
+norm = mpl.colors.Normalize(vmin=0, vmax=100)
 
 
 fig, ax = plt.subplots(5,1,sharey='row',sharex='col',tight_layout=True,figsize=[10,10])
@@ -89,4 +89,4 @@ cax = fig.add_axes([1, 0.36, 0.01, 0.3])
 fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax, orientation='vertical', label='% dynamos on')
 
 if save == True:
-    plt.savefig(f'../Plots/CoS/onset_heatmap_allr.png',dpi=450,bbox_inches='tight')
+    plt.savefig(f'../Plots/EPSL_paper/onset_heatmap_allr.png',dpi=450,bbox_inches='tight')
