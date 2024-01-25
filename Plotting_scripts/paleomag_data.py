@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 #%% Import data
 paleo = pd.read_csv("../meteorite_paleomagnetism.csv",skiprows=[1])
-savefolder = 'EPSL_paper'
+savefolder = 'EPSL_paper/'
 save = True
 #replace nan values in timing info
 values = {"rel_age_lower": 0, "rel_age_upper": 0}
