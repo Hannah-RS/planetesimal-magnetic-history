@@ -121,7 +121,7 @@ fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax,extend='both',t
 
 
 if save == True:
-    plt.savefig(f'../Plots/{savefolder}Rem_bars_full.pdf',dpi=450,bbox_inches='tight') 
+    plt.savefig(f'../Plots/{savefolder}Rem_bars_full.png',dpi=450,bbox_inches='tight') 
 
 #%% Continuous B version - this sucks so have commented it out
 #if do want to use it need to make 0 values unfilled rather than lightest colour 
