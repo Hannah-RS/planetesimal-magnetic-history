@@ -117,4 +117,4 @@ for i, met in enumerate(mclass):
 multi_ax[1].set_ylim([-2,15])
 multi_ax[1].set_xlabel('Time /Ma')
 if save == True:   
-    plt.savefig(f'../Plots/{savefolder}paleomag_intensity_log.pdf',dpi=450,bbox_inches='tight')
+    plt.savefig(f'../Plots/{savefolder}paleomag_intensity.pdf',dpi=450,bbox_inches='tight')
