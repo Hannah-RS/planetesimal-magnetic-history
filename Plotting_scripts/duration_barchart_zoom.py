@@ -56,17 +56,9 @@ for i, var in enumerate(variables):
     nrun = len(data)
     paths.extend([path]*nrun) #save paths for opening files later
     runval = np.concatenate([runval,var_data['run'].to_numpy()])
-    #for labelling min and max values
-
-    if logvar == True:
-        ytick_lab.append(f'{varlab}={var1:.1e}{unit}')
-        ytick_lab.extend(['']*(nrun-2))
-        ytick_lab.append(f'{varlab}={var2:.1e}{unit}')
-    else:
-        ytick_lab.append(f'{varlab}={var1:.1g}{unit}')
-        ytick_lab.extend(['']*(nrun-2))
-        ytick_lab.append(f'{varlab}={var2:.1g}{unit}')   
-    
+    #for labelling all values
+    ytick_lab = np.concatenate([ytick_lab,data[f'{var}'],['']]) #add a gap
+     
     #for labelling midpoints and upper and lower bounds
     if logvar == True:
         ytick_lab2.append(f'{var1_val[i]} {unit}')
@@ -109,19 +101,22 @@ maxB1_norm = (B1max-0)/(maxB-0)
 maxB2_norm = (B2max-0)/(maxB-0)
 maxB3_norm = (B3max-0)/(maxB-0)
 #%% Massive stacked barchart
-yplot = np.arange(nruns)*2
+yplot = np.arange(nruns+7)*2 #add extra blank space
 
 fig, axes = plt.subplots(1,2,figsize=[7.5,5],gridspec_kw={'width_ratios': [1,3]},tight_layout=True)
 for ax in axes: 
+    j = 0
     for i in range(nruns):
         run = int(runval[i])
+        if (ytick_lab[j]==''): #don't plot in gaps
+            ax.hlines(yplot[j],0.8,210,color='grey',linestyle='dashed',alpha=0.5,linewidth=0.5)
+            j = j + 1
         #find max B for first and second period
-        ax.barh(yplot[i],var_results.loc[var_results['run']==run,'magoff_1']-var_results.loc[var_results['run']==run,'magon_1'],left=var_results.loc[var_results['run']==run,'magon_1'],color=barcol,alpha=maxB1_norm[i])
-        ax.barh(yplot[i],var_results.loc[var_results['run']==run,'magoff_2']-var_results.loc[var_results['run']==run,'magon_2'],left=var_results.loc[var_results['run']==run,'magon_2'],color=barcol,alpha=maxB2_norm[i])
-        ax.barh(yplot[i],var_results.loc[var_results['run']==run,'magoff_3']-var_results.loc[var_results['run']==run,'magon_3'],left=var_results.loc[var_results['run']==run,'magon_3'],color=barcol,alpha=maxB3_norm[i])
-        ax.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[i]-0.4,yplot[i]+0.4,color='black')
-        if (ytick_lab[i]!='')&(ytick_lab[i-1]!='')&(i>0):
-            ax.hlines(yplot[i]-1,0.8,210,color='grey',linestyle='dashed',alpha=0.5,linewidth=0.5) 
+        ax.barh(yplot[j],var_results.loc[var_results['run']==run,'magoff_1']-var_results.loc[var_results['run']==run,'magon_1'],left=var_results.loc[var_results['run']==run,'magon_1'],color=barcol,alpha=maxB1_norm[i])
+        ax.barh(yplot[j],var_results.loc[var_results['run']==run,'magoff_2']-var_results.loc[var_results['run']==run,'magon_2'],left=var_results.loc[var_results['run']==run,'magon_2'],color=barcol,alpha=maxB2_norm[i])
+        ax.barh(yplot[j],var_results.loc[var_results['run']==run,'magoff_3']-var_results.loc[var_results['run']==run,'magon_3'],left=var_results.loc[var_results['run']==run,'magon_3'],color=barcol,alpha=maxB3_norm[i])
+        ax.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[j]-0.4,yplot[j]+0.4,color='black')
+        j = j + 1 #counter for yplot
             
         #import run with standard variables for comparison
     if ref == True: #plot reference run
@@ -134,8 +129,8 @@ for ax in axes:
     
     ax.set_xlabel('Time/Ma') 
      
-#axes[0].set_yticks(yplot,ytick_lab)
-axes[0].set_yticks(ytick_val2,ytick_lab2)
+axes[0].set_yticks(yplot,ytick_lab)
+#axes[0].set_yticks(ytick_val2,ytick_lab2)
 axes[0].tick_params(axis='y', labelsize=7) #make y labels smaller
 #no ticks on second y axis
 axes[1].yaxis.set_major_locator(plt.NullLocator())
