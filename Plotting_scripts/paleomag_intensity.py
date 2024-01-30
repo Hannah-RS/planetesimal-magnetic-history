@@ -64,7 +64,7 @@ for i, met in enumerate(mclass):
                 axes.errorbar(mdata.loc[j,'midpoints'],mdata.loc[j,'strength_upper'],xerr=mdata.loc[j,'error'],yerr=1,
                               uplims=True,color=pcol,alpha = trans)
             
-            elif (mdata.loc[j,'Meteorite']=='Winchcombe')|(mdata.loc[j,'Meteorite']=='Kaba'): #only central value for these meteorite
+            elif (mdata.loc[j,'Meteorite']=='Kaba'): #only central value for these meteorite
                 if mdata.loc[j,'CRM_problem'] == True: #set data transparency
                     trans = 0.3
                 else:
@@ -107,6 +107,8 @@ for i, met in enumerate(mclass):
                               color='grey')
             elif (mdata.loc[j,'Meteorite']=='Winchcombe'): #Winchcombe measurement
                 axes.errorbar(mdata.loc[j,'midpoints'],mdata.loc[j,'strength_middle']/2,xerr=mdata.loc[j,'error'],
+                              yerr=[[(mdata.loc[j,'strength_middle']-mdata.loc[j,'strength_lower'])/2],
+                                    [(mdata.loc[j,'strength_upper']-mdata.loc[j,'strength_middle'])/2]],
                               color='grey')
         axes.fill_betweenx([0.1,150],1,3.8,color='#FFA07A',alpha=0.5) #nebula field
         axes.fill_betweenx([0.1,60],4,12,color='#afe2c6') #previous dynamo
