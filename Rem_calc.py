@@ -2,18 +2,20 @@
 # -*- coding: utf-8 -*-
 """
 Calculate  magnetic Reynolds numbers and magnetic field strengths.
-    A unified buoyancy flux is calculated, which is then used to calculate a convective power per unit volume. 
-    This is then combined with scaling laws for magnetic field strength and convective velocity.
+    A unified buoyancy flux is calculated, which is then used to calculate a 
+    convective power per unit volume. 
+    This is then combined with scaling laws for magnetic field strength 
+    and convective velocity.
 """
 import numpy as np
-from parameters import alpha_c, rc, cpc, Omega, lambda_mag, rhofe_s, rhoc, gc, dr, rho_exp, mu0, r, fohm, cu, cb
-from parameters import Xs_eutectic, kc
+from parameters import alpha_c, rc, cpc, Omega, lambda_mag, rhofe_s, rhoc, gc, \
+    dr, rho_exp, mu0, r, fohm, cu, cb, Xs_eutectic, kc, Lc
 from fe_fes_liquidus import fe_fes_density
 
 def conv_power(f,dfdt,Xs,Tcore,Fcmb,solid):
     """
-    Convective power per unit volume for combined thermal and buoyancy flux adapted from Nichols 2021 
-    and Ruckriemen 2015
+    Convective power per unit volume for combined thermal and buoyancy flux 
+    adapted from Buffett 1996 (11) and Ruckriemen 2015 (16)
 
     Parameters
     ----------
@@ -34,8 +36,10 @@ def conv_power(f,dfdt,Xs,Tcore,Fcmb,solid):
     -------
     p : float
         convective power per unit volume as defined in equation 17 in Aubert 2009
-    comp/therm : float
-        ratio of compositional and buoyancy fluxes
+    comp : float
+            buoyancy flux from solidifying core [kg/s]
+    therm : float
+            buoyancy flux from superadiabatic heat flux [kg/s]
     """
     
     if solid == True:
@@ -45,7 +49,10 @@ def conv_power(f,dfdt,Xs,Tcore,Fcmb,solid):
             drho = 0
         else: 
             drho = rhofe_s - rhol
-        comp = drho*rc*dfdt
+        late = (alpha_c*rhol*Lc)/cpc #latent heat release at ICB
+        comp = (late-drho)*rc*dfdt
+        if comp <0:
+            raise ValueError('comp<0',late/drho)
         #thermal buoyancy
         nic = round(f*rc/dr)
         Ficb = -kc*(Tcore[nic]-Tcore[nic-1])/dr #worried if this will return anything if index is wrong
@@ -62,7 +69,7 @@ def conv_power(f,dfdt,Xs,Tcore,Fcmb,solid):
     Raq = gc*buoy/(4*np.pi*rhoc*Omega**3*(f*rc)**4)
     p = 3/5*Raq #convective power per unit volume
     
-    return p, comp/therm
+    return p, comp, therm
 
 def Rem_b(f,dfdt,Xs,Tcore,Fcmb,solid,min_unstable):
     """
@@ -91,11 +98,13 @@ def Rem_b(f,dfdt,Xs,Tcore,Fcmb,solid,min_unstable):
         magnetic Reynolds number
     Bdip_surf : float
         RMS dipole magnetic field strength at the surface [T]
-    buoyr : float
-        ratio of compositional and buoyancy fluxes
+    comp : float
+            buoyancy flux from solidifying core [kg/s]
+    therm : float
+            buoyancy flux from superadiabatic heat flux [kg/s]
     """
     l = f*rc - min_unstable*dr 
-    p, buoyr = conv_power(f, dfdt, Xs, Tcore, Fcmb, solid)
+    p, comp, therm = conv_power(f, dfdt, Xs, Tcore, Fcmb, solid)
     if p<0: #no dynamo
         Rem = 0
         Bdip_surf = 0 
@@ -105,4 +114,4 @@ def Rem_b(f,dfdt,Xs,Tcore,Fcmb,solid,min_unstable):
         Bdip_cmb = cb*p**0.31*(fohm*mu0*rhoc)**0.5*Omega*l
         Bdip_surf = Bdip_cmb*((f*rc)/r)**3
         
-    return Rem, Bdip_surf, buoyr
+    return Rem, Bdip_surf, comp, therm
