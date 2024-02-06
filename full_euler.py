@@ -98,7 +98,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     B : float
          magnetic field strength [T]
     buoyr : ndarray
-         compositional and thermal buoyancy fluxes in the dynamo 
+         compositional buoyr[0,:] and thermal buoyr[1,:] buoyancy fluxes [kg/s] 
     tsolve: array
         time points corresponding to each of the values above [s]
     fcond_t : float
