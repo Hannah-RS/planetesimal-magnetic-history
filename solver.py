@@ -187,15 +187,32 @@ threshold3 = 100
 
 ########### Dynamo maxima - must be greater than threshold1 to be on ##########
 #thermal dynamo
-if np.any(Rem>threshold1):
-    max_B = max(B[Rem>threshold1])
-    max_Bt = t[B==max_B][0]/Myr
+Remtherm = Rem[f>=f0]
+Btherm = B[f>=f0]
+
+if np.any(Remtherm>threshold1):
+    max_Btherm = max(Btherm)
+    max_Bthermt = t[B==max_Btherm][0]/Myr
 else:
-    max_B = 0
-    max_Bt = np.nan
+    max_Btherm = 0
+    max_Bthermt = np.nan
     
-max_R = max(Rem)
-max_Rt = t[Rem==max_R][0]/Myr
+max_Rtherm = max(Remtherm)
+max_Rthermt = t[Rem==max_Rtherm][0]/Myr
+
+#compositional - turn into df for rolling average
+#no max time as averaging
+wn = 50 #window width
+Remcomp = pd.Series(Rem[f<f0])
+Bcomp = pd.Series(B[f<f0])
+Remav = Remcomp.rolling(window=wn,center=True).mean()
+Bav = Bcomp.rolling(window=wn,center=True).mean()
+if np.any(Remcomp>threshold1):
+    max_Bcomp = max(Bav[wn:-wn]) #exclude nan
+else:
+    max_Bcomp = 0
+    
+max_Rcomp = max(Remav[wn:-wn])
 
 ########################## on and off times - calculate and save ####################
 from duration_calc import on_off_test
@@ -291,7 +308,7 @@ if B_save == True:
 from csv import writer
   
 var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_start, tstrat_remove, 
-             strat_end, fcond_t, fcond_T, tsolid_start, max_R, max_Rt, max_B, max_Bt, Bn1, magon_1, magoff_1, magon_2, magoff_2, magon_3, magoff_3, Bn2, 
+             strat_end, fcond_t, fcond_T, tsolid_start, max_Rtherm, max_Rthermt, max_Btherm, max_Bthermt, max_Rcomp, max_Bcomp, Bn1, magon_1, magoff_1, magon_2, magoff_2, magon_3, magoff_3, Bn2, 
              magon_4, magoff_4, magon_5, magoff_5, Bn3, magon_6, magoff_6, magon_7, magoff_7]
 
 with open(f'{folder}run_results.csv','a') as f_object:
