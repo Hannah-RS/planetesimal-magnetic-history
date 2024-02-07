@@ -13,7 +13,7 @@ import matplotlib as mpl
 #%% Load data for chosen variable
 from plot_params import subfolders, labels, units, logs, variables, Myr
 
-folder = 'Paper_run4/'
+folder = 'Paper_run300km/'
 savefolder='EPSL_paper/'
 varlabels = []
 ytick_lab = []
@@ -21,6 +21,8 @@ ytick_lab2 = []
 ytick_val2 = []
 paths = []
 runval = np.array([])
+B1max = np.array([])
+B2max = np.array([])
 #plot unchanged B
 bcol = 'white'
 ecol = 'gray'
@@ -56,6 +58,8 @@ for i, var in enumerate(variables):
     nrun = len(data)
     paths.extend([path]*nrun) #save paths for opening files later
     runval = np.concatenate([runval,var_data['run'].to_numpy()])
+    B1max = np.concatenate([B1max,data['max_Btherm'].to_numpy()])
+    B2max = np.concatenate([B2max,data['max_Bcomp'].to_numpy()])
     #for labelling all values
     ytick_lab = np.concatenate([ytick_lab,data[f'{var}'],['']]) #add a gap
      
@@ -73,34 +77,15 @@ for i, var in enumerate(variables):
     else:
         ytick_lab2.append(f'{var2_val[i]} {unit}')   
     ytick_val2.append(len(ytick_lab)*2-2)
-#%% Find max B values
-nruns = len(runval)
-B1max = np.zeros([nruns])
-B2max = np.zeros([nruns])
-B3max = np.zeros([nruns])
-for i in range(nruns):
-    #load B data
-    run = int(runval[i])
-    #import data
-    npzfile = np.load(f'{paths[i]}run_{run}.npz')
-    t = npzfile['t']/Myr
-    B = npzfile['B']
-    #find max value in first interval
-    toff1 = var_results.loc[var_results['run']==run,'magoff_1'].values[0]
-    toff2 = var_results.loc[var_results['run']==run,'magoff_2'].values[0]
-    if toff1 > 0:
-        B1max[i] = np.max(B[t<toff1])
-    if toff2> 0:
-        #find max value in second interval
-        B2max[i] = np.max(B[(t>toff1)&(t<toff2)])
-        B3max[i] = np.max(B[(t>toff2)])
-    
+#%% Normalise B values
+   
 #normalise, use min value of 0 so everything appears and max value of all B values
-maxB = np.max([B1max,B2max,B3max])
+maxB = np.max([B1max,B2max])
 maxB1_norm = (B1max-0)/(maxB-0)
 maxB2_norm = (B2max-0)/(maxB-0)
-maxB3_norm = (B3max-0)/(maxB-0)
+
 #%% Massive stacked barchart
+nruns = len(runval)
 yplot = np.arange(nruns+7)*2 #add extra blank space
 
 fig, axes = plt.subplots(1,2,figsize=[7.5,5],gridspec_kw={'width_ratios': [1,3]},tight_layout=True)
@@ -114,7 +99,7 @@ for ax in axes:
         #find max B for first and second period
         ax.barh(yplot[j],var_results.loc[var_results['run']==run,'magoff_1']-var_results.loc[var_results['run']==run,'magon_1'],left=var_results.loc[var_results['run']==run,'magon_1'],color=barcol,alpha=maxB1_norm[i])
         ax.barh(yplot[j],var_results.loc[var_results['run']==run,'magoff_2']-var_results.loc[var_results['run']==run,'magon_2'],left=var_results.loc[var_results['run']==run,'magon_2'],color=barcol,alpha=maxB2_norm[i])
-        ax.barh(yplot[j],var_results.loc[var_results['run']==run,'magoff_3']-var_results.loc[var_results['run']==run,'magon_3'],left=var_results.loc[var_results['run']==run,'magon_3'],color=barcol,alpha=maxB3_norm[i])
+        ax.barh(yplot[j],var_results.loc[var_results['run']==run,'magoff_3']-var_results.loc[var_results['run']==run,'magon_3'],left=var_results.loc[var_results['run']==run,'magon_3'],color=barcol,alpha=maxB2_norm[i])
         ax.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[j]-0.4,yplot[j]+0.4,color='black')
         j = j + 1 #counter for yplot
             
