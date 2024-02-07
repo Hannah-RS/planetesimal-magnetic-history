@@ -202,17 +202,21 @@ max_Rthermt = t[Rem==max_Rtherm][0]/Myr
 
 #compositional - turn into df for rolling average
 #no max time as averaging
-wn = 50 #window width
 Remcomp = pd.Series(Rem[f<f0])
 Bcomp = pd.Series(B[f<f0])
+wfrac = 30 #fractional window width
+wn = int(len(Remcomp)/wfrac)
+if wn < 1: #check if window is wider than data
+    wn = int(len(Remcomp)/5)
+    
 Remav = Remcomp.rolling(window=wn,center=True).mean()
 Bav = Bcomp.rolling(window=wn,center=True).mean()
-if np.any(Remcomp>threshold1):
+if np.any(Remav[wn:-wn]>threshold1):
     max_Bcomp = max(Bav[wn:-wn]) #exclude nan
 else:
     max_Bcomp = 0
     
-max_Rcomp = max(Remav[wn:-wn])
+max_Rcomp = max(Remav[wn:-wn]) 
 
 ########################## on and off times - calculate and save ####################
 from duration_calc import on_off_test
