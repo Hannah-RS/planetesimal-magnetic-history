@@ -97,3 +97,32 @@ fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax,ticks=[0,1e-9,1
 
 if save == True:
     plt.savefig(f'../Plots/{savefolder}Bpeak_comp.png',dpi=450,bbox_inches='tight') 
+    
+#%% Compositional dynamo duration as fraction of core solidification
+data['frac_dur'] = (data['magoff_2']-data['tsolid_start'])/(data['tsolid']-data['tsolid_start'])
+data2 = data[data['frac_dur']>0] #remove lowest eta0
+data3 = data[data['frac_dur']<0]
+#one solidification epoch
+data.loc[data['frac_dur']<0,'frac_dur'] = (data['magoff_1']-data['tsolid_start'])/(data['tsolid']-data['tsolid_start'])
+data3.loc[:,'frac_dur'] = (data3['magoff_1']-data3['tsolid_start'])/(data3['tsolid']-data3['tsolid_start'])
+#three solidification epochs
+data4 = data3[data3['frac_dur']<0]
+data3 = data3[data3['frac_dur']>0]
+data.loc[data['frac_dur']<0,'frac_dur'] = (data['magoff_3']-data['tsolid_start'])/(data['tsolid']-data['tsolid_start'])
+data4.loc[:,'frac_dur'] = (data4['magoff_3']-data4['tsolid_start'])/(data4['tsolid']-data4['tsolid_start'])
+#eutectic data
+data4.loc[data4['Xs_0']==Xs_eutectic,'frac_dur']=np.nan
+data.loc[data['Xs_0']==Xs_eutectic,'frac_dur']=np.nan
+
+plt.figure()
+plt.hist(data3['frac_dur'])
+plt.hist(data2['frac_dur'])
+plt.hist(data4['frac_dur'])
+plt.xlabel('Fraction of core solidification for which a dynamo is generated')
+plt.ylabel('Number of runs')
+
+plt.figure()
+plt.hist(data['frac_dur'])
+plt.xlabel('Fraction of core solidification for which a dynamo is generated')
+plt.ylabel('Number of runs')
+plt.savefig('../Plots/fraction_duration.png')
