@@ -9,8 +9,50 @@ Calculate  magnetic Reynolds numbers and magnetic field strengths.
 """
 import numpy as np
 from parameters import alpha_c, rc, cpc, Omega, lambda_mag, rhofe_s, rhoc, gc, \
-    dr, rho_exp, mu0, r, fohm, cu, cb, Xs_eutectic, kc, Lc
+    dr, rho_exp, mu0, r, fohm, cu, cb, Xs_eutectic, kc, Lc, icfrac
 from fe_fes_liquidus import fe_fes_density
+
+@np.vectorize
+def r1(x,f):
+    """
+    outer solid shell inner radius
+
+    Parameters
+    ----------
+    x : float
+        fraction of mass in outer shell
+    f : float
+        fractional inner core radius for concentric inward
+
+    Returns
+    -------
+    r1 : float
+        inner radius of outer solid shell
+
+    """
+    r1 = rc*(1-(1-x)*(1-f**3))**(1/3)
+    return r1
+
+@np.vectorize
+def r2(x,f):
+    """
+    inner solid core radius
+
+    Parameters
+    ----------
+    x : float
+        fraction of mass in outer shell
+    f : float
+        fractional inner core radius for concentric inward
+
+    Returns
+    -------
+    r2 : float
+        inner solid core radius
+
+    """
+    r2 = rc*(x*(1-f**3))**(1/3)
+    return r2
 
 def conv_power(f,dfdt,Xs,Tcore,Fcmb,solid):
     """
@@ -54,7 +96,7 @@ def conv_power(f,dfdt,Xs,Tcore,Fcmb,solid):
         if comp <0:
             raise ValueError('comp<0',late/drho)
         #thermal buoyancy
-        nic = round(f*rc/dr)
+        nic = round(r1(icfrac,f)/dr) #r1/dr
         Ficb = -kc*(Tcore[nic]-Tcore[nic-1])/dr #worried if this will return anything if index is wrong
         Fad = kc*gc*alpha_c*Tcore[nic-1]/cpc
          
@@ -103,7 +145,11 @@ def Rem_b(f,dfdt,Xs,Tcore,Fcmb,solid,min_unstable):
     therm : float
             buoyancy flux from superadiabatic heat flux [kg/s]
     """
-    l = f*rc - min_unstable*dr 
+    r2val = r2(icfrac,f)
+    if r2val > min_unstable*dr:
+        l = r1(icfrac,f) - r2val
+    else:
+        l = r1(icfrac,f) - min_unstable*dr 
     p, comp, therm = conv_power(f, dfdt, Xs, Tcore, Fcmb, solid)
     if p<0: #no dynamo
         Rem = 0

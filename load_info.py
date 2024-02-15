@@ -35,8 +35,8 @@ def load_run_info(run,file):
     dr = run_info[run_info['run']==run]['dr'].to_numpy()[0] #grid spacing [m]
     tstart = run_info[run_info['run']==run]['t_acc_m'].to_numpy()[0] #accretion time [Myr after CAIs]
     viscosity = run_info[run_info['run']==run]['default'].iloc[0] #viscosity profile
-    
-    return r, dr, tstart, tstep, viscosity
+    icfrac = run_info[run_info['run']==run]['icfrac'].to_numpy()[0] #fraction of core mass in centre
+    return r, dr, tstart, tstep, viscosity, icfrac
 
 def load_run_results(run,file):
     """
