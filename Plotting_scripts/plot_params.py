@@ -10,5 +10,5 @@ units = {'rcmf':'','eta0':'Pas','beta':'$K^{-1}$','etal':'Pas','Xs_0':'wt %','Fe
 logs ={'rcmf':False,'eta0':True,'beta':False,'etal':True,'Xs_0':False,'Fe0':True,'alpha_n':False,'r':False}
 variables = ['Xs_0','etal','alpha_n','rcmf','beta','eta0','Fe0','r']
 Myr = 365*24*3600*1e6 #number of s in Myr
-f0=0.999 #initial fractional inner liquid core radius
+f0=0.999999 #initial fractional inner liquid core radius
 Xs_eutectic = 32 # Buono & Walker give 31.9-32.7 for 10-500km size bodies
