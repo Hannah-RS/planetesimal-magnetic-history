@@ -54,7 +54,7 @@ def r2(x,f):
     r2 = rc*(x*(1-f**3))**(1/3)
     return r2
 
-def conv_power(f,dfdt,Xs,Tcore,Fcmb,solid):
+def conv_power(f,dfdt,l,Xs,Tcore,Fcmb,solid):
     """
     Convective power per unit volume for combined thermal and buoyancy flux 
     adapted from Buffett 1996 (11) and Ruckriemen 2015 (16)
@@ -65,6 +65,8 @@ def conv_power(f,dfdt,Xs,Tcore,Fcmb,solid):
         fractional inner core radius
     dfdt : float
         rate of change of inner core radius
+    l : float
+        convective lengthscale [m]
     Xs : float
         core sulfur content [wt %]
     Tcore : float
@@ -108,7 +110,7 @@ def conv_power(f,dfdt,Xs,Tcore,Fcmb,solid):
     therm = alpha_c/cpc*(Ficb-Fad)
     #convert total buoyancy to convective power per unit volume
     buoy = 4*np.pi*f**2*rc**2*(therm+comp)
-    Raq = gc*buoy/(4*np.pi*rhoc*Omega**3*(f*rc)**4)
+    Raq = gc*buoy/(4*np.pi*rhoc*Omega**3*l**4)
     p = 3/5*Raq #convective power per unit volume
     
     return p, comp, therm
@@ -150,7 +152,7 @@ def Rem_b(f,dfdt,Xs,Tcore,Fcmb,solid,min_unstable):
         l = r1(icfrac,f) - r2val
     else:
         l = r1(icfrac,f) - min_unstable*dr 
-    p, comp, therm = conv_power(f, dfdt, Xs, Tcore, Fcmb, solid)
+    p, comp, therm = conv_power(f, dfdt, l, Xs, Tcore, Fcmb, solid)
     if p<0: #no dynamo
         Rem = 0
         Bdip_surf = 0 
