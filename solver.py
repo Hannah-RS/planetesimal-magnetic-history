@@ -15,7 +15,7 @@ from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc
     default, rcmf, Fe0, full_save, B_save, eta0, etal, w, alpha_n, beta, n_cells, icfrac
 from viscosity_def import viscosity
 
-if automated == True: #should say true am just testing
+if automated == True: 
     import sys
     folder = sys.argv[1]
 else:
@@ -79,7 +79,9 @@ print('Initial conditions set')
 #%%
 ########################### Differentiation ###################################
 tic = time.perf_counter()
-Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H  = differentiation(Tint,t_acc,r, dr, step_m)
+Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H  = differentiation(Tint,
+                                                                            t_acc,r, 
+                                                                            dr, step_m)
 toc = time.perf_counter()
 int_time1 = toc - tic  
 
@@ -107,7 +109,9 @@ t_diffs = t_diff[0::n_save_d]
 Hs = H[0::n_save_d]
 
 if full_save == True:
-    np.savez_compressed(f'{folder}run_{run}_diff', Tdiff = Tdiffs, Xfe = Xfes, Xsi = Xsis, cp = cps, Ra = Ras, Ra_crit = Ra_crits, convect = convects, d0=d0s, t_diff = t_diffs, H=Hs)
+    np.savez_compressed(f'{folder}run_{run}_diff', Tdiff = Tdiffs, Xfe = Xfes, 
+                        Xsi = Xsis, cp = cps, Ra = Ras, Ra_crit = Ra_crits, 
+                        convect = convects, d0=d0s, t_diff = t_diffs, H=Hs)
 
 print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time1)))
 #%%
@@ -115,7 +119,10 @@ print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtim
 
 #integrate
 tic = time.perf_counter()
-Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, Racrit, Fs, Flid, Fad, Fcmb, Rem, B, buoyr, t, fcond_t = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0,  \
+    min_unstable, Ur, Ra, RaH, RanoH, Racrit, Fs, Flid, Fad, Fcmb, Rem, B, \
+        buoyr, t, fcond_t = thermal_evolution(t_diff[-1],t_end,step_m,
+                                              Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time2 = toc - tic    
 
@@ -305,9 +312,12 @@ else:
 ############################ Save results #####################################
 # save variables to file
 if full_save == True:
-    np.savez_compressed(f'{folder}run_{run}', Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, 
-             T_profile = Tprofile, Flid = Flid, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, Ur=Ur, 
-             Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, t=t, Rem = Rem, B=B, buoyr = buoyr, Flux = Flux) 
+    np.savez_compressed(f'{folder}run_{run}', Tc = Tc, Tc_conv = Tc_conv, 
+                        Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, 
+                        Tm_surf = Tm_surf, T_profile = Tprofile, Flid = Flid, 
+                        f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, 
+                        Ur=Ur, Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, 
+                        t=t, Rem = Rem, B=B, buoyr = buoyr, Flux = Flux) 
 
 if B_save == True:
     np.savez_compressed(f'{folder}run_{run}_B', B=B, Rem = Rem, t = t)
@@ -315,8 +325,10 @@ if B_save == True:
 #write parameters to the run file
 from csv import writer
   
-var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_start, tstrat_remove, 
-             strat_end, fcond_t, fcond_T, tsolid_start, max_Rtherm, max_Rthermt, max_Btherm, max_Bthermt, max_Rcomp, max_Bcomp, Bn1, magon_1, magoff_1, magon_2, magoff_2, magon_3, magoff_3, Bn2, 
+var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, 
+            tstrat_start, tstrat_remove, strat_end, fcond_t, fcond_T, tsolid_start, 
+            max_Rtherm, max_Rthermt, max_Btherm, max_Bthermt, max_Rcomp, max_Bcomp, 
+            Bn1, magon_1, magoff_1, magon_2, magoff_2, magon_3, magoff_3, Bn2, 
              magon_4, magoff_4, magon_5, magoff_5, Bn3, magon_6, magoff_6, magon_7, magoff_7]
 
 with open(f'{folder}run_results.csv','a') as f_object:
