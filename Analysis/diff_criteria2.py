@@ -15,6 +15,7 @@ folders = ['Paper_run100km','Paper_run200km','Paper_run300km','Paper_run400km','
 #%% Run loop
 #bad_params = pd.DataFrame()
 bad_runs = []
+conv_runs = []
 for j, folder in enumerate(folders):
     for var in variables[:-1]:
         path = '../Results_combined/'+folder+f"/params_{subfolders[var]}/"
@@ -39,6 +40,9 @@ for j, folder in enumerate(folders):
             if (len(Ra_super)>0)&(len(conv_on)>0):
                 if Ra_super[0]>conv_on[0]:
                     bad_runs.append(f'{run} and size {j}')
-                    
+            #how many runs have convection before differentiation
+            if len(conv_on)>0:
+                conv_runs.append(f'{run} and size {j}')       
 #%% Print list length
-print(f'Ra supercritical after lid thinner than domain for {len(bad_runs)} runs')            
+print(f'Ra supercritical after lid thinner than domain for {len(bad_runs)} runs')      
+print(f'{len(conv_runs)} runs ({len(conv_runs)*100/195:.0f} %) convect before differentiation')      
