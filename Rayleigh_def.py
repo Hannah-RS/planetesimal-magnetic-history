@@ -159,7 +159,7 @@ def Rayleigh_differentiate(t,Tb,Ur,model=default):
         d0H = 0.633*r*(frht*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
     
     Ra_crit = Rayleigh_crit(Tb)
-    if (d0H/r < convect_ratio) & (RaH/Ra_crit>conv_tol): #still working on this criteria
+    if d0H/r < convect_ratio:
         convect = True
     else: 
         convect = False
