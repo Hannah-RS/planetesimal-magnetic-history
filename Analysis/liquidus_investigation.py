@@ -24,8 +24,8 @@ x = Xsd*mrr/(1-Xsd) #mole fraction of FeS
 
 #create pressure array
 #r = np.array([10,100,250,300,500])*1e3 #radius [m]
-r = np.array([300e3]) #for one radius just use this line
-#r = np.linspace(10,500,200)*1e3
+#r = np.array([300e3]) #for one radius just use this line
+r = np.linspace(100,500,200)*1e3
 rc = r/2
 P = 2/3*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre [GPa]
 
@@ -50,8 +50,8 @@ Tc = 1400 #estimate for Tc
 Delta = dTdP*(rhoc*cpc)/(alpha_c*Tc)
 
 #find lowest Xs for a given silicate melting
-#phi = np.linspace(0.01,0.5,200)
-phi = np.array([0.3]) #for one melt fraction just use this line
+phi = np.linspace(0.2,0.5,200)
+#phi = np.array([0.3]) #for one melt fraction just use this line
 minS = np.zeros([len(r),len(phi)])
 Tphi = Tms+phi*(Tml-Tms)
 for i in range(len(r)):
@@ -66,23 +66,25 @@ plt.colorbar(norm=mcolors.LogNorm(),label='$\\frac{dT_L}{dP}$')
 plt.ylabel('radius /km')
 plt.xlabel('$X_s$ /wt %')
 
+#%%
 #plot minimum Xs for full melting at differentiation as a function of RCMF
 fig = plt.figure(tight_layout=True)
 ax1 = fig.add_subplot(111)
 ax2 = ax1.twiny()
 ax1.pcolormesh(phi,r/1e3,minS,shading='gouraud',vmin=np.min(minS), vmax=np.max(minS))
 ax2.pcolormesh(Tphi,r/1e3,minS,shading='gouraud',vmin=np.min(minS), vmax=np.max(minS))
-ax1.set_xlabel('Critical melt fraction')
-ax1.set_ylabel('r/km')
+ax1.set_xlabel('Critical melt fraction, $\phi_C$')
+ax1.set_ylabel('planetesimal radius /km')
 ax2.set_xlabel('Differentiation temp /K')
 #make the colorbar (took this off the internet it is a bit gross)
 norm = mcolors.Normalize(vmin=np.min(minS), vmax=np.max(minS)) 
 # creating ScalarMappable
 sm = plt.cm.ScalarMappable(cmap='viridis', norm=norm)
 sm.set_array([]) 
-plt.colorbar(sm,ax=ax2,label='min X$_s$')
-#plt.savefig('Plots/differentiation_Xs.png')
+plt.colorbar(sm,ax=ax2,label='minimum X$_{S,0}$')
+plt.savefig('../Plots/Icarus_paper/differentiation_Xs.png',dpi=500)
 
+#%%
 #plot liquidus for different values of r 
 colors = ['navy','purple','seagreen','cornflowerblue','lightblue']
 plt.figure()
