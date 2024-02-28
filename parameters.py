@@ -45,7 +45,7 @@ if automated == True:
     dr = auto.loc[ind,'dr']
     icfrac = auto.loc[ind,'icfrac']
 else: #set manually
-    r = 100e3 # radius of asteroid [m]
+    r = 300e3 # radius of asteroid [m]
     dr = 500 # grid size [m]
     default ='vary' #default viscosity model
     rcmf = 0.3 #rheologically critical melt fraction - melting required for differentiation
@@ -130,9 +130,11 @@ XFe_d = 1 - Xs_0/100 #abundance of Fe in core assuming S is only other significa
 
 
 # Core parameters 
-from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_density
-Ts_fe = 1260 # [K] Buono and Walker 2011 give 1263+-25
-Xs_eutectic = 32 # Buono & Walker give 31.9-32.7 for 10-500km size bodies
+from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_liquidus_bw_min, fe_fes_density
+from scipy.optimize import root_scalar
+Ts_fe = 1263 # [K] Buono and Walker 2011 give 1263+-25
+# Use root finding on FeFeS liquidus for 300km body pressure
+Xs_eutectic = np.round(root_scalar(fe_fes_liquidus_bw_min,bracket=(25,34),args=(0.08)).root,1) 
 cpc=850 # heat capacity of core [J kg^-1 K^-1] 
 kc=30 # thermal conducitivity of core material [Wm^-1 K^-1] 
 alpha_c=9.2e-5 #[K^-1] Nimmo 2009

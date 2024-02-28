@@ -40,9 +40,10 @@ etal = np.logspace(minetal,maxetal,3)
 
 #%%
 #sulfur content
+from parameters import Xs_eutectic
 nxs = 3
 minxs = 27.1 #minimum for a 300km radius, rcmf = 0.3 
-maxxs = 32
+maxxs = Xs_eutectic
 Xs_0 = np.linspace(minxs,maxxs,nxs)
 
 #%%
@@ -101,8 +102,8 @@ for i, runs in enumerate(run_nums):
     rcmfval= 0.3
     eta0val= 1e19
     betaval = 0.0225
-    etalval = 100 #liquid viscosity [Pas]
-    xsval = 29.5
+    etalval = 10 #liquid viscosity [Pas]
+    xsval = 30.05
     feval = 1e-8
     alpha_nval = 30 #melt weakening, diffusion creep
     rval=100e3
