@@ -101,7 +101,7 @@ def conv_power(f,dfdt,l,Xs,Tcore,Fcmb,solid):
         nic = round(r1(icfrac,f)/dr) #r1/dr
         Ficb = -kc*(Tcore[nic]-Tcore[nic-1])/dr #worried if this will return anything if index is wrong
         Fad = kc*gc*alpha_c*Tcore[nic-1]/cpc
-         
+        #comp = 0 #solidification doesn't help the dynamo
     else: #boundary of convecting region is at CMB
         comp = 0
         Ficb = Fcmb
