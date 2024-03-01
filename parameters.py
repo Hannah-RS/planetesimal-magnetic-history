@@ -17,7 +17,7 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-automated = False
+automated = True
 full_save = True #do you want to save temp profiles etc or just summary stats
 B_save = False #do you want to save field strengths and Rem
 out_interval = 20 #how many times do you want t to be printed in the whole run
@@ -52,13 +52,13 @@ else: #set manually
     eta0 = 1e19 #reference viscosity at Tms [Pas]
     beta =0.0225 #E/RTref^2
     w = 5 #width of log linear region [K]
-    etal = 100 #liquid viscsoity [Pas]
+    etal = 10 #liquid viscsoity [Pas]
     alpha_n = 30 #melt weakening (diffusion creep)
     Xs_0 = 27.1# initial wt % sulfur in core 
     Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 5
+    run = 7
     t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 100 # max end time [Myr]
+    t_end_m = 300 # max end time [Myr]
     icfrac = 0.5 #fraction of solidified material that forms a passive inner core during solidification
 
 # Size of body
@@ -132,7 +132,7 @@ XFe_d = 1 - Xs_0/100 #abundance of Fe in core assuming S is only other significa
 # Core parameters 
 from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_liquidus_bw_min, fe_fes_density
 from scipy.optimize import root_scalar
-Ts_fe = 1263 # [K] Buono and Walker 2011 give 1263+-25
+Ts_fe = 1260 # [K] Buono and Walker 2011 give 1263+-25
 # Use root finding on FeFeS liquidus for 300km body pressure
 Xs_eutectic = np.round(root_scalar(fe_fes_liquidus_bw_min,bracket=(25,34),args=(0.08)).root,1) 
 cpc=850 # heat capacity of core [J kg^-1 K^-1] 
