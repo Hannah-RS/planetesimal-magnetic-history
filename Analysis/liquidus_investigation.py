@@ -25,7 +25,7 @@ x = Xsd*mrr/(1-Xsd) #mole fraction of FeS
 #create pressure array
 #r = np.array([10,100,250,300,500])*1e3 #radius [m]
 #r = np.array([300e3]) #for one radius just use this line
-r = np.linspace(100,500,200)*1e3
+r = np.linspace(100,500,3)*1e3
 rc = r/2
 P = 2/3*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre [GPa]
 
@@ -82,22 +82,21 @@ norm = mcolors.Normalize(vmin=np.min(minS), vmax=np.max(minS))
 sm = plt.cm.ScalarMappable(cmap='viridis', norm=norm)
 sm.set_array([]) 
 plt.colorbar(sm,ax=ax2,label='minimum X$_{S,0}$')
-plt.savefig('../Plots/Icarus_paper/differentiation_Xs.png',dpi=500)
+#plt.savefig('../Plots/Icarus_paper/differentiation_Xs.png',dpi=500)
 
 #%%
 #plot liquidus for different values of r 
-colors = ['navy','purple','seagreen','cornflowerblue','lightblue']
+colors = ['#0292D7','#BB4DA7','#361AE5','cornflowerblue','lightblue']
 plt.figure()
 plt.plot(Xs[linear>Teut],linear[linear>Teut],label='linear',color='black')
 for i, rad in enumerate(r):
-    plt.plot(Xs[bw[i]>Teut],bw[i,bw[i]>Teut],label=f'radius {rad/1e3:.1f} km',color=colors[i%4])
-plt.scatter(Xs_eutectic,1260,linestyle='dashed',color='black',label='eutectic temp 1bar - 6GPa',marker='X')
-plt.xlabel('Weight % S')
-plt.ylabel('Tl /K')
-plt.ylim([1000,1800])
+    plt.plot(Xs[bw[i]>Teut],bw[i,bw[i]>Teut],label=f'R={rad/1e3:.0f} km',color=colors[i%4])
+plt.scatter(Xs_eutectic,1260,linestyle='dashed',color='black',label='eutectic temperature 1bar - 6GPa',marker='X')
+plt.xlabel('Core sulfur content /wt % S')
+plt.ylabel('Liquidus temperature /K')
+plt.ylim([1200,1800])
 plt.legend()
-plt.title('Comparison between linear liquidus and Buono & Walker (2011)')
-#plt.savefig('Plots/liquidus_comp_xs.png')
+plt.savefig('../Plots/liquidus_comp_xs.png',dpi=500)
 
 
 ##### Plot as a function of P and x for comparison with Buono & Walker
