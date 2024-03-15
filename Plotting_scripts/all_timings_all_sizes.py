@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 
 #%% Load data for chosen variable
-folders = ['Paper_run100km/','Paper_run200km/','Paper_run4/','Paper_run400km/','Paper_run500km/']
+folders = ['Paper_run100km/','Paper_run200km/','Paper_run300km/','Paper_run400km/','Paper_run500km/']
 
 from plot_params import subfolders, labels, units, logs, Myr
 variables = ['Xs_0','etal','beta','alpha_n','rcmf','Fe0']
@@ -27,7 +27,7 @@ bounds = [0,100]
 norm = mpl.colors.Normalize(vmin=0, vmax=100)
 
 
-fig, ax = plt.subplots(5,1,sharey='row',sharex='col',tight_layout=True,figsize=[10,10])
+fig, ax = plt.subplots(5,1,sharey='row',sharex='col',tight_layout=True,figsize=[7.5,7.5])
 
 
 for k, folder in enumerate(folders):
