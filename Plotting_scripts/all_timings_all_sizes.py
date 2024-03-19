@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 
 #%% Load data for chosen variable
-folders = ['Paper_run100km/','Paper_run200km/','Paper_run4/','Paper_run400km/','Paper_run500km/']
+folders = ['Paper_run100km/','Paper_run200km/','Paper_run300km/','Paper_run400km/','Paper_run500km/']
 
 from plot_params import subfolders, labels, units, logs, Myr
-variables = ['etal','beta','alpha_n','rcmf','Xs_0','Fe0']
+variables = ['Xs_0','etal','beta','alpha_n','rcmf','Fe0']
 y = np.arange(len(variables)+1)
 radius = [100,200,300,400,500]
 varlabels = []
@@ -23,12 +23,12 @@ save = True
 
 #make colormap
 cmap = mpl.cm.viridis
-bounds = [0,1]
-norm = mpl.colors.Normalize(vmin=0, vmax=1)
+bounds = [0,100]
+norm = mpl.colors.Normalize(vmin=0, vmax=100)
 
 
-fig, ax = plt.subplots(5,1,sharey='row',sharex='col',tight_layout=True,figsize=[10,10])
-#ax[2,1].remove() #remove unneeded axis
+fig, ax = plt.subplots(5,1,sharey='row',sharex='col',tight_layout=True,figsize=[7.5,7.5])
+
 
 for k, folder in enumerate(folders):
     r = radius[k]
@@ -57,11 +57,11 @@ for k, folder in enumerate(folders):
         nrun = len(data)
         
         #%% Create time array
-        tdyn = np.concatenate([data[data['magon_1']>0]['magon_1'],data[data['magon_1']>0]['magoff_1'],data[data['magon_2']>0]['magon_2'],data[data['magon_2']>0]['magoff_2']])
+        tdyn = np.concatenate([data[data['magon_1']>0]['magon_1'],data[data['magon_1']>0]['magoff_1'],data[data['magon_2']>0]['magon_2'],data[data['magon_2']>0]['magoff_2'],data[data['magon_3']>0]['magon_3'],data[data['magon_3']>0]['magoff_3']])
         tdyn = np.sort(tdyn) #range from low to high
         tmid = (tdyn[:-1]+tdyn[1:])/2 #find midpoints
-        ton = np.concatenate([data['magon_1'],data['magon_2']]) #on times
-        toff = np.concatenate([data['magoff_1'],data['magoff_2']]) #off times
+        ton = np.concatenate([data['magon_1'],data['magon_2'],data['magon_3']]) #on times
+        toff = np.concatenate([data['magoff_1'],data['magoff_2'],data['magoff_3']]) #off times
         weight=np.zeros([len(tmid),1])
         
         for j, t in enumerate(tmid):
@@ -83,10 +83,10 @@ for k, folder in enumerate(folders):
     ax[k].set_xlim([0.8,xmax])
     ax[k].set_title(f' {r}km')
 
-ax[4].set_xlabel('Time/Myr')
+ax[4].set_xlabel('Time/Ma')
 
 cax = fig.add_axes([1, 0.36, 0.01, 0.3])
 fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax, orientation='vertical', label='% dynamos on')
 
 if save == True:
-    plt.savefig(f'../Plots/CoS/onset_heatmap_allr.png',dpi=450,bbox_inches='tight')
+    plt.savefig(f'../Plots/EPSL_paper/onset_heatmap_allr.pdf',dpi=450,bbox_inches='tight')

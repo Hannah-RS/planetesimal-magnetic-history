@@ -45,8 +45,10 @@ def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
         magnetic Reynolds number
     Bdip_cmb : float
         dipole magnetic field strength at the surface [T]
-    buoyr : float
-        ratio of compositional and buoyancy fluxes
+    comp : float
+            buoyancy flux from solidifying core [kg/s]
+    therm : float
+            buoyancy flux from superadiabatic heat flux [kg/s]
     """
     
     if stratification[0] == True:
@@ -66,9 +68,9 @@ def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
        
     dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb+Qrad)/Qst
     #calculate magnetic field
-    Rem, Bdip_cmb, buoyr = Rem_b(f, 0, Xs, Tcore, Fcmb, False,min_unstable_ind) #dfdt = 0 for  non-solidifying   
+    Rem, Bdip_cmb, comp, therm = Rem_b(f, 0, Xs, Tcore, Fcmb, False,min_unstable_ind) #dfdt = 0 for  non-solidifying   
     
-    return dTcdt, Rem, Bdip_cmb, buoyr
+    return dTcdt, Rem, Bdip_cmb, comp, therm
 
 def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     """
@@ -98,8 +100,10 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
         magnetic Reynolds number
     Bdip_cmb : float
         dipole magnetic field strength at the surface [T]
-    buoyr : float
-        ratio of compositional and buoyancy fluxes
+    comp : float
+            buoyancy flux from solidifying core [kg/s]
+    therm : float
+            buoyancy flux from superadiabatic heat flux [kg/s]
     """
     dTl_dP = fe_fes_liquidus_dp(Xs, Pc)
     Qst = rhoc*cpc*Vc
@@ -109,8 +113,7 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
 
     dTcdt = (Fcmb*Acmb-Qrad)/(Qst+Ql)
     dfdt = - dTcdt/(rhoc*gc*dTl_dP*rc)
-
     f_new = f+dfdt*dt
-    Rem, Bdip_cmb, buoyr = Rem_b(f, dfdt, Xs, Tcore, Fcmb, True,0) #if core is solidifying there is no thermal stratification
+    Rem, Bdip_cmb, comp, therm = Rem_b(f, dfdt, Xs, Tcore, Fcmb, True,0) #if core is solidifying there is no thermal stratification
    
-    return dTcdt, f_new, Rem, Bdip_cmb, buoyr
+    return dTcdt, f_new, Rem, Bdip_cmb, comp, therm

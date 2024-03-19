@@ -110,6 +110,37 @@ def fe_fes_liquidus_bw(Xs,P):
     
     return Tl
 
+def fe_fes_liquidus_bw_min(Xs,P):
+    """
+    Fe-FeS liquidus from Buono & Walker (2011) - eqn 29 
+    with eutectic temp subtracted off for minimisation
+    Valid for sub-eutectic S contents up to 10GPa. 
+    Eutectic temp is 1263+-25K from Buono & Walker
+
+    Parameters
+    ----------
+    Xs : float
+        wt % sulfur
+    P : float
+        pressure [GPa]       
+
+    Returns
+    -------
+    Liquidus temp - Eutectic temp [K]
+
+    """
+    x = weight_perc_to_mole_frac(Xs)
+    
+    A = (-2.4724*P**4) + (28.025*P**3) + (9.1404*P**2) + (581.71*P) + 3394.8
+    B = (1.7978*P**4) + (-6.7881*P**3) + (-197.69*P**2) + (-271.69*P) + (-8219.5)
+    C = (-0.1702*P**4) + (-9.3959*P**3) + (163.53*P**2) + (-319.35*P) + 5698.6
+    D = (-0.2308*P**4) + (7.1*P**3) + (-64.118*P**2) + 105.98*P + (-1621.9)
+    E = 0.2302*P**4 + (-5.3688*P**3) + 38.124*P**2 + (-46.681*P) + 1813.8
+    
+    Tl = A*x**4 + B*x**3 + C*x**2 + D*x**1 + E -1260
+    
+    return Tl
+
 def fe_fes_liquidus_dp(Xs,P):
     """
     dTl/dP using Fe-FeS liquidus from Buono & Walker (2011) - eqn 29. 

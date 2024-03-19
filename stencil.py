@@ -43,9 +43,9 @@ def cond_stencil_mantle(r,rc,dr,krho):
 
     
     #first row uses forward differences
-    r_mat[0,0] = 1 - 2*dr/rmid[0]
-    r_mat[0,1] = 2*(dr/rmid[0]-1)
-    r_mat[0,2] = 1
+    # r_mat[0,0] = 1 - 2*dr/rmid[0]
+    # r_mat[0,1] = 2*(dr/rmid[0]-1)
+    # r_mat[0,2] = 1
     #last row is zeros as temperature of surface doesn't change
     
     for i in range(1,n_cells-1): #fill matrix but ignore first and last rows as they will need different values for bcs

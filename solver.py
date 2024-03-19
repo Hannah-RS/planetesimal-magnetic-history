@@ -10,11 +10,12 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, kappa_c, save_interval_d, save_interval_t, km, Vm, As
-from parameters import rhom, step_m, Xs_0, default, rcmf, Fe0, full_save, B_save, eta0, etal, w, alpha_n, beta, n_cells
+from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, \
+    kappa_c, save_interval_d, save_interval_t, km, Vm, As, rhom, step_m, Xs_0, \
+    default, rcmf, Fe0, full_save, B_save, eta0, etal, w, alpha_n, beta, n_cells, icfrac
 from viscosity_def import viscosity
 
-if automated == True: #should say true am just testing
+if automated == True: 
     import sys
     folder = sys.argv[1]
 else:
@@ -27,7 +28,10 @@ if automated == True:
     auto.loc[ind+1,'status']=0 #indicates started
     auto.to_csv(f'{folder}auto_params.csv',index=False)
 else: #save run parameters in run_info file
-    run_info = {"run":[run],"r":[r],"default":[default],"rcmf":[rcmf],"eta0":[eta0],"beta":[beta],"w":[w],"etal":[etal],"alpha_n":[alpha_n],"Xs_0":[Xs_0], "Fe0":[Fe0], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"step_m":[step_m]}
+    run_info = {"run":[run],"r":[r],"default":[default],"rcmf":[rcmf],"eta0":[eta0], 
+                "beta":[beta],"w":[w],"etal":[etal],"alpha_n":[alpha_n],"Xs_0":[Xs_0], 
+                "Fe0":[Fe0], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],
+                "step_m":[step_m],"icfrac":[icfrac]}
     run_info = pd.DataFrame(run_info)
     run_info.to_csv(f'{folder}run_info.csv',index=False,mode='a',header=False)
 
@@ -75,7 +79,9 @@ print('Initial conditions set')
 #%%
 ########################### Differentiation ###################################
 tic = time.perf_counter()
-Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H  = differentiation(Tint,t_acc,r, dr, step_m)
+Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H  = differentiation(Tint,
+                                                                            t_acc,r, 
+                                                                            dr, step_m)
 toc = time.perf_counter()
 int_time1 = toc - tic  
 
@@ -103,7 +109,9 @@ t_diffs = t_diff[0::n_save_d]
 Hs = H[0::n_save_d]
 
 if full_save == True:
-    np.savez_compressed(f'{folder}run_{run}_diff', Tdiff = Tdiffs, Xfe = Xfes, Xsi = Xsis, cp = cps, Ra = Ras, Ra_crit = Ra_crits, convect = convects, d0=d0s, t_diff = t_diffs, H=Hs)
+    np.savez_compressed(f'{folder}run_{run}_diff', Tdiff = Tdiffs, Xfe = Xfes, 
+                        Xsi = Xsis, cp = cps, Ra = Ras, Ra_crit = Ra_crits, 
+                        convect = convects, d0=d0s, t_diff = t_diffs, H=Hs)
 
 print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time1)))
 #%%
@@ -111,7 +119,10 @@ print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtim
 
 #integrate
 tic = time.perf_counter()
-Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0, min_unstable, Ur, Ra, RaH, RanoH, Racrit, Fs, Flid, Fad, Fcmb, Rem, B, buoyr, t, fcond_t = thermal_evolution(t_diff[-1],t_end,step_m,Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
+Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0,  \
+    min_unstable, Ur, Ra, RaH, RanoH, Racrit, Fs, Flid, Fad, Fcmb, Rem, B, \
+        buoyr, t, fcond_t = thermal_evolution(t_diff[-1],t_end,step_m,
+                                              Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time2 = toc - tic    
 
@@ -187,19 +198,40 @@ threshold3 = 100
 
 ########### Dynamo maxima - must be greater than threshold1 to be on ##########
 #thermal dynamo
-if np.any(Rem>threshold1):
-    max_B = max(B[Rem>threshold1])
-    max_Bt = t[B==max_B][0]/Myr
+Remtherm = Rem[f>=f0]
+Btherm = B[f>=f0]
+
+if np.any(Remtherm>threshold1):
+    max_Btherm = max(Btherm)
+    max_Bthermt = t[B==max_Btherm][0]/Myr
 else:
-    max_B = 0
-    max_Bt = np.nan
+    max_Btherm = 0
+    max_Bthermt = np.nan
     
-max_R = max(Rem)
-max_Rt = t[Rem==max_R][0]/Myr
+max_Rtherm = max(Remtherm)
+max_Rthermt = t[Rem==max_Rtherm][0]/Myr
+
+#compositional - turn into df for rolling average
+#no max time as averaging
+Remcomp = pd.Series(Rem[f<f0])
+Bcomp = pd.Series(B[f<f0])
+wfrac = 30 #fractional window width
+wn = int(len(Remcomp)/wfrac)
+if wn < 1: #check if window is wider than data
+    wn = int(len(Remcomp)/5)
+    
+Remav = Remcomp.rolling(window=wn,center=True).mean()
+Bav = Bcomp.rolling(window=wn,center=True).mean()
+if np.any(Remav[wn:-wn]>threshold1):
+    max_Bcomp = max(Bav[wn:-wn]) #exclude nan
+else:
+    max_Bcomp = 0
+    
+max_Rcomp = max(Remav[wn:-wn]) 
 
 ########################## on and off times - calculate and save ####################
 from duration_calc import on_off_test
-
+#10Myr interval may miss lowest sulfur content turning off - double check manually
 #Rem > 10  
 on, off, dur = on_off_test(t/Myr,Rem,threshold1,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
 Bn1 = len(on) #number of on periods
@@ -280,9 +312,12 @@ else:
 ############################ Save results #####################################
 # save variables to file
 if full_save == True:
-    np.savez_compressed(f'{folder}run_{run}', Tc = Tc, Tc_conv = Tc_conv, Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, Tm_surf = Tm_surf, 
-             T_profile = Tprofile, Flid = Flid, f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, Ur=Ur, 
-             Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, t=t, Rem = Rem, B=B, buoyr = buoyr, Flux = Flux) 
+    np.savez_compressed(f'{folder}run_{run}', Tc = Tc, Tc_conv = Tc_conv, 
+                        Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, 
+                        Tm_surf = Tm_surf, T_profile = Tprofile, Flid = Flid, 
+                        f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, 
+                        Ur=Ur, Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, 
+                        t=t, Rem = Rem, B=B, buoyr = buoyr, Flux = Flux) 
 
 if B_save == True:
     np.savez_compressed(f'{folder}run_{run}_B', B=B, Rem = Rem, t = t)
@@ -290,8 +325,10 @@ if B_save == True:
 #write parameters to the run file
 from csv import writer
   
-var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, tstrat_start, tstrat_remove, 
-             strat_end, fcond_t, fcond_T, tsolid_start, max_R, max_Rt, max_B, max_Bt, Bn1, magon_1, magoff_1, magon_2, magoff_2, magon_3, magoff_3, Bn2, 
+var_list = [run,tsolid,int_time,diff_time, diff_T, peakT, tmax, peak_coreT, tcoremax, 
+            tstrat_start, tstrat_remove, strat_end, fcond_t, fcond_T, tsolid_start, 
+            max_Rtherm, max_Rthermt, max_Btherm, max_Bthermt, max_Rcomp, max_Bcomp, 
+            Bn1, magon_1, magoff_1, magon_2, magoff_2, magon_3, magoff_3, Bn2, 
              magon_4, magoff_4, magon_5, magoff_5, Bn3, magon_6, magoff_6, magon_7, magoff_7]
 
 with open(f'{folder}run_results.csv','a') as f_object:

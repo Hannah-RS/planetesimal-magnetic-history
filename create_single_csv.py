@@ -6,7 +6,7 @@ Script to create auto_params.csv for chosen parameters ranges
 import pandas as pd
 import numpy as np
  
-folder = 'Run_params/Paper_run100km/' #folder to save parameters in   
+folder = 'Run_params/Ictest/' #folder to save parameters in   
 #for parameter list
 #each variable
 
@@ -40,9 +40,10 @@ etal = np.logspace(minetal,maxetal,3)
 
 #%%
 #sulfur content
+from parameters import Xs_eutectic
 nxs = 3
 minxs = 27.1 #minimum for a 300km radius, rcmf = 0.3 
-maxxs = 32
+maxxs = Xs_eutectic
 Xs_0 = np.linspace(minxs,maxxs,nxs)
 
 #%%
@@ -74,7 +75,7 @@ t_end_m = 1500 #maximum end time of simulation [Myr]
 w = 5 #width of linear region [K]
 dr = 500 # grid space [m]
 dt = 0.075 #timestep [fraction of core conductive timestep]
-
+icfrac = 0 #fraction of solidified mass that ends up in inner core
 #%%
 csv_nums = {'rcmf':1,'eta0':2,'beta':3,'etal':4,'Xs_0':5,'Fe0':6,'alpha_n':7,'r':8}
 nruns = [nrcmf,neta0,nbeta,netal,nxs,nfe,nalpha,nr] 
@@ -101,24 +102,24 @@ for i, runs in enumerate(run_nums):
     rcmfval= 0.3
     eta0val= 1e19
     betaval = 0.0225
-    etalval = 100 #liquid viscosity [Pas]
-    xsval = 29.5
+    etalval = 10 #liquid viscosity [Pas]
+    xsval = 30.05
     feval = 1e-8
     alpha_nval = 30 #melt weakening, diffusion creep
     rval=100e3
 
-    run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','beta','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
-    unit_row = ['','m','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core',''] #first row is units
+    run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','beta','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','icfrac','status']) #create columns of dataframe
+    unit_row = ['','m','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core','',''] #first row is units
     run_info.loc[len(run_info)] = unit_row
     
     
     for val in var:
         if val == var[0]: #create csv headers
-            run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','beta','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','status']) #create columns of dataframe
-            unit_row = ['','m','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core',''] #first row is units
+            run_info = pd.DataFrame(columns=['run','r','default','rcmf','eta0','beta','w','etal','alpha_n','Xs_0','Fe0','t_acc_m','t_end_m','dr','dt','icfrac','status']) #create columns of dataframe
+            unit_row = ['','m','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core','',''] #first row is units
             run_info.loc[len(run_info)] = unit_row
         #make data frame of correct length will all same values
-        run_info = pd.concat([run_info, pd.DataFrame({"run":[run],"r":[rval],"default":[default],"rcmf":[rcmfval],"eta0":[eta0val],"beta":[betaval],"w":[w],"etal":[etalval],"alpha_n":[alpha_nval],"Xs_0":[xsval], "Fe0":[feval], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"dt":[dt],"status":""})],ignore_index=True)
+        run_info = pd.concat([run_info, pd.DataFrame({"run":[run],"r":[rval],"default":[default],"rcmf":[rcmfval],"eta0":[eta0val],"beta":[betaval],"w":[w],"etal":[etalval],"alpha_n":[alpha_nval],"Xs_0":[xsval], "Fe0":[feval], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],"dt":[dt],"icfrac":[icfrac],"status":""})],ignore_index=True)
         run = run+1
     #replace variable values
     run_info.loc[1:,variables[i]]=var
