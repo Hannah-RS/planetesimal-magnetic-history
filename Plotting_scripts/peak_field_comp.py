@@ -14,10 +14,12 @@ from plot_params import subfolders, variables, f0, Xs_eutectic
 folder = 'Paper_run300km/'
 savefolder='Icarus_paper/'
 data  = pd.read_csv(f'../Results_combined/{folder}all_sucess_info.csv',skiprows=[1])
-save = True
+if folder == 'Paper_run300km/': #remove r variable runs
+    data = data[data['run']<=39]
+save = False
 
 #filter out data for different radii
-data = data[data['r']==300e3]
+#data = data[data['r']==300e3]
 #%% Make colorbar
 cmap = plt.colormaps['viridis']
 bounds = [-0.5e-9,0.5e-9,0.5e-8,1.5e-8,0.5e-7,1.5e-7,1e-6]
@@ -27,7 +29,8 @@ norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
 #add blank columns to dataframe
 data['Btherm_av']=""
 data['Bcomp_av']=""
-for var in variables: #includes r variation but won't be saved
+f0=0.999
+for var in variables[:-1]: #includes r variation but won't be saved
     path = '../Results_combined/'+folder+f"params_{subfolders[var]}/"
     var_data = pd.read_csv(path+'auto_params.csv',skiprows=[1])
 
@@ -56,16 +59,16 @@ plt.scatter(data['Btherm_av']/1e-6,data['Bcomp_av']/1e-6,c=data['Fe0'],norm=norm
 plt.plot(x,0.5*x,linestyle='dashed',color='black',alpha=0.5)
 plt.plot(x,x,linestyle='dashed',color='black',alpha=0.5)
 plt.plot(x,2*x,linestyle='dashed',color='black',alpha=0.5)
-plt.ylim([5,15])
-plt.xlim([2.5,15])
+#plt.ylim([5,15])
+#plt.xlim([2.5,15])
 plt.xlabel('Average thermal dynamo \n field strength /$\mu T$')
 plt.ylabel('Average compositional dynamo \n field strength /$\mu T$')
-plt.text(6,13,"2B$_{therm}$",bbox=dict(facecolor='white', 
-                                                      edgecolor='black',alpha=0.7))
-plt.text(13,13,"B$_{therm}$",bbox=dict(facecolor='white', 
-                                                      edgecolor='black',alpha=0.7))
-plt.text(13,6.5,"0.5B$_{therm}$",bbox=dict(facecolor='white', 
-                                                      edgecolor='black',alpha=0.7))
+# plt.text(6,13,"2B$_{therm}$",bbox=dict(facecolor='white', 
+#                                                       edgecolor='black',alpha=0.7))
+# plt.text(13,13,"B$_{therm}$",bbox=dict(facecolor='white', 
+#                                                       edgecolor='black',alpha=0.7))
+# plt.text(13,6.5,"0.5B$_{therm}$",bbox=dict(facecolor='white', 
+#                                                       edgecolor='black',alpha=0.7))
 cax = fig.add_axes([0.78, 0.3, 0.01, 0.3])
 fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax,ticks=[0,1e-9,1e-8,1e-7,6e-7]
              ,spacing='uniform',orientation='vertical',label='$^{60}Fe/^{56}Fe$')
@@ -125,4 +128,4 @@ plt.figure()
 plt.hist(data['frac_dur'])
 plt.xlabel('Fraction of core solidification for which a dynamo is generated')
 plt.ylabel('Number of runs')
-plt.savefig('../Plots/fraction_duration.png')
+#plt.savefig('../Plots/fraction_duration.png')
