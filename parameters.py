@@ -17,7 +17,7 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-automated = True
+automated = False
 full_save = True #do you want to save temp profiles etc or just summary stats
 B_save = False #do you want to save field strengths and Rem
 out_interval = 20 #how many times do you want t to be printed in the whole run
@@ -30,6 +30,7 @@ if automated == True:
     auto = pd.read_csv(f'{folder}auto_params.csv',skiprows=[1])
     ind = np.where((auto['status']!=1)&(auto['status']!=0)&(auto['status']!=-1))[0][0] #find index of first uncalculated run
     r = auto.loc[ind,'r']
+    rcr = auto.loc[ind,'rcr']
     default = auto.loc[ind,'default']
     rcmf = auto.loc[ind,'rcmf']
     eta0 = auto.loc[ind,'eta0']
@@ -45,7 +46,8 @@ if automated == True:
     dr = auto.loc[ind,'dr']
     icfrac = auto.loc[ind,'icfrac']
 else: #set manually
-    r = 300e3 # radius of asteroid [m]
+    r = 130e3 # radius of asteroid [m]
+    rcr = 0.5 #core radius as a fraction of asteroid radius
     dr = 500 # grid size [m]
     default ='vary' #default viscosity model
     rcmf = 0.3 #rheologically critical melt fraction - melting required for differentiation
@@ -54,15 +56,15 @@ else: #set manually
     w = 5 #width of log linear region [K]
     etal = 10 #liquid viscsoity [Pas]
     alpha_n = 30 #melt weakening (diffusion creep)
-    Xs_0 = 27.1# initial wt % sulfur in core 
+    Xs_0 = 30.05# initial wt % sulfur in core 
     Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 7
-    t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 300 # max end time [Myr]
-    icfrac = 0.5 #fraction of solidified material that forms a passive inner core during solidification
+    run = 5
+    t_acc_m = 0.3 #accretion time [Myr]
+    t_end_m = 10 # max end time [Myr]
+    icfrac = 0 #fraction of solidified material that forms a passive inner core during solidification
 
 # Size of body
-rc = r/2 #radius of core [m]
+rc = rcr*r #radius of core [m]
 n_cells = int(r/dr) +1 #number of cells needed to span the body including one at the centre
 Acmb = 4*np.pi*rc**2 #CMB surface area [m^2]
 As = 4*np.pi*r**2 # surface area of asteroid [m^2]

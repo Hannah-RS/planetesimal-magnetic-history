@@ -6,6 +6,7 @@ Requires no inputs just run once at the beginning of model for a given body to c
 Returns r_mat which is the required stencil based on Equation 13 in supplementary materials of Bryson (2019) but with Ts fixed and dT/dr = 0 at r=0
 Three stencils: one for core, one for mantle and one without k which can be multiplied in later
 """
+from parameters import n_cells
 def cond_stencil_mantle(r,rc,dr,krho):
     """
     
@@ -30,16 +31,15 @@ def cond_stencil_mantle(r,rc,dr,krho):
     import numpy as np
     
     
-    #create a temperature array same length as body
-    n_cells = int(r/(2*dr))+1 #number of cells needed to span half body plus one extra for CMB
-
+    #create a temperature array same length as mantle
+    nmcells = round((n_cells-3)*(r-rc)/r)+2 #number of cells needed to span mantle plus one extra for CMB
 
     # top value is surface, bottom row is CMB
-    rarr = np.arange(r/2-dr,r,dr) # create values of cell boundaries
+    rarr = np.arange(rc-dr,r,dr) # create values of cell boundaries
     rmid = (rarr[:-1]+rarr[1:])/2 #find midpoints of cells
     
     # create matrix for radial steps
-    r_mat = np.zeros([n_cells,n_cells])
+    r_mat = np.zeros([nmcells,nmcells])
 
     
     #first row uses forward differences
@@ -48,7 +48,7 @@ def cond_stencil_mantle(r,rc,dr,krho):
     # r_mat[0,2] = 1
     #last row is zeros as temperature of surface doesn't change
     
-    for i in range(1,n_cells-1): #fill matrix but ignore first and last rows as they will need different values for bcs
+    for i in range(1,nmcells-1): #fill matrix but ignore first and last rows as they will need different values for bcs
     
         r_mat[i,i-1] = 1 - dr/rmid[i]
         r_mat[i,i] = -2
@@ -62,7 +62,6 @@ def cond_stencil_mantle(r,rc,dr,krho):
 
 def cond_stencil_core(r,rc,dr,kappa_c):
     """
-    Assume core radius is half of body radius
 
     Parameters
     ----------
@@ -84,22 +83,21 @@ def cond_stencil_core(r,rc,dr,kappa_c):
     import numpy as np
     
     
-    #create a temperature array same length as half
-    n_cells = int(r/(2*dr))+1 #number of cells needed to span half body 
-
+    #create a temperature array same length as core
+    nccells = round((n_cells-3)*(rc/r))+2 #number of cells needed to span core 
     # top value is CMB, bottom row is centre
-    rarr = np.arange(0,r/2+dr,dr) # create values of cell boundaries
+    rarr = np.arange(0,rc+dr,dr) # create values of cell boundaries
     rmid = (rarr[:-1]+rarr[1:])/2 #find midpoints of cells
     
     # create matrix for radial steps
-    r_mat = np.zeros([n_cells,n_cells])
+    r_mat = np.zeros([nccells,nccells])
     
     #first row is set by assuming dT/dr=0 at centre 
     r_mat[0,0] = -1
     r_mat[0,1] = 1
     #last row is zeros as temperature of CMB doesn't change (determined separately from flux condition)
     
-    for i in range(1,n_cells-1): #fill matrix but ignore first and last rows as they will need different values for bcs
+    for i in range(1,nccells-1): #fill matrix but ignore first and last rows as they will need different values for bcs
     
         r_mat[i,i-1] = 1 - dr/rmid[i]
         r_mat[i,i] = -2
@@ -113,7 +111,6 @@ def cond_stencil_core(r,rc,dr,kappa_c):
 
 def cond_stencil_general(r,dr):
     """
-    Assume core radius is half of body radius
 
     Parameters
     ----------
@@ -130,10 +127,6 @@ def cond_stencil_general(r,dr):
     """
     
     import numpy as np
-    
-    
-    #create a temperature array same length as half
-    n_cells = int(r/dr)+1 #number of cells needed to span body 
 
     # top value is CMB, bottom row is centre
     rarr = np.arange(0,r+dr,dr) # create values of cell boundaries

@@ -17,6 +17,8 @@ def load_run_info(run,file):
     -------
     r : float
         radius of asteroid [m]
+    rcr : float
+        ratio of core radius to asteroid radius
     dr : float
         grid spacing [m]
     tstart : float
@@ -31,12 +33,13 @@ def load_run_info(run,file):
     """
     run_info = pd.read_csv(file,delimiter=',',skiprows=[1])  
     r = run_info[run_info['run']==run]['r'].to_numpy()[0] #radius [m]
+    rcr = run_info[run_info['run']==run]['rcr'].to_numpy()[0] #core radius/asteroid radius
     tstep = run_info[run_info['run']==run]['dt'].to_numpy()[0] #step size in integration [Myr]
     dr = run_info[run_info['run']==run]['dr'].to_numpy()[0] #grid spacing [m]
     tstart = run_info[run_info['run']==run]['t_acc_m'].to_numpy()[0] #accretion time [Myr after CAIs]
     viscosity = run_info[run_info['run']==run]['default'].iloc[0] #viscosity profile
     icfrac = run_info[run_info['run']==run]['icfrac'].to_numpy()[0] #fraction of core mass in centre
-    return r, dr, tstart, tstep, viscosity, icfrac
+    return r, rcr, dr, tstart, tstep, viscosity, icfrac
 
 def load_run_results(run,file):
     """

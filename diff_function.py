@@ -172,8 +172,7 @@ def differentiation(Tint,tacc,r,dr,dt):
             Xsi[T[:,i]<Tms,i] = 0 #subsolidus
             Xsi[((T[:,i]>=Tms) & (T[:,i]<Tml)),i] = (T[((T[:,i]>=Tms) & (T[:,i]<Tml)),i]-Tms)/dTphase_si #melting
             Xsi[T[:,i]>=Tml,i] = 1 #above liquidus
-            if np.any(Xsi[:,i]>rcmf):
-                print(Xsi[int(n_cells/2),i])
+
             i = i+1
             
         #relabel for returning

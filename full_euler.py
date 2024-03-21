@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Script for solving thermal evolution for the entire evolution of the body
-By convention Tprofile[int(n_cells/2)] is last core cell
 Flow:
     1. Obtain conductive profile for whole body
     2. Calculate stagnant lid thickness and Rayleigh number
@@ -108,7 +107,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
 
     #initialise arrays for output
     m = round((tend-tstart)/save_interval_t)+1 #add one so always enough space
-    i_core = round(n_cells/2) # index in array of last core cell 
+    i_core = round((n_cells-3)*(rc/r))+1 # index in array of last core cell 
     mantle_conv = False #flag for mantle convection
     core_conv = False #flag for core convection
     fcond_t = np.nan #end time of convection - default nan
