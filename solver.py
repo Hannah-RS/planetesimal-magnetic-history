@@ -232,7 +232,7 @@ max_Rcomp = max(Remav[wn:-wn])
 from duration_calc import on_off_test
 #10Myr interval may miss lowest sulfur content turning off - double check manually
 #Rem > 10  
-on, off, dur = on_off_test(t/Myr,Rem,threshold1,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
+on, off, dur = on_off_test(t/Myr,Rem,threshold1,10*save_interval_t/Myr) #use 1 Myr interval to split up dynamo generation periods
 Bn1 = len(on) #number of on periods
 if on.size > 0:
     if (on[0] < strat_end) & (off[0]>strat_end): #dynamo generation extends through stratification
@@ -261,7 +261,7 @@ else:
     magoff_3 = 0
 
 #Rem > 40
-on, off, dur = on_off_test(t/Myr,Rem,threshold2,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
+on, off, dur = on_off_test(t/Myr,Rem,threshold2,10*save_interval_t/Myr) #use 1 Myr interval to split up dynamo generation periods
 Bn2 = len(on) #number of on periods
 if on.size > 0: #i.e. there is one on value > nan
     if (on[0] < strat_end) & (off[0]>strat_end): #dynamo generation extends through stratification
@@ -285,7 +285,7 @@ else:
     magoff_5 = 0
     
 # Rem > 100
-on, off, dur = on_off_test(t/Myr,Rem,threshold3,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
+on, off, dur = on_off_test(t/Myr,Rem,threshold3,10*save_interval_t/Myr) #use 1 Myr interval to split up dynamo generation periods
 Bn3 = len(on) #number of on periods
 if on.size > 0:
     if (on[0] < strat_end) & (off[0]>strat_end): #dynamo generation extends through stratification
