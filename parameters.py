@@ -17,7 +17,7 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-automated = True
+automated = False
 full_save = True #do you want to save temp profiles etc or just summary stats
 B_save = False #do you want to save field strengths and Rem
 rhoa_var = False #is the undifferentiated density calculated based on inputs - false for Psyche runs
@@ -48,7 +48,7 @@ if automated == True:
     icfrac = auto.loc[ind,'icfrac']
 else: #set manually
     r = 130e3 # radius of asteroid [m]
-    rcr = 0.5 #core radius as a fraction of asteroid radius
+    rcr = 0.9 #core radius as a fraction of asteroid radius
     dr = 500 # grid size [m]
     default ='vary' #default viscosity model
     rcmf = 0.3 #rheologically critical melt fraction - melting required for differentiation
@@ -59,14 +59,17 @@ else: #set manually
     alpha_n = 30 #melt weakening (diffusion creep)
     Xs_0 = 30.05# initial wt % sulfur in core 
     Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 5
+    run = 6
     t_acc_m = 0.3 #accretion time [Myr]
     t_end_m = 10 # max end time [Myr]
     icfrac = 0 #fraction of solidified material that forms a passive inner core during solidification
 
 # Size of body
-rc = rcr*r #radius of core [m]
+#rc = rcr*r #radius of core [m]
 n_cells = int(r/dr) +1 #number of cells needed to span the body including one at the centre
+nccells = round((n_cells-3)*(rcr))+2 #number of cells needed to span core (inc. centre and CMB)
+nmcells = n_cells - nccells +1 #number of cells needed to span mantle plus one extra for CMB
+rc = (nccells-1)*dr #radius of core [m], subtract one for centre
 Acmb = 4*np.pi*rc**2 #CMB surface area [m^2]
 As = 4*np.pi*r**2 # surface area of asteroid [m^2]
 V = 4/3*np.pi*r**3 #volume of asteroid [m^3]

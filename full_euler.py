@@ -11,8 +11,9 @@ Flow:
 """
 #import modules
 import numpy as np
-from parameters import Ts, Myr, dr, out_interval, save_interval_t, km, kc, alpha_c, r, rc, rhoc, gc, Vm, rhom, As
-from parameters import cpc, Xs_0, default, Xs_eutectic, Acmb, Lc, Pc, automated, conv_tol, n_cells, temp_tol
+from parameters import Ts, Myr, dr, out_interval, save_interval_t, km, kc, alpha_c,\
+    r, rc, rhoc, gc, Vm, rhom, As, cpc, Xs_0, default, Xs_eutectic, Acmb, Lc, \
+        Pc, automated, conv_tol, n_cells, temp_tol, rcr, nccells, nmcells
 
 #import required functions
 from T_cond import Tm_cond_calc, Tc_cond_calc
@@ -107,12 +108,11 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
 
     #initialise arrays for output
     m = round((tend-tstart)/save_interval_t)+1 #add one so always enough space
-    i_core = round((n_cells-3)*(rc/r))+1 # index in array of last core cell 
+    i_core = round((n_cells-3)*(rcr))+1 # index in array of last core cell 
     mantle_conv = False #flag for mantle convection
     core_conv = False #flag for core convection
     fcond_t = np.nan #end time of convection - default nan
     conv_off = False #whether lid has thickened sufficiently to switch off convection
-    
     #output variables
     Xs = np.ones([m])*Xs_0 #core sulfur fraction
     Ra = np.zeros([m])

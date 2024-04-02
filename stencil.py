@@ -6,7 +6,7 @@ Requires no inputs just run once at the beginning of model for a given body to c
 Returns r_mat which is the required stencil based on Equation 13 in supplementary materials of Bryson (2019) but with Ts fixed and dT/dr = 0 at r=0
 Three stencils: one for core, one for mantle and one without k which can be multiplied in later
 """
-from parameters import n_cells
+from parameters import n_cells, nccells, nmcells
 def cond_stencil_mantle(r,rc,dr,krho):
     """
     
@@ -32,8 +32,6 @@ def cond_stencil_mantle(r,rc,dr,krho):
     
     
     #create a temperature array same length as mantle
-    nmcells = round((n_cells-3)*(r-rc)/r)+2 #number of cells needed to span mantle plus one extra for CMB
-
     # top value is surface, bottom row is CMB
     rarr = np.arange(rc-dr,r+dr,dr) # create values of cell boundaries
     rmid = (rarr[:-1]+rarr[1:])/2 #find midpoints of cells
@@ -82,12 +80,10 @@ def cond_stencil_core(r,rc,dr,kappa_c):
     import numpy as np
     
     
-    #create a temperature array same length as core
-    nccells = round((n_cells-3)*(rc/r))+2 #number of cells needed to span core 
+    #create a temperature array same length as core 
     # top value is CMB, bottom row is centre
     rarr = np.arange(0,rc+dr,dr) # create values of cell boundaries
     rmid = (rarr[:-1]+rarr[1:])/2 #find midpoints of cells
-    
     # create matrix for radial steps
     r_mat = np.zeros([nccells,nccells])
     
