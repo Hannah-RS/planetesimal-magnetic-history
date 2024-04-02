@@ -35,9 +35,8 @@ def cond_stencil_mantle(r,rc,dr,krho):
     nmcells = round((n_cells-3)*(r-rc)/r)+2 #number of cells needed to span mantle plus one extra for CMB
 
     # top value is surface, bottom row is CMB
-    rarr = np.arange(rc-dr,r,dr) # create values of cell boundaries
+    rarr = np.arange(rc-dr,r+dr,dr) # create values of cell boundaries
     rmid = (rarr[:-1]+rarr[1:])/2 #find midpoints of cells
-    
     # create matrix for radial steps
     r_mat = np.zeros([nmcells,nmcells])
 
