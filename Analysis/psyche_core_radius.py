@@ -60,7 +60,7 @@ def core_radius(Xs0,rhom,rhoa):
 
 #%% Set parameters
 rhoms = np.array([2500,3000,3500]) # mantle density [kg m^-3] Johnson et. al. (2020)
-rhoa = 4000 # bulk density [kg m^-3]
+rhoas = np.array([3440,3780,4120]) # bulk density [kg m^-3] Elkins-Tanton et. al. (2020)
 
 #%% Create arrays for output
 Xs0 = np.linspace(0,33,33)
@@ -68,15 +68,17 @@ Xs0 = np.linspace(0,33,33)
 #%% Plot result for rc
 colors = ['navy','mediumblue','skyblue']
 lines = ['-','-.',':']
-fig, ax = plt.subplots(1,1)
-ax.grid(which='both',alpha=0.5)
-for rhom, color, ls in zip(rhoms,colors,lines):
-    rc = core_radius(Xs0,rhom,rhoa)
-    ax.plot(Xs0,rc,label=f'$\\rho_m =${rhom} $kg m^{{-3}}$',color=color,linestyle=ls)
-ax.set(ylabel='Core radius fraction - $\\frac{r_c}{r}$',xlabel='Initial core sulfur content/ wt %')
-ax.legend()
-ax.set_title('bulk density 4000 kg$m^{-3}$')
+fig, axes = plt.subplots(1,3,figsize=[15,5])
+for ax, rhoa in zip(axes,rhoas):
+    ax.grid(which='both',alpha=0.5)
+    for rhom, color, ls in zip(rhoms,colors,lines):
+        rc = core_radius(Xs0,rhom,rhoa)
+        ax.plot(Xs0,rc,label=f'$\\rho_m =${rhom} $kg m^{{-3}}$',color=color,linestyle=ls)
+    ax.set(xlabel='Initial core sulfur content/ wt %',ylabel='Core radius fraction - $\\frac{r_c}{r}$',ylim=[0.4,1])
+    ax.legend()
+    ax.set_title(f'bulk density {rhoa} kg$m^{{-3}}$')
 fig.savefig('../Plots/Psyche/core_radius_frac.png',dpi=500)
+
 #%% Plot results for XFe
 rhoc = fe_fes_density(Xs0)
 Xfe = weight_perc_fe(Xs0,rhoc,rhoms[1],rhoa)
