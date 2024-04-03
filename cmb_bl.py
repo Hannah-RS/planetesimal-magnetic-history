@@ -30,7 +30,7 @@ def delta_l(Tm,Tcmb):
 
 def delta_c(Tc,Tcmb):
     """
-    Eqn on pg 14 in Dodds 2020 
+    Eqn on pg 14 in Dodds 2020 with added Rac based on boundary layer stability analysis
     Parameters
     ----------
     Tc : float
