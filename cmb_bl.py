@@ -23,7 +23,8 @@ def delta_l(Tm,Tcmb):
     """
     eta1 = viscosity(Tm)
     eta2 = viscosity((Tm+Tcmb)/2)
-    delta_l = 0.65*abs(Tcmb-Tm)**(-1/3)*(Tm-Ts)**0.07*(r-rc)**0.21*(kappa/(alpha_m*rhom))**0.26*(eta1/g)**(-0.07)*(eta2/gc)**(1/3) #Thiriet 2019
+    delta_l = 0.65*abs(Tcmb-Tm)**(-1/3)*(Tm-Ts)**0.07*(r-rc)**0.21\
+        *(kappa/(alpha_m*rhom))**0.26*(eta1/g)**(-0.07)*(eta2/gc)**(1/3) 
 
     return delta_l
 
