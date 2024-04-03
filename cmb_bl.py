@@ -7,21 +7,19 @@ from parameters import kappa_c, eta_c, rhoc, alpha_c, gc, r, rc
 from parameters import Ts, alpha_m, kappa, rhom, g, Rac
 from viscosity_def import viscosity
 
-def delta_l(Tm,Tcmb,Ur):
+def delta_l(Tm,Tcmb):
     """
-    Eqn 21 in Dodds 2020 simplified to cancel out length-scale of conduction
+    Eqn 13, 14, 16, 3 in Thiriet et. al. 2019
     Parameters
     ----------
     Tm : float
         mantle temperature [K]
     Tcmb : float
         CMB temperature [K]
-    Ur : float
-        Urey ratio
 
     Returns
     -------
-    mantle bottom boundary layer thickness  - Thiriet et. al. 2019 eqn. 13, 14, 16, 3
+    mantle bottom boundary layer thickness [m] 
     """
     eta1 = viscosity(Tm)
     eta2 = viscosity((Tm+Tcmb)/2)
