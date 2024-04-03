@@ -17,9 +17,10 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-automated = True
+automated = False
 full_save = True #do you want to save temp profiles etc or just summary stats
 B_save = False #do you want to save field strengths and Rem
+rhoa_var = False #is the undifferentiated density calculated based on inputs - false for Psyche runs
 out_interval = 20 #how many times do you want t to be printed in the whole run
 save_interval_d = 0.01*Myr # how often do you want each variable to be saved during differentiation
 save_interval_t = 0.1*Myr # how often do you want each variable to be saved during thermal evolution
@@ -30,6 +31,7 @@ if automated == True:
     auto = pd.read_csv(f'{folder}auto_params.csv',skiprows=[1])
     ind = np.where((auto['status']!=1)&(auto['status']!=0)&(auto['status']!=-1))[0][0] #find index of first uncalculated run
     r = auto.loc[ind,'r']
+    rcr = auto.loc[ind,'rcr']
     default = auto.loc[ind,'default']
     rcmf = auto.loc[ind,'rcmf']
     eta0 = auto.loc[ind,'eta0']
@@ -45,7 +47,8 @@ if automated == True:
     dr = auto.loc[ind,'dr']
     icfrac = auto.loc[ind,'icfrac']
 else: #set manually
-    r = 300e3 # radius of asteroid [m]
+    r = 130e3 # radius of asteroid [m]
+    rcr = 0.9 #core radius as a fraction of asteroid radius
     dr = 500 # grid size [m]
     default ='vary' #default viscosity model
     rcmf = 0.3 #rheologically critical melt fraction - melting required for differentiation
@@ -54,16 +57,19 @@ else: #set manually
     w = 5 #width of log linear region [K]
     etal = 10 #liquid viscsoity [Pas]
     alpha_n = 30 #melt weakening (diffusion creep)
-    Xs_0 = 27.1# initial wt % sulfur in core 
+    Xs_0 = 30.05# initial wt % sulfur in core 
     Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 7
-    t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 300 # max end time [Myr]
-    icfrac = 0.5 #fraction of solidified material that forms a passive inner core during solidification
+    run = 6
+    t_acc_m = 0.3 #accretion time [Myr]
+    t_end_m = 10 # max end time [Myr]
+    icfrac = 0 #fraction of solidified material that forms a passive inner core during solidification
 
 # Size of body
-rc = r/2 #radius of core [m]
+#rc = rcr*r #radius of core [m]
 n_cells = int(r/dr) +1 #number of cells needed to span the body including one at the centre
+nccells = round((n_cells-3)*(rcr))+2 #number of cells needed to span core (inc. centre and CMB)
+nmcells = n_cells - nccells +1 #number of cells needed to span mantle plus one extra for CMB
+rc = (nccells-1)*dr #radius of core [m], subtract one for centre
 Acmb = 4*np.pi*rc**2 #CMB surface area [m^2]
 As = 4*np.pi*r**2 # surface area of asteroid [m^2]
 V = 4/3*np.pi*r**3 #volume of asteroid [m^3]
@@ -120,7 +126,6 @@ Al0 = 5e-5 # 26Al/27Al ratio in accreting material (Dodds 2021)
 XAl_a = 0.014 # abundance of Al in accreting material [wt % /100] (Dodds 2021)
 thalf_al = 0.717*Myr # half life of Al26 [s] (Dodds 2021)
 h0Fe = 0.0366 # [W/ kg] heating rate of 60Fe at t=0 (Dodds thesis)
-XFe_a = 0.224 # abundance of Fe in accreting material [wt % /100] (Dodds thesis - Lodders 2021 for CV chondrites)
 thalf_fe = 2.62*Myr # half life of 60Fe [s] (Dodds thesis - Ruedas 2017)
 
 #core and mantle compostion
@@ -156,8 +161,6 @@ cb = 0.23 # Davies et. al. 2022 median value of c for Bdip,cmb
 temp_tol = 1e-8 #minimum usable temp difference
 
 #Calculated parameters
-rhoa = 1/(XFe_a/rhofe_s +(1-XFe_a)/rhom) # kg m^-3 density of undifferentiated material (Sturtz 2022b eqn. 1)
-XAl_d = (rhoa/rhom*(r**3/(r**3-rc**3)))*XAl_a
 kappa_c = kc/(cpc*rhoc) #thermal diffusivity of core material
 g = G*(Vm*rhom+4/3*np.pi*rc**3*rhoc)/r**2 # surface gravity [m/s^2]
 gc = 4/3*np.pi*rc*rhoc*G #gravitational field strength at CMB [m/s^2]
@@ -165,6 +168,15 @@ Pc = 2/3*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre of co
 Tl_fe = fe_fes_liquidus_bw(Xs_0,Pc)
 t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle
+
+if rhoa_var == True: #fixed iron abundance, compatible rc, rhoa responds
+    XFe_a = 0.224 # abundance of Fe in accreting material [wt % /100] (Dodds thesis - Lodders 2021 for CV chondrites)
+    rhoa = (rhoc*rc**3 + rhom*(r**3-rc**3))/r**3# kg m^-3 density of undifferentiated material (i.e bulk density)    
+else: #fix bulk density, compatible rc, accreted iron abundance responds
+    rhoa = 4000 # undifferentiated density [kg m^-3]
+    XFe_a = rcr**3*(rhoc/rhoa)*XFe_d
+    
+XAl_d = (rhoa/rhom*(r**3/(r**3-rc**3)))*XAl_a
 
 if automated == True:
     step_m = auto.loc[ind,'dt']*t_cond_core

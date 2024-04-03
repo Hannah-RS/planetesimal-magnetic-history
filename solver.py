@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, \
+from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, rcr,\
     kappa_c, save_interval_d, save_interval_t, km, Vm, As, rhom, step_m, Xs_0, \
     default, rcmf, Fe0, full_save, B_save, eta0, etal, w, alpha_n, beta, n_cells, icfrac
 from viscosity_def import viscosity
@@ -19,7 +19,7 @@ if automated == True:
     import sys
     folder = sys.argv[1]
 else:
-    folder = 'Results_combined/' #folder where you want to save the results
+    folder = 'Results_combined/Psyche/' #folder where you want to save the results
     ind = None #no index for csv
 #set flag for run started
 if automated == True:
@@ -28,7 +28,7 @@ if automated == True:
     auto.loc[ind+1,'status']=0 #indicates started
     auto.to_csv(f'{folder}auto_params.csv',index=False)
 else: #save run parameters in run_info file
-    run_info = {"run":[run],"r":[r],"default":[default],"rcmf":[rcmf],"eta0":[eta0], 
+    run_info = {"run":[run],"r":[r],"rcr":[rcr],"default":[default],"rcmf":[rcmf],"eta0":[eta0], 
                 "beta":[beta],"w":[w],"etal":[etal],"alpha_n":[alpha_n],"Xs_0":[Xs_0], 
                 "Fe0":[Fe0], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],
                 "step_m":[step_m],"icfrac":[icfrac]}
@@ -56,7 +56,6 @@ n_save_d = int(save_interval_d/step_m)
 n_save_t = int(save_interval_t/step_m)
 
 # set initial temperature profile
-n_cells = int(r/dr)+1 #number of cells needed to span body - add one to include the centre
 Tint = np.ones([n_cells])*Ts#first element in the array is at r=0, accrete cold at surface temp 
 Tint[-1]=Ts
 
@@ -233,7 +232,7 @@ max_Rcomp = max(Remav[wn:-wn])
 from duration_calc import on_off_test
 #10Myr interval may miss lowest sulfur content turning off - double check manually
 #Rem > 10  
-on, off, dur = on_off_test(t/Myr,Rem,threshold1,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
+on, off, dur = on_off_test(t/Myr,Rem,threshold1,10*save_interval_t/Myr) #use 1 Myr interval to split up dynamo generation periods
 Bn1 = len(on) #number of on periods
 if on.size > 0:
     if (on[0] < strat_end) & (off[0]>strat_end): #dynamo generation extends through stratification
@@ -262,7 +261,7 @@ else:
     magoff_3 = 0
 
 #Rem > 40
-on, off, dur = on_off_test(t/Myr,Rem,threshold2,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
+on, off, dur = on_off_test(t/Myr,Rem,threshold2,10*save_interval_t/Myr) #use 1 Myr interval to split up dynamo generation periods
 Bn2 = len(on) #number of on periods
 if on.size > 0: #i.e. there is one on value > nan
     if (on[0] < strat_end) & (off[0]>strat_end): #dynamo generation extends through stratification
@@ -286,7 +285,7 @@ else:
     magoff_5 = 0
     
 # Rem > 100
-on, off, dur = on_off_test(t/Myr,Rem,threshold3,100*save_interval_t/Myr) #use 10 Myr interval to split up dynamo generation periods
+on, off, dur = on_off_test(t/Myr,Rem,threshold3,10*save_interval_t/Myr) #use 1 Myr interval to split up dynamo generation periods
 Bn3 = len(on) #number of on periods
 if on.size > 0:
     if (on[0] < strat_end) & (off[0]>strat_end): #dynamo generation extends through stratification
