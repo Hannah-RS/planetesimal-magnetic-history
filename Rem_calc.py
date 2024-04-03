@@ -30,7 +30,7 @@ def r1(x,f):
         inner radius of outer solid shell
 
     """
-    r1 = rc*(1-(1-x)*(1-f**3))**(1/3)
+    r1 = rc*(x*(1-f**3)+f**3)**(1/3)
     return r1
 
 @np.vectorize
