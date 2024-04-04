@@ -106,12 +106,12 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
             buoyancy flux from superadiabatic heat flux [kg/s]
     """
     dTl_dP = fe_fes_liquidus_dp(Xs, Pc)
-    Qst = rhoc*cpc*Vc
+    Qst = rhoc*Vc*cpc
     Qrad = Qr(t)
     Ql = Qlt(Tcore[0],f,dTl_dP)
     #Qg = Qgt(Tcore[0],f,dTl_dP,Xs) #exclude as makes neglible difference
 
-    dTcdt = (Fcmb*Acmb-Qrad)/(Qst+Ql)
+    dTcdt = (Qrad-Fcmb*Acmb)/(Qst-Ql)
     dfdt = - dTcdt/(rhoc*gc*dTl_dP*rc)
     f_new = f+dfdt*dt
     Rem, Bdip_cmb, comp, therm = Rem_b(f, dfdt, Xs, Tcore, Fcmb, True,0) #if core is solidifying there is no thermal stratification
