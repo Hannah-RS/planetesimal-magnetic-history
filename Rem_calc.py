@@ -57,7 +57,7 @@ def r2(x,f):
 def conv_power(f,dfdt,l,Xs,Tcore,Fcmb,solid):
     """
     Convective power per unit volume for combined thermal and buoyancy flux 
-    adapted from Buffett 1996 (11) and Ruckriemen 2015 (16)
+    adapted from Buffett 1996 (11) and Aubert 2009
 
     Parameters
     ----------
@@ -99,7 +99,7 @@ def conv_power(f,dfdt,l,Xs,Tcore,Fcmb,solid):
             raise ValueError('comp<0',late/drho)
         #thermal buoyancy
         nic = round(r1(icfrac,f)/dr) #r1/dr
-        Ficb = -kc*(Tcore[nic]-Tcore[nic-1])/dr #worried if this will return anything if index is wrong
+        Ficb = -kc*(Tcore[nic]-Tcore[nic-1])/dr 
         Fad = kc*gc*alpha_c*Tcore[nic-1]/cpc
 
     else: #boundary of convecting region is at CMB

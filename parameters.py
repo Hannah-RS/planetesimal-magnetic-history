@@ -157,7 +157,7 @@ rhofe_s = 7800 # density of pure solid iron [kg m^-3] Bryson 2015
 rho_eut = fe_fes_density(Xs_eutectic)*rho_exp # density of eutectic Fe-FeS solid [kg m^-3] Morard (2019)
 rhoc = fe_fes_density(Xs_0)*rho_exp # density of core [kg m^-3]
 fohm = 1 #fraction of energy dissipated via Ohmic dissipation in the dynamo (Weiss 2010)
-cu = 1.65 #  Aubert 2009
+cu = 1.31 #  Aubert 2009
 cb = 0.23 # Davies et. al. 2022 median value of c for Bdip,cmb
 temp_tol = 1e-8 #minimum usable temp difference
 
