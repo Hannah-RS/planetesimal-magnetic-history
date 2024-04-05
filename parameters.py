@@ -47,8 +47,8 @@ if automated == True:
     dr = auto.loc[ind,'dr']
     icfrac = auto.loc[ind,'icfrac']
 else: #set manually
-    r = 130e3 # radius of asteroid [m]
-    rcr = 0.9 #core radius as a fraction of asteroid radius
+    r = 300e3 # radius of asteroid [m]
+    rcr = 0.5 #core radius as a fraction of asteroid radius
     dr = 500 # grid size [m]
     default ='vary' #default viscosity model
     rcmf = 0.3 #rheologically critical melt fraction - melting required for differentiation
@@ -59,9 +59,9 @@ else: #set manually
     alpha_n = 30 #melt weakening (diffusion creep)
     Xs_0 = 30.05# initial wt % sulfur in core 
     Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 6
+    run = 9
     t_acc_m = 0.3 #accretion time [Myr]
-    t_end_m = 10 # max end time [Myr]
+    t_end_m = 800 # max end time [Myr]
     icfrac = 0 #fraction of solidified material that forms a passive inner core during solidification
 
 # Size of body
@@ -135,11 +135,12 @@ XFe_d = 1 - Xs_0/100 #abundance of Fe in core assuming S is only other significa
 
 
 # Core parameters 
-from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_liquidus_bw_min, fe_fes_density
+from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_liquidus_bw_min,\
+    fe_fes_density, central_pressure
 from scipy.optimize import root_scalar
 Ts_fe = 1260 # [K] Buono and Walker 2011 give 1263+-25
-# Use root finding on FeFeS liquidus for 300km body pressure
-Xs_eutectic = np.round(root_scalar(fe_fes_liquidus_bw_min,bracket=(25,34),args=(0.08)).root,1) 
+# Use root finding on FeFeS liquidus for 300km body pressure, 30.05 wt% core
+Xs_eutectic = np.round(root_scalar(fe_fes_liquidus_bw_min,bracket=(25,34),args=(0.154)).root,1) 
 cpc=850 # heat capacity of core [J kg^-1 K^-1] 
 kc=30 # thermal conducitivity of core material [Wm^-1 K^-1] 
 alpha_c=9.2e-5 #[K^-1] Nimmo 2009
@@ -164,7 +165,7 @@ temp_tol = 1e-8 #minimum usable temp difference
 kappa_c = kc/(cpc*rhoc) #thermal diffusivity of core material
 g = G*(Vm*rhom+4/3*np.pi*rc**3*rhoc)/r**2 # surface gravity [m/s^2]
 gc = 4/3*np.pi*rc*rhoc*G #gravitational field strength at CMB [m/s^2]
-Pc = 2/3*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre of core [GPa]
+Pc = central_pressure(rhom,rhoc,r,rc) #central pressure [GPa]
 Tl_fe = fe_fes_liquidus_bw(Xs_0,Pc)
 t_cond_core = dr**2/kappa_c #conductive timestep for core
 t_cond_mantle = dr**2/kappa #conductive timestep for mantle

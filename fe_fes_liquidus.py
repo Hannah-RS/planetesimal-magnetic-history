@@ -5,6 +5,34 @@ Fe-FeS liquidus and Fe-FeS density
 
 Pressure dependent liquidus from Buono & Walker (2011)
 """
+import numpy as np
+
+def central_pressure(rhom,rhoc,r,rc):
+    """
+    Pressure at the centre of a planetesimal assuming constant core and mantle density
+
+    Parameters
+    ----------
+    rhom : float
+        mantle density [kg m^-3]
+    rhoc : float
+        core density [kg m^-3]
+    r : float
+        planetesimal radius [m]
+    rc : float
+        core radius [m]
+
+    Returns
+    -------
+    Pc : float
+        central pressure [GPa]
+
+    """
+    G = 6.67e-11 # gravitational constant [N kg^-2 m^2]
+    Pcpa = 2*np.pi*G/3*(rc**2*(rhoc**2-rhom**2)+r**2*rhom**2+2*rhom*(rhoc-rhom)*rc**2*(1-(rc/r))) #[Pa]
+    Pc = Pcpa/1e9 #convert to GPa
+    return Pc
+
 def weight_perc_to_mole_frac(Xs):
     """
     

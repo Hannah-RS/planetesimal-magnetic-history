@@ -11,7 +11,8 @@ import matplotlib.colors as mcolors
 import sys
 # setting path
 sys.path.append('../')
-from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_liquidus_linear, fe_fes_liquidus_dp
+from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_liquidus_linear,\
+    fe_fes_liquidus_dp, central_pressure
 from parameters import rhoc, rhom, G, Mr_s, Mr_fe, Tml, Tms, cpc, alpha_c, Xs_eutectic
 
 
@@ -24,10 +25,10 @@ x = Xsd*mrr/(1-Xsd) #mole fraction of FeS
 
 #create pressure array
 #r = np.array([10,100,250,300,500])*1e3 #radius [m]
-#r = np.array([300e3]) #for one radius just use this line
+#r = np.array([100e3]) #for one radius just use this line
 r = np.linspace(100,500,3)*1e3
 rc = r/2
-P = 2/3*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre [GPa]
+P = central_pressure(rhom,rhoc,r,rc) #pressure at centre [GPa]
 
 bw =np.zeros([len(r),100])
 Teut = 1260 #Buono & Walker eutectic temp
@@ -96,7 +97,7 @@ plt.xlabel('Core sulfur content /wt % S')
 plt.ylabel('Liquidus temperature /K')
 plt.ylim([1200,1800])
 plt.legend()
-plt.savefig('../Plots/liquidus_comp_xs.png',dpi=500)
+#plt.savefig('../Plots/liquidus_comp_xs.png',dpi=500)
 
 
 ##### Plot as a function of P and x for comparison with Buono & Walker
