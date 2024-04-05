@@ -14,7 +14,7 @@ source activate $DATA/viscosity
 cd Asteroid_model
 mkdir Results/$1
 #copy autoparameters file for this run
-cp Run_params/auto_params.csv Results/$1/auto_params.csv
+cp Run_params/$1/auto_params.csv Results/$1/auto_params.csv
 #run the model
 bash multi_run.sh Results/$1
 
