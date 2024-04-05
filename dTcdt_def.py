@@ -13,7 +13,7 @@ Can toggle on and off solidification
 """
 #import constants and parameters    
 from parameters import Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Pc, gc
-from q_funcs import Qlt, Qr
+from q_funcs import Qlt, Qr, Qgt
 from fe_fes_liquidus import fe_fes_liquidus_dp
 import numpy as np
 from Rem_calc import Rem_b
@@ -111,7 +111,7 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     Ql = Qlt(Tcore[0],f,dTl_dP)
     #Qg = Qgt(Tcore[0],f,dTl_dP,Xs) #exclude as makes neglible difference
 
-    dTcdt = (Qrad-Fcmb*Acmb)/(Qst-Ql)
+    dTcdt = (Qrad-Fcmb*Acmb)/(Qst-Ql)#+Qg)
     dfdt = - dTcdt/(rhoc*gc*dTl_dP*rc)
     f_new = f+dfdt*dt
     Rem, Bdip_cmb, comp, therm = Rem_b(f, dfdt, Xs, Tcore, Fcmb, True,0) #if core is solidifying there is no thermal stratification
