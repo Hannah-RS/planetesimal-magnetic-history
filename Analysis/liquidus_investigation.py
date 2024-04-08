@@ -25,8 +25,8 @@ x = Xsd*mrr/(1-Xsd) #mole fraction of FeS
 
 #create pressure array
 #r = np.array([10,100,250,300,500])*1e3 #radius [m]
-#r = np.array([100e3]) #for one radius just use this line
-r = np.linspace(100,500,3)*1e3
+r = np.array([200e3]) #for one radius just use this line
+#r = np.linspace(100,500,3)*1e3
 rc = r/2
 P = central_pressure(rhom,rhoc,r,rc) #pressure at centre [GPa]
 
@@ -51,8 +51,8 @@ Tc = 1400 #estimate for Tc
 Delta = dTdP*(rhoc*cpc)/(alpha_c*Tc)
 
 #find lowest Xs for a given silicate melting
-phi = np.linspace(0.2,0.5,200)
-#phi = np.array([0.3]) #for one melt fraction just use this line
+#phi = np.linspace(0.2,0.5,200)
+phi = np.array([0.3]) #for one melt fraction just use this line
 minS = np.zeros([len(r),len(phi)])
 Tphi = Tms+phi*(Tml-Tms)
 for i in range(len(r)):
@@ -62,7 +62,7 @@ for i in range(len(r)):
 if len(r) == 1: #just trying to get one value
     print(minS)
 plt.figure()
-plt.pcolormesh(Xs[Xs<32],r/1e3,Delta[:,Xs<32])
+plt.pcolormesh(Xs[Xs<Xs_eutectic],r/1e3,Delta[:,Xs<Xs_eutectic])
 plt.colorbar(norm=mcolors.LogNorm(),label='$\\frac{dT_L}{dP}$')
 plt.ylabel('radius /km')
 plt.xlabel('$X_s$ /wt %')
