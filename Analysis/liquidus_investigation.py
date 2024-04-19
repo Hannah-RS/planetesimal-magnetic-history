@@ -11,7 +11,8 @@ import matplotlib.colors as mcolors
 import sys
 # setting path
 sys.path.append('../')
-from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_liquidus_linear, fe_fes_liquidus_dp
+from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_liquidus_linear,\
+    fe_fes_liquidus_dp, central_pressure
 from parameters import rhoc, rhom, G, Mr_s, Mr_fe, Tml, Tms, cpc, alpha_c, Xs_eutectic
 
 
@@ -24,10 +25,10 @@ x = Xsd*mrr/(1-Xsd) #mole fraction of FeS
 
 #create pressure array
 #r = np.array([10,100,250,300,500])*1e3 #radius [m]
-#r = np.array([300e3]) #for one radius just use this line
-r = np.linspace(100,500,3)*1e3
+r = np.array([200e3]) #for one radius just use this line
+#r = np.linspace(100,500,3)*1e3
 rc = r/2
-P = 2/3*np.pi*G*(rc**2*rhoc+rhom**2*(r**2-rc**2))/1e9 #pressure at centre [GPa]
+P = central_pressure(rhom,rhoc,r,rc) #pressure at centre [GPa]
 
 bw =np.zeros([len(r),100])
 Teut = 1260 #Buono & Walker eutectic temp
@@ -50,8 +51,8 @@ Tc = 1400 #estimate for Tc
 Delta = dTdP*(rhoc*cpc)/(alpha_c*Tc)
 
 #find lowest Xs for a given silicate melting
-phi = np.linspace(0.2,0.5,200)
-#phi = np.array([0.3]) #for one melt fraction just use this line
+#phi = np.linspace(0.2,0.5,200)
+phi = np.array([0.3]) #for one melt fraction just use this line
 minS = np.zeros([len(r),len(phi)])
 Tphi = Tms+phi*(Tml-Tms)
 for i in range(len(r)):
@@ -61,7 +62,7 @@ for i in range(len(r)):
 if len(r) == 1: #just trying to get one value
     print(minS)
 plt.figure()
-plt.pcolormesh(Xs[Xs<32],r/1e3,Delta[:,Xs<32])
+plt.pcolormesh(Xs[Xs<Xs_eutectic],r/1e3,Delta[:,Xs<Xs_eutectic])
 plt.colorbar(norm=mcolors.LogNorm(),label='$\\frac{dT_L}{dP}$')
 plt.ylabel('radius /km')
 plt.xlabel('$X_s$ /wt %')
@@ -96,7 +97,7 @@ plt.xlabel('Core sulfur content /wt % S')
 plt.ylabel('Liquidus temperature /K')
 plt.ylim([1200,1800])
 plt.legend()
-plt.savefig('../Plots/liquidus_comp_xs.png',dpi=500)
+#plt.savefig('../Plots/liquidus_comp_xs.png',dpi=500)
 
 
 ##### Plot as a function of P and x for comparison with Buono & Walker

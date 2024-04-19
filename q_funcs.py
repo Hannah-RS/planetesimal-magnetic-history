@@ -3,7 +3,7 @@
 """
 Expressions for heat fluxes divided by dTcdt from Nimmo (2009)
 """
-from parameters import rc, rhoc, rhofe_l, rhofe_s, rho_eut, Mr_fe, Mr_s, Lc, cpc, G, gc, alpha_c, rho_exp
+from parameters import rc, rhoc, Lc, G, gc, rho_exp, rhofe_s
 from fe_fes_liquidus import fe_fes_density
 from heating import Fe_heating
 import numpy as np
@@ -28,26 +28,6 @@ def Qlt(Tc,f,dTl_dP):
     Qlt = 4*np.pi*(f*rc)**2*Lc/(gc*dTl_dP)
     
     return Qlt
-
-
-def Qst(Tc):
-    """   
-
-    Parameters
-    ----------
-    Tc : float
-        core temperature
-
-    Returns
-    -------
-    Power contribution from secular cooling divided by dTc/dt
-
-    """
-    
-    Mc = 4/3*np.pi*rc**3*rhoc
-    
-    return -Mc*cpc
-
     
 def Qgt(Tc,f,dTl_dP,Xs):
     """
@@ -71,7 +51,7 @@ def Qgt(Tc,f,dTl_dP,Xs):
     rhol = fe_fes_density(Xs)*rho_exp
     drho = rhofe_s - rhol 
     Qgt = -8/3*np.pi**2*G*rhol*drho*(f*rc)**4/(rhoc*gc*dTl_dP)
-    Qgt =0 
+ 
     return Qgt
 
 def Qr(t):

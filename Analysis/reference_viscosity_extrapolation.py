@@ -46,7 +46,7 @@ def viscosity_converter(p,pref,Tref,V,E,eta0):
 r = np.array([100,200,300,400,500])*1e3 #[m]
 rc = r/2
 rmid = 0.75*r
-pmid = 2/3*np.pi*G*rhom**2*(r**2-rmid**2) #[Pa]
+pmid = 2/3*np.pi*G/3*(rhom**2*(r**2-rmid**2)+2*rhom*(rhoc-rhom)*rc**3*((1/rmid)-(1/r))) #[Pa]
 
 #activation energies from Karato and Wu 1993 and Hirth & Kohlstedt 2003
 E = np.array([240,300,325,430,540,570])*1e3 # [J /mol]
