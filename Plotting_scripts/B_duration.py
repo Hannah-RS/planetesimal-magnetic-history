@@ -24,7 +24,7 @@ ytick_val2 = []
 runval = np.array([])
 
 
-save = False
+save = True
 xmax = 12 #how much to zoom by
 #%% Load a given variable
 
@@ -105,8 +105,9 @@ for ax in axes:
         #make the plot
         ax.pcolormesh(t,yplot[2*j:2*j+2],[B,B],cmap=cmap,norm=norm)
         
-        #create blank spaces between runs        
-        ax.pcolormesh(t,yplot[2*j+1:2*j+3],np.zeros([2,len(B)]),cmap=cmap2,norm=norm2) #add gaps between variables
+        #create blank spaces between runs  
+        ax.barh(yplot[2*j+1],t[-1],color='white',height=1)
+        #ax.pcolormesh(t,yplot[2*j+1:2*j+3],np.zeros([2,len(B)]),cmap=cmap2,norm=norm2) #add gaps between variables
         ax.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[2*j]-0.5,yplot[2*j]+0.5,color='black')
         j = j+1
     
