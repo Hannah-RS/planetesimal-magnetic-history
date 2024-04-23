@@ -24,7 +24,7 @@ ytick_val2 = []
 runval = np.array([])
 
 
-save = True
+save = False
 xmax = 12 #how much to zoom by
 #%% Load a given variable
 
@@ -53,8 +53,6 @@ for i, var in enumerate(variables[:-1]):
 #%% Massive stacked barchart
 nruns = len(runval)
 yplot = np.arange(2*(nruns+7)) #add extra blank space
-#convert yticks to array
-
 
 #make colormap for B data
 import copy
@@ -72,7 +70,7 @@ cmap2 = (mpl.colors.ListedColormap([ '#004488', '#DDAA33']).with_extremes(over='
 bounds2 = [0.5,1]
 norm2 = mpl.colors.BoundaryNorm(bounds2, cmap2.N)
 
-fig, axes = plt.subplots(1,2,sharey='row',figsize=[7.5,5],gridspec_kw={'width_ratios': [1,3]},tight_layout=True)
+fig, axes = plt.subplots(1,2,sharey='row',figsize=[7.5,6],gridspec_kw={'width_ratios': [1,3]},tight_layout=True)
 for ax in axes:
     j = 0 #for plotting
     for i in range(nruns):
@@ -108,23 +106,22 @@ for ax in axes:
         ax.pcolormesh(t,yplot[2*j:2*j+2],[B,B],cmap=cmap,norm=norm)
         
         #create blank spaces between runs        
-        ax.pcolormesh(t,yplot[2*j+1:2*j+3],np.zeros([2,len(Rem)]),cmap=cmap2,norm=norm2) #add gaps between variables
+        ax.pcolormesh(t,yplot[2*j+1:2*j+3],np.zeros([2,len(B)]),cmap=cmap2,norm=norm2) #add gaps between variables
         ax.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[2*j]-0.5,yplot[2*j]+0.5,color='black')
         j = j+1
     
     ax.set_ylim([yplot[0]-1,yplot[-1]+0.5])
-axes[1].set_xlabel('Time after CAI formation /Ma') 
 axes[0].set_xlim([0.8,xmax])
 axes[1].set_xlim([xmax,300])
 axes[0].set_yticks(yplot[::2],ytick_lab)
 axes[0].tick_params(axis='y', labelsize=7) #make y labels smaller
-axes[1].set_title(f'>{xmax} Ma')
-axes[0].set_title(f'First {xmax} Ma')
+axes[1].set_title(f'>{xmax} Ma',fontsize=10)
+axes[0].set_title(f'First {xmax} Ma',fontsize=10)
 cax = fig.add_axes([0.87, 0.17, 0.01, 0.3])
 colorbar = fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax,
              orientation='vertical', label='magnetic field strength /$\\mu T$')
 colorbar.set_ticks([3,10,20,30,40],labels=[3,10,20,30,40])
-
+fig.suptitle('Time after CAI formation / Ma',y=0,fontsize=10)
 
 if save == True:
     plt.savefig(f'../Plots/{savefolder}B_duration.pdf',dpi=500,bbox_inches='tight') 
