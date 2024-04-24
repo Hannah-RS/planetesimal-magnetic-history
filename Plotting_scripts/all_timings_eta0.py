@@ -73,7 +73,7 @@ for k, folder in enumerate(folders):
             ax[k].pcolormesh(tdyn,y[i:i+2],np.transpose(weight),shading='flat',vmin=0,vmax=100)
         
     #%% Customise the plot
-    #ax[k].set_yticks([],[])
+    ax[k].set_yticks([],[])
     #ax[k,p].set_yticks((y[:-1]+y[1:])/2,varlabels)
     
     
