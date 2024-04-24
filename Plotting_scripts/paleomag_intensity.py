@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 #%% Import data
 paleo = pd.read_csv("../meteorite_paleomag_intensity.csv",encoding='latin1')
 savefolder = 'EPSL_paper/'
-save = False
+save = True
 #replace nan values in timing info
 values = {"rel_age_lower": 0, "rel_age_upper": 0}
 paleo2 = paleo.fillna(value=values)
@@ -30,13 +30,13 @@ paleo2 = paleo2[paleo2['Classification']!='R matrix'] #remove R chondrites
 mclass = paleo2['Classification'].unique()
 
 #%% Intensity axis
-fig, axes = plt.subplots(nrows=1,sharex='col',figsize=[7.5,7.5],tight_layout=True)
+fig, axes = plt.subplots(nrows=1,sharex='col',figsize=[7.5,( 7.5/4)*3],tight_layout=True)
 xlim_low = [0.8,12]
 hwidth = 10 #headwidth
 hlengths = 0.2 #head length - shorter in first plot
 
 #colour dictionary
-col = {'nebula':'black','dynamo':'black','uncertain':'#007aaf','nothing':'black'} #other angrite colour '#A00143'
+col = {'nebula':'#00c500','dynamo':'black','uncertain':'#007aaf','nothing':'black'} #other angrite colour '#A00143'
 cs = 5 #capsize
 for i, met in enumerate(mclass):
     mdata = paleo2.loc[paleo2['Classification']==met,:] #filter by class
