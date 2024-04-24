@@ -54,11 +54,17 @@ for i, var in enumerate(variables[:-1]):
     ytick_lab_new = []
     for lab in labs:
         if var == 'beta':
-            ytick_lab_new.append(f'{lab:.5f}')
-        elif (var == 'eta0') | (var=='Fe0'):
+            ytick_lab_new.append(f'{lab:.5f} $K^{{-1}}$')
+        elif var == 'eta0':
+            ytick_lab_new.append(f'{lab:.0e} Pas')
+        elif var=='Fe0':
             ytick_lab_new.append(f'{lab:.0e}')
-        elif (var == 'alpha_n')|(var == 'etal'):
+        elif (var == 'alpha_n'):
             ytick_lab_new.append(f'{lab:.0f}')
+        elif var == 'etal':
+            ytick_lab_new.append(f'{lab:.0f} Pas')
+        elif (var == 'Xs_0'):
+            ytick_lab_new.append(f'{lab:.2f} wt %')
         else:
             ytick_lab_new.append(f'{lab:.2f}')
     ytick_lab = np.concatenate([ytick_lab,ytick_lab_new,['']]) #add a gap 
