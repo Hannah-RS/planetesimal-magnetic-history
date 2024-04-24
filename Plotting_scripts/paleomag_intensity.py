@@ -116,7 +116,7 @@ axes.fill_betweenx([0.1,60],4,12,color='#afe2c6') #previous dynamo
 axes.fill_betweenx([0.1,60],1,4,color='#afe2c6',alpha=0.5) #current dynamo
 axes.set_ylabel('Paleointensity /$\\mu$T')
 axes.set_xlim(right=12)
-axes.set_ylim(top=150)
+
 axes.set_xlabel('Time after CAI formation /Ma')
 if save == True:   
     plt.savefig(f'../Plots/{savefolder}paleomag_intensity.pdf',dpi=450,bbox_inches='tight')
