@@ -48,7 +48,20 @@ for i, var in enumerate(variables[:-1]):
     nrun = len(data)
     paths.extend([path]*nrun) #save paths for opening files later
     runval = np.concatenate([runval,var_data['run'].to_numpy()])
-    ytick_lab = np.concatenate([ytick_lab,data[f'{var}'],['']]) #add a gap 
+    
+    #get tick labels correct format
+    labs = data[f'{var}']
+    ytick_lab_new = []
+    for lab in labs:
+        if var == 'beta':
+            ytick_lab_new.append(f'{lab:.5f}')
+        elif (var == 'eta0') | (var=='Fe0'):
+            ytick_lab_new.append(f'{lab:.0e}')
+        elif (var == 'alpha_n')|(var == 'etal'):
+            ytick_lab_new.append(f'{lab:.0f}')
+        else:
+            ytick_lab_new.append(f'{lab:.2f}')
+    ytick_lab = np.concatenate([ytick_lab,ytick_lab_new,['']]) #add a gap 
 
 #%% Massive stacked barchart
 nruns = len(runval)
@@ -113,7 +126,7 @@ for ax in axes:
     
     ax.set_ylim([yplot[0]-1,yplot[-1]+0.5])
 axes[0].set_xlim([0.8,xmax])
-axes[1].set_xlim([xmax,300])
+axes[1].set_xlim([xmax,270])
 axes[0].set_yticks(yplot[::2],ytick_lab)
 axes[0].tick_params(axis='y', labelsize=7) #make y labels smaller
 axes[1].set_title(f'>{xmax} Ma',fontsize=10)
