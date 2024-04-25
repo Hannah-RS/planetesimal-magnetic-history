@@ -19,8 +19,8 @@ radius = [100,200,300,400,500]
 varlabels = []
 bcol = 'white'
 ecol = 'gray'
-xmax = 525 #max xlimit in Myr
-save = False
+xmax = 600 #max xlimit in Myr
+save = True
 
 #make colormap
 cmap = mpl.cm.viridis
@@ -28,7 +28,7 @@ bounds = [0,100]
 norm = mpl.colors.Normalize(vmin=0, vmax=100)
 
 with sns.plotting_context('paper',font_scale = 1.75):
-    fig, ax = plt.subplots(5,1,sharey='row',sharex='col',tight_layout=True,figsize=[7.5,10])
+    fig, ax = plt.subplots(5,1,sharey='row',sharex='col',tight_layout=True,figsize=[10,10])
     
     
     for k, folder in enumerate(folders):
@@ -81,11 +81,11 @@ with sns.plotting_context('paper',font_scale = 1.75):
         if r==100: #force all variables to appear
             ax[k].set_ylim([0,y[-1]])
         ax[k].set_xlim([0.8,xmax])
-        ax[k].set_title(f'Planetesimal radius = {r}km, core radius = {r/2:.0f} km')
+        ax[k].set_title(f'Planetesimal radius = {r} km, core radius = {r/2:.0f} km')
     
     ax[4].set_xlabel('Time after CAI formation /Ma')
     
-    cax = fig.add_axes([1, 0.36, 0.01, 0.3])
+    cax = fig.add_axes([1, 0.36, 0.025, 0.3])
     fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax, orientation='vertical', label='% dynamos on')
 
 if save == True:
