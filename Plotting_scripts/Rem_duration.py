@@ -125,7 +125,7 @@ axes[0].set_title(f'First {xmax} Ma',fontsize=10)
 cax = fig.add_axes([0.87, 0.17, 0.01, 0.3])
 fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax,extend='both',ticks=bounds,spacing='proportional',
              extendfrac=0.5, orientation='vertical', label='Re$_m$')
-fig.suptitle('Time after CAI formation / Ma',y=0,fontsize=10)
+fig.suptitle('Time after CAI formation /Ma',y=0,fontsize=10)
 
 if save == True:
     plt.savefig(f'../Plots/{savefolder}Rem_bars_full.png',dpi=500,bbox_inches='tight') 

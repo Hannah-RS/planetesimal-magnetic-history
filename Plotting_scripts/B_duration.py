@@ -141,7 +141,7 @@ cax = fig.add_axes([0.87, 0.17, 0.01, 0.3])
 colorbar = fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax,
              orientation='vertical', label='magnetic field strength /$\\mu T$')
 colorbar.set_ticks([3,10,20,30,40],labels=[3,10,20,30,40])
-fig.suptitle('Time after CAI formation / Ma',y=0,fontsize=10)
+fig.suptitle('Time after CAI formation /Ma',y=0,fontsize=10)
 
 if save == True:
     plt.savefig(f'../Plots/{savefolder}B_duration.png',dpi=500,bbox_inches='tight') 
