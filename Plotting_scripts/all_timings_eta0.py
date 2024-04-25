@@ -81,9 +81,9 @@ for k, folder in enumerate(folders):
     if r==100: #force all variables to appear
         ax[k].set_ylim([0,y[-1]])
     ax[k].set_xlim([0.8,xmax])
-    ax[k].set_title(f' Planetesimal radius = {r}km')
+    ax[k].set_title(f' Planetesimal radius = {r} km')
 
-ax[4].set_xlabel('Time after CAI formation/Ma')
+ax[4].set_xlabel('Time after CAI formation /Ma')
 
 cax = fig.add_axes([1, 0.36, 0.025, 0.3])
 fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax, orientation='vertical', label='% dynamos on')
