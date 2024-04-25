@@ -126,8 +126,8 @@ for ax in axes:
         
         #create blank spaces between runs  
         ax.barh(yplot[2*j+1],t[-1],color='white',height=1)
-        #ax.pcolormesh(t,yplot[2*j+1:2*j+3],np.zeros([2,len(B)]),cmap=cmap2,norm=norm2) #add gaps between variables
-        ax.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[2*j]-0.5,yplot[2*j]+0.5,color='black')
+        #add solidification lines
+        ax.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[2*j]-0.7,yplot[2*j]+0.7,color='black')
         j = j+1
     
     ax.set_ylim([yplot[0]-1,yplot[-1]+0.5])
@@ -144,7 +144,7 @@ colorbar.set_ticks([3,10,20,30,40],labels=[3,10,20,30,40])
 fig.suptitle('Time after CAI formation / Ma',y=0,fontsize=10)
 
 if save == True:
-    plt.savefig(f'../Plots/{savefolder}B_duration.pdf',dpi=500,bbox_inches='tight') 
+    plt.savefig(f'../Plots/{savefolder}B_duration.png',dpi=500,bbox_inches='tight') 
 
 #%% Minimum value for colormap
 #print(np.min(Bminfind)) #muT

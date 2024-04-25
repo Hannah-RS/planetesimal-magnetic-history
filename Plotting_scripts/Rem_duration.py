@@ -24,7 +24,7 @@ ytick_val2 = []
 runval = np.array([])
 
 
-save = False
+save = True
 xmax = 12 #how much to zoom by
 #%% Load a given variable
 
@@ -111,13 +111,13 @@ for ax in axes:
         ax.pcolormesh(t,yplot[2*j:2*j+2],[Rem,Rem],cmap=cmap,norm=norm)
         ax.barh(yplot[2*j+1],t[-1],color='white',height=1)
     
-        ax.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[2*j]-0.5,yplot[2*j]+0.5,color='black')
+        ax.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[2*j]-0.7,yplot[2*j]+0.7,color='black')
         j = j+1
         
     
     ax.set_ylim([yplot[0]-1,yplot[-1]+0.5]) 
 axes[0].set_xlim([0.8,xmax])
-axes[1].set_xlim([xmax,500])
+axes[1].set_xlim([xmax,600])
 axes[0].set_yticks(yplot[::2],ytick_lab[:-1])
 axes[0].tick_params(axis='y', labelsize=7) #make y labels smaller
 axes[1].set_title(f'>{xmax} Ma',fontsize=10)
@@ -128,7 +128,7 @@ fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax,extend='both',t
 fig.suptitle('Time after CAI formation / Ma',y=0,fontsize=10)
 
 if save == True:
-    plt.savefig(f'../Plots/{savefolder}Rem_bars_full.png',dpi=450,bbox_inches='tight') 
+    plt.savefig(f'../Plots/{savefolder}Rem_bars_full.png',dpi=500,bbox_inches='tight') 
 
 #%% Continuous B version - this sucks so have commented it out
 #if do want to use it need to make 0 values unfilled rather than lightest colour 
