@@ -24,11 +24,11 @@ ytick_val2 = []
 runval = np.array([])
 
 
-save = False
+save = True
 xmax = 12 #how much to zoom by
 #%% Load a given variable
 
-for i, var in enumerate(variables):
+for i, var in enumerate(variables[:-1]):
 
     unit = units[var]
     varlab = labels[var]
@@ -48,6 +48,7 @@ for i, var in enumerate(variables):
     nrun = len(data)
     paths.extend([path]*nrun) #save paths for opening files later
     runval = np.concatenate([runval,var_data['run'].to_numpy()])
+    
     #get tick labels correct format
     labs = data[f'{var}']
     ytick_lab_new = []
@@ -62,101 +63,88 @@ for i, var in enumerate(variables):
             ytick_lab_new.append(f'{lab:.0f}')
         elif var == 'etal':
             ytick_lab_new.append(f'{lab:.0f} Pas')
-        elif var == 'r':
-            ytick_lab_new.append(f'{lab/1000:.0f} km')
         elif (var == 'Xs_0'):
             ytick_lab_new.append(f'{lab:.2f} wt %')
         else:
             ytick_lab_new.append(f'{lab:.2f}')
     ytick_lab = np.concatenate([ytick_lab,ytick_lab_new,['']]) #add a gap 
-    
+
 #%% Massive stacked barchart
 nruns = len(runval)
-yplot = np.arange(2*(nruns+7))
+yplot = np.arange(2*(nruns+7)) #add extra blank space
 
-#make colormap for Rem data
-cmap = (mpl.colors.ListedColormap([ '#7D9CEB', '#DDAA33']).with_extremes(over='#BB5566', under='#FFFFFF'))
+#make colormap for B data
+import copy
+import matplotlib.colors as colors
+cmap = copy.copy(plt.get_cmap('viridis'))
+cmap.set_under('white')
+Bmin = 3 #min B value in muT based on lower limit from data
+#Bminfind=[] #use this line to find Bmin
+#Bmaxfind = np.max([var_results['max_Btherm'].max(),var_results['max_Bcomp'].max()])/1e-6
+Bmax = 40 #based on Bmaxfind
+norm = colors.LogNorm(vmin=Bmin,vmax=Bmax)
 
-bounds = [10,40,100]
-norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+#make colormap that is all white to indicate gaps in data
+cmap2 = (mpl.colors.ListedColormap([ '#004488', '#DDAA33']).with_extremes(over='#BB5566', under='#FFFFFF'))
+bounds2 = [0.5,1]
+norm2 = mpl.colors.BoundaryNorm(bounds2, cmap2.N)
 
 fig, axes = plt.subplots(1,2,sharey='row',figsize=[7.5,6],gridspec_kw={'width_ratios': [1,3]},tight_layout=True)
-for ax in axes: 
-    j = 0 
+for ax in axes:
+    j = 0 #for plotting
     for i in range(nruns):
         #load Rem data
         run = int(runval[i])
         #import data
         npzfile = np.load(f'{paths[i]}run_{run}.npz')
         Rem = npzfile['Rem']
+        B = npzfile['B']/1e-6
         t = npzfile['t']/Myr
-        
-        #average Rem post onset of solidification to remove white bars
+        Rem_c = 10 #critical Rem
+        #average B post onset of solidification to remove white bars
         tsolid_start = var_results.loc[var_results['run']==run,'tsolid_start'].values[0]
         toff2 = var_results.loc[var_results['run']==run,'magoff_2'].values[0]
         toff3 = var_results.loc[var_results['run']==run,'magoff_3'].values[0]
         if toff3 != 0: #3 dynamo periods
-            Rem[(t>tsolid_start)&(t<toff3)]=np.average(Rem[(t>tsolid_start)&(t<toff3)])
+            B[(t>tsolid_start)&(t<toff3)]=np.average(B[(t>tsolid_start)&(t<toff3)])
         elif toff2 !=0: #2 dynamo periods
-            Rem[(t>tsolid_start)&(t<toff2)]=np.average(Rem[(t>tsolid_start)&(t<toff2)])
+            B[(t>tsolid_start)&(t<toff2)]=np.average(B[(t>tsolid_start)&(t<toff2)])
         else: #1 dynamo period
             toff1 = var_results.loc[var_results['run']==run,'magoff_1'].values[0]
-            Rem[(t>tsolid_start)&(t<toff1)]=np.average(Rem[(t>tsolid_start)&(t<toff1)])
+            B[(t>tsolid_start)&(t<toff1)]=np.average(B[(t>tsolid_start)&(t<toff1)])
+        #set all B with subccritical Rem before solidification to 0
+        B[(t<tsolid_start)&(Rem<Rem_c)]=0
+        #Bminfind.append(np.min(B[B>0]))
         
+        #set up ticks
         if (ytick_lab[j]==''): #don't plot in gaps
             ax.hlines(yplot[2*j],0.8,210,color='grey',linestyle='dashed',alpha=0.5,linewidth=0.5)
             j=j+1
-            
+        
         #make the plot
-        ax.pcolormesh(t,yplot[2*j:2*j+2],[Rem,Rem],cmap=cmap,norm=norm)
+        ax.pcolormesh(t,yplot[2*j:2*j+2],[B,B],cmap=cmap,norm=norm)
+        
+        #create blank spaces between runs  
         ax.barh(yplot[2*j+1],t[-1],color='white',height=1)
-    
+        #ax.pcolormesh(t,yplot[2*j+1:2*j+3],np.zeros([2,len(B)]),cmap=cmap2,norm=norm2) #add gaps between variables
         ax.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[2*j]-0.5,yplot[2*j]+0.5,color='black')
         j = j+1
-        
     
-    ax.set_ylim([yplot[0]-1,yplot[-1]+0.5]) 
+    ax.set_ylim([yplot[0]-1,yplot[-1]+0.5])
 axes[0].set_xlim([0.8,xmax])
-axes[1].set_xlim([xmax,500])
-axes[0].set_yticks(yplot[::2],ytick_lab[:-1])
+axes[1].set_xlim([xmax,270])
+axes[0].set_yticks(yplot[::2],ytick_lab)
 axes[0].tick_params(axis='y', labelsize=7) #make y labels smaller
 axes[1].set_title(f'>{xmax} Ma',fontsize=10)
 axes[0].set_title(f'First {xmax} Ma',fontsize=10)
 cax = fig.add_axes([0.87, 0.17, 0.01, 0.3])
-fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax,extend='both',ticks=bounds,spacing='proportional',
-             extendfrac=0.5, orientation='vertical', label='Re$_m$')
+colorbar = fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax,
+             orientation='vertical', label='magnetic field strength /$\\mu T$')
+colorbar.set_ticks([3,10,20,30,40],labels=[3,10,20,30,40])
 fig.suptitle('Time after CAI formation / Ma',y=0,fontsize=10)
 
 if save == True:
-    plt.savefig(f'../Plots/{savefolder}Rem_bars_full.png',dpi=450,bbox_inches='tight') 
+    plt.savefig(f'../Plots/{savefolder}B_duration.pdf',dpi=500,bbox_inches='tight') 
 
-#%% Continuous B version - this sucks so have commented it out
-#if do want to use it need to make 0 values unfilled rather than lightest colour 
-# need perceptially uniform colourmap
-# maxB = max(var_results['max_B'])/1e-6
-# minB = 0 #lowest B
-
-# plt.figure()
-# minrun = 1
-# for i in range(nruns):
-#     #load Rem data
-#     run = int(runval[i])
-#     #import data
-#     npzfile = np.load(f'{paths[i]}run_{run}.npz')
-#     B = npzfile['B']/1e-6 #B in muT
-#     t = npzfile['t']/Myr
-    
-#     plt.pcolormesh(t,yplot[2*i:2*i+2],[B,B],vmin=minB,vmax=maxB,cmap='YlOrRd')
-#     if i==(nruns-1):
-#         plt.colorbar(label='B/ $\mu$T')
-        
-#     plt.pcolormesh(t,yplot[2*i+1:2*i+3],np.zeros([2,len(B)]),cmap=cmap2,norm=norm2) #add gaps between variables
-#     plt.vlines(var_results.loc[var_results['run']==run,'tsolid_start'],yplot[2*i]-0.5,yplot[2*i]+0.5,color='black')
-#     if (ytick_lab[2*i]!='')&(ytick_lab[2*i-1]!='')&(i>0):
-#         plt.hlines(yplot[2*i]-1,0.8,500,color='grey',linestyle='dashed',alpha=0.5,linewidth=0.5) 
-    
-
-# plt.xlabel('Time/Myr') 
-# #plt.xlim([0.8,20])
-# plt.yticks(yplot[np.where(ytick_arr!='')[1]],ytick_arr[0,np.where(ytick_arr!='')[1]])
-
+#%% Minimum value for colormap
+#print(np.min(Bminfind)) #muT

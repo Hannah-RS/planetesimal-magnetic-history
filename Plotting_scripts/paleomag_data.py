@@ -9,7 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 #%% Import data
-paleo = pd.read_csv("../meteorite_paleomagnetism.csv",skiprows=[1])
+paleo = pd.read_csv("../meteorite_paleomagnetism.csv",skiprows=[1],encoding='latin1')
 savefolder = 'EPSL_paper/'
 save = True
 #replace nan values in timing info
@@ -83,7 +83,7 @@ for ax, xlim_up, xlim_low, title, hlength in zip(axes,xlim_up,xlim_low,title,hle
     
     #overall figure things
     ax.set_yticks(midpoints[::2],mclass)
-    ax.set_xlabel('Time /Ma')
+    ax.set_xlabel('Time after CAI formation /Ma')
     ax.set_xlim([xlim_low,xlim_up])
     ax.set_title(title)
 
