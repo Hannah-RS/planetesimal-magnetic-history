@@ -42,11 +42,37 @@ def viscosity_converter(p,pref,Tref,V,E,eta0):
     
     return eta_ast, eta_fk
 
+@np.vectorize
+def pmid_calc(rhom,rhoc,rc,rmid,r):
+    """
+    Mid mantle pressure assuming incompressible core and mantle [Pa]
+
+    Parameters
+    ----------
+    rhom : float
+        mantle density [kg m^-3]
+    rhoc : float
+        core density [kg m^-3]
+    rc : float
+        core radius [m]
+    rmid : float
+        radius in mantle where you want to calculate the pressure [m]
+    r : float
+        planetesimal radius [m]
+
+    Returns
+    -------
+    pressure at rmid [Pa]
+
+    """
+    pmid = 2/3*np.pi*G/3*(rhom**2*(r**2-rmid**2)+2*rhom*(rhoc-rhom)*rc**3*((1/rmid)-(1/r))) 
+    return pmid
+
 #calculate pressures for a range of asteroid sizes at mid-mantle
 r = np.array([100,200,300,400,500])*1e3 #[m]
 rc = r/2
 rmid = 0.75*r
-pmid = 2/3*np.pi*G/3*(rhom**2*(r**2-rmid**2)+2*rhom*(rhoc-rhom)*rc**3*((1/rmid)-(1/r))) #[Pa]
+pmid = pmid_calc(rhom,rhoc,rc,rmid,r)
 
 #activation energies from Karato and Wu 1993 and Hirth & Kohlstedt 2003
 E = np.array([240,300,325,430,540,570])*1e3 # [J /mol]
@@ -74,10 +100,10 @@ for i, p in enumerate(pmid):
             peta_ast[i,:,j], peta_fk[i,:,j] = viscosity_converter(p, pref, Tref, Vin, E, eta0)
             
 # find minimum and maximum reference viscosities
-print(f'The minimum asteroid Arrhenius reference viscosity is {np.min(peta_ast):0e} Pas')
-print(f'The maximum asteroid Arrhenius reference viscosity is {np.max(peta_ast):0e} Pas')
-print(f'The minimum asteroid FK reference viscosity is {np.min(peta_fk):0e} Pas')
-print(f'The maximum asteroid FK reference viscosity is {np.max(peta_fk):0e} Pas')
+print(f'From Mars: The minimum asteroid Arrhenius reference viscosity is {np.min(peta_ast):0e} Pas')
+print(f'From Mars: The maximum asteroid Arrhenius reference viscosity is {np.max(peta_ast):0e} Pas')
+print(f'From Mars: The minimum asteroid FK reference viscosity is {np.min(peta_fk):0e} Pas')
+print(f'From Mars: The maximum asteroid FK reference viscosity is {np.max(peta_fk):0e} Pas')
 
 #%% Extrapolation case 2: Ganymede Ruckriemen 2018 - parameters from Table 1
 eta0 = np.array([1e19,1e22])
@@ -85,7 +111,8 @@ rg = 2634*1e3 #Ganymede radius
 rgc = 1000*1e3 #average core radius [m]
 rgmid = rgc + (rg-rgc)/2 #mid mantle radius [m]
 rhog = 3300 #density of silicate layer [kg m^-3]
-pref = 2/3*np.pi*G*rhog**2*(rg**2-rgmid**2)
+rhocg = 7800 #density of core [kg m^-3]
+pref = pmid_calc(rhog,rhocg,rgc,rgmid,rg)
 Tref = 1600
 
 #find spread in values
@@ -98,10 +125,10 @@ for i, p in enumerate(pmid):
             reta_ast[:,i,k,j], reta_fk[:,i,k,j] = viscosity_converter(p, pref, Tref, Vin, Ein, eta0)
             
 # find minimum and maximum reference viscosities
-print(f'The minimum asteroid Arrhenius reference viscosity is {np.min(reta_ast):0e} Pas')
-print(f'The maximum asteroid Arrhenius reference viscosity is {np.max(reta_ast):0e} Pas')
-print(f'The minimum asteroid FK reference viscosity is {np.min(reta_fk):0e} Pas')
-print(f'The maximum asteroid FK reference viscosity is {np.max(reta_fk):0e} Pas')
+print(f'From Ganymede: The minimum asteroid Arrhenius reference viscosity is {np.min(reta_ast):0e} Pas')
+print(f'From Ganymede: The maximum asteroid Arrhenius reference viscosity is {np.max(reta_ast):0e} Pas')
+print(f'From Ganymede: The minimum asteroid FK reference viscosity is {np.min(reta_fk):0e} Pas')
+print(f'From Ganymede: The maximum asteroid FK reference viscosity is {np.max(reta_fk):0e} Pas')
 
 #%% Extrapolation case 3: Scott & Kohlstedt 2006 experimental pararmeters
 eta0 = 1e14
@@ -117,7 +144,7 @@ for i, p in enumerate(pmid):
             seta_ast[i,:,j], seta_fk[i,:,j] = viscosity_converter(p, pref, Tref, Vin, E, eta0)
             
 # find minimum and maximum reference viscosities
-print(f'The minimum asteroid Arrhenius reference viscosity is {np.min(seta_ast):0e} Pas')
-print(f'The maximum asteroid Arrhenius reference viscosity is {np.max(seta_ast):0e} Pas')
-print(f'The minimum asteroid FK reference viscosity is {np.min(seta_fk):0e} Pas')
-print(f'The maximum asteroid FK reference viscosity is {np.max(seta_fk):0e} Pas')
+print(f'From experiments: The minimum asteroid Arrhenius reference viscosity is {np.min(seta_ast):0e} Pas')
+print(f'From experiments: The maximum asteroid Arrhenius reference viscosity is {np.max(seta_ast):0e} Pas')
+print(f'From experiments: The minimum asteroid FK reference viscosity is {np.min(seta_fk):0e} Pas')
+print(f'From experiments: The maximum asteroid FK reference viscosity is {np.max(seta_fk):0e} Pas')
