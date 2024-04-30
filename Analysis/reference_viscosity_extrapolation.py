@@ -109,10 +109,14 @@ print(f'From Mars: The maximum asteroid FK reference viscosity is {np.max(peta_f
 eta0 = np.array([1e19,1e22])
 rg = 2634*1e3 #Ganymede radius
 rgc = 1000*1e3 #average core radius [m]
-rgmid = rgc + (rg-rgc)/2 #mid mantle radius [m]
-rhog = 3300 #density of silicate layer [kg m^-3]
-rhocg = 7800 #density of core [kg m^-3]
-pref = pmid_calc(rhog,rhocg,rgc,rgmid,rg)
+rgm = 1784*1e3 #Ganymede mantle radius [m]
+
+rgmid = rgc + rgm/2 #mid mantle radius [m]
+rhomg = 3300 #density of silicate layer [kg m^-3] from Ruckriemen 2018
+rhocg = 6072 #density of core [kg m^-3] from Ruckriemen 2018
+rhoi = 1200 # density of ice [kg m^-3] from Ruckriemen 2018
+pref = 2*np.pi*G/3*(rhomg**2*(rgm**2-rgmid**2)+rhoi**2*(rg**2-rgm**2)+2*rhomg*(rhocg-rhomg)*rgc**3*((1/rgmid)-(1/rgm)))\
+        -2*np.pi*G/3*(2*rhoi*(rgc**3*rhocg+(rgm**3-rgc**3)*rhomg-rgm**3*rhoi)*((1/rg)-(1/rgm)))
 Tref = 1600
 
 #find spread in values
