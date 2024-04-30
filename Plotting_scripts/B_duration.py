@@ -11,7 +11,8 @@ from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 
 
 #%% Load data for chosen variable
-folder = 'Paper_run300km/'
+r = 100
+folder = f'Paper_run{r}km/'
 savefolder = 'EPSL_paper/'
 from plot_params import subfolders, labels, units, logs, variables, Myr
  
@@ -144,7 +145,7 @@ colorbar.set_ticks([3,10,20,30,40],labels=[3,10,20,30,40])
 fig.suptitle('Time after CAI formation /Ma',y=0,fontsize=10)
 
 if save == True:
-    plt.savefig(f'../Plots/{savefolder}B_duration.png',dpi=500,bbox_inches='tight') 
+    plt.savefig(f'../Plots/{savefolder}B_duration_{r}.png',dpi=500,bbox_inches='tight') 
 
 #%% Minimum value for colormap
 #print(np.min(Bminfind)) #muT
