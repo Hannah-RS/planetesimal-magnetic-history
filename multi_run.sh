@@ -6,7 +6,7 @@ else
         echo "Directory already has files - appending"
     else
         echo "Directory is empty - copying templates"
-        cp Templates/* $1
+        cp Templates/run_results.csv $1
     fi
     i=0
     nruns=$(awk '(NR>2)' $1/auto_params.csv | awk -F',' '$NF<-1' | wc -l) #only count unrun lines - status is in last column
