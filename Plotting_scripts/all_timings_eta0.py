@@ -9,17 +9,17 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 
 #%% Load data for chosen variable
-#folders = ['Paper_run100km/','Paper_run200km/','Paper_run300km/','Paper_run400km/','Paper_run500km/']
-folders = ['Paper_run300km/']
-from plot_params import subfolders, labels, units, logs, Myr
+folders = ['Paper_run100km/','Paper_run200km/','Paper_run300km/','Paper_run400km/','Paper_run500km/']
+
+from plot_params import subfolders, labels, units, logs
 variables = ['eta0']
 y = np.arange(len(variables)+1)
 radius = [100,200,300,400,500]
 varlabels = []
 bcol = 'white'
 ecol = 'gray'
-xmax = 600 #max xlimit in Myr
-save = False
+xmax = 650 #max xlimit in Myr
+save = True
 
 #make colormap
 cmap = mpl.cm.viridis
@@ -27,7 +27,7 @@ bounds = [0,100]
 norm = mpl.colors.Normalize(vmin=0, vmax=100)
 
 
-fig, ax = plt.subplots(4,1,sharey='row',sharex='col',tight_layout=True,figsize=[7.5,5])
+fig, ax = plt.subplots(5,1,sharey='row',sharex='col',tight_layout=True,figsize=[5,5])
 
 
 for k, folder in enumerate(folders):
@@ -70,23 +70,23 @@ for k, folder in enumerate(folders):
             
         #%% Make the plot
         if len(tdyn)>0: #check the dynamo is on at all
-            ax[k].pcolormesh(tdyn,y[i:i+2],np.transpose(weight),shading='flat',vmin=0,vmax=100)
+            ax[k].pcolormesh(tdyn,y[0:2],np.transpose(weight),shading='flat',vmin=0,vmax=100)
         
     #%% Customise the plot
-    ax[k].set_yticks([],[])
-    #ax[k,p].set_yticks((y[:-1]+y[1:])/2,varlabels)
+    #ax[k].set_yticks([],[])
+    ax[k].set_yticks([y[1]/2],['$\\eta_0$'])
     
     
     
     if r==100: #force all variables to appear
         ax[k].set_ylim([0,y[-1]])
     ax[k].set_xlim([0.8,xmax])
-    ax[k].set_title(f' Planetesimal radius = {r}km, core radius = {r/2:.0f} km')
+    ax[k].set_title(f' Planetesimal radius = {r} km')
 
-ax[3].set_xlabel('Time after CAI formation/Ma')
+ax[4].set_xlabel('Time after CAI formation /Ma')
 
-cax = fig.add_axes([1, 0.36, 0.01, 0.3])
+cax = fig.add_axes([1, 0.36, 0.025, 0.3])
 fig.colorbar(mpl.cm.ScalarMappable(cmap=cmap, norm=norm),cax=cax, orientation='vertical', label='% dynamos on')
 
 if save == True:
-    plt.savefig(f'../Plots/EPSL_paper/timings_heatmap_eta0.pdf',dpi=450,bbox_inches='tight')
+    plt.savefig(f'../Plots/EPSL_paper/timings_heatmap_eta0.pdf',dpi=500,bbox_inches='tight')
