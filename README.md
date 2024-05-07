@@ -14,16 +14,14 @@ Thermal evolution and dynamo generation model for a planetesimal. The model is d
 Describe required file structure and set up (run parameters and results folder) 
 ### Directory structure
 ```mermaid
-    ---
-    title: Directory structure
-    ---
-    flowchart TD
-    Repository --- Run_parameters & Results
-    Run_parameters --- a["Single_run"] & b["Multi_run"]
-    b --- params_1 & params_2
-    Results --- c["Single_run"] & d["Multi_run"]
-    d --- e["params_1] & f"[params_2] & all_sucess_info.csv & fail_params.csv & inval_params.csv
-
+flowchart TD;
+Repository --- g(["All code"]) & Plotting_scripts & Templates & Results;
+Results --- c["Single_run"] & d["Multi_run"];
+c --- k("auto_params.csv")
+style Results fill:#990000
+d --- e["params_1"] & f["params_2"] & h("all_sucess_info.csv") & i("fail_params.csv") & j("inval_params.csv");
+e --- l("auto_params.csv")
+f --- m("auto_params.csv")
 ```
 
 ### Single run
