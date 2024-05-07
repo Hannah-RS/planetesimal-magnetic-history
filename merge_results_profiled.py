@@ -7,9 +7,11 @@ To see memory usage run python merge_results_profiled.py on the command line
 from load_info import combine_info
 from memory_profiler import profile
 import pandas as pd
-folder = 'Results_combined/Fullrun1/' #folder
+import sys
+folder1 = sys.argv[1]
+folder = 'Results_combined/'+folder1 #folder
 subfolder = 'params_' #subfolder
-num_runs = 3 #number of subruns
+num_runs = int(sys.argv[2]) #number of subruns
 
 
 @profile

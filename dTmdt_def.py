@@ -5,7 +5,7 @@ Expression for dTm/dt from rearranging eqn 25 in Dodds (2020) and dTdt for an un
 """
 import numpy as np
 from parameters import rhom, As, Acmb, rhoa, V, r, rc, Vm, convect_ratio
-from heating import Al_heating, AlFe_heating
+from heating import al_heating, alfe_heating
 from cp_func import cp_calc_int
 
 def dTmdt_calc(t,Tconv,d0,Flid,Fcmb):
@@ -37,7 +37,7 @@ def dTmdt_calc(t,Tconv,d0,Flid,Fcmb):
         Vocean = Vm #put filler here as the output of this function won't be used
         Alid = As
     #calculate radiogenic heating 
-    h = Al_heating(t)
+    h = al_heating(t)
     rad = h*rhom*Vocean #radiogenic heating contribution
     cp = cp_calc_int(Tconv,False)
     return 1/(rhom*cp*Vocean)*(rad-Flid*Alid+Fcmb*Acmb)
@@ -71,7 +71,7 @@ def dTadt_calc(t,Tconv,d0,Flid,eutectic):
         Vocean = V #put filler here as the output of this function won't be used
         Alid = As
     #calculate radiogenic heating 
-    h = AlFe_heating(t)
+    h = alfe_heating(t)
     rad = h*rhoa*Vocean #radiogenic heating contribution
     cp = cp_calc_int(Tconv,True,eutectic)
    

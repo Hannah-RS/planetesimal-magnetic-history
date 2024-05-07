@@ -3,7 +3,7 @@
 """
 Test conductive stencil
 """
-from T_cond import Tm_cond_calc
+from temp_cond import Tm_cond_calc
 from stencil import cond_stencil_mantle
 import scipy.sparse as sp
 import numpy as np

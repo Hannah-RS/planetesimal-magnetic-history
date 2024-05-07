@@ -19,7 +19,7 @@ if automated == True:
     import sys
     folder = sys.argv[1]
 else:
-    folder = 'Results_combined/Psyche/' #folder where you want to save the results
+    folder = 'Results_combined/' #folder where you want to save the results
     ind = None #no index for csv
 #set flag for run started
 if automated == True:
@@ -182,8 +182,8 @@ else:
     fcond_T = np.nan
     
 # Frad - radiogenic heat flux, normalised to surface of body
-from heating import Al_heating
-h = Al_heating(t) 
+from heating import al_heating
+h = al_heating(t) 
 Frad = h*rhom*Vm/As #radiogenic heatflux
 
 #combine these in a single array

@@ -6,7 +6,7 @@ Radiogenic heating equations
 import numpy as np
 from parameters import h0Al, Al0, XAl_a, XAl_d, thalf_al, h0Fe, Fe0, XFe_a, XFe_d, thalf_fe
 
-def Al_heating(t):
+def al_heating(t):
     """
     Radiogenic heating by 26Al in a silicate mantle
 
@@ -25,7 +25,7 @@ def Al_heating(t):
     
     return h
 
-def Fe_heating(t):
+def fe_heating(t):
     """
     Radiogenic heating by 60Fe in an iron core
 
@@ -44,7 +44,7 @@ def Fe_heating(t):
     
     return h
 
-def AlFe_heating(t):
+def alfe_heating(t):
     """
     Radiogenic heating by 26Al and 60Fe (undifferentiated material)
 

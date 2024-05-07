@@ -115,7 +115,7 @@ def conv_power(f,dfdt,l,Xs,Tcore,Fcmb,solid):
     
     return p, comp, therm
 
-def Rem_b(f,dfdt,Xs,Tcore,Fcmb,solid,min_unstable):
+def rem_b(f,dfdt,Xs,Tcore,Fcmb,solid,min_unstable):
     """
     Calculation of dipole field strength on the surface and magnetic Reynolds number
     Based on scaling laws of Aubert 2009, Davidson 2013 and Davies 2022

@@ -9,7 +9,7 @@ import numpy as np
 import scipy.sparse as sp
 from parameters import cpc
 from cp_func import cp_calc_arr
-from heating import Al_heating, Fe_heating
+from heating import al_heating, fe_heating
     
 def Tm_cond_calc(t,dt,T,sparse_mat):
     """
@@ -36,7 +36,7 @@ def Tm_cond_calc(t,dt,T,sparse_mat):
 
     cpdTdt = sparse_mat.dot(T) #lhs of 16 divided by rhom
     cp = cp_calc_arr(T,False)   
-    h = Al_heating(t)
+    h = al_heating(t)
     dTdt = cpdTdt/cp + h/cp
 
     Tnew = dTdt*dt + T
@@ -72,7 +72,7 @@ def Tc_cond_calc(t,dt,T,sparse_mat,radio=True):
     
     if radio == True:
         
-        h = Fe_heating(t)
+        h = fe_heating(t)
         dTdt = dTdt + h/cpc
     else: 
         pass

@@ -47,7 +47,7 @@ if automated == True:
     dr = auto.loc[ind,'dr']
     icfrac = auto.loc[ind,'icfrac']
 else: #set manually
-    r = 300e3 # radius of asteroid [m]
+    r = 100e3 # radius of asteroid [m]
     rcr = 0.5 #core radius as a fraction of asteroid radius
     dr = 500 # grid size [m]
     default ='vary' #default viscosity model
@@ -59,9 +59,9 @@ else: #set manually
     alpha_n = 30 #melt weakening (diffusion creep)
     Xs_0 = 30.05# initial wt % sulfur in core 
     Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 9
+    run = 12
     t_acc_m = 0.3 #accretion time [Myr]
-    t_end_m = 800 # max end time [Myr]
+    t_end_m = 100 # max end time [Myr]
     icfrac = 0 #fraction of solidified material that forms a passive inner core during solidification
 
 # Size of body

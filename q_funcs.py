@@ -5,10 +5,10 @@ Expressions for heat fluxes divided by dTcdt from Nimmo (2009)
 """
 from parameters import rc, rhoc, Lc, G, gc, rho_exp, rhofe_s
 from fe_fes_liquidus import fe_fes_density
-from heating import Fe_heating
+from heating import fe_heating
 import numpy as np
 
-def Qlt(Tc,f,dTl_dP):
+def qlt(Tc,f,dTl_dP):
     """
 
     Parameters
@@ -25,11 +25,11 @@ def Qlt(Tc,f,dTl_dP):
     Power contribution due to release of latent heat divided by dTc/dt
 
     """
-    Qlt = 4*np.pi*(f*rc)**2*Lc/(gc*dTl_dP)
+    qlt = 4*np.pi*(f*rc)**2*Lc/(gc*dTl_dP)
     
-    return Qlt
+    return qlt
     
-def Qgt(Tc,f,dTl_dP,Xs):
+def qgt(Tc,f,dTl_dP,Xs):
     """
 
     Parameters
@@ -50,11 +50,11 @@ def Qgt(Tc,f,dTl_dP,Xs):
     """
     rhol = fe_fes_density(Xs)*rho_exp
     drho = rhofe_s - rhol 
-    Qgt = -8/3*np.pi**2*G*rhol*drho*(f*rc)**4/(rhoc*gc*dTl_dP)
+    qgt = -8/3*np.pi**2*G*rhol*drho*(f*rc)**4/(rhoc*gc*dTl_dP)
  
-    return Qgt
+    return qgt
 
-def Qr(t):
+def qr(t):
     """
 
     Parameters
@@ -71,6 +71,6 @@ def Qr(t):
     """
     
     Mc = 4/3*np.pi*rc**3*rhoc #mass of the core [kg]
-    h_fe = Fe_heating(t) #internal heat generation rate from iron [J /kg /s]
+    h_fe = fe_heating(t) #internal heat generation rate from iron [J /kg /s]
     
     return Mc*h_fe

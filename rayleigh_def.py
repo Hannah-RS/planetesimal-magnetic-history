@@ -7,11 +7,11 @@ Also script for Rayleigh number and critical Rayleigh number for differentiation
 """
 
 from viscosity_def import viscosity #import viscosity model
-from heating import Al_heating, AlFe_heating
+from heating import al_heating, alfe_heating
 
-from parameters import frht, rhom, alpha_m, g, r, rc, kappa, km, Rac, Ts, default, G, convect_ratio, cpm_p, conv_tol
+from parameters import frht, rhom, alpha_m, g, r, rc, kappa, km, Ts, default, G, convect_ratio
 
-def Rayleigh_crit(Tb):
+def rayleigh_crit(Tb):
     """
     Critical Rayleigh number from eqn 26 of Solomatov 1995
 
@@ -29,7 +29,7 @@ def Rayleigh_crit(Tb):
     Ra_crit = 20.9*(frht*(Tb-Ts))**4 
     return Ra_crit
     
-def Rayleigh_calc(t,Tb,Ur,model=default):
+def rayleigh_calc(t,Tb,Ur,model=default):
     """
     
 
@@ -50,8 +50,8 @@ def Rayleigh_calc(t,Tb,Ur,model=default):
 
     """
 
-    RaH = Rayleigh_H(t,Tb,model=model)
-    RanoH= Rayleigh_noH(Tb,model)
+    RaH = rayleigh_H(t,Tb,model=model)
+    RanoH= rayleigh_noH(Tb,model)
 
     if Ur > 1:
         d0 = 0.667*(r-rc)*(frht*(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
@@ -65,7 +65,7 @@ def Rayleigh_calc(t,Tb,Ur,model=default):
     
     return Ram, d0, RaH, RanoH
 
-def Rayleigh_noH(Tb,model=default): 
+def rayleigh_noH(Tb,model=default): 
     """
     
 
@@ -88,7 +88,7 @@ def Rayleigh_noH(Tb,model=default):
     
     return Ram
 
-def Rayleigh_H(t,Tb,rcore = rc, model=default,Fe=False):
+def rayleigh_H(t,Tb,rcore = rc, model=default,Fe=False):
     """
     Rayleigh number for radiogenic heating
 
@@ -112,16 +112,16 @@ def Rayleigh_H(t,Tb,rcore = rc, model=default,Fe=False):
     eta = viscosity(Tb,model)
 
     if Fe == False: #exclude radiogenic heating from Fe
-        h = Al_heating(t)
+        h = al_heating(t)
     else:
-        h = AlFe_heating(t)
+        h = alfe_heating(t)
     
     Ra = rhom**3*alpha_m*h*G*(r-rcore)**6/(km*kappa*eta) #Internally heated sphere (Schubert 2001)
 
     return Ra
 
 
-def Rayleigh_differentiate(t,Tb,Ur,model=default):
+def rayleigh_differentiate(t,Tb,Ur,model=default):
     """
     Check for onset of differentiation
 
@@ -149,16 +149,16 @@ def Rayleigh_differentiate(t,Tb,Ur,model=default):
 
     """
    
-    RaH = Rayleigh_H(t,Tb,0,model,Fe=True)
+    RaH = rayleigh_H(t,Tb,0,model,Fe=True)
 
-    RanoH = Rayleigh_noH(Tb,model)
+    RanoH = rayleigh_noH(Tb,model)
     
     if Ur > 1:
         d0H = 0.667*r*(frht*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
     else:
         d0H = 0.633*r*(frht*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
     
-    Ra_crit = Rayleigh_crit(Tb)
+    Ra_crit = rayleigh_crit(Tb)
     if d0H/r < convect_ratio:
         convect = True
     else: 

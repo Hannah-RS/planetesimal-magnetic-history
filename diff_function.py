@@ -4,8 +4,8 @@
 Function for differentiating an asteroid. Based on the process in Dodds et. al. (2021)
 """
 from stencil import cond_stencil_general
-from Rayleigh_def import Rayleigh_differentiate
-from heating import AlFe_heating
+from rayleigh_def import rayleigh_differentiate
+from heating import alfe_heating
 from dTmdt_def import dTadt_calc
 from scipy import sparse as sp
 from cp_func import cp_calc_arr, cp_calc_int, cp_calc_eut_arr, cp_calc_eut_int
@@ -78,7 +78,7 @@ def differentiation(Tint,tacc,r,dr,dt):
         convect[0] = False
         
         #calculate radiogenic heating
-        H = np.array([AlFe_heating(t[0])])
+        H = np.array([alfe_heating(t[0])])
         Tk = ka*Tint
         #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
         rhs = sparse_mat.dot(Tk) + H*rhoa
@@ -122,9 +122,9 @@ def differentiation(Tint,tacc,r,dr,dt):
             
             t = np.append(t,t[i-1]+dt)
             
-            Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1], Ur)
+            Ra[i], d0[i], Ra_crit[i], convect[i] = rayleigh_differentiate(t[i],T[0,i-1], Ur)
             #calculate radiogenic heating
-            H = np.append(H,AlFe_heating(t[i]))
+            H = np.append(H,alfe_heating(t[i]))
             Tk = ka*T[:,i-1]
             #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
             rhs = sparse_mat.dot(Tk) + H[i]*rhoa
@@ -252,7 +252,7 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     Ra_crit[0] = Rac
     convect[0] = False
     #calculate radiogenic heating
-    H = np.array([AlFe_heating(t[0])])
+    H = np.array([alfe_heating(t[0])])
     
     #calculate convective profile
     Tk = ka*Tint
@@ -295,9 +295,9 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         
         t = np.append(t,t[i-1]+dt)
         
-        Ra[i], d0[i], Ra_crit[i], convect[i] = Rayleigh_differentiate(t[i],T[0,i-1],Ur)
+        Ra[i], d0[i], Ra_crit[i], convect[i] = rayleigh_differentiate(t[i],T[0,i-1],Ur)
         #calculate radiogenic heating
-        H = np.append(H,AlFe_heating(t[i]))
+        H = np.append(H,alfe_heating(t[i]))
         Tk = ka*T[:,i-1]
         #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
         rhs = sparse_mat.dot(Tk) + H[i]*rhoa
