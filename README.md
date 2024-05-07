@@ -63,15 +63,15 @@ Then follow the instructions in either of the subsections below.
 This method is for keeping a set of parameters constant, whilst varying an individuals parameter in independent runs. It requires access to an hpc in order to create an array job. For example, the directory "Multi_run" could contain subfolders "params_1" nd "params_2" each containing an "auto_params.csv" file and could run as one directory using an array job on an hpc. "params_1/" could vary reference viscosity but keep all other variables constant and "params_2" could vary critical melt fraction and keep all other variables constant. This method was used in Sanderson et. al. 2024b to investigate the role of viscosity, core sulfur content and radiogenic $^{60}Fe$ on dynamo generation.
  
 1. Create overall parameters directory e.g. "Multi_run"
-2. Use `create_single_csv.py` to set your range of parameter space you are exploring and create the parameter subfolders.
+2. Use `create_single_csv.py` to set your range of parameter space you are exploring.
 3. Send parameters to remote machine
-4. Submit an array job to run `multi_run.sh` on each of your parameter subfolders. 
-5. Copy all results off the hpc
-6. Copy `all_sucess_info.csv`, `fail_params.csv` and `inval_params.csv` from Templates to results folder 
+4. Submit an array job using an amended version of `submit_array.sh` to run `multi_run.sh`. This will run each auto_params_n.csv and create a parameter subfolder for each set of runs. 
+5. Copy all results off the hpc into `<results_folder>`
+6. Copy `all_sucess_info.csv`, `fail_params.csv` and `inval_params.csv` from Templates to `<results_folder>` 
 7. Use `merge_results.py <results_folder> <number_of_subfolders>` to merge all results from a group of runs into a combined data file 
 8. Now enjoy analysing your data!
 
-For runs on a remote machine, it may be useful to create a subdirectory for parameter files before they are sent to the remote machine which is separate from your results subdirectory. This will enable pristine parameter fiels to be sent to the hpc to repeat calculations without needing to repeat steps 1 and 2. 
+For runs on a remote machine, it may be useful to create a subdirectory for parameter files before they are sent to the remote machine which is separate from your results subdirectory. This will enable pristine parameter files to be sent to the hpc to repeat calculations without needing to repeat steps 1 and 2. 
 
 ### Model outputs
 The model outputs:
