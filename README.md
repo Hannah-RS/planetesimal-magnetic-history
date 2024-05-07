@@ -1,10 +1,10 @@
 # learning-model
 
-Thermal evolution and dynamo generation model for a planetesimal. The model is described in Sanderson et. al. 2024a, "Unlocking planetesimal magnetic field histories: a refined, versatile model for thermal evolution and dynamo generation", which will be submitted to Icarus and available as a preprint soon. 
+Thermal evolution and dynamo generation model for a planetesimal. 
 
 
 ## Basic model description
-This is a spherically symmetric 1D thermal evolution and dynamo generation model. It begins with an undifferentiated planetesimal which heats up due to decay of $^{26}Al$ and differentiates into a core and mantle. The code then tracks the thermal evolution of the core and mantle and when dynamo generation is possible.
+The model is described in Sanderson et. al. 2024a, "Unlocking planetesimal magnetic field histories: a refined, versatile model for thermal evolution and dynamo generation", which will be submitted to Icarus and available as a preprint soon. This is a spherically symmetric 1D thermal evolution and dynamo generation model. It begins with an undifferentiated planetesimal which heats up due to decay of $^{26}Al$ and differentiates into a core and mantle. The code then tracks the thermal evolution of the core and mantle and when dynamo generation is possible.
 
 ## Contents of this repository
 This repository contains the code required to run the model, an example run and plotting notebook and the parameter files for Sanderson et. al. 2024b.
@@ -21,7 +21,7 @@ conda env create -f environment.yml
 ```
 4. The code is now ready to be used.
 
-### Directory structure
+### Example Directory structure
 ```mermaid
 flowchart TD;
 Repository --- g(["All code"]) & Plotting_scripts & Templates & Results;
@@ -29,9 +29,13 @@ Results --- c["Single_run"] & d["Multi_run"];
 c --- k("auto_params.csv")
 style Results fill:#990000
 d --- e["params_1"] & f["params_2"] & h("all_sucess_info.csv") & i("fail_params.csv") & j("inval_params.csv");
+style h fill:#5c0099
+style i fill:#5c0099
+style j fill:#5c0099
 e --- l("auto_params.csv")
 f --- m("auto_params.csv")
 ```
+The Results directory in red must be added by the user on installation. The purple csv files must be copied across from the Templates directory after a series of runs with multiple subdirectories is complete.
 
 ### Dependencies
 This code was written using Python 3.10.12 but should work for all Python 3 releases. It also requires pandas, matplotlib, numpy and scipy to run. A virtual environment with the required packages can be installed using the environment.yml file and the instructions above.
@@ -77,10 +81,11 @@ The model outputs:
 
 The frequency of time series output can be adjusted using `save_interval_d` and `save_interval_t` for the pre- and post-differentiation portions of the thermal evolution.
 
-`Example_output_plots.ipynb` contains some example plots.
-
 #### Magnetic field generation output
 The summary file is designed to save on/off times for up to three dynamo generation periods for critical magnetic Reynolds numbers of 10, 40 and 100. `save_interval_mag` sets the minimum size for a detectable gap in dynamo generation. The minimum value is `2*save_interval_t`. Too small a minimum size will have more than 3 dynamo generation periods due to the oscillations and magnetic Reynolds number during core solidification. Too large a minumum size and you may miss gaps in dynamo generation. Larger bodies have longer gaps, so for bodies >300km radius `save_interval_mag=10*Myr` is recommended for 100km radius bodies `save_interval_mag=1*Myr`is recommended.
+
+### Example use
+The `Plotting_scripts` directory contains the results of an example run and `Example_output_plots.ipynb` contains some example plots.
 
 ## Citing the model
 If you use this model please cite Sanderson et. al. 2024a. This paper will be submitted soon. If you would like to cite the model in the meantime, please use the Zenodo link.
