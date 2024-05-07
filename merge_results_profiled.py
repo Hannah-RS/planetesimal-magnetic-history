@@ -16,6 +16,7 @@ num_runs = 3 #number of subruns
 def combine_csv(): 
     nfails = 0 #total number of fails
     nsuc = 0 #total number of sucesses
+    ninval = 0 #number of invalid parameter combos
     for i in range(num_runs):
         #combine all run params and results
         # by default the merging here will remove unfinished runs which didn't save mag field parameters
