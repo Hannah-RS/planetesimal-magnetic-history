@@ -15,14 +15,14 @@ Describe required file structure and set up (run parameters and results folder)
 ### Directory structure
 ```mermaid
     ---
-title: Directory structure
----
-flowchart TD
-Repository --- Run_parameters & Results
-Run_parameters --- a["Single_run"] & b["Multi_run"]
-b --- params_1 & params_2
-Results --- c["Single_run"] & d["Multi_run"]
-d --- e["params_1] & f"[params_2] & all_sucess_info.csv & fail_params.csv & inval_params.csv
+    title: Directory structure
+    ---
+    flowchart TD
+    Repository --- Run_parameters & Results
+    Run_parameters --- a["Single_run"] & b["Multi_run"]
+    b --- params_1 & params_2
+    Results --- c["Single_run"] & d["Multi_run"]
+    d --- e["params_1] & f"[params_2] & all_sucess_info.csv & fail_params.csv & inval_params.csv
 
 ```
 
