@@ -15,11 +15,12 @@ This repository contains the code required to run the model, an example run and 
 git clone https://github.com/Hannah-RS/learning-model.git
 ```
 2. Create a Results subdirectory inside the repository to save your results (the code works on the structure shown in the diagram below)
-3. Create a virtual environment with all required Python packages by running the following command in terminal
+3. Open `environment.yml` and choose the name for your virtual environment
+4. Create a virtual environment with all required Python packages by running the following command in terminal
 ```
 conda env create -f environment.yml
 ```
-4. The code is now ready to be used.
+5. The code is now ready to be used.
 
 ### Example Directory structure
 ```mermaid
