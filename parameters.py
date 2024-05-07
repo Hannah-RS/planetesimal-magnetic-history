@@ -24,6 +24,7 @@ rhoa_var = False #is the undifferentiated density calculated based on inputs - f
 out_interval = 20 #how many times do you want t to be printed in the whole run
 save_interval_d = 0.01*Myr # how often do you want each variable to be saved during differentiation
 save_interval_t = 0.1*Myr # how often do you want each variable to be saved during thermal evolution
+save_interval_mag = 10*Myr #minimum size for detectable gap in dynamo generation
 
 # Parameters that will vary
 if automated == True:
