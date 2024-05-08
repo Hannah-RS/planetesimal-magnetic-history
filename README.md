@@ -2,6 +2,7 @@
 
 Thermal evolution and dynamo generation model for a planetesimal. 
 
+[![DOI](https://zenodo.org/badge/509014410.svg)](https://zenodo.org/doi/10.5281/zenodo.11147997)
 
 ## Basic model description
 The model is described in Sanderson et. al. 2024a, "Unlocking planetesimal magnetic field histories: a refined, versatile model for thermal evolution and dynamo generation", which will be submitted to Icarus and available as a preprint soon. This is a spherically symmetric 1D thermal evolution and dynamo generation model. It begins with an undifferentiated planetesimal which heats up due to decay of $^{26}Al$ and differentiates into a core and mantle. The code then tracks the thermal evolution of the core and mantle and when dynamo generation is possible.
