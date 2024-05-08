@@ -77,8 +77,9 @@ For runs on a remote machine, it may be useful to create a subdirectory for para
 ### Model outputs
 The model outputs:
 + `run_results.csv` : summary statistics for the model run
-+ `run_<n>_diff.npz` : npz file containing time series arrays for the temperature profile, iron and silicate melt fractions, specific heat capacity, Rayleigh number and critical Rayleigh number, stagnant lid thickness, radiogenic heating and time for the planetesimal prior to differentiation
-+ `run_<n>.npz` : npz file containing time series arrays for the temperature profile, heat fluxes, boundary layer thicknesses, core sulfur content, fractional inner core radius,   Rayleigh number and critical Rayleigh number, magnetic field strength, magnetic Reynolds number and compositional/thermal buoyancy flux ratio and time for the planetesimal afterS to differentiation 
++ `run_<n>_diff.npz` : npz file containing time series arrays for planetesimal properties prior to differentiation
++ `run_<n>.npz` : npz file containing time series arrays for planetesimal properties after differentiation 
+A full description of the model output can be found in the METADATA file.
 
 The frequency of time series output can be adjusted using `save_interval_d` and `save_interval_t` for the pre- and post-differentiation portions of the thermal evolution.
 
@@ -89,10 +90,10 @@ The summary file is designed to save on/off times for up to three dynamo generat
 The `Plotting_scripts` directory contains the results of an example run and `Example_output_plots.ipynb` contains some example plots.
 
 ## Citing the model
-If you use this model please cite Sanderson et. al. 2024a. This paper will be submitted soon. If you would like to cite the model in the meantime, please use the Zenodo link.
+If you use this model please cite Sanderson et. al. 2024a. This paper will be submitted soon. If you would like to cite the model in the meantime, please use the Zenodo doi.
 
 ## Issues
-If you have any questions about the code please email hannah.sanderson@earth.ox.ac.uk. 
+If you have any questions about the code please email hannah.sanderson"at"earth.ox.ac.uk. 
 If there are any issues or bugs in the code please raise an [issue](https://github.com/Hannah-RS/learning-model/issues)
 
 ## References
