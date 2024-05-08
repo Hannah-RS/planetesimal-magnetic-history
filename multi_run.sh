@@ -6,7 +6,7 @@ else
         echo "Directory already has files - appending"
     else
         echo "Directory is empty - copying templates"
-        cp Templates/* $1
+        cp Templates/run_results.csv $1
     fi
     i=0
     nruns=$(awk '(NR>2)' $1/auto_params.csv | awk -F',' '$NF<-1' | wc -l) #only count unrun lines - status is in last column
@@ -17,7 +17,7 @@ else
         SECONDS=0 #start timer
         python solver.py $1/ >> $1/output.txt 2>&1 #run model and write terminal output to file, send error there too
         runt=$SECONDS #stop timer
-        #printf '%s\n' $runi $runt | paste -sd ',' >> $1/runtime.csv #save run number and time to file
+        
         echo Run $runi has been completed in 
         printf '%dd:%dh:%dm:%ds\n' $((runt/86400)) $((runt%86400/3600)) $((runt%3600/60)) $((runt%60))
         i=$((i+1)) 

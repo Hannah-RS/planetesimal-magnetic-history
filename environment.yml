@@ -1,0 +1,10 @@
+name: thermdyn
+channels:
+  - defaults
+dependencies:
+  - pandas
+  - python
+  - matplotlib
+  - scipy
+  - seaborn
+  - memory_profiler

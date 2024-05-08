@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script to create auto_params.csv for chosen parameters ranges
+Script to create auto_params.csv for variations in a single parameter
 """
 import pandas as pd
 import numpy as np

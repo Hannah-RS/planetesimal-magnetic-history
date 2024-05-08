@@ -13,11 +13,11 @@ Can toggle on and off solidification
 """
 #import constants and parameters    
 from parameters import Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Pc, gc
-from q_funcs import Qlt, Qr, Qgt
+from q_funcs import qlt, qr, qgt
 from fe_fes_liquidus import fe_fes_liquidus_dp
 import numpy as np
-from Rem_calc import Rem_b
-from heating import Fe_heating
+from rem_calc import rem_b
+from heating import fe_heating
 
 def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
     """
@@ -63,12 +63,12 @@ def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
         Vconv = 4/3*np.pi*rc**3*(f**3)
         
     
-    Qst = rhoc*cpc*Vconv
-    Qrad = rhoc*Vconv*Fe_heating(t)
+    qst = rhoc*cpc*Vconv
+    qrad = rhoc*Vconv*fe_heating(t)
        
-    dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb+Qrad)/Qst
+    dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb+qrad)/qst
     #calculate magnetic field
-    Rem, Bdip_cmb, comp, therm = Rem_b(f, 0, Xs, Tcore, Fcmb, False,min_unstable_ind) #dfdt = 0 for  non-solidifying   
+    Rem, Bdip_cmb, comp, therm = rem_b(f, 0, Xs, Tcore, Fcmb, False,min_unstable_ind) #dfdt = 0 for  non-solidifying   
     
     return dTcdt, Rem, Bdip_cmb, comp, therm
 
@@ -106,14 +106,14 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
             buoyancy flux from superadiabatic heat flux [kg/s]
     """
     dTl_dP = fe_fes_liquidus_dp(Xs, Pc)
-    Qst = rhoc*Vc*cpc
-    Qrad = Qr(t)
-    Ql = Qlt(Tcore[0],f,dTl_dP)
-    #Qg = Qgt(Tcore[0],f,dTl_dP,Xs) #exclude as makes neglible difference
+    qst = rhoc*Vc*cpc
+    qrad = qr(t)
+    ql = qlt(Tcore[0],f,dTl_dP)
+    #qg = qgt(Tcore[0],f,dTl_dP,Xs) #exclude as makes neglible difference
 
-    dTcdt = (Qrad-Fcmb*Acmb)/(Qst-Ql)#+Qg)
+    dTcdt = (qrad-Fcmb*Acmb)/(qst-ql)#+Qg)
     dfdt = - dTcdt/(rhoc*gc*dTl_dP*rc)
     f_new = f+dfdt*dt
-    Rem, Bdip_cmb, comp, therm = Rem_b(f, dfdt, Xs, Tcore, Fcmb, True,0) #if core is solidifying there is no thermal stratification
+    Rem, Bdip_cmb, comp, therm = rem_b(f, dfdt, Xs, Tcore, Fcmb, True,0) #if core is solidifying there is no thermal stratification
    
     return dTcdt, f_new, Rem, Bdip_cmb, comp, therm

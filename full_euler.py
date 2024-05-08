@@ -16,15 +16,15 @@ from parameters import Ts, Myr, dr, out_interval, save_interval_t, km, kc, alpha
         Pc, automated, conv_tol, n_cells, temp_tol, rcr, nccells, nmcells
 
 #import required functions
-from T_cond import Tm_cond_calc, Tc_cond_calc
+from temp_cond import Tm_cond_calc, Tc_cond_calc
 from dTmdt_def import dTmdt_calc
 from dTcdt_def import dTcdt_calc, dTcdt_calc_solid 
-from Rayleigh_def import Rayleigh_calc, Rayleigh_crit
+from rayleigh_def import rayleigh_calc, rayleigh_crit
 from cmb_bl import delta_l, delta_c
-from q_funcs import Qr
+from q_funcs import qr
 from fe_fes_liquidus import fe_fes_liquidus_bw 
 from stratification import volume_average
-from heating import Al_heating
+from heating import al_heating
 
 def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     """
@@ -164,12 +164,12 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Tm_conv_new = 0 #default convective temp
     Fs_new = -km*(T_new_mantle[-1]-T_new_mantle[-2])/dr
     Flid_new = Fs_new #by default lid flux is same as surface
-    h = Al_heating(tsolve_new)
+    h = al_heating(tsolve_new)
     Ur_new = rhom*Vm*h/abs(Fs_new*As) #calculate Urey ratio
     
     # Step 2. Is the mantle convecting? Calculate stagnant lid thickness, base thickness and Rayleigh number
-    Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T0_mantle[1],Ur_new,default) #use temp at base of mantle 
-    Racrit_new = Rayleigh_crit(T0_mantle[1])   
+    Ra_new, d0_new, RaH_new, RanoH_new = rayleigh_calc(tsolve_new,T0_mantle[1],Ur_new,default) #use temp at base of mantle 
+    Racrit_new = rayleigh_crit(T0_mantle[1])   
     nlid_cells = round(d0_new/dr)
     if nlid_cells ==0:
         lid_start = nmantle_cells -2
@@ -219,7 +219,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         stratification_old = False #no stratification when solidifying
         if Xs_0>= Xs_eutectic:
             dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
-            dfdt = -(Fcmb_new*Acmb-Qr(tsolve_new))/(4*np.pi*rc**3*f0**2*Lc*rhoc)                    
+            dfdt = -(Fcmb_new*Acmb-qr(tsolve_new))/(4*np.pi*rc**3*f0**2*Lc*rhoc)                    
             f_new = f0 + dfdt*dt
             Xs_new = Xs_0 #sulfur concentration unchanged in eutectic solidification
             #find new convective temperature
@@ -335,8 +335,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     lid_start = nmantle_cells - nlid_cells - 1  #index in temp array where lid starts
                 if Tm_conv_old ==0: #if was conducting use base temp
                     Tm_conv_old = T_old_mantle[1] #use mantle base temp
-                Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,Tm_conv_old,Ur_old,default) #Use the temperature just below the lid 
-                Racrit_new = Rayleigh_crit(Tm_conv_old)
+                Ra_new, d0_new, RaH_new, RanoH_new = rayleigh_calc(tsolve_new,Tm_conv_old,Ur_old,default) #Use the temperature just below the lid 
+                Racrit_new = rayleigh_crit(Tm_conv_old)
                 #calculate temp change
                 mantle_conv = True               
                 dTdt_mantle_conv = dTmdt_calc(tsolve_old,Tm_conv_old,d0_old,Flid_old,Fcmb_old) #convective dTdt - use temp below lid
@@ -351,8 +351,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                     Flid_new = -km*(T_new_mantle[lid_start+1]-T_new_mantle[lid_start])/dr
                 
             else: #mantle not convecting, use basal mantle temp
-                Ra_new, d0_new, RaH_new, RanoH_new = Rayleigh_calc(tsolve_new,T_old_mantle[1],Ur_old,default) #use temp at base of mantle 
-                Racrit_new = Rayleigh_crit(T_old_mantle[1])            
+                Ra_new, d0_new, RaH_new, RanoH_new = rayleigh_calc(tsolve_new,T_old_mantle[1],Ur_old,default) #use temp at base of mantle 
+                Racrit_new = rayleigh_crit(T_old_mantle[1])            
                 
                 if tsolve_new/Myr > 5: #turn off convection if mantle no longer heating up
                     conv_off = True
@@ -366,7 +366,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Tm_conv_new = 0
         
         # Calculate Urey ratio with correct heat flux
-        h = Al_heating(tsolve_new)
+        h = al_heating(tsolve_new)
         Ur_new = rhom*Vm*h/abs(Fs_new*As)
         
         #store values
@@ -391,7 +391,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             stratification_new = False #thermal stratification is removed by solidification
             if Xs_old>= Xs_eutectic:
                 dTcdt = 0 # whilst undergoing eutectic solidification there is no temp change
-                dfdt = -(Fcmb_old*Acmb-Qr(tsolve_new))/(4*np.pi*rc**3*f_old**2*Lc*rhoc)                    
+                dfdt = -(Fcmb_old*Acmb-qr(tsolve_new))/(4*np.pi*rc**3*f_old**2*Lc*rhoc)                    
                 f_new = f_old + dfdt*dt
                 Xs_new = Xs_old #sulfur concentration unchanged in eutectic solidification
                 #find new convective temperature
