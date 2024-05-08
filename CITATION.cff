@@ -5,7 +5,7 @@ authors:
   given-names: "Hannah"
   orcid: "https://orcid.org/0000-0001-5842-6985"
 title: "A refined, versatile model for planetesimal thermal evolution and dynamo generation"
-version: 0.1.0
-doi: 
+version: 1.0.0-alpha
+doi: 10.5281/zenodo.11147998
 date-released: 2024-05-08
-url: "https://github.com/Hannah-RS/learning-model"
+url: "https://github.com/Hannah-RS/planetesimal-magnetic-history"
