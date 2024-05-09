@@ -142,6 +142,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     tsolve = np.zeros([m])
         
     #Step 0. Calculate time, get two separate temperature arrays
+    # assume mantle and core are isothermal at point of differentiation - valid due to strong heating
     # the last cell of the core array is the same as the first cell of the mantle array
     tsolve_new = tstart + dt
     T0_core = T0[:i_core+1] #include last core cell
