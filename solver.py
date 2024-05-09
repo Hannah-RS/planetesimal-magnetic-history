@@ -313,7 +313,7 @@ else:
 if full_save == True:
     np.savez_compressed(f'{folder}run_{run}', Tc = Tc, Tc_conv = Tc_conv, 
                         Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, 
-                        Tm_surf = Tm_surf, T_profile = Tprofile, Flid = Flid, 
+                        Tm_surf = Tm_surf, T_profile = Tprofile, 
                         f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, 
                         Ur=Ur, Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, 
                         t=t, Rem = Rem, B=B, buoyr = buoyr, Flux = Flux) 

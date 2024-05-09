@@ -72,8 +72,6 @@ RanoH: array
     non-radiogenic Rayleigh number for convecting mantle
 Racrit: array
     critical Rayleigh number for convecting mantle
-Flid: array
-    heat flux across base of stagnant lid [W m^-2]
 Flux : array
     Fs Flux[0,:]: surface heat flux [W m^-2]
     Fad Flux[1,:]: adiabatic CMB heat flux [W m^-2]
