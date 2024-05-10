@@ -1,3 +1,2 @@
 run,r,rcr,default,rcmf,eta0,beta,w,etal,alpha_n,Xs_0,Fe0,t_acc_m,t_end_m,dr,dt,icfrac
 ,m,,,,Pas,K^-1,K,Pas,,Wt %,,Myr,Myr,m,t_cond_core,
-1,500000,0.5,vary,0.3,1E+019,0.0225,5,10,30,26.7,1E-08,0.8,1000,500,0.075,0
