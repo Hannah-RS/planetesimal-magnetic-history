@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Stitch results of runs into one csv
+Stitch results of runs in subfolders into one csv
 """
 from load_info import combine_info
 import pandas as pd

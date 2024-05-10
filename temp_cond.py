@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Expression for dT/dt from rearranging 13 in supplementary materials of Bryson (2019)
-Calculates rate of change of conductive profile for the whole body and new temperature profile
-"""
 # set up
-import numpy as np
-import scipy.sparse as sp
 from parameters import cpc
 from cp_func import cp_calc_arr
 from heating import al_heating, fe_heating
@@ -21,14 +15,14 @@ def Tm_cond_calc(t,dt,T,sparse_mat):
     dt : float
         time step [s]
     T: array
-        temperature profile, first value is r=0, last value is surface
+        temperature profile, first value is r=rc, last value is surface [K]
     sparse_mat: sparse matrix
         stencil for conductive temperature evolution
 
     Returns
     -------
     Tm_new :  array
-            new temperature profile
+            new mantle temperature profile [K]
 
     """
 
@@ -55,14 +49,14 @@ def Tc_cond_calc(t,dt,T,sparse_mat,radio=True):
     dt : float
         time step [s]
     T: array
-        temperature profile, first value is r=0, last value is surface
+        temperature profile, first value is r=0, last value is rc [K]
     sparse_mat: sparse matrix
         stencil for conductive temperature evolution
 
     Returns
     -------
     Tc_new :  array
-            new temperature profile
+            new core temperature profile [K]
 
     """
 

@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Function for differentiating an asteroid. Based on the process in Dodds et. al. (2021)
-"""
 from stencil import cond_stencil_general
 from rayleigh_def import rayleigh_differentiate
 from heating import alfe_heating
@@ -13,7 +10,8 @@ import numpy as np
 from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V, Rac, rcmf, n_cells
 def differentiation(Tint,tacc,r,dr,dt):
     """
-    
+    Thermal evolution of planetesimal prior to differentiation as described in
+    Section 2.4 of Sanderson et. al. (2024)
 
     Parameters
     ----------
@@ -190,7 +188,7 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     Parameters
     ----------
     Tint : float
-        array of initial temperatures
+        array of initial temperatures [K]
     tacc: float
         accretion time after CAIs [s]
     r : float
@@ -211,7 +209,7 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     Xsi: float
         proportion of silicate in each cell which is melted in differentiation [0 to 1]
     cp : float
-        effective specific heat capacity of each cell
+        effective specific heat capacity of each cell [J /kg /K]
     Ra: float
         Rayleigh number for body
     Ra_crit: float

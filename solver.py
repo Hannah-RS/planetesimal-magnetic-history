@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script for solving the thermal evolution of an asteroid. 
+Main script for solving the thermal evolution and dynamo generation of a planetesimal.
+For non-automated runs change parameters in parameters.py and then run this script.
 """
 # import modules
 import numpy as np

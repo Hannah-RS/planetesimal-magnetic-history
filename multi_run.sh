@@ -1,3 +1,4 @@
+# run multiple parameter combinations
 #if directory is empty except for parameters file copy csv templates from main directory
 if [ $(ls $1|wc -l) -lt 1 ]; then
     echo "No auto parameters file - aborting"

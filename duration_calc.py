@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Functions for testing and saving on and off of a certain parameter
+Functions for finding and saving on and off times of a certain parameter
 """
 import numpy as np
 import pandas as pd

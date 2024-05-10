@@ -9,7 +9,8 @@ from viscosity_def import viscosity
 
 def delta_l(Tm,Tcmb):
     """
-    Eqn 13, 14, 16, 3 in Thiriet et. al. 2019
+    Mantle bottom CMB boundary layer thickness.
+    Eqn. 11 in Sanderson et. al. (2024).
     Parameters
     ----------
     Tm : float
@@ -30,7 +31,8 @@ def delta_l(Tm,Tcmb):
 
 def delta_c(Tc,Tcmb):
     """
-    Eqn on pg 14 in Dodds 2020 with added Rac based on boundary layer stability analysis
+    Core CMB boundary layer thickness.
+    Eqn. 21 in Sanderson et. al. (2024).
     Parameters
     ----------
     Tc : float
@@ -39,6 +41,6 @@ def delta_c(Tc,Tcmb):
         CMB temperature [K]
     Returns
     -------
-    core cmb boundary layer thickness
+    core cmb boundary layer thickness [m]
     """
     return ((kappa_c*eta_c*Rac)/(rhoc*alpha_c*gc*abs(Tc-Tcmb)))**(1/3)

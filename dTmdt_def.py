@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Expression for dTm/dt from rearranging eqn 25 in Dodds (2020) and dTdt for an undifferentiated body
-"""
 import numpy as np
 from parameters import rhom, As, Acmb, rhoa, V, r, rc, Vm, convect_ratio
 from heating import al_heating, alfe_heating
@@ -10,7 +7,9 @@ from cp_func import cp_calc_int
 
 def dTmdt_calc(t,Tconv,d0,Flid,Fcmb):
     """
-
+    Temperature change of convecting portion of the mantle.
+    Uses Eqn. 14 of Sanderson et. al. (2024)
+    
     Parameters
     ----------
     t : float
@@ -44,7 +43,9 @@ def dTmdt_calc(t,Tconv,d0,Flid,Fcmb):
 
 def dTadt_calc(t,Tconv,d0,Flid,eutectic): 
     """
-
+    Temperature change of convecting portion of undifferentiated body.
+    Uses Eqn. 6 of Sanderson et. al. (2024)
+    
     Parameters
     ----------
     t : float

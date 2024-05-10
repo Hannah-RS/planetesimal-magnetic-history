@@ -3,13 +3,14 @@
 """
 Function for creating the stencil for the solution of the diffusion equation
 Requires no inputs just run once at the beginning of model for a given body to create it then use multiple times
-Returns r_mat which is the required stencil based on Equation 13 in supplementary materials of Bryson (2019) but with Ts fixed and dT/dr = 0 at r=0
 Three stencils: one for core, one for mantle and one without k which can be multiplied in later
+Eqn. 39, 40 and 41 in Sanderson et. al. (2024)
 """
 from parameters import n_cells, nccells, nmcells
 def cond_stencil_mantle(r,rc,dr,krho):
     """
-    
+    Mantle conductive stencil
+    Eqn. 41 in Sanderson et. al. (2024)
 
     Parameters
     ----------
@@ -59,7 +60,8 @@ def cond_stencil_mantle(r,rc,dr,krho):
 
 def cond_stencil_core(r,rc,dr,kappa_c):
     """
-
+    Core conductive stencil
+    Eqn. 40 in Sanderson et. al. (2024)
     Parameters
     ----------
     r : float
@@ -106,7 +108,9 @@ def cond_stencil_core(r,rc,dr,kappa_c):
 
 def cond_stencil_general(r,dr):
     """
-
+    Undifferentiated body conductive stencil
+    Eqn. 39 in Sanderson et. al. (2024)
+    
     Parameters
     ----------
     r : float

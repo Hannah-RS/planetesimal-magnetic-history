@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Fe-FeS liquidus and Fe-FeS density
+Functions required to calculate Fe-FeS liquidus and Fe-FeS density
 
-Pressure dependent liquidus from Buono & Walker (2011)
 """
 import numpy as np
 
 def central_pressure(rhom,rhoc,r,rc):
     """
     Pressure at the centre of a planetesimal assuming constant core and mantle density
-
+    Eqn. 31 in Sanderson et. al. (2024)
+    
     Parameters
     ----------
     rhom : float
@@ -35,12 +35,12 @@ def central_pressure(rhom,rhoc,r,rc):
 
 def weight_perc_to_mole_frac(Xs):
     """
-    
+    Convert from wt % sulfur to mole fraction of sulfur.
 
     Parameters
     ----------
     s : float
-        wt % sulfur
+        sulfur content [wt %]
 
     Returns
     -------
@@ -58,12 +58,12 @@ def weight_perc_to_mole_frac(Xs):
 
 def weight_perc_to_at_frac(Xs):
     """
-    
+    Convert from wt % sulfur to atom fraction of sulfur.
 
     Parameters
     ----------
     Xs : float
-        wt % sulfur
+        sulfur content [wt %]
 
     Returns
     -------
@@ -77,12 +77,13 @@ def weight_perc_to_at_frac(Xs):
 
 def fe_fes_density(Xs):
     """
-    Density based on eqn. 1 in Morard 2019
+    Fe-FeS density
+    Eqn. 37 in Sanderson et. al. (2024)
 
     Parameters
     ----------
     Xs : float
-        wt % sulfur
+        sulfur content [wt %]
 
     Returns
     -------
@@ -95,13 +96,11 @@ def fe_fes_density(Xs):
 
 def fe_fes_liquidus_linear(Xs):
     """
-    Fe-FeS liquidus - linear liquidus approximation for eutectic solidification at 32% S at 1234K
-    liquid iron melting at 1810 K 
-    see Kathryn's thesis pg 180
+    Fe-FeS linear liquidus approximation
     Parameters
     ----------
     Xs : float
-        wt % sulfur
+        sulfur content [wt %]
 
     Returns
     -------
@@ -113,11 +112,12 @@ def fe_fes_liquidus_linear(Xs):
 def fe_fes_liquidus_bw(Xs,P):
     """
     Fe-FeS liquidus from Buono & Walker (2011) - eqn 29. Valid for sub-eutectic S contents up to 10GPa. 
-
+    Eqn. 29 in Sanderson et. al. (2024)
+    
     Parameters
     ----------
     Xs : float
-        wt % sulfur
+        sulfur content [wt %]
     P : float
         pressure [GPa]       
 
@@ -148,7 +148,7 @@ def fe_fes_liquidus_bw_min(Xs,P):
     Parameters
     ----------
     Xs : float
-        wt % sulfur
+        sulfur content [wt %]
     P : float
         pressure [GPa]       
 
@@ -177,7 +177,7 @@ def fe_fes_liquidus_dp(Xs,P):
     Parameters
     ----------
     Xs : float
-        wt % sulfur
+        sulfur content [wt %]
     P : float
         pressure [GPa]       
 

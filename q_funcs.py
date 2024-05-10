@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Expressions for heat fluxes divided by dTcdt from Nimmo (2009)
+Expressions for individual power sources in the core during core solidification
+divided by dTcdt from Nimmo (2009)
 """
 from parameters import rc, rhoc, Lc, G, gc, rho_exp, rhofe_s
 from fe_fes_liquidus import fe_fes_density
@@ -10,19 +11,20 @@ import numpy as np
 
 def qlt(Tc,f,dTl_dP):
     """
-
+    Latent heat release
     Parameters
     ----------
     Tc : float
-        core temperature.
+        core temperature [K]
     f : float
         fractional inner core radius.
     dTl_dP : float
-        dTl/dP 
+        pressure gradient of the liquidus [K/Pa]
 
     Returns
     -------
-    Power contribution due to release of latent heat divided by dTc/dt
+    qlt: float
+        Power contribution due to release of latent heat divided by dTc/dt [W]
 
     """
     qlt = 4*np.pi*(f*rc)**2*Lc/(gc*dTl_dP)
@@ -31,21 +33,23 @@ def qlt(Tc,f,dTl_dP):
     
 def qgt(Tc,f,dTl_dP,Xs):
     """
-
+    GPE release
     Parameters
     ----------
     Tc : float
-        core temperature.
+        core temperature [K]
     f : float
         fractional inner core radius
     dTl_dP : float
-        dTl/dP pressure gradient of the liquidus
+        pressure gradient of the liquidus [K/Pa]
     Xs : float
-        sulfur content wt %
+        sulfur content [wt %]
 
     Returns
     -------
-    Power contribution due to release of GPE from release of light elements when inner core solidifies
+    qgt: float
+        Power contribution due to release of GPE from release of light elements 
+        when inner core solidifies [W]
 
     """
     rhol = fe_fes_density(Xs)*rho_exp
@@ -56,7 +60,8 @@ def qgt(Tc,f,dTl_dP,Xs):
 
 def qr(t):
     """
-
+    Radiogenic heating
+    
     Parameters
     ----------
     t: float
@@ -66,7 +71,7 @@ def qr(t):
 
     Returns
     -------
-    Power source due to radiogenic heat production
+    Power source due to radiogenic heat production [W]
 
     """
     

@@ -6,18 +6,19 @@ from variable_viscosity import eta_calc
 
 def viscosity(Tm, model = default):
     """
-    Different viscosity models - 
+    Overall viscosity function which can call different viscosity models 
     
     Parameters
     ----------
     Tm : float
-        mantle temperature
+        mantle temperature [K]
     model: str, default specified in run parameters
-        viscosity model to use, options are vary (Sanderson et. al. 2024 model), Bryson, Dodds
+        viscosity model to use, options are 'vary' (Sanderson et. al. 2024 model), 'Bryson', 'Dodds'
 
     Returns
     -------
-    Silicate viscosity
+    eta: float
+        mantle viscosity [Pas]
 
     """
         
