@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script for calculating the Rayleigh number, expression for d0 comes from substituting in the expression for Rayleigh number
-so that length of the domain cancels
-Also script for Rayleigh number and critical Rayleigh number for differentiation section
+Rayleigh numbers
 """
-
 from viscosity_def import viscosity #import viscosity model
 from heating import al_heating, alfe_heating
 
@@ -31,8 +28,7 @@ def rayleigh_crit(Tb):
     
 def rayleigh_calc(t,Tb,Ur,model=default):
     """
-    
-
+    Calculate all Rayleigh numbers and stagnant lid thickness
     Parameters
     ----------
     t : float
@@ -46,7 +42,14 @@ def rayleigh_calc(t,Tb,Ur,model=default):
 
     Returns
     -------
-    Rayleigh number, stagnant lid thickness
+    Ram : float
+        model Rayleigh number (whichever of RanoH and RaH is greater)
+    d0 : float
+        stagnant lid thickness [m]
+    RaH : float
+        radiogenic heating Rayleigh number
+    RanoH : float
+        non-radiogenic (internal) Rayleigh number 
 
     """
 
@@ -67,7 +70,8 @@ def rayleigh_calc(t,Tb,Ur,model=default):
 
 def rayleigh_noH(Tb,model=default): 
     """
-    
+    Non-radiogenic Rayleigh number 
+    Eqn. 9 of Sanderson et. al. (2024)
 
     Parameters
     ----------
@@ -80,7 +84,8 @@ def rayleigh_noH(Tb,model=default):
 
     Returns
     -------
-    Rayleigh number, stagnant lid thickness
+    Ram : float
+        non-radiogenic (internal) Rayleigh number
 
     """
     eta = viscosity(Tb,model)
@@ -90,7 +95,8 @@ def rayleigh_noH(Tb,model=default):
 
 def rayleigh_H(t,Tb,rcore = rc, model=default,Fe=False):
     """
-    Rayleigh number for radiogenic heating
+    Rayleigh number for radiogenic heating for an internally heated sphere 
+    (Schubert 2021)
 
     Parameters
     ----------
@@ -106,7 +112,7 @@ def rayleigh_H(t,Tb,rcore = rc, model=default,Fe=False):
     Returns
     -------
     Ra : float
-        Rayleigh number
+        radiogenic Rayleigh number
 
     """
     eta = viscosity(Tb,model)
@@ -123,7 +129,7 @@ def rayleigh_H(t,Tb,rcore = rc, model=default,Fe=False):
 
 def rayleigh_differentiate(t,Tb,Ur,model=default):
     """
-    Check for onset of differentiation
+    Check for onset of convection in undifferentiated body
 
     Parameters
     ----------

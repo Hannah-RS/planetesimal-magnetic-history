@@ -27,7 +27,7 @@ def r1(x,f):
     Returns
     -------
     r1 : float
-        inner radius of outer solid shell
+        inner radius of outer solid shell [m]
 
     """
     r1 = rc*(x*(1-f**3)+f**3)**(1/3)
@@ -48,7 +48,7 @@ def r2(x,f):
     Returns
     -------
     r2 : float
-        inner solid core radius
+        inner solid core radius [m]
 
     """
     r2 = rc*(x*(1-f**3))**(1/3)
@@ -58,13 +58,14 @@ def conv_power(f,dfdt,l,Xs,Tcore,Fcmb,solid):
     """
     Convective power per unit volume for combined thermal and buoyancy flux 
     adapted from Buffett 1996 (11) and Aubert 2009
-
+    Eqn. 36 in Sanderson et. al. (2024)
+    
     Parameters
     ----------
     f : float
         fractional inner core radius
     dfdt : float
-        rate of change of inner core radius
+        rate of change of inner core radius [s^{-1}]
     l : float
         convective lengthscale [m]
     Xs : float
@@ -79,7 +80,7 @@ def conv_power(f,dfdt,l,Xs,Tcore,Fcmb,solid):
     Returns
     -------
     p : float
-        convective power per unit volume as defined in equation 17 in Aubert 2009
+        convective power per unit volume [kg/s]
     comp : float
             buoyancy flux from solidifying core [kg/s]
     therm : float
@@ -119,13 +120,14 @@ def rem_b(f,dfdt,Xs,Tcore,Fcmb,solid,min_unstable):
     """
     Calculation of dipole field strength on the surface and magnetic Reynolds number
     Based on scaling laws of Aubert 2009, Davidson 2013 and Davies 2022
+    Eqn. 34 in Sanderson et. al. (2024)
     
     Parameters
     ----------
     f : float
         fractional inner core radius
     dfdt : float
-        rate of change of inner core radius
+        rate of change of inner core radius [s^{-1}]
     Xs : float
         core sulfur content [wt %]
     Tcore : float

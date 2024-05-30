@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script to create auto_params.csv for variations in a single parameter
+Create auto_params.csv for variations in a single parameter. Creates the same number 
+of csv files as varied parameters. Set ranges and number of points for each parameter 
+as well as fixed parameters in the code blocks below.  
 """
 import pandas as pd
 import numpy as np

@@ -1,28 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Script for calculating the average temperature over a volume
-"""
 import numpy as np
 from parameters import rhoc, rc
 
 def volume_average(Tprofile, unstable_ind, dr):
     """
-    
-
+    Calculate average temperature over a volume. 
+    Used in calculating removal of thermal stratification
     Parameters
     ----------
     Tprofile : float
-        array of temperatures
+        array of temperatures [K]
     unstable_ind : int
         indices of positions of instability
     dr: float
-        grid spacing
+        grid spacing [m]
 
     Returns
     -------
     Tave: float
-        volume average temperature
+        volume average temperature [K]
 
     """
     rcore = np.arange(0,rc+dr,dr) 

@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Function for variable viscosity
-"""
 import numpy as np
 from parameters import alpha_n, Tml, Tms, rcmf, eta0, etal, w, Trcmf, beta 
 
 def part_a(T):
     """
     Exponential (Frank-Kamenetskii) viscosity variation with no melt fraction component
+    Eqn. 1a from Sanderson et. al. (2024)
     
     Parameters
     ----------
@@ -26,7 +24,8 @@ def part_a(T):
 
 def part_b(T):
     """
-    Exponential (Frank-Kamenetskii) viscosity variation
+    Exponential (Frank-Kamenetskii) viscosity variation with melt weakening
+    Eqn. 1b from Sanderson et. al. (2024)
     
     Parameters
     ----------
@@ -44,7 +43,8 @@ def part_b(T):
 
 def part_c(T):
     """
-    Linear in log-space approximation to initial decrease after rcmf
+    Linear in log-space approximation to initial decrease after critical melt fraction
+    Eqn. 1c from Sanderson et. al. (2024)
 
     Parameters
     ----------
@@ -65,7 +65,8 @@ def part_c(T):
 def part_d(T):
     """
     Krieger-Dougherty viscosity variation for supercritical melt fractions
-
+    Eqn. 1d from Sanderson et. al. (2024)
+    
     Parameters
     ----------
     T : float
@@ -85,7 +86,8 @@ def part_d(T):
 
 def eta_calc(T):
     """
-    Piecewise viscosity calculation
+    Piecewise mantle viscosity 
+    Eqn 1. from Sanderson et. al. (2024)
     Parameters
     ----------
     T : float

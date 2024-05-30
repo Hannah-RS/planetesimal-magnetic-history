@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Parameters for coupled mantle and core evolution model. 
-The source of each number is commented next to it. If there is no comment it is from
-Dodds et. al. (2021) and references within or it is a fundamental constant
+Parameters for thermal evolution and dynamo generation model.
+The reference for each value is commented next to it. If there is no comment it is from
+Dodds et. al. (2021) and references within or it is a fundamental constant.
+For non-automated runs, change parameters in this file before running solver.py
 """
 
 import numpy as np
@@ -48,7 +49,7 @@ if automated == True:
     dr = auto.loc[ind,'dr']
     icfrac = auto.loc[ind,'icfrac']
 else: #set manually
-    r = 100e3 # radius of asteroid [m]
+    r = 500e3 # radius of asteroid [m]
     rcr = 0.5 #core radius as a fraction of asteroid radius
     dr = 500 # grid size [m]
     default ='vary' #default viscosity model
@@ -58,11 +59,11 @@ else: #set manually
     w = 5 #width of log linear region [K]
     etal = 10 #liquid viscsoity [Pas]
     alpha_n = 30 #melt weakening (diffusion creep)
-    Xs_0 = 30.05# initial wt % sulfur in core 
+    Xs_0 = 26.7# initial wt % sulfur in core 
     Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 12
-    t_acc_m = 0.3 #accretion time [Myr]
-    t_end_m = 100 # max end time [Myr]
+    run = 1
+    t_acc_m = 0.8 #accretion time [Myr]
+    t_end_m = 1000 # max end time [Myr]
     icfrac = 0 #fraction of solidified material that forms a passive inner core during solidification
 
 # Size of body

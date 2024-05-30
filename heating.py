@@ -47,7 +47,8 @@ def fe_heating(t):
 def alfe_heating(t):
     """
     Radiogenic heating by 26Al and 60Fe (undifferentiated material)
-
+    Eqn. 4 in Sanderson et. al. (2024)
+    
     Parameters
     ----------
     t : float

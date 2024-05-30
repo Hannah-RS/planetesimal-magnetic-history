@@ -1,4 +1,5 @@
 #! /bin/bash
+# example array submission script
 #alter the SBATCH info here
 #SBATCH --job-name=arrayJob
 #SBATCH --output=arrayJob_%A_%a.out

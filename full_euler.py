@@ -1,14 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Script for solving thermal evolution for the entire evolution of the body
-Flow:
-    1. Obtain conductive profile for whole body
-    2. Calculate stagnant lid thickness and Rayleigh number
-    3. If Ra > Rac, replace rc < r < R-d0 with convective profile for mantle
-    4. Replace r < rc with isothermal core profile
-    5. Calculate df/dt and f    
-"""
 #import modules
 import numpy as np
 from parameters import Ts, Myr, dr, out_interval, save_interval_t, km, kc, alpha_c,\
@@ -28,7 +19,14 @@ from heating import al_heating
 
 def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     """
-    
+    Script for solving thermal evolution for the entire evolution of the body after differentiation.
+    Workflow:
+        1. Obtain conductive profile for whole body
+        2. Calculate stagnant lid thickness and Rayleigh number
+        3. If d0 + dl < R - rc replace rc < r < R-d0 with convective profile for mantle
+        4. Replace r < rc with isothermal core profile if the core is convecting
+        5. Calculate change in inner core radius, magnetic Reynolds number and field strength
+    Calculation ends when the core has solidified or specified end time has been exceeded.
 
     Parameters
     ----------
@@ -66,7 +64,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     f: array
         fractional inner core radius [m]
     Xs: array
-        wt % S in core 
+        core sulfur content [wt %]
     dl: array
         thickness of mantle CMB boundary layer (0 if mantle not convecting) [m]
     dc: array
@@ -142,6 +140,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     tsolve = np.zeros([m])
         
     #Step 0. Calculate time, get two separate temperature arrays
+    # assume mantle and core are isothermal at point of differentiation - valid due to strong heating
     # the last cell of the core array is the same as the first cell of the mantle array
     tsolve_new = tstart + dt
     T0_core = T0[:i_core+1] #include last core cell

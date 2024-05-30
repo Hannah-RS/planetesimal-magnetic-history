@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Function for choosing correct specific heat capacity
+Specific heat capacity functions.
 """
 from parameters import Tml, Tms, Ts_fe, Tl_fe, cpa, cpa_fe, cpa_fesi, cpa_si, cpm, cpm_p
 import numpy as np
@@ -9,7 +9,9 @@ import numpy as np
 def cp_calc_int(T,differentiate,eutectic=False):
     """
     
-    Calculate specific heat capacity for a single temperature
+    Calculate specific heat capacity for a single temperature value.
+    Before differentiation Eqn. 5 in Sanderson et. al. (2024)
+    After differentiation Eqn. 15 in Sanderson et. a. (2024)
     
     Parameters
     ----------
@@ -23,7 +25,7 @@ def cp_calc_int(T,differentiate,eutectic=False):
     Returns
     -------
     cp : float
-        effective specific heat capacity
+        effective specific heat capacity [J /kg /K]
 
     """
     
@@ -60,6 +62,8 @@ def cp_calc_arr(Tarr,differentiate):
     """
     
     Calculate specific heat capacity for a temperature array
+    Before differentiation Eqn. 5 in Sanderson et. al. (2024)
+    After differentiation Eqn. 15 in Sanderson et. a. (2024)
     
     Parameters
     ----------
@@ -71,7 +75,7 @@ def cp_calc_arr(Tarr,differentiate):
     Returns
     -------
     cp : float
-        array of heat capacities
+        array of heat capacities [J /kg /K]
 
     """
     cp = np.zeros([len(Tarr)])
@@ -105,6 +109,8 @@ def cp_calc_eut_arr(Tarr,differentiate):
     """
     
     Calculate specific heat capacity for a temperature array for eutectic Fe,FeS 
+    Before differentiation Eqn. 5 in Sanderson et. al. (2024)
+    After differentiation Eqn. 15 in Sanderson et. a. (2024)
     
     Parameters
     ----------
@@ -140,6 +146,8 @@ def cp_calc_eut_int(T,differentiate):
     """
     
     Calculate specific heat capacity for a temperature for eutectic Fe,FeS 
+    Before differentiation Eqn. 5 in Sanderson et. al. (2024)
+    After differentiation Eqn. 15 in Sanderson et. a. (2024)
     
     Parameters
     ----------

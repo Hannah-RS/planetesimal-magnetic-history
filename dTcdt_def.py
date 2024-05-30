@@ -1,16 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-When not solidifying:
-    dTc/dt  equation 27 of Dodds et al. (2020)
-    
-When solidiying:
-    Uses expressions for Ql and Qg from Nimmo (2009)
-    
-Neglects heating due to radioacitivity in core    
-Can toggle on and off solidification
-
-"""
 #import constants and parameters    
 from parameters import Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Pc, gc
 from q_funcs import qlt, qr, qgt
@@ -21,7 +10,11 @@ from heating import fe_heating
 
 def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
     """
-
+    Core temperature change prior to solidification for convecting portion of the core.
+    Includes the possibility of core thermal stratification.
+    Uses Eqn. 20 of Sanderson et. al. (2024)
+    Also calls function to calculate magnetic Reynolds number and field strengths.
+    
     Parameters
     ----------
     t : float
@@ -40,7 +33,7 @@ def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
     Returns
     -------
     dTcdt : float
-            rate of change of core temperature (if negative core is cooling)
+            rate of change of core temperature (if negative core is cooling) [K/s]
     Rem : float
         magnetic Reynolds number
     Bdip_cmb : float
@@ -74,7 +67,9 @@ def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
 
 def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     """
-    Temp change for solidification
+    Core temperature change during solidification.
+    Uses Eqn. 25 of Sanderson et. al. (2024)
+    Also calls function to calculate magnetic Reynolds number and field strengths.
     
     Parameters
     ----------
@@ -93,7 +88,7 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     Returns
     -------
     dTcdt : float
-            rate of change of core temperature (if negative core is cooling)
+            rate of change of core temperature (if negative core is cooling) [K/s]
     f_new : float
         new fractional inner core radius
     Rem : float

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script for solving the thermal evolution of an asteroid. 
+Main script for solving the thermal evolution and dynamo generation of a planetesimal.
+For non-automated runs change parameters in parameters.py and then run this script.
 """
 # import modules
 import numpy as np
@@ -11,15 +12,15 @@ import time #use this to time the integration
 
 #import time constants and initial conditions
 from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, rcr,\
-    kappa_c, save_interval_d, save_interval_t, save_interval_mag, km, Vm, As, rhom, step_m, Xs_0, \
-    default, rcmf, Fe0, full_save, B_save, eta0, etal, w, alpha_n, beta, n_cells, icfrac
+    kappa_c, save_interval_d, save_interval_t, save_interval_mag, km, Vm, As, rhom, step_m, t_cond_core,\
+    Xs_0, default, rcmf, Fe0, full_save, B_save, eta0, etal, w, alpha_n, beta, n_cells, icfrac
 from viscosity_def import viscosity
 
 if automated == True: 
     import sys
     folder = sys.argv[1]
 else:
-    folder = 'Results_combined/' #folder where you want to save the results
+    folder = 'Plotting_scripts/' #folder where you want to save the results
     ind = None #no index for csv
 #set flag for run started
 if automated == True:
@@ -31,7 +32,7 @@ else: #save run parameters in run_info file
     run_info = {"run":[run],"r":[r],"rcr":[rcr],"default":[default],"rcmf":[rcmf],"eta0":[eta0], 
                 "beta":[beta],"w":[w],"etal":[etal],"alpha_n":[alpha_n],"Xs_0":[Xs_0], 
                 "Fe0":[Fe0], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],
-                "step_m":[step_m],"icfrac":[icfrac]}
+                "step_m":[step_m/t_cond_core],"icfrac":[icfrac]}
     run_info = pd.DataFrame(run_info)
     run_info.to_csv(f'{folder}run_info.csv',index=False,mode='a',header=False)
 
@@ -89,17 +90,17 @@ if automated == False:
     rplot= np.arange(0,r+dr,dr)/1e3
     
     plt.figure()
-    plt.scatter(rplot,Tdiff[:,-1])
+    plt.scatter(rplot,Tdiff[-1,:])
     plt.xlabel('r/km')
     plt.ylabel('Temperature/K')
     plt.title('Temperature profile post differentiation')
 
 #rescale data and save here in case thermal evolution crashes
 #relabel so don't change input to model on next step
-Tdiffs = Tdiff[:,0::n_save_d]
-Xfes = Xfe[:,0::n_save_d]
-Xsis = Xsi[:,0::n_save_d]
-cps = cp[:,0::n_save_d]
+Tdiffs = Tdiff[0::n_save_d,:] 
+Xfes = Xfe[0::n_save_d,:]
+Xsis = Xsi[0::n_save_d,:]
+cps = cp[0::n_save_d,:]
 Ras = Ra[0::n_save_d]
 Ra_crits = Ra_crit[0::n_save_d]
 convects = convect[0::n_save_d]
@@ -121,7 +122,7 @@ tic = time.perf_counter()
 Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0,  \
     min_unstable, Ur, Ra, RaH, RanoH, Racrit, Fs, Flid, Fad, Fcmb, Rem, B, \
         buoyr, t, fcond_t = thermal_evolution(t_diff[-1],t_end,step_m,
-                                              Tdiff[:,-1],f0,sparse_mat_c,sparse_mat_m) 
+                                              Tdiff[-1,:],f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time2 = toc - tic    
 
@@ -140,7 +141,7 @@ print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_t
 int_time = int_time1+int_time2 #total time for the two scripts
 nmantle = int((r/dr)/2)
 diff_time = t_diff[-1]/Myr
-diff_T = Tdiff[int(nmantle),-1]
+diff_T = Tdiff[-1,int(nmantle)]
 peakT = np.amax(Tprofile[:,nmantle+1:])
 loc_max1 = np.where(Tprofile[:,nmantle+1:]==peakT)[0][0] #take the set of time coordinates and first value (they should all be the same)
 tmax = t[loc_max1]/Myr
@@ -313,7 +314,7 @@ else:
 if full_save == True:
     np.savez_compressed(f'{folder}run_{run}', Tc = Tc, Tc_conv = Tc_conv, 
                         Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, 
-                        Tm_surf = Tm_surf, T_profile = Tprofile, Flid = Flid, 
+                        Tm_surf = Tm_surf, T_profile = Tprofile, 
                         f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, 
                         Ur=Ur, Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, 
                         t=t, Rem = Rem, B=B, buoyr = buoyr, Flux = Flux) 
