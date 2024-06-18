@@ -238,7 +238,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             Xs_new = Xs_0/(f_new**3) #update sulfur content
             
     # Is the core convecting  without solidification?
-    elif Fcmb_new > Fad_new: #super adiabatic, core convects, don't check for stratification as haven't recalculated Tcmb yet
+    elif Fcmb_new > 0: #Fcmb > 0, core convects, don't check for stratification as haven't recalculated Tcmb yet
         core_conv = True
         nbl_cells = round(dc_new/dr)
         bl_start = ncore_cells - nbl_cells - 1 #index in temp array where lid starts
@@ -410,7 +410,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
                 Xs_new = Xs_0/(f_new**3) #update sulfur content
          
         # Is the core convecting  without solidification?
-        elif (Fcmb_old > Fad_old) and (stratification_old==False): #super adiabatic and no stratification, core convects
+        elif (Fcmb_old > 0) and (stratification_old==False): #super adiabatic and no stratification, core convects
             core_conv = True
             stratification_new = False
             min_unstable_new = 0
