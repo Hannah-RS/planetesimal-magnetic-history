@@ -121,7 +121,7 @@ print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtim
 tic = time.perf_counter()
 Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0,  \
     min_unstable, Ur, Ra, RaH, RanoH, Racrit, Fs, Flid, Fad, Fcmb, Rem, B, \
-        buoyr, t, fcond_t = thermal_evolution(t_diff[-1],t_end,step_m,
+        buoyr, qcore, t, fcond_t = thermal_evolution(t_diff[-1],t_end,step_m,
                                               Tdiff[-1,:],f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
 int_time2 = toc - tic    
@@ -317,7 +317,7 @@ if full_save == True:
                         Tm_surf = Tm_surf, T_profile = Tprofile, 
                         f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, 
                         Ur=Ur, Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, 
-                        t=t, Rem = Rem, B=B, buoyr = buoyr, Flux = Flux) 
+                        t=t, Rem = Rem, B=B, buoyr = buoyr, qcore = qcore, Flux = Flux) 
 
 if B_save == True:
     np.savez_compressed(f'{folder}run_{run}_B', B=B, Rem = Rem, t = t)

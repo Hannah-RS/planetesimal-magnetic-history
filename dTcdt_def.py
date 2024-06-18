@@ -42,6 +42,10 @@ def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
             buoyancy flux from solidifying core [kg/s]
     therm : float
             buoyancy flux from superadiabatic heat flux [kg/s]
+    qcore : np.ndarray
+            heat sources in the core, qr=radiogenic, qs=secular cooling
+            ql= latent heat release, qg=gpe release [qr, qs, ql, qg] [W]
+            
     """
     
     if stratification[0] == True:
@@ -56,14 +60,16 @@ def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
         Vconv = 4/3*np.pi*rc**3*(f**3)
         
     
-    qst = rhoc*cpc*Vconv
-    qrad = rhoc*Vconv*fe_heating(t)
+    qst = rhoc*cpc*Vconv #secular cooling
+    qrad = rhoc*Vconv*fe_heating(t) #radiogenic heating
        
     dTcdt = (f3*4*np.pi*(rstrat)**2-Fcmb*Acmb+qrad)/qst
     #calculate magnetic field
     Rem, Bdip_cmb, comp, therm = rem_b(f, 0, Xs, Tcore, Fcmb, False,min_unstable_ind) #dfdt = 0 for  non-solidifying   
+    #calculate fluxes to return
+    qcore =np.array([qrad,qst*dTcdt,0,0])
     
-    return dTcdt, Rem, Bdip_cmb, comp, therm
+    return dTcdt, Rem, Bdip_cmb, comp, therm, qcore
 
 def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     """
@@ -99,16 +105,22 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
             buoyancy flux from solidifying core [kg/s]
     therm : float
             buoyancy flux from superadiabatic heat flux [kg/s]
+    qcore : np.ndarray
+            heat sources in the core, qr=radiogenic, qs=secular cooling
+            ql= latent heat release, qg=gpe release [qr, qs, ql, qg] [W]
     """
     dTl_dP = fe_fes_liquidus_dp(Xs, Pc)
     qst = rhoc*Vc*cpc
     qrad = qr(t)
     ql = qlt(Tcore[0],f,dTl_dP)
     #qg = qgt(Tcore[0],f,dTl_dP,Xs) #exclude as makes neglible difference
-
-    dTcdt = (qrad-Fcmb*Acmb)/(qst-ql)#+Qg)
+    qg=0
+    
+    dTcdt = (qrad-Fcmb*Acmb)/(qst-ql+qg)
     dfdt = - dTcdt/(rhoc*gc*dTl_dP*rc)
     f_new = f+dfdt*dt
     Rem, Bdip_cmb, comp, therm = rem_b(f, dfdt, Xs, Tcore, Fcmb, True,0) #if core is solidifying there is no thermal stratification
-   
-    return dTcdt, f_new, Rem, Bdip_cmb, comp, therm
+    #calculate heat fluxes to return
+    qcore =np.array([qrad,qst*dTcdt,ql*dTcdt,qg*dTcdt])
+    
+    return dTcdt, f_new, Rem, Bdip_cmb, comp, therm, qcore
