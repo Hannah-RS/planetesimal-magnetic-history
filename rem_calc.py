@@ -95,9 +95,9 @@ def conv_power(f,dfdt,l,Xs,Tcore,Fcmb,solid):
         else: 
             drho = rhofe_s - rhol
         late = (alpha_c*rhol*Lc)/cpc #latent heat release at ICB
-        comp = (late-drho)*rc*dfdt
-        if comp <0:
-            raise ValueError('comp<0',late/drho)
+        comp = (late+drho)*rc*dfdt
+        if comp >0:
+            raise ValueError('comp>0',late/drho)
         #thermal buoyancy
         nic = round(r1(icfrac,f)/dr) #r1/dr
         Ficb = -kc*(Tcore[nic]-Tcore[nic-1])/dr 
@@ -110,7 +110,7 @@ def conv_power(f,dfdt,l,Xs,Tcore,Fcmb,solid):
     
     therm = alpha_c/cpc*(Ficb-Fad)
     #convert total buoyancy to convective power per unit volume
-    buoy = 4*np.pi*f**2*rc**2*(therm+comp)
+    buoy = 4*np.pi*f**2*rc**2*(therm-comp)
     Raq = gc*buoy/(4*np.pi*rhoc*Omega**3*l**4)
     p = 3/5*Raq #convective power per unit volume
     
