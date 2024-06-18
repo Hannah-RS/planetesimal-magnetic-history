@@ -23,6 +23,8 @@ Ra: array
     Rayleigh number for body
 Ra_crit: array
     critical Rayleigh number for body
+eta : array
+    viscosity of body [Pas]
 convect : array
     whether the body is convecting
 d0 : array
@@ -72,6 +74,8 @@ RanoH: array
     non-radiogenic Rayleigh number for convecting mantle
 Racrit: array
     critical Rayleigh number for convecting mantle
+eta : array
+    mantle viscosity [Pas]
 Flux : array
     Fs Flux[0,:]: surface heat flux [W m^-2]
     Fad Flux[1,:]: adiabatic CMB heat flux [W m^-2]
@@ -84,6 +88,12 @@ B : array
     dipole magnetic field strength at the surface [T]
 buoyr : array
         compositional buoyr[0,:] and thermal buoyr[1,:] buoyancy fluxes [kg/s] 
+qcore : array
+    heat fluxes in the core
+    qr qcore[0,:]: radiogenic heat flux [W]
+    qs qcore[1,:]: secular cooling [W]
+    ql qcore[2,:]: release of latent heat [W]
+    qg qcore[3,:]: release of GPE [W] - ignored for now
 tsolve: array
     time points corresponding to each of the values above [s]
 
