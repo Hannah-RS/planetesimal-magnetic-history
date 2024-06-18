@@ -79,7 +79,7 @@ print('Initial conditions set')
 #%%
 ########################### Differentiation ###################################
 tic = time.perf_counter()
-Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H  = differentiation(Tint,
+Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, eta, convect, d0, t_diff, H  = differentiation(Tint,
                                                                             t_acc,r, 
                                                                             dr, step_m)
 toc = time.perf_counter()
@@ -103,6 +103,7 @@ Xsis = Xsi[0::n_save_d,:]
 cps = cp[0::n_save_d,:]
 Ras = Ra[0::n_save_d]
 Ra_crits = Ra_crit[0::n_save_d]
+etas = eta[0::n_save_d]
 convects = convect[0::n_save_d]
 d0s = d0[0::n_save_d]
 t_diffs = t_diff[0::n_save_d]
@@ -110,7 +111,7 @@ Hs = H[0::n_save_d]
 
 if full_save == True:
     np.savez_compressed(f'{folder}run_{run}_diff', Tdiff = Tdiffs, Xfe = Xfes, 
-                        Xsi = Xsis, cp = cps, Ra = Ras, Ra_crit = Ra_crits, 
+                        Xsi = Xsis, cp = cps, Ra = Ras, Ra_crit = Ra_crits, eta=etas, 
                         convect = convects, d0=d0s, t_diff = t_diffs, H=Hs)
 
 print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time1)))
@@ -120,7 +121,7 @@ print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtim
 #integrate
 tic = time.perf_counter()
 Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0,  \
-    min_unstable, Ur, Ra, RaH, RanoH, Racrit, Fs, Flid, Fad, Fcmb, Rem, B, \
+    min_unstable, Ur, Ra, RaH, RanoH, Racrit, eta, Fs, Flid, Fad, Fcmb, Rem, B, \
         buoyr, qcore, t, fcond_t = thermal_evolution(t_diff[-1],t_end,step_m,
                                               Tdiff[-1,:],f0,sparse_mat_c,sparse_mat_m) 
 toc = time.perf_counter()
@@ -316,7 +317,7 @@ if full_save == True:
                         Tcmb = Tcmb,  Tm_mid = Tm_mid, Tm_conv = Tm_conv, 
                         Tm_surf = Tm_surf, T_profile = Tprofile, 
                         f=f, Xs = Xs, dl = dl, dc=dc, d0 = d0, min_unstable=min_unstable, 
-                        Ur=Ur, Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, 
+                        Ur=Ur, Ra = Ra, RaH= RaH, RanoH = RanoH, Racrit = Racrit, eta = eta, 
                         t=t, Rem = Rem, B=B, buoyr = buoyr, qcore = qcore, Flux = Flux) 
 
 if B_save == True:

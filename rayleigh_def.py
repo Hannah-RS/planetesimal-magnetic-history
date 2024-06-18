@@ -49,12 +49,14 @@ def rayleigh_calc(t,Tb,Ur,model=default):
     RaH : float
         radiogenic heating Rayleigh number
     RanoH : float
-        non-radiogenic (internal) Rayleigh number 
+        non-radiogenic (internal) Rayleigh number
+    eta : float
+        viscosity [Pas]
 
     """
 
     RaH = rayleigh_H(t,Tb,model=model)
-    RanoH= rayleigh_noH(Tb,model)
+    RanoH, eta = rayleigh_noH(Tb,model)
 
     if Ur > 1:
         d0 = 0.667*(r-rc)*(frht*(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
@@ -66,7 +68,7 @@ def rayleigh_calc(t,Tb,Ur,model=default):
     else:
         Ram = RanoH
     
-    return Ram, d0, RaH, RanoH
+    return Ram, d0, RaH, RanoH, eta
 
 def rayleigh_noH(Tb,model=default): 
     """
@@ -86,12 +88,13 @@ def rayleigh_noH(Tb,model=default):
     -------
     Ram : float
         non-radiogenic (internal) Rayleigh number
-
+    eta : float
+        viscosity [Pas]
     """
     eta = viscosity(Tb,model)
     Ram= rhom*g*alpha_m*abs(Tb-Ts)*(r-rc)**3/(kappa*eta)
     
-    return Ram
+    return Ram, eta
 
 def rayleigh_H(t,Tb,rcore = rc, model=default,Fe=False):
     """
@@ -152,12 +155,13 @@ def rayleigh_differentiate(t,Tb,Ur,model=default):
         critical Rayleigh number
     convect: bool
         True if cell convects, false if not
-
+    eta : float
+        viscosity [Pas]
     """
    
     RaH = rayleigh_H(t,Tb,0,model,Fe=True)
 
-    RanoH = rayleigh_noH(Tb,model)
+    RanoH, eta = rayleigh_noH(Tb,model)
     
     if Ur > 1:
         d0H = 0.667*r*(frht*abs(Tb-Ts))**(1.21)*RanoH**(-0.27) #eqn 26 Deschamps & Villela (2021) 
@@ -170,4 +174,4 @@ def rayleigh_differentiate(t,Tb,Ur,model=default):
     else: 
         convect = False
 
-    return RaH, d0H,  Ra_crit, convect
+    return RaH, d0H,  Ra_crit, convect, eta
