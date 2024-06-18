@@ -99,7 +99,7 @@ def conv_power(f,dfdt,l,Xs,Tcore,Fcmb,solid):
         #thermal buoyancy
         nic = round(r1(icfrac,f)/dr) #r1/dr
         Ficb = -kc*(Tcore[nic]-Tcore[nic-1])/dr 
-        Fad = kc*gc*alpha_c*Tcore[nic-1]/cpc
+        Fad = kc*f*gc*alpha_c*Tcore[nic-1]/cpc #g(ri)=fg(rc) for constant density core
 
     else: #boundary of convecting region is at CMB
         comp = 0
@@ -109,7 +109,7 @@ def conv_power(f,dfdt,l,Xs,Tcore,Fcmb,solid):
     therm = alpha_c/cpc*(Ficb-Fad)
     #convert total buoyancy to convective power per unit volume
     buoy = 4*np.pi*f**2*rc**2*(therm-comp)
-    Raq = gc*buoy/(4*np.pi*rhoc*Omega**3*l**4)
+    Raq = f*gc*buoy/(4*np.pi*rhoc*Omega**3*l**4) #g(ri)=fg(rc) for constant density core
     p = 3/5*Raq #convective power per unit volume
     
     return p, comp, therm
