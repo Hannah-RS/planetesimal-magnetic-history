@@ -24,7 +24,7 @@ def qlt(Tc,f,dTl_dP):
     Returns
     -------
     qlt: float
-        Power contribution due to release of latent heat divided by dTc/dt [W]
+        Power contribution due to release of latent heat divided by dTc/dt [W /K /s]
 
     """
     qlt = 4*np.pi*(f*rc)**2*Lc/(gc*dTl_dP)
@@ -49,7 +49,7 @@ def qgt(Tc,f,dTl_dP,Xs):
     -------
     qgt: float
         Power contribution due to release of GPE from release of light elements 
-        when inner core solidifies [W]
+        when inner core solidifies [W /K /s]
 
     """
     rhol = fe_fes_density(Xs)*rho_exp

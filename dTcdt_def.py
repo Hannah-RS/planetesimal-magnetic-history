@@ -116,8 +116,10 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     #qg = qgt(Tcore[0],f,dTl_dP,Xs) #exclude as makes neglible difference
     qg=0
     
-    dTcdt = (qrad-Fcmb*Acmb)/(qst-ql+qg)
+    dTcdt = (Fcmb*Acmb-qrad)/(qst+ql+qg)
     dfdt = - dTcdt/(rhoc*gc*dTl_dP*rc)
+    if dfdt > 0:
+        raise ValueError('Core growing!')
     f_new = f+dfdt*dt
     Rem, Bdip_cmb, comp, therm = rem_b(f, dfdt, Xs, Tcore, Fcmb, True,0) #if core is solidifying there is no thermal stratification
     #calculate heat fluxes to return

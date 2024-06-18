@@ -96,8 +96,6 @@ def conv_power(f,dfdt,l,Xs,Tcore,Fcmb,solid):
             drho = rhofe_s - rhol
         late = (alpha_c*rhol*Lc)/cpc #latent heat release at ICB
         comp = (late+drho)*rc*dfdt
-        if comp >0:
-            raise ValueError('comp>0',late/drho)
         #thermal buoyancy
         nic = round(r1(icfrac,f)/dr) #r1/dr
         Ficb = -kc*(Tcore[nic]-Tcore[nic-1])/dr 
