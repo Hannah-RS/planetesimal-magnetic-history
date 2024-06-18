@@ -54,7 +54,7 @@ def qgt(Tc,f,dTl_dP,Xs):
     """
     rhol = fe_fes_density(Xs)*rho_exp
     drho = rhofe_s - rhol 
-    qgt = -8/3*np.pi**2*G*rhol*drho*(f*rc)**4/(rhoc*gc*dTl_dP)
+    qgt = 32*np.pi**2*G*(f*rc)**4*drho/(15*gc*dTl_dP)
  
     return qgt
 
