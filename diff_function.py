@@ -183,7 +183,7 @@ def differentiation(Tint,tacc,r,dr,dt):
         Tdiff = T
         t_diff = t
     else:
-        Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H = differentiation_eutectic(Tint,tacc,r,dr,dt)
+        Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, eta, convect, d0, t_diff, H = differentiation_eutectic(Tint,tacc,r,dr,dt)
               
     return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, eta, convect, d0, t_diff, H
 
