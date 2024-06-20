@@ -6,7 +6,7 @@ Rayleigh numbers
 from viscosity_def import viscosity #import viscosity model
 from heating import al_heating, alfe_heating
 
-from parameters import frht, rhom, alpha_m, g, r, rc, kappa, km, Ts, default, G, convect_ratio
+from parameters import frht, rhom, alpha_m, g, r, rc, kappa, km, Ts, default, G, convect_ratio, Rac
 
 def rayleigh_crit(Tb):
     """
@@ -24,6 +24,8 @@ def rayleigh_crit(Tb):
 
     """
     Ra_crit = 20.9*(frht*(Tb-Ts))**4 
+    if Ra_crit < Rac: #if variable critical Ra is less than analytical min ignore
+        Ra_crit = Rac
     return Ra_crit
     
 def rayleigh_calc(t,Tb,Ur,model=default):
