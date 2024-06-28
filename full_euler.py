@@ -117,34 +117,34 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     fcond_t = np.nan #end time of convection - default nan
     conv_off = False #whether lid has thickened sufficiently to switch off convection
     #output variables
-    Xs = np.ones([m])*Xs_0 #core sulfur fraction
-    Ra = np.zeros([m])
-    Racrit = np.zeros([m])
-    RaH = np.zeros([m])
-    RanoH = np.zeros([m])
-    eta = np.zeros([m])
-    d0 = np.zeros([m])
-    dl = np.zeros([m])
-    dc = np.zeros([m])
+    Xs = np.ones([m],dtype='float64')*Xs_0 #core sulfur fraction
+    Ra = np.zeros([m],dtype='float64')
+    Racrit = np.zeros([m],dtype='float64')
+    RaH = np.zeros([m],dtype='float64')
+    RanoH = np.zeros([m],dtype='float64')
+    eta = np.zeros([m],dtype='float64')
+    d0 = np.zeros([m],dtype='float64')
+    dl = np.zeros([m],dtype='float64')
+    dc = np.zeros([m],dtype='float64')
     min_unstable = np.ones([m],dtype=int)*(i_core-1) #smallest index of cells in the core that are convectively unstable - as a minimum it is the one below the CMB
-    Ur = np.zeros([m])
-    Tprofile= np.zeros([m,n_cells])
-    Tc = np.zeros([m])
-    Tc_conv = np.zeros([m])
-    Tcmb = np.zeros([m])
-    Tm_conv = np.zeros([m])
-    Tm_mid = np.zeros([m])
-    Tm_surf = np.zeros([m])
-    f = np.ones([m])*f0 #set as initial core size by default and only override if core starts to change
-    Fs = np.zeros([m])
-    Flid = np.zeros([m])
-    Fad = np.zeros([m])
-    Fcmb = np.zeros([m])
-    Rem = np.zeros([m])
-    B = np.zeros([m])
-    buoyr = np.zeros([2,m])
-    qcore = np.zeros([4,m])
-    tsolve = np.zeros([m])
+    Ur = np.zeros([m],dtype='float64')
+    Tprofile= np.zeros([m,n_cells],dtype='float64')
+    Tc = np.zeros([m],dtype='float64')
+    Tc_conv = np.zeros([m],dtype='float64')
+    Tcmb = np.zeros([m],dtype='float64')
+    Tm_conv = np.zeros([m],dtype='float64')
+    Tm_mid = np.zeros([m],dtype='float64')
+    Tm_surf = np.zeros([m],dtype='float64')
+    f = np.ones([m],dtype='float64')*f0 #set as initial core size by default and only override if core starts to change
+    Fs = np.zeros([m],dtype='float64')
+    Flid = np.zeros([m],dtype='float64')
+    Fad = np.zeros([m],dtype='float64')
+    Fcmb = np.zeros([m],dtype='float64')
+    Rem = np.zeros([m],dtype='float64')
+    B = np.zeros([m],dtype='float64')
+    buoyr = np.zeros([2,m],dtype='float64')
+    qcore = np.zeros([4,m],dtype='float64')
+    tsolve = np.zeros([m],dtype='float64')
         
     #Step 0. Calculate time, get two separate temperature arrays
     # assume mantle and core are isothermal at point of differentiation - valid due to strong heating
@@ -278,7 +278,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     # Step 6. Replace old array with new ready for next step
     T_old_core = T_new_core
     T_old_mantle = T_new_mantle
-    Tprofile_old = np.hstack((T_new_core,T_new_mantle[1:]))
+    Tprofile_old = np.hstack((T_new_core,T_new_mantle[1:]),dtype='float64')
     Tc_old = Tc_new
     Tc_conv_old = Tc_conv_new
     Tcmb_old = Tcmb_new
@@ -385,7 +385,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         Rem_new = 0 #by default assume no compositional convection
         B_new = 0
         buoyr_new = [0, 0]
-        qcore_new = np.zeros([4]) #different heat sources not relevant when conducting
+        qcore_new = np.zeros([4],dtype='float64') #different heat sources not relevant when conducting
         f_new = f_old #by default overwrite if solidifies
         Xs_new = Xs_old
         min_unstable_new = min_unstable_old #continuity of mixed layer thickness by default
@@ -519,7 +519,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         # Step 6. Replace old values with new ready for next step
         T_old_core = T_new_core
         T_old_mantle = T_new_mantle
-        Tprofile_old = np.hstack((T_new_core,T_new_mantle[1:])) #top cell of core and bottom cell of mantle are Tcmb
+        Tprofile_old = np.hstack((T_new_core,T_new_mantle[1:]),dtype='float64') #top cell of core and bottom cell of mantle are Tcmb
         Tc_old = Tc_new
         Tc_conv_old = Tc_conv_new
         Tcmb_old = Tcmb_new

@@ -34,10 +34,10 @@ def cond_stencil_mantle(r,rc,dr,krho):
     
     #create a temperature array same length as mantle
     # top value is surface, bottom row is CMB
-    rarr = np.arange(rc-dr,r+dr,dr) # create values of cell boundaries
+    rarr = np.arange(rc-dr,r+dr,dr,dtype='float64') # create values of cell boundaries
     rmid = (rarr[:-1]+rarr[1:])/2 #find midpoints of cells
     # create matrix for radial steps
-    r_mat = np.zeros([nmcells,nmcells])
+    r_mat = np.zeros([nmcells,nmcells],dtype='float64')
 
     
     #first row uses forward differences
@@ -84,10 +84,10 @@ def cond_stencil_core(r,rc,dr,kappa_c):
     
     #create a temperature array same length as core 
     # top value is CMB, bottom row is centre
-    rarr = np.arange(0,rc+dr,dr) # create values of cell boundaries
+    rarr = np.arange(0,rc+dr,dr,dtype='float64') # create values of cell boundaries
     rmid = (rarr[:-1]+rarr[1:])/2 #find midpoints of cells
     # create matrix for radial steps
-    r_mat = np.zeros([nccells,nccells])
+    r_mat = np.zeros([nccells,nccells],dtype='float64')
     
     #first row is set by assuming dT/dr=0 at centre 
     r_mat[0,0] = -1
@@ -128,11 +128,11 @@ def cond_stencil_general(r,dr):
     import numpy as np
 
     # top value is CMB, bottom row is centre
-    rarr = np.arange(0,r+dr,dr) # create values of cell boundaries
+    rarr = np.arange(0,r+dr,dr,dtype='float64') # create values of cell boundaries
     rmid = (rarr[:-1]+rarr[1:])/2 #find midpoints of cells
     
     # create matrix for radial steps
-    r_mat = np.zeros([n_cells,n_cells])
+    r_mat = np.zeros([n_cells,n_cells],dtype='float64')
     
     #first row is set by assuming dT/dr=0 at centre 
     r_mat[0,0] = -1

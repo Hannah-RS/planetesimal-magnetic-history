@@ -20,7 +20,7 @@ if automated == True:
     import sys
     folder = sys.argv[1]
 else:
-    folder = 'Plotting_scripts/' #folder where you want to save the results
+    folder = 'Results_combined/' #folder where you want to save the results
     ind = None #no index for csv
 #set flag for run started
 if automated == True:
@@ -45,8 +45,8 @@ import scipy.sparse as sp
 
 dT_mat_c = cond_stencil_core(r,rc,dr,kappa_c) 
 dT_mat_m = cond_stencil_mantle(r,rc,dr,km/rhom)  
-sparse_mat_m = sp.dia_matrix(dT_mat_m)
-sparse_mat_c = sp.dia_matrix(dT_mat_c)
+sparse_mat_m = sp.dia_matrix(dT_mat_m,dtype='float64')
+sparse_mat_c = sp.dia_matrix(dT_mat_c,dtype='float64')
 
 
 # define the run number, start and end times
@@ -87,7 +87,7 @@ int_time1 = toc - tic
 
 # update user on progress and plot differentiated temperature profile 
 if automated == False:
-    rplot= np.arange(0,r+dr,dr)/1e3
+    rplot= np.arange(0,r+dr,dr,dtype='float64')/1e3
     
     plt.figure()
     plt.scatter(rplot,Tdiff[-1,:])

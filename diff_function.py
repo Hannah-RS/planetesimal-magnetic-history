@@ -59,17 +59,17 @@ def differentiation(Tint,tacc,r,dr,dt):
 
     #Initial step
     # Create arrays - column is one timestep
-    Xfe = np.zeros([1,n_cells]) #fraction of iron melted
-    Xsi = np.zeros([1,n_cells]) #fraction of silicate melted
-    cp = np.zeros([1,n_cells]) #specific heat capacity of each cell
-    T = np.zeros([1,n_cells]) #temperature
-    Ra = np.ones([1]) #Rayleigh number
-    d0 = np.ones([1]) #stagnant lid thickness
-    Ra_crit = np.ones([1]) # critical Rayleigh number
-    eta = np.ones([1]) # viscosity
-    convect = np.ones([1]) # is anything convecting
+    Xfe = np.zeros([1,n_cells],dtype='float64') #fraction of iron melted
+    Xsi = np.zeros([1,n_cells],dtype='float64') #fraction of silicate melted
+    cp = np.zeros([1,n_cells],dtype='float64') #specific heat capacity of each cell
+    T = np.zeros([1,n_cells],dtype='float64') #temperature
+    Ra = np.ones([1],dtype='float64') #Rayleigh number
+    d0 = np.ones([1],dtype='float64') #stagnant lid thickness
+    Ra_crit = np.ones([1],dtype='float64') # critical Rayleigh number
+    eta = np.ones([1],dtype='float64') # viscosity
+    convect = np.ones([1],dtype='float64') # is anything convecting
     
-    t = np.asarray([tacc])
+    t = np.asarray([tacc],dtype='float64')
     
     if Xs_0 != Xs_eutectic:
         #Initial step 
@@ -81,7 +81,7 @@ def differentiation(Tint,tacc,r,dr,dt):
         eta[0] = eta_calc(Tint[0])
         
         #calculate radiogenic heating
-        H = np.array([alfe_heating(t[0])])
+        H = np.array([alfe_heating(t[0])],dtype='float64')
         Tk = ka*Tint
         #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
         rhs = sparse_mat.dot(Tk) + H*rhoa
@@ -113,7 +113,7 @@ def differentiation(Tint,tacc,r,dr,dt):
         while Xsi[i-1,int(n_cells/2)]<rcmf: #assume differentiation occurs at rcmf
             
             #add to existing arrays ready for new timestep
-            app_array = np.zeros([1,n_cells])
+            app_array = np.zeros([1,n_cells],dtype='float64')
             T = np.append(T,app_array,0)
             Xfe = np.append(Xfe, app_array, 0)
             Xsi = np.append(Xsi, app_array, 0)
@@ -239,17 +239,17 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
 
     #Initial step
     # Create arrays - column is one timestep
-    Xfe = np.zeros([1,n_cells]) #fraction of iron melted
-    Xsi = np.zeros([1,n_cells]) #fraction of silicate melted
-    cp = np.zeros([1,n_cells]) #specific heat capacity of each cell
-    T = np.zeros([1,n_cells]) #temperature
-    Ra = np.ones([1]) #Rayleigh number
-    d0 = np.ones([1]) #stagnant lid thickness
-    Ra_crit = np.ones([1]) # critical Rayleigh number
-    convect = np.ones([1]) # is anything convecting
-    eta = np.ones([1]) # viscosity
+    Xfe = np.zeros([1,n_cells],dtype='float64') #fraction of iron melted
+    Xsi = np.zeros([1,n_cells],dtype='float64') #fraction of silicate melted
+    cp = np.zeros([1,n_cells],dtype='float64') #specific heat capacity of each cell
+    T = np.zeros([1,n_cells],dtype='float64') #temperature
+    Ra = np.ones([1],dtype='float64') #Rayleigh number
+    d0 = np.ones([1],dtype='float64') #stagnant lid thickness
+    Ra_crit = np.ones([1],dtype='float64') # critical Rayleigh number
+    convect = np.ones([1],dtype='float64') # is anything convecting
+    eta = np.ones([1],dtype='float64') # viscosity
     
-    t = np.asarray([tacc])
+    t = np.asarray([tacc],dtype='float64')
     
     #Initial step 
         
@@ -260,7 +260,7 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     convect[0] = False
     eta[0] = eta_calc(Tint[0])
     #calculate radiogenic heating
-    H = np.array([alfe_heating(t[0])])
+    H = np.array([alfe_heating(t[0])],dtype='float64')
     
     #calculate convective profile
     Tk = ka*Tint
@@ -291,7 +291,7 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     
     while Xsi[i-1,int(n_cells/2)]<rcmf: #differentiation occurs at rcmf
         
-        app_array = np.zeros([1,n_cells])
+        app_array = np.zeros([1,n_cells],dtype='float64')
         T = np.append(T,app_array,0)
         Xfe = np.append(Xfe, app_array, 0)
         Xsi = np.append(Xsi, app_array, 0)

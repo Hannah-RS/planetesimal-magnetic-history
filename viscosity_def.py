@@ -34,7 +34,7 @@ def viscosity(Tm, model = default):
         # Viscosity model from Bryson et al. (2019)
         if type(Tm)==np.ndarray: # if an array will need to loop
             n = len(Tm)
-            eta = np.zeros([n])
+            eta = np.zeros([n],dtype='float64')
             for i in range(n):
                 if Tm[i] > 1650:
                     eta[i] = 100
@@ -55,7 +55,7 @@ def viscosity(Tm, model = default):
         # use rounded solidus and liquidus temperatures from Bryson (2019)
         if type(Tm)==np.ndarray: # if an array will need to loop
             n = len(Tm)
-            eta = np.zeros([n])
+            eta = np.zeros([n],dtype='float64')
             for i in range(n):
                 if Tm[i] <= Tcrit:
                     eta[i] = eta0*np.exp(-gamma*(Tm[i]-T0eta))*np.exp(-alpha_n*(Tm[i]-Tms)/(Tml-Tms)) 

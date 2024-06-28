@@ -67,7 +67,7 @@ def dTcdt_calc(t,Fcmb,Tcore,f,Xs=Xs_0,stratification = [False,0]):
     #calculate magnetic field
     Rem, Bdip_cmb, comp, therm = rem_b(f, 0, Xs, Tcore, Fcmb, False,min_unstable_ind) #dfdt = 0 for  non-solidifying   
     #calculate fluxes to return
-    qcore =np.array([qrad,qst*dTcdt,0,0])
+    qcore =np.array([qrad,qst*dTcdt,0,0],dtype='float64')
     
     return dTcdt, Rem, Bdip_cmb, comp, therm, qcore
 
@@ -123,6 +123,6 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     f_new = f+dfdt*dt
     Rem, Bdip_cmb, comp, therm = rem_b(f, dfdt, Xs, Tcore, Fcmb, True,0) #if core is solidifying there is no thermal stratification
     #calculate heat fluxes to return
-    qcore =np.array([qrad,qst*dTcdt,ql*dTcdt,qg*dTcdt])
+    qcore =np.array([qrad,qst*dTcdt,ql*dTcdt,qg*dTcdt],dtype='float64')
     
     return dTcdt, f_new, Rem, Bdip_cmb, comp, therm, qcore
