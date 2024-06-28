@@ -22,7 +22,7 @@ def volume_average(Tprofile, unstable_ind, dr):
         volume average temperature [K]
 
     """
-    rcore = np.arange(0,rc+dr,dr) 
+    rcore = np.arange(0,rc+dr,dr,dtype='float64') 
     min_unstable = int(min(unstable_ind)) 
     if min_unstable ==0: #amend unstable indices so layer mass works
         unstable_ind = unstable_ind[1:]

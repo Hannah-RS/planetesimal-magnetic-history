@@ -103,7 +103,7 @@ def eta_calc(T):
         eta2 = part_b(T[((phi>0)&(phi<=rcmf))])
         eta3 = part_c(T[(phi>rcmf)&(T<(Trcmf+w))])
         eta4 = part_d(T[T>=(Trcmf+w)])
-        eta = np.concatenate((eta1,eta2,eta3,eta4))
+        eta = np.concatenate((eta1,eta2,eta3,eta4),dtype='float64')
     else:
         phi = (T-Tms)/(Tml-Tms)
         if phi<0:
