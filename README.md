@@ -1,14 +1,35 @@
-# learning-model
+# planetesimal-magnetic-history
 
 Thermal evolution and dynamo generation model for a planetesimal. 
 
 [![DOI](https://zenodo.org/badge/509014410.svg)](https://zenodo.org/doi/10.5281/zenodo.11147997)
 
+## Table of Contents
+
++ [Basic model description](#basic-model-description)
++ [Contents of this repository](#contents-of-this-repository)
++ [Installation](#installation)
++ [Example directory structure](#example-directory-structure)
++ [Dependencies](#dependencies)
++ [How to run the model](#how-to-run-the-model)
+    + [Single run](#single-run)
+    + [Automated runs](#automated-runs)
+    + [Model outputs](#model-outputs)
+    + [Example use](#example-use)
++ [Citing the model](#citing-the-model)
++ [Issues](#issues)
++ [References](#references)
+
 ## Basic model description
 The model is described in Sanderson et. al. 2024a, "Unlocking planetesimal magnetic field histories: a refined, versatile model for thermal evolution and dynamo generation", which will be submitted to Icarus and available as a preprint soon. This is a spherically symmetric 1D thermal evolution and dynamo generation model. It begins with an undifferentiated planetesimal which heats up due to decay of $^{26}Al$ and differentiates into a core and mantle. The code then tracks the thermal evolution of the core and mantle and when dynamo generation is possible.
 
 ## Contents of this repository
-This repository contains the code required to run the model, an example run and plotting notebook and the parameter files for Sanderson et. al. 2024b.
+This repository contains the code required to run the model, an example run and plotting notebook and the parameter files for Sanderson et. al. 2024b. The directory contains the following subdirectories:
++ Analysis/ - scripts to analyse data or choose correct input parameters
++ Plotting_scripts - scripts to plot the output, including example output
++ Run_params_public - run parameters to accompany Sanderson et. al. 2024a and Sanderson et. al. 2024b
++ Templates - csv templates required for automated running of the code and saving results
+All the code in the main directory is required for running the model. To use the code but not alter its functionality you will only need to change values in `solver.py` and `parameters.py` (see below for instructions).
 
 ## Installation
 1. Clone this repository
@@ -40,13 +61,14 @@ f --- m("auto_params.csv")
 The Results directory in red must be added by the user on installation. The purple csv files must be copied across from the Templates directory after a series of runs with multiple subdirectories is complete.
 
 ### Dependencies
-This code was written using Python 3.10.12 but should work for all Python 3 releases. It also requires pandas, matplotlib, numpy and scipy to run. A virtual environment with the required packages can be installed using the environment.yml file and the instructions above.
+This code was written using Python 3.10.12 but should work for all Python 3 releases. It also requires numpy >=1.24.3 and scipy >=1.9.3 to run. It also requires matplotlib and pandas, but the specific version is not as important. A virtual environment with the required packages can be installed using the environment.yml file and the instructions above.
 
 ## How to run the model
 
 ### Single run
 1. Set `automated=False` in `parameters.py` and change any desired parameters in `parameters.py`. 
-2. Run `solver.py`. Results will appear in your chosen results directory and run parameters will be saved in `run_info.csv`.
+2. Set the `folder` variable in `solver.py` to choose where you want to save your results.
+3. Run `solver.py`. Results will appear in your chosen results directory and run parameters will be saved in `run_info.csv`.
 
 ### Automated runs
 An automated series of runs is performed using `multi_run.sh` which iteratively reads in a line of parameters from `auto_params.csv` and runs the model until all parameter lines have been run. The final `status` column in `auto_params.csv` indicates whether a parameter list has been run. `status=1` indicates a completed run with no errors, `status=0` indicates an incompleted run (failed or in progress) and `status=''` indicates the run has not been started. `multi_run.sh` finishes when all rows have `status=1` or `status=0`.

@@ -2,9 +2,10 @@ name: thermdyn
 channels:
   - defaults
 dependencies:
-  - pandas
-  - python
-  - matplotlib
-  - scipy
-  - seaborn
-  - memory_profiler
+  - pandas >=1.4.1
+  - python >=3.9.1
+  - numpy >= 1.24.3
+  - matplotlib >=3.5.1
+  - scipy >=1.9.3
+  - seaborn >=0.12.1
+  - memory_profiler >=0.58.0

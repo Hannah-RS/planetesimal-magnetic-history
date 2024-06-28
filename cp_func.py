@@ -78,7 +78,7 @@ def cp_calc_arr(Tarr,differentiate):
         array of heat capacities [J /kg /K]
 
     """
-    cp = np.zeros([len(Tarr)])
+    cp = np.zeros([len(Tarr)],dtype='float64')
     if differentiate == True:
         for i, T in enumerate(Tarr):
            if T < Ts_fe:
@@ -124,7 +124,7 @@ def cp_calc_eut_arr(Tarr,differentiate):
         array of heat capacities
 
     """
-    cp = np.zeros([len(Tarr)])
+    cp = np.zeros([len(Tarr)],dtype='float64')
     if differentiate == True:
         for i, T in enumerate(Tarr):
             if T < Tms:

@@ -6,6 +6,7 @@ from heating import alfe_heating
 from dTmdt_def import dTadt_calc
 from scipy import sparse as sp
 from cp_func import cp_calc_arr, cp_calc_int, cp_calc_eut_arr, cp_calc_eut_int
+from viscosity_def import eta_calc
 import numpy as np
 from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V, Rac, rcmf, n_cells
 def differentiation(Tint,tacc,r,dr,dt):
@@ -40,6 +41,8 @@ def differentiation(Tint,tacc,r,dr,dt):
         Rayleigh number for body
     Ra_crit: float
         critical Rayleigh number for body
+    eta : float
+        viscosity [Pas]
     convect : bool
         whether the body is convecting
     d0 : float
@@ -56,16 +59,17 @@ def differentiation(Tint,tacc,r,dr,dt):
 
     #Initial step
     # Create arrays - column is one timestep
-    Xfe = np.zeros([1,n_cells]) #fraction of iron melted
-    Xsi = np.zeros([1,n_cells]) #fraction of silicate melted
-    cp = np.zeros([1,n_cells]) #specific heat capacity of each cell
-    T = np.zeros([1,n_cells]) #temperature
-    Ra = np.ones([1]) #Rayleigh number
-    d0 = np.ones([1]) #stagnant lid thickness
-    Ra_crit = np.ones([1]) # critical Rayleigh number
-    convect = np.ones([1]) # is anything convecting
+    Xfe = np.zeros([1,n_cells],dtype='float64') #fraction of iron melted
+    Xsi = np.zeros([1,n_cells],dtype='float64') #fraction of silicate melted
+    cp = np.zeros([1,n_cells],dtype='float64') #specific heat capacity of each cell
+    T = np.zeros([1,n_cells],dtype='float64') #temperature
+    Ra = np.ones([1],dtype='float64') #Rayleigh number
+    d0 = np.ones([1],dtype='float64') #stagnant lid thickness
+    Ra_crit = np.ones([1],dtype='float64') # critical Rayleigh number
+    eta = np.ones([1],dtype='float64') # viscosity
+    convect = np.ones([1],dtype='float64') # is anything convecting
     
-    t = np.asarray([tacc])
+    t = np.asarray([tacc],dtype='float64')
     
     if Xs_0 != Xs_eutectic:
         #Initial step 
@@ -74,9 +78,10 @@ def differentiation(Tint,tacc,r,dr,dt):
         d0[0] = r
         Ra_crit[0] = Rac
         convect[0] = False
+        eta[0] = eta_calc(Tint[0])
         
         #calculate radiogenic heating
-        H = np.array([alfe_heating(t[0])])
+        H = np.array([alfe_heating(t[0])],dtype='float64')
         Tk = ka*Tint
         #Calculate rhs 1/r^2dt/dr(r^2dt/dr)
         rhs = sparse_mat.dot(Tk) + H*rhoa
@@ -108,7 +113,7 @@ def differentiation(Tint,tacc,r,dr,dt):
         while Xsi[i-1,int(n_cells/2)]<rcmf: #assume differentiation occurs at rcmf
             
             #add to existing arrays ready for new timestep
-            app_array = np.zeros([1,n_cells])
+            app_array = np.zeros([1,n_cells],dtype='float64')
             T = np.append(T,app_array,0)
             Xfe = np.append(Xfe, app_array, 0)
             Xsi = np.append(Xsi, app_array, 0)
@@ -116,11 +121,12 @@ def differentiation(Tint,tacc,r,dr,dt):
             Ra = np.append(Ra, 0)
             d0 = np.append(d0, 0)
             Ra_crit = np.append(Ra_crit, 0)
+            eta = np.append(eta,0)
             convect = np.append(convect, 0)
             
             t = np.append(t,t[i-1]+dt)
             
-            Ra[i], d0[i], Ra_crit[i], convect[i] = rayleigh_differentiate(t[i],T[i-1,0], Ur)
+            Ra[i], d0[i], Ra_crit[i], convect[i], eta[i] = rayleigh_differentiate(t[i],T[i-1,0], Ur)
             #calculate radiogenic heating
             H = np.append(H,alfe_heating(t[i]))
             Tk = ka*T[i-1,:]
@@ -177,9 +183,9 @@ def differentiation(Tint,tacc,r,dr,dt):
         Tdiff = T
         t_diff = t
     else:
-        Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H = differentiation_eutectic(Tint,tacc,r,dr,dt)
+        Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, eta, convect, d0, t_diff, H = differentiation_eutectic(Tint,tacc,r,dr,dt)
               
-    return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H
+    return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, eta, convect, d0, t_diff, H
 
 def differentiation_eutectic(Tint,tacc,r,dr,dt):
     """
@@ -214,6 +220,8 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         Rayleigh number for body
     Ra_crit: float
         critical Rayleigh number for body
+    eta : float
+        viscosity [Pas]
     convect : bool
         whether the body is convecting
     d0 : float
@@ -231,16 +239,17 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
 
     #Initial step
     # Create arrays - column is one timestep
-    Xfe = np.zeros([1,n_cells]) #fraction of iron melted
-    Xsi = np.zeros([1,n_cells]) #fraction of silicate melted
-    cp = np.zeros([1,n_cells]) #specific heat capacity of each cell
-    T = np.zeros([1,n_cells]) #temperature
-    Ra = np.ones([1]) #Rayleigh number
-    d0 = np.ones([1]) #stagnant lid thickness
-    Ra_crit = np.ones([1]) # critical Rayleigh number
-    convect = np.ones([1]) # is anything convecting
+    Xfe = np.zeros([1,n_cells],dtype='float64') #fraction of iron melted
+    Xsi = np.zeros([1,n_cells],dtype='float64') #fraction of silicate melted
+    cp = np.zeros([1,n_cells],dtype='float64') #specific heat capacity of each cell
+    T = np.zeros([1,n_cells],dtype='float64') #temperature
+    Ra = np.ones([1],dtype='float64') #Rayleigh number
+    d0 = np.ones([1],dtype='float64') #stagnant lid thickness
+    Ra_crit = np.ones([1],dtype='float64') # critical Rayleigh number
+    convect = np.ones([1],dtype='float64') # is anything convecting
+    eta = np.ones([1],dtype='float64') # viscosity
     
-    t = np.asarray([tacc])
+    t = np.asarray([tacc],dtype='float64')
     
     #Initial step 
         
@@ -249,8 +258,9 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     d0[0] = r
     Ra_crit[0] = Rac
     convect[0] = False
+    eta[0] = eta_calc(Tint[0])
     #calculate radiogenic heating
-    H = np.array([alfe_heating(t[0])])
+    H = np.array([alfe_heating(t[0])],dtype='float64')
     
     #calculate convective profile
     Tk = ka*Tint
@@ -281,7 +291,7 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     
     while Xsi[i-1,int(n_cells/2)]<rcmf: #differentiation occurs at rcmf
         
-        app_array = np.zeros([1,n_cells])
+        app_array = np.zeros([1,n_cells],dtype='float64')
         T = np.append(T,app_array,0)
         Xfe = np.append(Xfe, app_array, 0)
         Xsi = np.append(Xsi, app_array, 0)
@@ -289,11 +299,12 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         Ra = np.append(Ra, 0)
         d0 = np.append(d0, 0)
         Ra_crit = np.append(Ra_crit, 0)
+        eta = np.append(eta,0)
         convect = np.append(convect, 0)
         
         t = np.append(t,t[i-1]+dt)
         
-        Ra[i], d0[i], Ra_crit[i], convect[i] = rayleigh_differentiate(t[i],T[i-1,0],Ur)
+        Ra[i], d0[i], Ra_crit[i], convect[i], eta[i] = rayleigh_differentiate(t[i],T[i-1,0],Ur)
         #calculate radiogenic heating
         H = np.append(H,alfe_heating(t[i]))
         Tk = ka*T[i-1,:]
@@ -359,4 +370,4 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     Tdiff = T
     t_diff = t
 
-    return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, convect, d0, t_diff, H
+    return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, eta, convect, d0, t_diff, H
