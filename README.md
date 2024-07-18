@@ -21,7 +21,7 @@ Thermal evolution and dynamo generation model for a planetesimal.
 + [References](#references)
 
 ## Basic model description
-The model is described in Sanderson et. al. 2024a, "Unlocking planetesimal magnetic field histories: a refined, versatile model for thermal evolution and dynamo generation", which will be submitted to Icarus and available as a preprint soon. This is a spherically symmetric 1D thermal evolution and dynamo generation model. It begins with an undifferentiated planetesimal which heats up due to decay of $^{26}Al$ and differentiates into a core and mantle. The code then tracks the thermal evolution of the core and mantle and when dynamo generation is possible.
+The model is described in [Sanderson et. al. 2024a](https://arxiv.org/abs/2407.12721), "Unlocking planetesimal magnetic field histories: a refined, versatile model for thermal evolution and dynamo generation", submitted to Icarus and available as a preprint. This is a spherically symmetric 1D thermal evolution and dynamo generation model. It begins with an undifferentiated planetesimal which heats up due to decay of $^{26}Al$ and differentiates into a core and mantle. The code then tracks the thermal evolution of the core and mantle and when dynamo generation is possible.
 
 ## Contents of this repository
 This repository contains the code required to run the model, an example run and plotting notebook and the parameter files for Sanderson et. al. 2024b. The directory contains the following subdirectories:
@@ -120,9 +120,9 @@ If you have any questions about the code please email hannah.sanderson"at"earth.
 If there are any issues or bugs in the code please raise an [issue](https://github.com/Hannah-RS/learning-model/issues)
 
 ## References
-Sanderson et. al. 2024a "Unlocking planetesimal magnetic field histories: a refined, versatile model for thermal evolution and dynamo generation", in prep. 
+Sanderson et. al. 2024a "Unlocking planetesimal magnetic field histories: a refined, versatile model for thermal evolution and dynamo generation", [https://arxiv.org/abs/2407.12721](https://arxiv.org/abs/2407.12721), submitted to Icarus 
 
-Sanderson et. al. 2024b "Early and elongated epochs of planetesimal dynamo generation", in prep.
+Sanderson et. al. 2024b "Early and elongated epochs of planetesimal dynamo generation", [https://arxiv.org/abs/2405.05147](https://arxiv.org/abs/2405.05147), submitted to Earth and Planetary Science Letters
 
 
 
