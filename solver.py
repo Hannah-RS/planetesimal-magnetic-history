@@ -20,7 +20,7 @@ if automated == True:
     import sys
     folder = sys.argv[1]
 else:
-    folder = 'Results_combined/' #folder where you want to save the results
+    folder = 'Results_combined/nc_vs_cc/' #folder where you want to save the results
     ind = None #no index for csv
 #set flag for run started
 if automated == True:
@@ -113,7 +113,7 @@ if full_save == True:
     np.savez_compressed(f'{folder}run_{run}_diff', Tdiff = Tdiffs, Xfe = Xfes, 
                         Xsi = Xsis, cp = cps, Ra = Ras, Ra_crit = Ra_crits, eta=etas, 
                         convect = convects, d0=d0s, t_diff = t_diffs, H=Hs)
-
+print(f'Differentiation at {t_diff[-1]/Myr:.1f}Ma')
 print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time1)))
 #%%
 ######################## Thermal evolution ####################################
@@ -208,9 +208,13 @@ if np.any(Remtherm>threshold1):
 else:
     max_Btherm = 0
     max_Bthermt = np.nan
-    
-max_Rtherm = max(Remtherm)
-max_Rthermt = t[Rem==max_Rtherm][0]/Myr
+
+if len(Remtherm)!=0: #i.e. dynamo generation before core solidification    
+    max_Rtherm = max(Remtherm)
+    max_Rthermt = t[Rem==max_Rtherm][0]/Myr
+else:
+    max_Rtherm = 0
+    max_Rthermt = np.nan
 
 #compositional - turn into df for rolling average
 #no max time as averaging
@@ -227,9 +231,11 @@ if np.any(Remav[wn:-wn]>threshold1):
     max_Bcomp = max(Bav[wn:-wn]) #exclude nan
 else:
     max_Bcomp = 0
-    
-max_Rcomp = max(Remav[wn:-wn]) 
 
+if len(Remcomp)!=0:    
+    max_Rcomp = max(Remav[wn:-wn]) 
+else:
+    max_Rcomp = 0
 ########################## on and off times - calculate and save ####################
 from duration_calc import on_off_test
 
