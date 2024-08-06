@@ -18,7 +18,7 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-automated = False
+automated = True
 full_save = True #do you want to save temp profiles etc or just summary stats
 B_save = False #do you want to save field strengths and Rem
 rhoa_var = False #is the undifferentiated density calculated based on inputs - false for Psyche runs
@@ -61,9 +61,9 @@ else: #set manually
     alpha_n = 30 #melt weakening (diffusion creep)
     Xs_0 = 30# initial wt % sulfur in core 
     Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 1
-    t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 10 # max end time [Myr]
+    run = 8
+    t_acc_m = 1.75 #accretion time [Myr]
+    t_end_m = 2.5 # max end time [Myr]
     icfrac = 0 #fraction of solidified material that forms a passive inner core during solidification
 
 # Size of body
@@ -121,7 +121,8 @@ ka = km # [W /m /K] same as mantle (correct for post sintering - Dodds 2021)
 cpa = cpm # heat capacity [J /kg /K] (Elkins-Tanton 2011 and Bryson 2019 use silicate value)
 alpha_a = alpha_m # thermal expansivity of mantle [/K]
 convect_ratio = 0.99 #ratio of d0/r for onset of convection in undifferentiated body
- 
+tdiff_max = 5*Myr #maximum time for differentiation to occur
+
 #radiogenic heating
 h0Al = 0.355 # [W/ kg] heating rate of Al^26 at t=0 (Dodds 2021)
 Al0 = 5e-5 # 26Al/27Al ratio in accreting material (Dodds 2021)
