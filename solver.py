@@ -13,7 +13,7 @@ import time #use this to time the integration
 #import time constants and initial conditions
 from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, rcr,\
     kappa_c, save_interval_d, save_interval_t, save_interval_mag, km, Vm, As, rhom, step_m, t_cond_core,\
-    Xs_0, default, rcmf, Fe0, full_save, B_save, eta0, etal, w, alpha_n, beta, n_cells, icfrac
+    Xs_0, default, rcmf, Fe0, full_save, B_save, eta0, etal, w, alpha_n, beta, n_cells, icfrac, xwater
 from viscosity_def import viscosity
 
 if automated == True: 
@@ -32,7 +32,7 @@ else: #save run parameters in run_info file
     run_info = {"run":[run],"r":[r],"rcr":[rcr],"default":[default],"rcmf":[rcmf],"eta0":[eta0], 
                 "beta":[beta],"w":[w],"etal":[etal],"alpha_n":[alpha_n],"Xs_0":[Xs_0], 
                 "Fe0":[Fe0], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],
-                "step_m":[step_m/t_cond_core],"icfrac":[icfrac]}
+                "step_m":[step_m/t_cond_core],"icfrac":[icfrac],"xwater":[xwater]}
     run_info = pd.DataFrame(run_info)
     run_info.to_csv(f'{folder}run_info.csv',index=False,mode='a',header=False)
 

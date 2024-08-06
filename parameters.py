@@ -10,6 +10,7 @@ For non-automated runs, change parameters in this file before running solver.py
 import numpy as np
 import pandas as pd
 import sys
+from solidus_calc import solidus, liquidus
 #Constants
 G = 6.67e-11 # gravitational constant [N kg^-2 m^2]
 year = 60*60*24*365 #number of seconds in a year
@@ -18,7 +19,7 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-automated = True
+automated = False #do you want to run a series of automated runs
 full_save = True #do you want to save temp profiles etc or just summary stats
 B_save = False #do you want to save field strengths and Rem
 rhoa_var = False #is the undifferentiated density calculated based on inputs - false for Psyche runs
@@ -48,6 +49,7 @@ if automated == True:
     t_end_m = auto.loc[ind,'t_end_m']
     dr = auto.loc[ind,'dr']
     icfrac = auto.loc[ind,'icfrac']
+    xwater = auto.loc[ind,'xwater']
 else: #set manually
     r = 100e3 # radius of asteroid [m]
     rcr = 0.5 #core radius as a fraction of asteroid radius
@@ -61,10 +63,11 @@ else: #set manually
     alpha_n = 30 #melt weakening (diffusion creep)
     Xs_0 = 30# initial wt % sulfur in core 
     Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 8
-    t_acc_m = 1.75 #accretion time [Myr]
-    t_end_m = 2.5 # max end time [Myr]
+    run = 9
+    t_acc_m = 1 #accretion time [Myr]
+    t_end_m = 4 # max end time [Myr]
     icfrac = 0 #fraction of solidified material that forms a passive inner core during solidification
+    xwater = 0 #water content of mantle [wt %]
 
 # Size of body
 #rc = rcr*r #radius of core [m]
@@ -84,9 +87,11 @@ Ts = 200 # surface temperature, modelled as fixed [K]
 # Mantle parameters
 cpm = 800 # heat capacity [J /kg /K] (Elkins-Tanton 2011)
 Lm = 400e3 #latent heat of mantle [J /kg]
-Tml = 1800 # mantle liquidus [K]
-Tms = 1400 # mantle solidus [K]
 rhom = 3000 # density [kg m^-3] Bryson et. al. (2019)
+#Tml = 1800 # mantle liquidus [K]
+#Tms = 1400 # mantle solidus [K]
+Tms = solidus(r,rc,0,Xs_0,rhom) # mantle solidus [K] Katz et al. 2003
+Tml = liquidus(r,rc,0,Xs_0,rhom) # mantle liquidus [K] Katz et al. 2003
 km = 2.16 # thermal conductivity of silicate [W /m /K] needs to be consistent with cp, kappa and rhom
 kappa = 9e-7 # thermal diffusivity of silicate [m^2 /s] - 4 options are given in Dodds (2021) have picked the middle one - needs to be consistent with other choices
 alpha_m = 4e-5 # thermal expansivity of mantle [/K]

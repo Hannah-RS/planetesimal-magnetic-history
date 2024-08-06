@@ -7,6 +7,7 @@ range of sizes and activation volumes
 import numpy as np
 import sys
 sys.path.append('../')
+from solidus_calc import pmid_calc
 from parameters import R, G, Tms, rhoc, rhom
 
 def viscosity_converter(p,pref,Tref,V,E,eta0):
@@ -42,31 +43,6 @@ def viscosity_converter(p,pref,Tref,V,E,eta0):
     
     return eta_ast, eta_fk
 
-@np.vectorize
-def pmid_calc(rhom,rhoc,rc,rmid,r):
-    """
-    Mid mantle pressure assuming incompressible core and mantle [Pa]
-
-    Parameters
-    ----------
-    rhom : float
-        mantle density [kg m^-3]
-    rhoc : float
-        core density [kg m^-3]
-    rc : float
-        core radius [m]
-    rmid : float
-        radius in mantle where you want to calculate the pressure [m]
-    r : float
-        planetesimal radius [m]
-
-    Returns
-    -------
-    pressure at rmid [Pa]
-
-    """
-    pmid = 2/3*np.pi*G/3*(rhom**2*(r**2-rmid**2)+2*rhom*(rhoc-rhom)*rc**3*((1/rmid)-(1/r))) 
-    return pmid
 
 #calculate pressures for a range of asteroid sizes at mid-mantle
 r = np.array([100,200,300,400,500])*1e3 #[m]
