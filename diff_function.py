@@ -8,7 +8,8 @@ from scipy import sparse as sp
 from cp_func import cp_calc_arr, cp_calc_int, cp_calc_eut_arr, cp_calc_eut_int
 from viscosity_def import eta_calc
 import numpy as np
-from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V, Rac, rcmf, n_cells
+from parameters import  ka, rhoa, XFe_a, Xs_0, Xs_eutectic, cpa, Lc, Ts_fe, Tl_fe, Tml, Tms, Ts, As, V, Rac, rcmf, n_cells, tdiff_max, Myr
+
 def differentiation(Tint,tacc,r,dr,dt):
     """
     Thermal evolution of planetesimal prior to differentiation as described in
@@ -51,6 +52,8 @@ def differentiation(Tint,tacc,r,dr,dt):
         array of timesteps during differentiation [s]
     H : float
         radiogenic heating [W/kg]
+    diff : bool
+        whether differentiation has occurred
 
     """
     sparse_mat = sp.dia_matrix(cond_stencil_general(r,dr))
@@ -125,7 +128,8 @@ def differentiation(Tint,tacc,r,dr,dt):
             convect = np.append(convect, 0)
             
             t = np.append(t,t[i-1]+dt)
-            
+            if t[-1] > tdiff_max: #past maximum time for differentiation not enough 26Al
+                break
             Ra[i], d0[i], Ra_crit[i], convect[i], eta[i] = rayleigh_differentiate(t[i],T[i-1,0], Ur)
             #calculate radiogenic heating
             H = np.append(H,alfe_heating(t[i]))
@@ -182,10 +186,15 @@ def differentiation(Tint,tacc,r,dr,dt):
         #relabel for returning
         Tdiff = T
         t_diff = t
+        if t[-1] > tdiff_max:
+            diff = False
+        else:
+            diff = True
+
     else:
-        Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, eta, convect, d0, t_diff, H = differentiation_eutectic(Tint,tacc,r,dr,dt)
+        Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, eta, convect, d0, t_diff, H, diff = differentiation_eutectic(Tint,tacc,r,dr,dt)
               
-    return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, eta, convect, d0, t_diff, H
+    return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, eta, convect, d0, t_diff, H, diff
 
 def differentiation_eutectic(Tint,tacc,r,dr,dt):
     """
@@ -232,6 +241,8 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         radiogenic heating [W/kg]
     t_diff: float
         array of timesteps during differentiation [s]
+    diff : bool
+        whether differentiation has occurred
 
     """
     sparse_mat = sp.dia_matrix(cond_stencil_general(r,dr))
@@ -303,7 +314,8 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
         convect = np.append(convect, 0)
         
         t = np.append(t,t[i-1]+dt)
-        
+        if t[-1] > tdiff_max: #past maximum time for differentiation not enough 26Al
+            break
         Ra[i], d0[i], Ra_crit[i], convect[i], eta[i] = rayleigh_differentiate(t[i],T[i-1,0],Ur)
         #calculate radiogenic heating
         H = np.append(H,alfe_heating(t[i]))
@@ -369,5 +381,8 @@ def differentiation_eutectic(Tint,tacc,r,dr,dt):
     #relabel for returning
     Tdiff = T
     t_diff = t
-
-    return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, eta, convect, d0, t_diff, H
+    if t[-1] > tdiff_max:
+        diff = False
+    else:
+        diff = True
+    return Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, eta, convect, d0, t_diff, H, diff

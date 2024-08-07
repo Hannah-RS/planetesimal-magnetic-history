@@ -1,0 +1,7 @@
+Viscosity profile is monotonically decreasing - proceeding
+Beginning run 1
+Initial conditions set
+Differentiation complete. It took 00h01m57s
+Lid is too thick convection turned off at 264.82 Myr
+Thermal evolution complete 00h34m27s
+Results and run parameters saved. Run sucessful

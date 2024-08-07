@@ -10,6 +10,7 @@ For non-automated runs, change parameters in this file before running solver.py
 import numpy as np
 import pandas as pd
 import sys
+from solidus_calc import solidus, liquidus
 #Constants
 G = 6.67e-11 # gravitational constant [N kg^-2 m^2]
 year = 60*60*24*365 #number of seconds in a year
@@ -18,7 +19,7 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-automated = False
+automated = False #do you want to run a series of automated runs
 full_save = True #do you want to save temp profiles etc or just summary stats
 B_save = False #do you want to save field strengths and Rem
 rhoa_var = False #is the undifferentiated density calculated based on inputs - false for Psyche runs
@@ -44,10 +45,12 @@ if automated == True:
     Xs_0 = auto.loc[ind,'Xs_0']
     Fe0 = auto.loc[ind,'Fe0']
     run = int(auto.loc[ind,'run'])
-    t_acc_m = auto.loc[ind,'t_acc_m']
+    t_start_m = auto.loc[ind,'t_start_m']
     t_end_m = auto.loc[ind,'t_end_m']
     dr = auto.loc[ind,'dr']
     icfrac = auto.loc[ind,'icfrac']
+    xwater = auto.loc[ind,'xwater']
+    accrete = auto.loc[ind,'accrete']
 else: #set manually
     r = 100e3 # radius of asteroid [m]
     rcr = 0.5 #core radius as a fraction of asteroid radius
@@ -61,10 +64,12 @@ else: #set manually
     alpha_n = 30 #melt weakening (diffusion creep)
     Xs_0 = 30# initial wt % sulfur in core 
     Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 1
-    t_acc_m = 0.8 #accretion time [Myr]
-    t_end_m = 10 # max end time [Myr]
+    run = 9
+    t_start_m = 1.5 #start time - accretion time if accrete = True, differentiation time if accrete = False [Myr]
+    t_end_m = 4 # max end time [Myr]
     icfrac = 0 #fraction of solidified material that forms a passive inner core during solidification
+    xwater = 0 #water content of mantle [wt %]
+    accrete = False #do you want to include accretion to differentiation
 
 # Size of body
 #rc = rcr*r #radius of core [m]
@@ -84,9 +89,11 @@ Ts = 200 # surface temperature, modelled as fixed [K]
 # Mantle parameters
 cpm = 800 # heat capacity [J /kg /K] (Elkins-Tanton 2011)
 Lm = 400e3 #latent heat of mantle [J /kg]
-Tml = 1800 # mantle liquidus [K]
-Tms = 1400 # mantle solidus [K]
 rhom = 3000 # density [kg m^-3] Bryson et. al. (2019)
+#Tml = 1800 # mantle liquidus [K]
+#Tms = 1400 # mantle solidus [K]
+Tms = solidus(r,rc,0,Xs_0,rhom) # mantle solidus [K] Katz et al. 2003
+Tml = liquidus(r,rc,0,Xs_0,rhom) # mantle liquidus [K] Katz et al. 2003
 km = 2.16 # thermal conductivity of silicate [W /m /K] needs to be consistent with cp, kappa and rhom
 kappa = 9e-7 # thermal diffusivity of silicate [m^2 /s] - 4 options are given in Dodds (2021) have picked the middle one - needs to be consistent with other choices
 alpha_m = 4e-5 # thermal expansivity of mantle [/K]
@@ -121,7 +128,8 @@ ka = km # [W /m /K] same as mantle (correct for post sintering - Dodds 2021)
 cpa = cpm # heat capacity [J /kg /K] (Elkins-Tanton 2011 and Bryson 2019 use silicate value)
 alpha_a = alpha_m # thermal expansivity of mantle [/K]
 convect_ratio = 0.99 #ratio of d0/r for onset of convection in undifferentiated body
- 
+tdiff_max = 5*Myr #maximum time for differentiation to occur
+
 #radiogenic heating
 h0Al = 0.355 # [W/ kg] heating rate of Al^26 at t=0 (Dodds 2021)
 Al0 = 5e-5 # 26Al/27Al ratio in accreting material (Dodds 2021)
