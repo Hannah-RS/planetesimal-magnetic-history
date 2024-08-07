@@ -135,6 +135,18 @@ if accrete==False: #if starting from differentiation, run thermal evolution
         min_unstable, Ur, Ra, RaH, RanoH, Racrit, eta, Fs, Flid, Fad, Fcmb, Rem, B, \
             buoyr, qcore, t, fcond_t = thermal_evolution(t_start,t_end,step_m,
                                                 Tint,f0,sparse_mat_c,sparse_mat_m)
+    #update on progress
+    if automated == False:
+        rplot= np.arange(0,r+dr,dr,dtype='float64')/1e3
+        plt.figure()
+        plt.scatter(rplot,Tprofile[-1,:])
+        plt.xlabel('r/km')
+        plt.ylabel('Temperature/K')
+        plt.title('Temperature profile post thermal evolution')
+    toc = time.perf_counter()
+    int_time2 = toc - tic
+    print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time2)))
+
 elif diff == True: #include accretion, differentiation occured, now run thermal evolution
     therm = True #perform thermal evolution
     print('Beginning post-differentiation thermal evolution')
@@ -149,19 +161,19 @@ elif diff == True: #include accretion, differentiation occured, now run thermal 
         plt.xlabel('r/km')
         plt.ylabel('Temperature/K')
         plt.title('Temperature profile post thermal evolution')
-
+    toc = time.perf_counter()
+    int_time2 = toc - tic
     print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time2)))
 
 else: #accretion but no differentiation 
     therm = False  
     print('Differentiation did not occur - skipping subsequent thermal evolution')
-toc = time.perf_counter()
-int_time2 = toc - tic    
-    
+        
 #%%
 ############################# Process data ####################################
 ################ all processes which happen once  #############################
 if therm == True: #process thermal evolution data
+    nmantle = int((r/dr)/2)
     if accrete == True: #accretion and differentiation
         int_time = int_time1+int_time2 #total time for the two scripts
         diff_time = t_diff[-1]/Myr
@@ -170,7 +182,6 @@ if therm == True: #process thermal evolution data
         int_time = int_time2 #only thermal evolution
         diff_time = t_start_m
         diff_T = Trcmf
-    nmantle = int((r/dr)/2)
     peakT = np.amax(Tprofile[:,nmantle+1:])
     loc_max1 = np.where(Tprofile[:,nmantle+1:]==peakT)[0][0] #take the set of time coordinates and first value (they should all be the same)
     tmax = t[loc_max1]/Myr
