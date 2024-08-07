@@ -11,9 +11,10 @@ import matplotlib.pyplot as plt
 import time #use this to time the integration
 
 #import time constants and initial conditions
-from parameters import  run, t_acc_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, rcr,\
+from parameters import  run, t_start_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, rcr,\
     kappa_c, save_interval_d, save_interval_t, save_interval_mag, km, Vm, As, rhom, step_m, t_cond_core,\
-    Xs_0, default, rcmf, Fe0, full_save, B_save, eta0, etal, w, alpha_n, beta, n_cells, icfrac, xwater
+    Xs_0, default, rcmf, Fe0, full_save, B_save, eta0, etal, w, alpha_n, beta, n_cells, icfrac, xwater,\
+    accrete, Trcmf
 from viscosity_def import viscosity
 
 if automated == True: 
@@ -31,8 +32,8 @@ if automated == True:
 else: #save run parameters in run_info file
     run_info = {"run":[run],"r":[r],"rcr":[rcr],"default":[default],"rcmf":[rcmf],"eta0":[eta0], 
                 "beta":[beta],"w":[w],"etal":[etal],"alpha_n":[alpha_n],"Xs_0":[Xs_0], 
-                "Fe0":[Fe0], "t_acc_m":[t_acc_m], "t_end_m":[t_end_m], "dr":[dr],
-                "step_m":[step_m/t_cond_core],"icfrac":[icfrac],"xwater":[xwater]}
+                "Fe0":[Fe0], "t_start_m":[t_start_m], "t_end_m":[t_end_m], "dr":[dr],
+                "step_m":[step_m/t_cond_core],"icfrac":[icfrac],"xwater":[xwater],"accrete":[accrete]}
     run_info = pd.DataFrame(run_info)
     run_info.to_csv(f'{folder}run_info.csv',index=False,mode='a',header=False)
 
@@ -50,15 +51,18 @@ sparse_mat_c = sp.dia_matrix(dT_mat_c,dtype='float64')
 
 
 # define the run number, start and end times
-t_acc = t_acc_m*Myr #Accretion time
+t_start = t_start_m*Myr #Start time - - accretion time if accrete = True, differentiation time if accrete = False  
 t_end=t_end_m*Myr #end time 
-#step_m=0.1*t_cond_core  #max timestep must be smaller than conductive timestep
 n_save_d = int(save_interval_d/step_m)
 n_save_t = int(save_interval_t/step_m)
 
 # set initial temperature profile
-Tint = np.ones([n_cells])*Ts#first element in the array is at r=0, accrete cold at surface temp 
-Tint[-1]=Ts
+if accrete == True: #start from cold accretion
+    Tint = np.ones([n_cells])*Ts#first element in the array is at r=0, accrete cold at surface temp 
+    Tint[-1]=Ts
+else: #start from differentiated profile
+    Tint = np.ones([n_cells])*Trcmf
+    Tint[-1]=Ts
 
 #Check viscosity profile is monotonically decreasing before start
 Ttest = np.linspace(1200,1900,200)
@@ -78,57 +82,66 @@ print(f'Beginning run {run}')
 print('Initial conditions set')
 #%%
 ########################### Differentiation ###################################
-tic = time.perf_counter()
-Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, eta, convect, d0, t_diff, H, diff  = differentiation(Tint,
-                                                                            t_acc,r, 
-                                                                            dr, step_m)
-toc = time.perf_counter()
-int_time1 = toc - tic  
+if accrete == True: #if start at accretion, differentiate planetesimal
+    print('Beginning differentiation')
+    tic = time.perf_counter()
+    Tdiff, Xfe, Xsi, cp, Ra, Ra_crit, eta, convect, d0, t_diff, H, diff  = differentiation(Tint,
+                                                                                t_start,r, 
+                                                                                dr, step_m)
+    toc = time.perf_counter()
+    int_time1 = toc - tic  
 
-# update user on progress and plot differentiated temperature profile 
-if automated == False:
-    rplot= np.arange(0,r+dr,dr,dtype='float64')/1e3
-    
-    plt.figure()
-    plt.scatter(rplot,Tdiff[-1,:])
-    plt.xlabel('r/km')
-    plt.ylabel('Temperature/K')
-    plt.title('Temperature profile post differentiation')
+    # update user on progress and plot differentiated temperature profile 
+    if automated == False:
+        rplot= np.arange(0,r+dr,dr,dtype='float64')/1e3
+        
+        plt.figure()
+        plt.scatter(rplot,Tdiff[-1,:])
+        plt.xlabel('r/km')
+        plt.ylabel('Temperature/K')
+        plt.title('Temperature profile post differentiation')
 
-#rescale data and save here in case thermal evolution crashes
-#relabel so don't change input to model on next step
-Tdiffs = Tdiff[0::n_save_d,:] 
-Xfes = Xfe[0::n_save_d,:]
-Xsis = Xsi[0::n_save_d,:]
-cps = cp[0::n_save_d,:]
-Ras = Ra[0::n_save_d]
-Ra_crits = Ra_crit[0::n_save_d]
-etas = eta[0::n_save_d]
-convects = convect[0::n_save_d]
-d0s = d0[0::n_save_d]
-t_diffs = t_diff[0::n_save_d]
-Hs = H[0::n_save_d]
+    #rescale data and save here in case thermal evolution crashes
+    #relabel so don't change input to model on next step
+    Tdiffs = Tdiff[0::n_save_d,:] 
+    Xfes = Xfe[0::n_save_d,:]
+    Xsis = Xsi[0::n_save_d,:]
+    cps = cp[0::n_save_d,:]
+    Ras = Ra[0::n_save_d]
+    Ra_crits = Ra_crit[0::n_save_d]
+    etas = eta[0::n_save_d]
+    convects = convect[0::n_save_d]
+    d0s = d0[0::n_save_d]
+    t_diffs = t_diff[0::n_save_d]
+    Hs = H[0::n_save_d]
 
-if full_save == True:
-    np.savez_compressed(f'{folder}run_{run}_diff', Tdiff = Tdiffs, Xfe = Xfes, 
-                        Xsi = Xsis, cp = cps, Ra = Ras, Ra_crit = Ra_crits, eta=etas, 
-                        convect = convects, d0=d0s, t_diff = t_diffs, H=Hs)
+    if full_save == True:
+        np.savez_compressed(f'{folder}run_{run}_diff', Tdiff = Tdiffs, Xfe = Xfes, 
+                            Xsi = Xsis, cp = cps, Ra = Ras, Ra_crit = Ra_crits, eta=etas, 
+                            convect = convects, d0=d0s, t_diff = t_diffs, H=Hs)
+    if diff == True: #print if differentiation occurred 
+        print(f'Differentiation at {t_diff[-1]/Myr:.1f}Ma')
+        print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time1)))
 
 #%%
 ######################## Thermal evolution ####################################
-if diff == True: #if differentiation occurred, run thermal evolution
-    print(f'Differentiation at {t_diff[-1]/Myr:.1f}Ma')
-    print('Differentiation complete. It took', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time1)))
-    print('Beginning subsequent thermal evolution')
+tic = time.perf_counter()
+if accrete==False: #if starting from differentiation, run thermal evolution
+    therm = True #perform thermal evolution
+    print('Beginning post-differentiation thermal evolution')
     #integrate
-    tic = time.perf_counter()
+         
     Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0,  \
         min_unstable, Ur, Ra, RaH, RanoH, Racrit, eta, Fs, Flid, Fad, Fcmb, Rem, B, \
-            buoyr, qcore, t, fcond_t = thermal_evolution(t_diff[-1],t_end,step_m,
-                                                Tdiff[-1,:],f0,sparse_mat_c,sparse_mat_m) 
-    toc = time.perf_counter()
-    int_time2 = toc - tic    
-
+            buoyr, qcore, t, fcond_t = thermal_evolution(t_start,t_end,step_m,
+                                                Tint,f0,sparse_mat_c,sparse_mat_m)
+elif diff == True: #include accretion, differentiation occured, now run thermal evolution
+    therm = True #perform thermal evolution
+    print('Beginning post-differentiation thermal evolution')
+    Tc, Tc_conv, Tcmb, Tm_mid, Tm_conv, Tm_surf, Tprofile, f, Xs, dl, dc, d0,  \
+            min_unstable, Ur, Ra, RaH, RanoH, Racrit, eta, Fs, Flid, Fad, Fcmb, Rem, B, \
+                buoyr, qcore, t, fcond_t = thermal_evolution(t_diff[-1],t_end,step_m,
+                                                    Tdiff[-1,:],f0,sparse_mat_c,sparse_mat_m)
     #update on progress
     if automated == False:
         plt.figure()
@@ -138,16 +151,26 @@ if diff == True: #if differentiation occurred, run thermal evolution
         plt.title('Temperature profile post thermal evolution')
 
     print('Thermal evolution complete', time.strftime("%Hh%Mm%Ss", time.gmtime(int_time2)))
-else: 
+
+else: #accretion but no differentiation 
+    therm = False  
     print('Differentiation did not occur - skipping subsequent thermal evolution')
+toc = time.perf_counter()
+int_time2 = toc - tic    
+    
 #%%
 ############################# Process data ####################################
 ################ all processes which happen once  #############################
-if diff == True: #process thermal evolution data
-    int_time = int_time1+int_time2 #total time for the two scripts
+if therm == True: #process thermal evolution data
+    if accrete == True: #accretion and differentiation
+        int_time = int_time1+int_time2 #total time for the two scripts
+        diff_time = t_diff[-1]/Myr
+        diff_T = Tdiff[-1,int(nmantle)]
+    else:
+        int_time = int_time2 #only thermal evolution
+        diff_time = t_start_m
+        diff_T = Trcmf
     nmantle = int((r/dr)/2)
-    diff_time = t_diff[-1]/Myr
-    diff_T = Tdiff[-1,int(nmantle)]
     peakT = np.amax(Tprofile[:,nmantle+1:])
     loc_max1 = np.where(Tprofile[:,nmantle+1:]==peakT)[0][0] #take the set of time coordinates and first value (they should all be the same)
     tmax = t[loc_max1]/Myr

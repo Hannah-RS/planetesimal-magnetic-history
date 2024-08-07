@@ -45,11 +45,12 @@ if automated == True:
     Xs_0 = auto.loc[ind,'Xs_0']
     Fe0 = auto.loc[ind,'Fe0']
     run = int(auto.loc[ind,'run'])
-    t_acc_m = auto.loc[ind,'t_acc_m']
+    t_start_m = auto.loc[ind,'t_start_m']
     t_end_m = auto.loc[ind,'t_end_m']
     dr = auto.loc[ind,'dr']
     icfrac = auto.loc[ind,'icfrac']
     xwater = auto.loc[ind,'xwater']
+    accrete = auto.loc[ind,'accrete']
 else: #set manually
     r = 100e3 # radius of asteroid [m]
     rcr = 0.5 #core radius as a fraction of asteroid radius
@@ -64,10 +65,11 @@ else: #set manually
     Xs_0 = 30# initial wt % sulfur in core 
     Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
     run = 9
-    t_acc_m = 1 #accretion time [Myr]
+    t_start_m = 1.5 #start time - accretion time if accrete = True, differentiation time if accrete = False [Myr]
     t_end_m = 4 # max end time [Myr]
     icfrac = 0 #fraction of solidified material that forms a passive inner core during solidification
     xwater = 0 #water content of mantle [wt %]
+    accrete = False #do you want to include accretion to differentiation
 
 # Size of body
 #rc = rcr*r #radius of core [m]
