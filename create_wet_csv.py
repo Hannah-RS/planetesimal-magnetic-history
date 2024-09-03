@@ -17,7 +17,8 @@ rcr = [0.5,0.4] #core radius as a fraction of asteroid radius
 eta0 = [1e19, 1e18] #reference viscosity at Tms [Pas]
 eac =[440e3,510e3] #creep activation energy [J/mol]
 etal = [10,1] #liquid viscsoity [Pas]
-Xs_0 = [23,14.5] # initial wt % sulfur in core 
+Xs_wet = np.array([19.8,19.4,17.8,14.9,12.5])
+Xs_0 = np.vstack((Xs_wet+9,Xs_wet)) # initial wt % sulfur in core - first row is dry, second is wet, first column is 100km, last is 500km
 
 #%%
 # #radius [m]
@@ -79,7 +80,7 @@ for i, runs in enumerate(run_nums):
         m = 1 #wet second
     #calculated wet-dry parameters 
     rav = (minr+maxr)/2
-    Tms = solidus(rav,rav/2,xwater[m],Xs_0[m],rhom) # mantle solidus [K] Katz et al. 2003
+    Tms = solidus(rav,rav/2,xwater[m],Xs_0[m,2],rhom) # mantle solidus [K] Katz et al. 2003
     beta = eac[m]/(R*Tms**2) #E/RTref^2 - Arrhenius slope
     eta0 = np.logspace(mineta0[m],maxeta0[m],neta0)
     varlab = {'r':r,'t_start_m':t_start_m,'eta0':eta0}
@@ -92,6 +93,7 @@ for i, runs in enumerate(run_nums):
     t_start_val = tdiff[m]
     eta0val= 10**((maxeta0[m]+mineta0[m])/2)
     rval=300e3
+    Xsval = Xs_0[m,2] #midpoint sulfur content
     run_info = pd.DataFrame(columns=['run','r','rcr','default','rcmf','eta0','beta','w','etal','alpha_n','Xs_0','Fe0','t_start_m','t_end_m','dr','dt','icfrac','xwater','accrete','status']) #create columns of dataframe
     unit_row = ['','m','','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core','','wt %','',''] #first row is units
     run_info.loc[len(run_info)] = unit_row
@@ -102,9 +104,11 @@ for i, runs in enumerate(run_nums):
             unit_row = ['','m','','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core','','wt %','',''] #first row is units
             run_info.loc[len(run_info)] = unit_row
         #make data frame of correct length will all same values
-        run_info = pd.concat([run_info, pd.DataFrame({"run":[run],"r":[rval],"rcr":[rcr[m]],"default":[default],"rcmf":[rcmf],"eta0":[eta0val],"beta":[beta],"w":[w],"etal":[etal[m]],"alpha_n":[alpha_n],"Xs_0":[Xs_0[m]], "Fe0":[Fe0], "t_start_m":[t_start_val], "t_end_m":[t_end_m], "dr":[dr],"dt":[dt],"icfrac":[icfrac],"xwater":[xwater[m]],"accrete":[False],"status":""})],ignore_index=True)
+        run_info = pd.concat([run_info, pd.DataFrame({"run":[run],"r":[rval],"rcr":[rcr[m]],"default":[default],"rcmf":[rcmf],"eta0":[eta0val],"beta":[beta],"w":[w],"etal":[etal[m]],"alpha_n":[alpha_n],"Xs_0":[Xsval], "Fe0":[Fe0], "t_start_m":[t_start_val], "t_end_m":[t_end_m], "dr":[dr],"dt":[dt],"icfrac":[icfrac],"xwater":[xwater[m]],"accrete":[False],"status":""})],ignore_index=True)
         run = run+1
     #replace variable values
     run_info.loc[1:,variables[i%mod]]=var
+    if variables[i%mod] == 'r':
+        run_info.loc[1:,'Xs_0']=Xs_0[m,:] #replace min sulfur content when r varies
     #create csv                      
     run_info.to_csv(f'{folder}auto_params_{i+1}.csv',index=False)                        

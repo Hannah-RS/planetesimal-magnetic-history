@@ -9,11 +9,14 @@ import sys
 # setting path
 sys.path.append('../')
 from fe_fes_liquidus import fe_fes_liquidus_bw, central_pressure
-from parameters import rhoc, rhom, Mr_s, Mr_fe, Tml, Tms
+from parameters import rhoc, rhom, Mr_s, Mr_fe
+from solidus_calc import solidus, liquidus
 
 #%% Choose parameters
-r = np.array([300e3]) #m
-phi = np.array([0.3]) #critical melt fraction
+r = np.array([100e3]) #m
+rc = r/2 #core radius
+phi = np.array([0.5]) #critical melt fraction
+xwater = np.array([0]) #wt %
 
 #%% Calculation
 
@@ -22,6 +25,10 @@ Xs = np.linspace(0,40,100)
 Xsd = Xs/100 #convert wt % to decimal
 mrr = Mr_fe/Mr_s
 x = Xsd*mrr/(1-Xsd) #mole fraction of FeS
+# Calculate solidus
+Xsnom = 15 #chosen Xs in Tms and Tml makes 0.01 K difference
+Tms = solidus(r,rc,xwater,Xsnom,rhom) 
+Tml = liquidus(r,rc,xwater,Xsnom,rhom)
 
 #pressure, c
 rc = r/2
