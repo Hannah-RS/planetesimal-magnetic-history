@@ -387,9 +387,12 @@ if therm == True: #process thermal evolution data
 #add done flag to run
 if automated == True: #no need to reimport ind as will have been imported earlier
     auto = pd.read_csv(f'{folder}auto_params.csv')
-    if diff == True:
+    if accrete == True:
+        if diff == True:
+            auto.loc[ind+1,'status']=1 #indicates differentiated and completed
+        elif diff == False:
+            auto.loc[ind+1,'status']=2 #indicates not differentiated but completed
+    else:
         auto.loc[ind+1,'status']=1 #indicates differentiated and completed
-    elif diff == False:
-        auto.loc[ind+1,'status']=2 #indicates not differentiated but completed
     auto.to_csv(f'{folder}auto_params.csv',index=False)
 
