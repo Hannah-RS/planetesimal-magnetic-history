@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #import constants and parameters    
-from parameters import Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Pc, gc
+from parameters import Acmb, dr, kc, rc, rhoc, cpc, Vc, Xs_0, Pc, gc, f0
 from q_funcs import qlt, qr, qgt
 from fe_fes_liquidus import fe_fes_liquidus_dp
 import numpy as np
@@ -118,8 +118,8 @@ def dTcdt_calc_solid(t,Fcmb,Tcore,f,Xs,dt):
     
     dTcdt = (Fcmb*Acmb-qrad)/(qst+ql+qg)
     dfdt = - dTcdt/(rhoc*gc*dTl_dP*rc)
-    if dfdt > 0:
-        raise ValueError('Core growing!')
+    if (dfdt > 0) & (f==f0):
+        raise ValueError('Core growing beyond max core size!')
     f_new = f+dfdt*dt
     Rem, Bdip_cmb, comp, therm = rem_b(f, dfdt, Xs, Tcore, Fcmb, True,0) #if core is solidifying there is no thermal stratification
     #calculate heat fluxes to return
