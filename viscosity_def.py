@@ -4,7 +4,7 @@ import numpy as np
 from parameters import eta0, gamma, alpha_n, Tms, Tml, eta0_50, Tm50, Tcrit, T0eta, default
 from variable_viscosity import eta_calc
 
-def viscosity(Tm, model = default):
+def viscosity(Tm,model = default,Tms=Tms,Tml=Tml):
     """
     Overall viscosity function which can call different viscosity models 
     
@@ -13,8 +13,11 @@ def viscosity(Tm, model = default):
     Tm : float
         mantle temperature [K]
     model: str, default specified in run parameters
-        viscosity model to use, options are 'vary' (Sanderson et. al. 2024 model), 'Bryson', 'Dodds'
-
+        viscosity model to use, options are 'vary' (Sanderson et. al. 2025 model), 'Bryson', 'Dodds'
+    Tms : float
+        solidus temperature [K], default in parameters file
+    Tml : float
+        liquidus temperature [K], default in parameters file
     Returns
     -------
     eta: float
@@ -24,7 +27,7 @@ def viscosity(Tm, model = default):
         
     if model == 'vary':
         # Sanderson et. al. 2024 model
-        eta = eta_calc(Tm)
+        eta = eta_calc(Tm,Tms,Tml)
         
     elif model == 'Dodds':   
     # Viscosity model from Dodds et al (2021)
