@@ -55,11 +55,12 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
     Bdf_long = Bdf[tsolids>=t2]
     if len(Bdf_short)>1:
         Bshort_av = Bdf_short.rolling(window=wn1,center=False).mean() #calculate rolling average
-        Badd = np.ones([wn1])*np.average(Bdf_short[:wn1]) #average initial window width
-        if len(Bdf_short > wn1):
+        if len(Bdf_short) > wn1:
+            Badd = np.ones([wn1])*np.average(Bdf_short[:wn1]) #average initial window width
             Bplot = np.concatenate([Bplot,Badd,Bshort_av.values[wn1:]])
         else:
-            Bplot = np.concatenate([Bplot,Badd])
+            Badd = np.ones([len(Bdf_short)])*np.average(Bdf_short) #average initial window width
+            Bplot = np.concatenate([Bplot,Badd])           
     if len(Bdf_med)>1:
         if len(Bdf_med) < wn2: #if less than window width
             wn2 = wn1 #use previous window width
@@ -82,7 +83,7 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
                 Bdf_long = pd.concat([Bdf_med[-wn3:],Bdf_long])
                 Blong_av = Bdf_long.rolling(window=wn3,center=False).mean() #calculate rolling average
                 Bplot = np.concatenate([Bplot,Blong_av.values[wn3:]])
-            else: # previous array too short to concatenate
+            else: # previous array too short to concatenate    
                 Blong_av = Bdf_long.rolling(window=wn3,center=False).mean()
                 Badd = np.ones([wn3])*np.average(Bdf_long[:wn3]) #average initial window width
                 Bplot = np.concatenate([Bplot,Badd,Blong_av.values[wn3:]])  
@@ -95,8 +96,12 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
     Remdf_long = Remdf[tsolids>=t2]
     if len(Remdf_short)>1:
         Remshort_av = Remdf_short.rolling(window=wn1,center=False).mean() #calculate rolling average
-        Remadd = np.ones([wn1])*np.average(Remdf_short[:wn1]) #average initial window width
-        Remplot = np.concatenate([Remplot,Remadd,Remshort_av.values[wn1:]])
+        if len(Remdf_short)>wn1:
+            Remadd = np.ones([wn1])*np.average(Remdf_short[:wn1]) #average initial window width
+            Remplot = np.concatenate([Remplot,Remadd,Remshort_av.values[wn1:]])
+        else: 
+            Remadd = np.ones([len(Remdf_short)])*np.average(Remdf_short) #average initial window width
+            Remplot = np.concatenate([Remplot,Remadd])
     if len(Remdf_med)>1:
         if len(Remdf_med) < wn2: #if less than window width
             wn2 = wn1
