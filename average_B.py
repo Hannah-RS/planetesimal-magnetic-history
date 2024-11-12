@@ -167,12 +167,13 @@ def average_B_Psyche(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
     #find when core reaches eutectic composition
     t_eut = t[xs>=xs_eut][0]
     #process B values
-    Bplot = B[t<tsolid_start] #before solidification
-    Bdf = pd.Series(B[(t>=tsolid_start)&(t<t_eut)]) # convert to pandas series
+    #Bplot = B[t<tsolid_start] #before solidification
+    Bplot=[]
+    Bdf = pd.Series(B[(t<t_eut)]) # convert to pandas series
     Blate = B[t>=t_eut] #after eutectic
-    tsolids = t[(t>=tsolid_start)&(t<t_eut)]
+    tsolids = t[(t<t_eut)]
     #split into 2 series
-    t1 = 5 #first threshold [Myr]
+    t1 = tsolid_start #first threshold [Myr]
     wn1 = 10 #window for rolling average - 1Ma
     wn2 = 50 #window for rolling average - 5Ma
     Bdf_short = Bdf[tsolids < t1]
@@ -198,8 +199,8 @@ def average_B_Psyche(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
             Bplot = np.concatenate([Bplot,Badd,Bmed_av.values[wn2:]])
     
     #process Rem values
-    Remplot = Rem[t<tsolid_start] #before solidification
-    Remdf = pd.Series(Rem[(t>=tsolid_start)&(t<t_eut)]) # convert to pandas series
+    Remplot = [] #before solidification
+    Remdf = pd.Series(Rem[(t<t_eut)]) # convert to pandas series
     Remlate = Rem[t>=t_eut] #after eutectic
     Remdf_short = Remdf[tsolids < t1]
     Remdf_med = Remdf[(tsolids >=t1)]
