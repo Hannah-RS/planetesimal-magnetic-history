@@ -240,7 +240,11 @@ if therm == True: #process thermal evolution data
     #average post solidification values
     from duration_calc import on_off_test
     from average_B import average_B_rem
-    Bav, Remav = average_B_rem(B, Rem, t/Myr, Xs, Xs_eutectic, tsolid_start)
+    if Xs[0]!=Xs_eutectic: #if the core doesn't start at the eutectic composition
+        Bav, Remav = average_B_rem(B, Rem, t/Myr, Xs, Xs_eutectic, tsolid_start)
+    else: #at eutectic no need to average
+        Bav = B
+        Remav = Rem
     #thermal dynamo
     Remtherm = Remav[f>=f0]
     Btherm = Bav[f>=f0]
