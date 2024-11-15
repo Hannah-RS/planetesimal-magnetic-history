@@ -263,7 +263,8 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     Tc_new = T_new_core[0] #temperature of core is always taken at centre
     
     #Check for initial stratification
-    if np.any(T_new_core[:-1]-Tcmb_new < temp_tol):
+    if np.any((T_new_core[:-1]-Tcmb_new) < temp_tol):
+
         stratification_new = True
         if np.all(T_new_core[:-1]-Tcmb_new < temp_tol):
             min_unstable_new = i_core -1
@@ -272,7 +273,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
             min_unstable_new = b_ind[0]
             dl_new = 0 #reset dl as 0 when core is stratified
     else:
-        stratifcation_new = False
+        stratification_new = False
         min_unstable_new = 0
         
     # Step 6. Replace old array with new ready for next step

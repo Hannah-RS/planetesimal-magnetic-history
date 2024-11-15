@@ -14,14 +14,14 @@ import time #use this to time the integration
 from parameters import  run, t_start_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, rcr,\
     kappa_c, save_interval_d, save_interval_t, save_interval_mag, km, Vm, As, rhom, step_m, t_cond_core,\
     Xs_0, default, rcmf, Fe0, full_save, B_save, eta0, etal, w, alpha_n, beta, n_cells, icfrac, xwater,\
-    accrete, Trcmf
+    accrete, Trcmf, Xs_eutectic
 from viscosity_def import viscosity
 
 if automated == True: 
     import sys
     folder = sys.argv[1]
 else:
-    folder = 'Results_combined/nc_vs_cc/' #folder where you want to save the results
+    folder = 'Results_combined/' #folder where you want to save the results
     ind = None #no index for csv
 #set flag for run started
 if automated == True:
@@ -237,9 +237,17 @@ if therm == True: #process thermal evolution data
     threshold3 = 100
 
     ########### Dynamo maxima - must be greater than threshold1 to be on ##########
+    #average post solidification values
+    from duration_calc import on_off_test
+    from average_B import average_B_rem
+    if Xs[0]!=Xs_eutectic: #if the core doesn't start at the eutectic composition
+        Bav, Remav = average_B_rem(B, Rem, t/Myr, Xs, Xs_eutectic, tsolid_start)
+    else: #at eutectic no need to average
+        Bav = B
+        Remav = Rem
     #thermal dynamo
-    Remtherm = Rem[f>=f0]
-    Btherm = B[f>=f0]
+    Remtherm = Remav[f>=f0]
+    Btherm = Bav[f>=f0]
 
     if np.any(Remtherm>threshold1):
         max_Btherm = max(Btherm)
@@ -257,29 +265,22 @@ if therm == True: #process thermal evolution data
 
     #compositional - turn into df for rolling average
     #no max time as averaging
-    Remcomp = pd.Series(Rem[f<f0])
-    Bcomp = pd.Series(B[f<f0])
-    wfrac = 30 #fractional window width
-    wn = int(len(Remcomp)/wfrac)
-    if wn < 1: #check if window is wider than data
-        wn = int(len(Remcomp)/5)
-        
-    Remav = Remcomp.rolling(window=wn,center=True).mean()
-    Bav = Bcomp.rolling(window=wn,center=True).mean()
-    if np.any(Remav[wn:-wn]>threshold1):
-        max_Bcomp = max(Bav[wn:-wn]) #exclude nan
+    Remcomp = Remav[f<f0]
+    Bcomp = Bav[f<f0]
+    
+    if np.any(Remcomp>threshold1):
+        max_Bcomp = max(Bcomp)
     else:
         max_Bcomp = 0
 
     if len(Remcomp)!=0:    
-        max_Rcomp = max(Remav[wn:-wn]) 
+        max_Rcomp = max(Remcomp) 
     else:
         max_Rcomp = 0
     ########################## on and off times - calculate and save ####################
-    from duration_calc import on_off_test
-
+    
     #Rem > 10  
-    on, off, dur = on_off_test(t/Myr,Rem,threshold1,save_interval_mag/Myr) 
+    on, off, dur = on_off_test(t/Myr,Remav,threshold1,save_interval_mag/Myr) 
     Bn1 = len(on) #number of on periods
     if on.size > 0:
         if (on[0] < strat_end) & (off[0]>strat_end): #dynamo generation extends through stratification
@@ -308,7 +309,7 @@ if therm == True: #process thermal evolution data
         magoff_3 = 0
 
     #Rem > 40
-    on, off, dur = on_off_test(t/Myr,Rem,threshold2,save_interval_mag/Myr) 
+    on, off, dur = on_off_test(t/Myr,Remav,threshold2,save_interval_mag/Myr) 
     Bn2 = len(on) #number of on periods
     if on.size > 0: #i.e. there is one on value > nan
         if (on[0] < strat_end) & (off[0]>strat_end): #dynamo generation extends through stratification
@@ -332,7 +333,7 @@ if therm == True: #process thermal evolution data
         magoff_5 = 0
         
     # Rem > 100
-    on, off, dur = on_off_test(t/Myr,Rem,threshold3,save_interval_mag/Myr) 
+    on, off, dur = on_off_test(t/Myr,Remav,threshold3,save_interval_mag/Myr) 
     Bn3 = len(on) #number of on periods
     if on.size > 0:
         if (on[0] < strat_end) & (off[0]>strat_end): #dynamo generation extends through stratification
@@ -387,9 +388,12 @@ if therm == True: #process thermal evolution data
 #add done flag to run
 if automated == True: #no need to reimport ind as will have been imported earlier
     auto = pd.read_csv(f'{folder}auto_params.csv')
-    if diff == True:
+    if accrete == True:
+        if diff == True:
+            auto.loc[ind+1,'status']=1 #indicates differentiated and completed
+        elif diff == False:
+            auto.loc[ind+1,'status']=2 #indicates not differentiated but completed
+    else:
         auto.loc[ind+1,'status']=1 #indicates differentiated and completed
-    elif diff == False:
-        auto.loc[ind+1,'status']=2 #indicates not differentiated but completed
     auto.to_csv(f'{folder}auto_params.csv',index=False)
 

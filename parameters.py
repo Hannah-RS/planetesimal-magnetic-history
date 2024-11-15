@@ -19,7 +19,7 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-automated = False #do you want to run a series of automated runs
+automated = True #do you want to run a series of automated runs
 full_save = True #do you want to save temp profiles etc or just summary stats
 B_save = False #do you want to save field strengths and Rem
 rhoa_var = False #is the undifferentiated density calculated based on inputs - false for Psyche runs
@@ -92,8 +92,8 @@ Lm = 400e3 #latent heat of mantle [J /kg]
 rhom = 3000 # density [kg m^-3] Bryson et. al. (2019)
 #Tml = 1800 # mantle liquidus [K]
 #Tms = 1400 # mantle solidus [K]
-Tms = solidus(r,rc,0,Xs_0,rhom) # mantle solidus [K] Katz et al. 2003
-Tml = liquidus(r,rc,0,Xs_0,rhom) # mantle liquidus [K] Katz et al. 2003
+Tms = solidus(r,rc,xwater,Xs_0,rhom) # mantle solidus [K] Katz et al. 2003
+Tml = liquidus(r,rc,xwater,Xs_0,rhom) # mantle liquidus [K] Katz et al. 2003
 km = 2.16 # thermal conductivity of silicate [W /m /K] needs to be consistent with cp, kappa and rhom
 kappa = 9e-7 # thermal diffusivity of silicate [m^2 /s] - 4 options are given in Dodds (2021) have picked the middle one - needs to be consistent with other choices
 alpha_m = 4e-5 # thermal expansivity of mantle [/K]
@@ -150,7 +150,7 @@ from fe_fes_liquidus import fe_fes_liquidus_bw, fe_fes_liquidus_bw_min,\
 from scipy.optimize import root_scalar
 Ts_fe = 1260 # [K] Buono and Walker 2011 give 1263+-25
 # Use root finding on FeFeS liquidus for 300km body pressure, 30.05 wt% core
-Xs_eutectic = np.round(root_scalar(fe_fes_liquidus_bw_min,bracket=(25,34),args=(0.154)).root,1) 
+Xs_eutectic = 33 # np.round(root_scalar(fe_fes_liquidus_bw_min,bracket=(25,34),args=(0.154)).root,1) 
 cpc=850 # heat capacity of core [J kg^-1 K^-1] 
 kc=30 # thermal conducitivity of core material [Wm^-1 K^-1] 
 alpha_c=9.2e-5 #[K^-1] Nimmo 2009

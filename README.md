@@ -21,13 +21,14 @@ Thermal evolution and dynamo generation model for a planetesimal.
 + [References](#references)
 
 ## Basic model description
-The model is described in [Sanderson et. al. 2024a](https://arxiv.org/abs/2407.12721), "Unlocking planetesimal magnetic field histories: a refined, versatile model for thermal evolution and dynamo generation", submitted to Icarus and available as a preprint. This is a spherically symmetric 1D thermal evolution and dynamo generation model. It begins with an undifferentiated planetesimal which heats up due to decay of $^{26}Al$ and differentiates into a core and mantle. The code then tracks the thermal evolution of the core and mantle and when dynamo generation is possible.
+The model is described in [Sanderson et. al. 2025](https://doi.org/10.1016/j.icarus.2024.116323), "Unlocking planetesimal magnetic field histories: a refined, versatile model for thermal evolution and dynamo generation", submitted to Icarus and available as a preprint. This is a spherically symmetric 1D thermal evolution and dynamo generation model. It begins with an undifferentiated planetesimal which heats up due to decay of $^{26}Al$ and differentiates into a core and mantle. The code then tracks the thermal evolution of the core and mantle and when dynamo generation is possible.
 
+![image](images/asteroid_evolution.jpg)*Schematic of the stages in planetesimal thermal evolution and dynamo generation that are modelled by this code (Figure 1, Sanderson et. al. 2025)*
 ## Contents of this repository
 This repository contains the code required to run the model, an example run and plotting notebook and the parameter files for Sanderson et. al. 2024b. The directory contains the following subdirectories:
 + Analysis/ - scripts to analyse data or choose correct input parameters
 + Plotting_scripts - scripts to plot the output, including example output
-+ Run_params_public - run parameters to accompany Sanderson et. al. 2024a and Sanderson et. al. 2024b
++ Run_params_public - run parameters to accompany Sanderson et. al. 2025 and Sanderson et. al. 2024
 + Templates - csv templates required for automated running of the code and saving results
 All the code in the main directory is required for running the model. To use the code but not alter its functionality you will only need to change values in `solver.py` and `parameters.py` (see below for instructions).
 
@@ -84,7 +85,7 @@ Then follow the instructions in either of the subsections below.
 3. Run `bash multi_run.sh <filepath>` in the main directory where filepath is the path from the model directory to where you want to save results
 
 #### Multiple runs - multiple subfolders
-This method is for keeping a set of parameters constant, whilst varying an individuals parameter in independent runs. It requires access to an hpc in order to create an array job. For example, the directory "Multi_run" could contain subfolders "params_1" nd "params_2" each containing an "auto_params.csv" file and could run as one directory using an array job on an hpc. "params_1/" could vary reference viscosity but keep all other variables constant and "params_2" could vary critical melt fraction and keep all other variables constant. This method was used in Sanderson et. al. 2024b to investigate the role of viscosity, core sulfur content and radiogenic $^{60}Fe$ on dynamo generation.
+This method is for keeping a set of parameters constant, whilst varying an individuals parameter in independent runs. It requires access to an hpc in order to create an array job. For example, the directory "Multi_run" could contain subfolders "params_1" nd "params_2" each containing an "auto_params.csv" file and could run as one directory using an array job on an hpc. "params_1/" could vary reference viscosity but keep all other variables constant and "params_2" could vary critical melt fraction and keep all other variables constant. This method was used in Sanderson et. al. 2024 to investigate the role of viscosity, core sulfur content and radiogenic $^{60}Fe$ on dynamo generation.
  
 1. Create overall parameters directory e.g. "Multi_run"
 2. Use `create_single_csv.py` to set your range of parameter space you are exploring.
@@ -108,21 +109,23 @@ The frequency of time series output can be adjusted using `save_interval_d` and 
 
 #### Magnetic field generation output
 The summary file is designed to save on/off times for up to three dynamo generation periods for critical magnetic Reynolds numbers of 10, 40 and 100. `save_interval_mag` sets the minimum size for a detectable gap in dynamo generation. The minimum value is `2*save_interval_t`. Too small a minimum size will have more than 3 dynamo generation periods due to the oscillations and magnetic Reynolds number during core solidification. Too large a minumum size and you may miss gaps in dynamo generation. Larger bodies have longer gaps, so for bodies >300km radius `save_interval_mag=10*Myr` is recommended for 100km radius bodies `save_interval_mag=1*Myr`is recommended.
+The average_B function is used to calculate a rolling average for the magnetic field strength and magnetic Reynolds number during core solidification.
 
 ### Example use
 The `Plotting_scripts` directory contains the results of an example run and `Example_output_plots.ipynb` contains some example plots.
 
 ## Citing the model
-If you use this model please cite Sanderson et. al. 2024a. This paper will be submitted soon. If you would like to cite the model in the meantime, please use the Zenodo doi.
+If you use this model please cite Sanderson et. al. 2025.
 
 ## Issues
 If you have any questions about the code please email hannah.sanderson"at"earth.ox.ac.uk. 
 If there are any issues or bugs in the code please raise an [issue](https://github.com/Hannah-RS/learning-model/issues)
 
 ## References
-Sanderson et. al. 2024a "Unlocking planetesimal magnetic field histories: a refined, versatile model for thermal evolution and dynamo generation", [https://arxiv.org/abs/2407.12721](https://arxiv.org/abs/2407.12721), submitted to Icarus 
+Sanderson et. al. 2025. Unlocking planetesimal magnetic field histories: A refined, versatile model for thermal evolution and dynamo generation. Icarus 425, 116323. https://doi.org/10.1016/j.icarus.2024.116323
 
-Sanderson et. al. 2024b "Early and elongated epochs of planetesimal dynamo generation", [https://arxiv.org/abs/2405.05147](https://arxiv.org/abs/2405.05147), submitted to Earth and Planetary Science Letters
+
+Sanderson et. al. 2024 "Early and elongated epochs of planetesimal dynamo generation", Earth and Planetary Science Letters, 648, 119083 https://doi.org/10.1016/j.epsl.2024.119083 
 
 
 
