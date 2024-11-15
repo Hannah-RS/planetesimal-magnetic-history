@@ -109,6 +109,7 @@ The frequency of time series output can be adjusted using `save_interval_d` and 
 
 #### Magnetic field generation output
 The summary file is designed to save on/off times for up to three dynamo generation periods for critical magnetic Reynolds numbers of 10, 40 and 100. `save_interval_mag` sets the minimum size for a detectable gap in dynamo generation. The minimum value is `2*save_interval_t`. Too small a minimum size will have more than 3 dynamo generation periods due to the oscillations and magnetic Reynolds number during core solidification. Too large a minumum size and you may miss gaps in dynamo generation. Larger bodies have longer gaps, so for bodies >300km radius `save_interval_mag=10*Myr` is recommended for 100km radius bodies `save_interval_mag=1*Myr`is recommended.
+The average_B function is used to calculate a rolling average for the magnetic field strength and magnetic Reynolds number during core solidification.
 
 ### Example use
 The `Plotting_scripts` directory contains the results of an example run and `Example_output_plots.ipynb` contains some example plots.
@@ -124,7 +125,7 @@ If there are any issues or bugs in the code please raise an [issue](https://gith
 Sanderson et. al. 2025. Unlocking planetesimal magnetic field histories: A refined, versatile model for thermal evolution and dynamo generation. Icarus 425, 116323. https://doi.org/10.1016/j.icarus.2024.116323
 
 
-Sanderson et. al. 2024 "Early and elongated epochs of planetesimal dynamo generation", [https://arxiv.org/abs/2405.05147](https://arxiv.org/abs/2405.05147), submitted to Earth and Planetary Science Letters
+Sanderson et. al. 2024 "Early and elongated epochs of planetesimal dynamo generation", Earth and Planetary Science Letters, 648, 119083 https://doi.org/10.1016/j.epsl.2024.119083 
 
 
 
