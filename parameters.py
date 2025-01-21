@@ -116,7 +116,7 @@ E = 300e3 # activation energy [J /mol]
 Tref = 1800 # viscosity reference temperature [K] 
 c1 = 8 # constant in boundary layer thickness (Sterenborg & Crowley, 2013)
 gamma = E/(R*T0eta**2)
-Dw = 1e-3 #C^sol_H/C^melt_H partition coefficient of water between solid and melt
+Dw = 0.006 #C^sol_H/C^melt_H partition coefficient of water between peridotite and melt (Hirschmann 2009)
 mmr = 140 #mineral Mr used for converting ppm to H/1e6 Si
 #my model - also uses alpha_n from above
 Trcmf = rcmf*(Tml-Tms)+Tms #temperature at critical melt fraction
