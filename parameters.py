@@ -19,7 +19,7 @@ R = 8.31 # gas constant [J /K /mol]
 mu0 = 4*np.pi*1e-7 #magnetic permeability of a vacuum [H/m]
 
 #Run parameters
-automated = True #do you want to run a series of automated runs
+automated = False #do you want to run a series of automated runs
 full_save = True #do you want to save temp profiles etc or just summary stats
 B_save = False #do you want to save field strengths and Rem
 rhoa_var = False #is the undifferentiated density calculated based on inputs - false for Psyche runs
@@ -64,11 +64,11 @@ else: #set manually
     alpha_n = 30 #melt weakening (diffusion creep)
     Xs_0 = 30# initial wt % sulfur in core 
     Fe0 = 1e-8 # 60Fe/56FE ratio in accreting material (Dodds 1e-7) (6e-7 Cook 2021)
-    run = 9
-    t_start_m = 1.5 #start time - accretion time if accrete = True, differentiation time if accrete = False [Myr]
-    t_end_m = 4 # max end time [Myr]
+    run = 23
+    t_start_m = 2 #start time - accretion time if accrete = True, differentiation time if accrete = False [Myr]
+    t_end_m = 1000 # max end time [Myr]
     icfrac = 0 #fraction of solidified material that forms a passive inner core during solidification
-    xwater = 0 #water content of mantle [wt %]
+    xwater = 0.05 #water content of mantle [wt %]
     accrete = False #do you want to include accretion to differentiation
 
 # Size of body
@@ -116,7 +116,8 @@ E = 300e3 # activation energy [J /mol]
 Tref = 1800 # viscosity reference temperature [K] 
 c1 = 8 # constant in boundary layer thickness (Sterenborg & Crowley, 2013)
 gamma = E/(R*T0eta**2)
-
+Dw = 1e-3 #C^sol_H/C^melt_H partition coefficient of water between solid and melt
+mmr = 140 #mineral Mr used for converting ppm to H/1e6 Si
 #my model - also uses alpha_n from above
 Trcmf = rcmf*(Tml-Tms)+Tms #temperature at critical melt fraction
 if frht == 'old':
