@@ -117,7 +117,7 @@ Tref = 1800 # viscosity reference temperature [K]
 c1 = 8 # constant in boundary layer thickness (Sterenborg & Crowley, 2013)
 gamma = E/(R*T0eta**2)
 Dw = 0.006 #C^sol_H/C^melt_H partition coefficient of water between peridotite and melt (Hirschmann 2009)
-mmr = 140 #mineral Mr used for converting ppm to H/1e6 Si
+mmr = 55.1 #molar mass of KLB-1 peridotite (Davis et. al. 2009) used for converting ppm to H/1e6 Si
 #my model - also uses alpha_n from above
 Trcmf = rcmf*(Tml-Tms)+Tms #temperature at critical melt fraction
 if frht == 'old':
