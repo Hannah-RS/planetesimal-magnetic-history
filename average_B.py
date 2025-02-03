@@ -53,7 +53,7 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
     Bdf_short = Bdf[tsolids < t1]
     Bdf_med = Bdf[(tsolids >=t1)&(tsolids<t2)]
     Bdf_long = Bdf[tsolids>=t2]
-    if len(Bdf_short)>1:
+    if len(Bdf_short)>0:
         Bshort_av = Bdf_short.rolling(window=wn1,center=False).mean() #calculate rolling average
         if len(Bdf_short) > wn1:
             Badd = np.ones([wn1])*np.average(Bdf_short[:wn1]) #average initial window width
@@ -94,7 +94,7 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
     Remdf_short = Remdf[tsolids < t1]
     Remdf_med = Remdf[(tsolids >=t1)&(tsolids<t2)]
     Remdf_long = Remdf[tsolids>=t2]
-    if len(Remdf_short)>1:
+    if len(Remdf_short)>0:
         Remshort_av = Remdf_short.rolling(window=wn1,center=False).mean() #calculate rolling average
         if len(Remdf_short)>wn1:
             Remadd = np.ones([wn1])*np.average(Remdf_short[:wn1]) #average initial window width
@@ -102,7 +102,7 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
         else: 
             Remadd = np.ones([len(Remdf_short)])*np.average(Remdf_short) #average initial window width
             Remplot = np.concatenate([Remplot,Remadd])
-    if len(Remdf_med)>1:
+    if len(Remdf_med)>0:
         if len(Remdf_med) < wn2: #if less than window width
             wn2 = wn1
         if len(Remdf_short)>wn2: #concatenate part of previous array to cover blank space of rolling average
@@ -113,7 +113,7 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
             Remmed_av = Remdf_med.rolling(window=wn2,center=False).mean()
             Remadd = np.ones([wn2])*np.average(Remdf_med[:wn2])
             Remplot = np.concatenate([Remplot,Remadd,Remmed_av.values[wn2:]])
-    if len(Remdf_long)>1:
+    if len(Remdf_long)>0:
         if len(Remdf_long) < wn2: #too small for rolling average
             Rem_add = np.ones([len(Remdf_long)])*np.average(Remdf_long)
             Remplot = np.concatenate([Remplot,Rem_add])
