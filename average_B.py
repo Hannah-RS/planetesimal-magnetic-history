@@ -39,7 +39,7 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
     #process B values
     Bplot = B[t<tsolid_start] #before solidification
     Bdf = pd.Series(B[(t>=tsolid_start)&(t<t_eut)]) # convert to pandas series
-    Blate = B[t>=t_eut] #after eutectic
+    Blate = B[(t>=t_eut)&(t>=tsolid_start)] #after eutectic and after solidification
     tsolids = t[(t>=tsolid_start)&(t<t_eut)]
     #split into 3 series
     t1 = 10 #first threshold [Myr]
@@ -61,7 +61,7 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
         else:
             Badd = np.ones([len(Bdf_short)])*np.average(Bdf_short) #average initial window width
             Bplot = np.concatenate([Bplot,Badd])           
-    if len(Bdf_med)>1:
+    if len(Bdf_med)>0:
         if len(Bdf_med) < wn2: #if less than window width
             wn2 = wn1 #use previous window width
         if len(Bdf_short)>wn2: #concatenate part of previous array to cover blank space of rolling average
@@ -72,7 +72,7 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
             Bmed_av = Bdf_med.rolling(window=wn2,center=False).mean()
             Badd = np.ones([wn2])*np.average(Bdf_med[:wn2]) #average initial window width
             Bplot = np.concatenate([Bplot,Badd,Bmed_av.values[wn2:]])
-    if len(Bdf_long)>1:
+    if len(Bdf_long)>0:
         if len(Bdf_long) < wn2: #if less than medium window width
             Badd = np.ones([len(Bdf_long)])*np.average(Bdf_long) #average initial window width
             Bplot = np.concatenate([Bplot,Badd])
@@ -90,7 +90,7 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
     #process Rem values
     Remplot = Rem[t<tsolid_start] #before solidification
     Remdf = pd.Series(Rem[(t>=tsolid_start)&(t<t_eut)]) # convert to pandas series
-    Remlate = Rem[t>=t_eut] #after eutectic
+    Remlate = Rem[(t>=t_eut)&(t>=tsolid_start)] #after eutectic
     Remdf_short = Remdf[tsolids < t1]
     Remdf_med = Remdf[(tsolids >=t1)&(tsolids<t2)]
     Remdf_long = Remdf[tsolids>=t2]
