@@ -189,7 +189,7 @@ def eta_calc(T,Tms=Tms,Tml=Tml,xwater=xwater):
         elif (phi>rcmf) & (T<(Trcmf+w)):
             eta = part_c(T,Tms,Tml,Trcmf,ch_tot)
         elif T>=(Trcmf+w):
-            eta= part_d(T,Tms,Tml,ch_tot)  
+            eta= part_d(T,Tms,Tml)  
         else:
             print(T,'Scenario not considered')
     return eta
