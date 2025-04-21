@@ -28,7 +28,7 @@ Bmax_err = edata.loc[edata['B_mid'] == Bmax, 'B_err'].values[0]
 edata['Brel'] = edata['B_mid']/edata['B_mid'].max()
 edata['Brel_err'] = np.sqrt((edata['B_err']/Bmax)**2 + (Bmax_err**2*edata['B_mid']**2/Bmax**4))
 #%% Loop over runs
-for run in mdata['run']:
+for run in mout['run']:
     run = int(run)
     #load data
     npzfile = np.load(f'../Results/{folder}/{subfolder}/run_{run}_B.npz')
@@ -43,7 +43,7 @@ for run in mdata['run']:
     eta0 = mdata.loc[mdata['run'] == run, 'eta0'].values[0]
     dr = mdata.loc[mdata['run'] == run, 'dr'].values[0]
     dt = t[1] - t[0] #time step in data [Myr]
-    tsolid_start = mdata.loc[mdata['run'] == run, 'tsolid_start'].values[0]
+    tsolid_start = mout.loc[mout['run'] == run, 'tsolid_start'].values[0]
     #average B and Rem
     if Xs0!=Xs_eutectic: #if the core doesn't start at the eutectic composition
         B, Rem = average_B_rem(B, Rem, t, Xs, Xs_eutectic, tsolid_start)
@@ -55,7 +55,7 @@ for run in mdata['run']:
     #calculate dTdt
     tempdt = -np.gradient(temp,dt,axis=0) #cooling rate [K/Myr]
     # check if there is a gap in dynamo generation, f1 = False if not, 
-    if mdata.loc[mdata['run'] == run, 'Bn1'].values[0] > 1:
+    if mout.loc[mout['run'] == run, 'Bn1'].values[0] > 1:
         f1 = True
     else:
         f1 = False
