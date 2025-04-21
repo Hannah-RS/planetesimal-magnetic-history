@@ -32,7 +32,7 @@ edata['Brel_err'] = np.sqrt((edata['B_err']/Bmax)**2 + (Bmax_err**2*edata['B_mid
 for run in mout['run']: #only do for sucessful runs
     run = int(run)
     #load data
-    npzfile = np.load(f'../Results/{folder}/{subfolder}/run_{run}.npz')
+    npzfile = np.load(f'../Results/{folder}/{subfolder}/run_{run}_B.npz')
     B = npzfile['B']
     Rem = npzfile['Rem']
     Xs = npzfile['Xs']
