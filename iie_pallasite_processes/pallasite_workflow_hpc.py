@@ -35,7 +35,6 @@ for run in mdata['run']:
     B = npzfile['B']
     Rem = npzfile['Rem']
     Xs = npzfile['Xs']
-    d0 = npzfile['d0']
     t = npzfile['t']/Myr
     temp = npzfile['T_profile']
     r = mdata.loc[mdata['run'] == run, 'r'].values[0]
@@ -63,9 +62,9 @@ for run in mdata['run']:
     
     if f1 == True:
         #find contour for Yang et. al. 2010 data, find depths where cooling rates match
-        rind = find_temp_depth(925,edata['cr_yang_low'],edata['cr_yang_up'], t, temp, tempdt,d0,dr)
+        rind = find_temp_depth(925,edata['cr_yang_low'],edata['cr_yang_up'], t, temp, tempdt)
         #check if Maurel cooling rates match at these positions,refine depths
-        f2, rind = check_623_cool(rind,edata['cr_623_low'],edata['cr_623_up'],t, temp, tempdt, d0, dr)
+        f2, rind = check_623_cool(rind,edata['cr_623_low'],edata['cr_623_up'],t, temp, tempdt)
     else: 
         f2 = False
     

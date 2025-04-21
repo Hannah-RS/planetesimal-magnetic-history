@@ -6,7 +6,7 @@ Cooling rate functions for the pallasite workflow
 import numpy as np
 import pandas as pd
 
-def find_temp_depth(tempcool,tempdtlow,tempdtup,t,temp,tempdt,d0,dr):
+def find_temp_depth(tempcool,tempdtlow,tempdtup,t,temp,tempdt):
     """
     Find the depth at which cooling rates at input temp match data 
     Parameters
@@ -23,10 +23,6 @@ def find_temp_depth(tempcool,tempdtlow,tempdtup,t,temp,tempdt,d0,dr):
         Model mantle temperature profile [K]
     tempdt : array
         Model mantle cooling rate [K/Myr]
-    d0 : array
-        Stagnant lid thickness [m]
-    dr : float
-        Radial grid spacing [m]
     Returns
     -------
     rind : array
@@ -34,7 +30,7 @@ def find_temp_depth(tempcool,tempdtlow,tempdtup,t,temp,tempdt,d0,dr):
         cooling rate for a given meteorite
     """
     # ignore initial slow cooling when 26Al heating is strong
-    minage = t[d0>5*dr][0]  #first time stagnant lid is greater than five cells thick
+    minage = t[t>7][0]  #10 26Al half-lives
     rind = np.zeros([5,2],dtype=int)
     contour = np.zeros([len(t[t>minage])],dtype=int)
     cr = np.zeros([len(t[t>minage])])
@@ -54,7 +50,7 @@ def find_temp_depth(tempcool,tempdtlow,tempdtup,t,temp,tempdt,d0,dr):
         i+=1 
     return rind
 
-def check_623_cool(rind,tempdtlow,tempdtup,t,temp,tempdt,d0,dr):
+def check_623_cool(rind,tempdtlow,tempdtup,t,temp,tempdt):
     """
     Check if cooling rates at 623K match Maurel et. al. 2019
     Parameters
@@ -72,10 +68,6 @@ def check_623_cool(rind,tempdtlow,tempdtup,t,temp,tempdt,d0,dr):
         Model mantle temperature profile [K]
     tempdt : array
         Model mantle cooling rate [K/Myr]
-    d0 : array
-        Stagnant lid thickness [m]
-    dr : float
-        Radial grid spacing [m]
     Returns
     -------
     f : bool
@@ -102,7 +94,7 @@ def check_623_cool(rind,tempdtlow,tempdtup,t,temp,tempdt,d0,dr):
         if all(fcheck) == True:
             f = True
             #refine depth estimate to satisfying both cooling constraints
-            rind2 = find_temp_depth(623,tempdtlow,tempdtup, t, temp, tempdt,d0,dr)
+            rind2 = find_temp_depth(623,tempdtlow,tempdtup, t, temp, tempdt)
             #conditionally replace rind
             rind[rind2[:,0]<rind[:,0],0] = rind2[rind2[:,0]<rind[:,0],0] #shallower max depths
             rind[rind2[:,1]>rind[:,1],1] = rind2[rind2[:,1]>rind[:,1],1] #deeper min depths
