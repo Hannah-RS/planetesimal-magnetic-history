@@ -21,7 +21,7 @@ if automated == True:
     import sys
     folder = sys.argv[1]
 else:
-    folder = 'Results_combined/' #folder where you want to save the results
+    folder = 'Results_combined/nc_cc_final/solidus_comparison/' #folder where you want to save the results
     ind = None #no index for csv
 #set flag for run started
 if automated == True:
@@ -367,7 +367,7 @@ if therm == True: #process thermal evolution data
                             t=t, Rem = Rem, B=B, buoyr = buoyr, qcore = qcore, Flux = Flux) 
 
     if B_save == True:
-        np.savez_compressed(f'{folder}run_{run}_B', B=B, Rem = Rem, t = t)
+        np.savez_compressed(f'{folder}run_{run}_B', B=B, Rem = Rem, t = t, T_profile = Tprofile, Xs = Xs)
     
     #write parameters to the run file
     from csv import writer
