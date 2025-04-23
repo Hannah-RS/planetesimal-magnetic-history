@@ -75,7 +75,7 @@ for run in mout['run']:
         f3 = False
         depth = np.zeros([5,2])
         time = np.zeros([5,2])
-        c = np.zeros([5])
+        c = [False,False,False,False,False]
 
     #check relative paleointensities of experimental and model data, f4 = False if not
     if f3 == True:
