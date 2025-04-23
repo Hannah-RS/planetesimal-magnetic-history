@@ -54,7 +54,7 @@ def dynamo_check(Bdat,rind,t,temp,Rem,Remc,B,tsolid_start,rplot):
         if np.any(temp[:,rval]<=593): #check if cools below 593K
             tval = np.where(temp[:,rval]<=593)[0][0] #find first time cool below 593K
             #save depths, times, field strength
-            depth[i,0] = rplot[rind[i,0]] 
+            depth[i,0] = rplot[-1] - rplot[rind[i,0]] 
             tdata[i,0] = t[np.where(temp[:,rind[i,0]]<=593)[0][0]]
             Bmodel[i,0] = B[tval] #save model B
             if ((Rem[tval] >= Remc) & (Bdat[i] > 0)) | ((Rem[tval] < Remc) & (Bdat[i] <=0)): 
@@ -65,7 +65,7 @@ def dynamo_check(Bdat,rind,t,temp,Rem,Remc,B,tsolid_start,rplot):
         if np.any(temp[:,rind[i,1]]<=593): #check if cools below 593K
             tval = np.where(temp[:,rind[i,1]]<=593)[0][0] #find first time cool below 593K
             #save depths, times, field strength
-            depth[i,1] = rplot[rind[i,1]]
+            depth[i,1] = rplot[-1] - rplot[rind[i,1]]
             tdata[i,1] = t[np.where(temp[:,rind[i,1]]<=593)[0][0]]
             Bmodel[i,1] = B[tval] #save model B
             if ((Rem[tval] >= Remc) & (Bdat[i] > 0)) | ((Rem[tval] < Remc) & (Bdat[i] <=0)): 
