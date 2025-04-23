@@ -71,7 +71,26 @@ def dynamo_check(Bdat,rind,t,temp,Rem,Remc,B,tsolid_start,rplot):
             if ((Rem[tval] >= Remc) & (Bdat[i] > 0)) | ((Rem[tval] < Remc) & (Bdat[i] <=0)): 
                 #dynamo is on/off and should be
                 frcheck[1] = 1    
-        
+        elif frcheck[0] == 1: #doesnt cool below 593K but other value does
+            #find upper bound on depth that does cool below 593K
+            pmax = rind[i,0]-rind[i,-1] #don't exceed shallowest depth
+            p = 1
+            while p<pmax:
+                while (np.any(temp[:,(rind[i,1]+p)]<=593)==False): #first index that is cool enough
+                    p += 1
+                #check if dynamo is on/off
+                tval = np.where(temp[:,(rind[i,1]+p)]<=593)[0][0]
+                if ((Rem[tval] >= Remc) & (Bdat[i] > 0)) | ((Rem[tval] < Remc) & (Bdat[i] <=0)): 
+                    #dynamo is on/off and should be
+                    frcheck[1] = 1
+                    depth[i,1] = rplot[-1] - rplot[rind[i,1]+p]
+                    tdata[i,1] = t[np.where(temp[:,(rind[i,1]+p)]<=593)[0][0]]
+                    Bmodel[i,1] = B[tval] #save model B
+                    break
+                else: #go one index higher and repeat
+                    p += 1
+
+            
         if np.any(frcheck == 1): #if either time works
             fcheck[i] = 1
             if frcheck[0] == 1: #use first value for c, B
