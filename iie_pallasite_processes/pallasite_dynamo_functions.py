@@ -89,12 +89,8 @@ def dynamo_check(Bdat,rind,t,temp,Rem,Remc,B,tsolid_start,rplot):
 
             
         if np.any(frcheck == 1): #if either time works
-            fcheck[i] = 1
-            if frcheck[0] == 1: #use first value for c, B
-                tval = np.where(temp[:,rval]<=593)[0][0] #find first time cool below 593K
-            else: #use second value for c, B
-                tval = np.where(temp[:,rind[i,1]]<=593)[0][0]
-            if t[tval] >= tsolid_start: #check if core is solidifying
+            fcheck[i] = 1 
+            if (tsolid_start<=tdata[i,1]): #check if core is solidifying
                 c.append(True)
             else:
                 c.append(False)

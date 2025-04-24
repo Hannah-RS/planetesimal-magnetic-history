@@ -35,11 +35,11 @@ def dynamo_check(tdatalow,tdataup,t,Rem,Remc,tsolid_start):
     c = []
     fcheck = [] #counter for dynamo on/off
     for tlow, tup in zip(tdatalow,tdataup):
-        if tlow < tsolid_start: #check if core is solidifying at each time
+        if tup < tsolid_start: #check if core is solidifying at each time
             c.append(False)
         else:
             c.append(True)
-        if np.any(t>=tup)==True: #check if time is before core solidified
+        if np.any(t>=tup)==True: #check if time is before core fully solidified
             if np.any(Rem[(t>=tlow)&(t<=tup)]> Remc): #check if dynamo is on in time period
                 fcheck.append(True)
             else:
