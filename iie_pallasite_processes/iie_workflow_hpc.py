@@ -50,9 +50,9 @@ for run in mout['run']: #only do for sucessful runs
         B, Rem = average_B_rem(B, Rem, t, Xs, Xs_eutectic, tsolid_start)
     #calculate radial grid and truncate Tprofile
     n_cells = int(r/dr) +1 #number of cells needed to span the body including one at the centre
-    nmcells = n_cells - round((n_cells-3)*rcr) -1 #number of mantle cells
-    rprof = np.linspace(rcr*r,int(r),nmcells)/1e3
-    temp = temp[:,(nmcells-1):] #restrict to mantle cells
+    i_core = round((n_cells-3)*rcr) +1 #index of CMB
+    rprof = np.arange(i_core*dr,r+dr,dr)/1e3
+    temp = temp[:,i_core:] #restrict to mantle cells
     #calculate dTdt
     tempdt = -np.gradient(temp,dt,axis=0) #cooling rate [K/Myr]
     # check if dynamo is on at the radiogenic times, f1 = False if not, 
