@@ -9,7 +9,6 @@ import numpy as np
 import sys
 sys.path.append('../')
 Myr = 1e6*365*24*3600 #seconds in a million years
-from csv import writer
 from pallasite_dynamo_functions import dynamo_check, paleo_check
 from pallasite_cooling_functions import find_temp_depth, check_623_cool
 from average_B import average_B_rem
@@ -27,7 +26,14 @@ Bmax = edata['B_mid'].max()
 Bmax_err = edata.loc[edata['B_mid'] == Bmax, 'B_err'].values[0]
 edata['Brel'] = edata['B_mid']/edata['B_mid'].max()
 edata['Brel_err'] = np.sqrt((edata['B_err']/Bmax)**2 + (Bmax_err**2*edata['B_mid']**2/Bmax**4))
+#create dataframe to store output
+pdata = pd.DataFrame(columns=['run','d1_low','d1_up','d2_low','d2_up','d3_low',
+                                      'd3_up','d4_low','d4_up','d5_low','d5_up','t1_low',
+                                      't1_up','t2_low','t2_up','t3_low','t3_up','t4_low',
+                                      't4_up','t5_low','t5_up','f1','f2','f3','f4','c1',
+                                      'c2','c3','c4','c5','subfolder'])
 #%% Loop over runs
+i = 0 # index for saving to dataframe
 for run in mout['run']:
     run = int(run)
     #load data
@@ -84,20 +90,13 @@ for run in mout['run']:
         f4 = False
 
     #save to file
-    var_list = [run, r, rcr, Xs0, eta0, depth[0, 0], depth[0, 1], depth[1, 0], depth[1, 1], depth[2, 0], depth[2, 1],
+    pdata.loc[0] = [run, depth[0, 0], depth[0, 1], depth[1, 0], depth[1, 1], depth[2, 0], depth[2, 1],
                 depth[3,0], depth[3,1], depth[4,0], depth[4,1], time[0,0], time[0,1], time[1,0], time[1,1], time[2,0], 
                 time[2,1], time[3,0], time[3,1], time[4,0], time[4,1], f1, f2, f3, f4, c[0], c[1], c[2], c[3], c[4],subfolder[7]]
+    i += 1
 
-    with open(f'../Results/{folder}/{subfolder}/pallasite_results.csv','a') as f_object:
-        writer_object = writer(f_object) #pass file object to csv.writer
-        writer_object.writerow(var_list) # pass list as argument into write row
-        f_object.close() #close file
 
 # merge with overall results
-pdata = pd.read_csv(f'../Results/{folder}/{subfolder}/pallasite_results.csv',skiprows=[1]) #model outputs
 mdata['run'] = mdata['run'].astype(int) #convert to int
 sucesses = pd.merge(mdata, pdata, on="run") #join together on matching runs
-#drop duplicate columns
-sucesses = sucesses.drop(columns = ['r_y','rcr_y', 'Xs0', 'eta0_y'])
-sucesses = sucesses.rename(columns={'r_x':'r','rcr_x':'rcr','eta0_x':'eta0'}) #rename columns
 sucesses.to_csv(f'../Results/{folder}/pallasite_sucess_info.csv',index=False,mode='a',header=False)
