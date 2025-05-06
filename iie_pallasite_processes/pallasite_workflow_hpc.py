@@ -90,7 +90,7 @@ for run in mout['run']:
         f4 = False
 
     #save to file
-    pdata.loc[0] = [run, depth[0, 0], depth[0, 1], depth[1, 0], depth[1, 1], depth[2, 0], depth[2, 1],
+    pdata.loc[i] = [run, depth[0, 0], depth[0, 1], depth[1, 0], depth[1, 1], depth[2, 0], depth[2, 1],
                 depth[3,0], depth[3,1], depth[4,0], depth[4,1], time[0,0], time[0,1], time[1,0], time[1,1], time[2,0], 
                 time[2,1], time[3,0], time[3,1], time[4,0], time[4,1], f1, f2, f3, f4, c[0], c[1], c[2], c[3], c[4],subfolder[7]]
     i += 1
