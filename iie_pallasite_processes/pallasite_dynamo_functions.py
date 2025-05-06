@@ -56,17 +56,20 @@ def dynamo_check(Bdat,rind,t,temp,Rem,Remc,B,tsolid_start,rplot):
             pmax = rind[i,0]-rind[i,-1] #max depth range
             p = 0
             while p<pmax:
-                tval = np.where(temp[:,rval-p]<=593)[0][0] #find first time cool below 593K
-                if ((Rem[tval] >= Remc) & (Bdat[i] > 0)) | ((Rem[tval] < Remc) & (Bdat[i] <=0)): 
-                    #dynamo is on/off and should be
-                    frcheck[0] = 1
-                    #save depths, times, field strength
-                    depth[i,0] = rplot[-1] - rplot[rind[i,0]-p] 
-                    tdata[i,0] = t[np.where(temp[:,rind[i,0]-p]<=593)[0][0]]
-                    Bmodel[i,0] = B[tval] #save model B
-                    break
-                else: #go one index higher and repeat
-                    p += 1           
+                if np.any(temp[:,rval-p]<=593): #if this depth cools below 593K
+                    tval = np.where(temp[:,rval-p]<=593)[0][0] #find first time cool below 593K
+                    if ((Rem[tval] >= Remc) & (Bdat[i] > 0)) | ((Rem[tval] < Remc) & (Bdat[i] <=0)): 
+                        #dynamo is on/off and should be
+                        frcheck[0] = 1
+                        #save depths, times, field strength
+                        depth[i,0] = rplot[-1] - rplot[rind[i,0]-p] 
+                        tdata[i,0] = t[np.where(temp[:,rind[i,0]-p]<=593)[0][0]]
+                        Bmodel[i,0] = B[tval] #save model B
+                        break
+                    else: #if dynamo criteria fails, go one position deeper and repeat
+                        p += 1 
+                else: #below this depth, no longer cools below 593K
+                    break          
                 
         #do for upper bound
         if frcheck[0] == 1: #check shallow limit works
