@@ -94,6 +94,28 @@ def fe_fes_density(Xs):
     rho = (-3108*at**2)+(-5176*at)+6950
     return rho
 
+def fe_fes_density_err(Xs,err_Xs):
+    """
+    Uncertainty on Fe-FeS density based on Eqn. 37 in Sanderson et. al. (2024)
+
+    Parameters
+    ----------
+    Xs : float
+        sulfur content [wt %]
+    err_Xs : float
+        uncertainty in sulfur content [wt %]
+
+    Returns
+    -------
+    rho_err : float
+        uncertainty in density [kg m^-3]
+    """
+    xs_at = weight_perc_to_at_frac(Xs)
+    err_at = weight_perc_to_at_frac(err_Xs)
+    drhodxs = (-3108*2*xs_at-5176)
+    rho_err = np.abs(drhodxs*err_at)
+    return rho_err
+
 def fe_fes_liquidus_linear(Xs):
     """
     Fe-FeS linear liquidus approximation

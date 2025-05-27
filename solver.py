@@ -14,14 +14,14 @@ import time #use this to time the integration
 from parameters import  run, t_start_m, t_end_m, dr, automated, Myr, Ts, f0, r, rc, rcr,\
     kappa_c, save_interval_d, save_interval_t, save_interval_mag, km, Vm, As, rhom, step_m, t_cond_core,\
     Xs_0, default, rcmf, Fe0, full_save, B_save, eta0, etal, w, alpha_n, beta, n_cells, icfrac, xwater,\
-    accrete, Trcmf, Xs_eutectic
+    accrete, Trcmf, Xs_eutectic, Trcmf
 from viscosity_def import viscosity
 
 if automated == True: 
     import sys
     folder = sys.argv[1]
 else:
-    folder = 'Results_combined/' #folder where you want to save the results
+    folder = 'Results_combined/nc_cc_final/solidus_comparison/' #folder where you want to save the results
     ind = None #no index for csv
 #set flag for run started
 if automated == True:
@@ -64,13 +64,13 @@ else: #start from differentiated profile
     Tint = np.ones([n_cells])*Trcmf
     Tint[-1]=Ts
 
-#Check viscosity profile is monotonically decreasing before start
-Ttest = np.linspace(1200,1900,200)
+#Check viscosity profile is monotonically decreasing around the critical melt fraction before start
+Ttest = np.linspace(Trcmf-50,Trcmf+50,200)
 #calculate viscosity
 eta_test = viscosity(Ttest)
 eta_diff = np.diff(eta_test) #calculate differences with sucessive elements
 if np.all(eta_diff<=0):
-    print('Viscosity profile is monotonically decreasing - proceeding')
+    print('Viscosity profile at critical melt fraction is monotonically decreasing - proceeding')
 else: #put marker in csv
     if automated == True: #no need to reimport ind as will have been imported earlier
         auto = pd.read_csv(f'{folder}auto_params.csv')
@@ -367,7 +367,7 @@ if therm == True: #process thermal evolution data
                             t=t, Rem = Rem, B=B, buoyr = buoyr, qcore = qcore, Flux = Flux) 
 
     if B_save == True:
-        np.savez_compressed(f'{folder}run_{run}_B', B=B, Rem = Rem, t = t)
+        np.savez_compressed(f'{folder}run_{run}_B', B=B, Rem = Rem, t = t, T_profile = Tprofile, Xs = Xs)
     
     #write parameters to the run file
     from csv import writer
