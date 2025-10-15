@@ -26,7 +26,7 @@ pdata = pd.DataFrame(columns=['run','d1_low','d1_up','d2_low','d2_up','d3_low',
                                       'd3_up','d4_low','d4_up','t1_low',
                                       't1_up','t2_low','t2_up','t3_low','t3_up','t4_low',
                                       't4_up','c1',
-                                      'c2','c3','c4','B1','B2','B3','B4','subfolder'])
+                                      'c2','c3','c4','B1','B2','B3','B4','f','subfolder'])
 #%% Loop over runs
 i = 0 # index for saving to dataframe
 for run in mout['run']:
@@ -57,15 +57,22 @@ for run in mout['run']:
     tempdt = -np.gradient(temp,dt,axis=0) #cooling rate [K/Myr]
     #find contour for Fish cooling rate data, find depths where cooling rates match
     rind = find_temp_depth(623,edata['cr_623_low'],edata['cr_623_up'], t, temp, tempdt)
-    #find out if the dynamo is on/off at 593K for each sample
-    Bmodel, c = dynamo_status(rind,t,temp,Rem,Remc,B,tsolid_start)
-    #find depths of each sample
-    depth, time = find_abs_depth(rind,rprof,t,temp,623)
-
+    if np.any(rind==0): #if any meteorite doesn't reach the required cooling rate
+        f = 0
+        depth = np.zeros([4,2])
+        time = np.zeros([4,2])
+        Bmodel = np.zeros([4])
+        c = [False,False,False,False]
+    else:
+        f = 1
+        #find out if the dynamo is on/off at 593K for each sample
+        Bmodel, c = dynamo_status(rind,t,temp,Rem,Remc,B,tsolid_start)
+        #find depths of each sample
+        depth, time = find_abs_depth(rind,rprof,t,temp,623)
     #save to file
     pdata.loc[i] = [run, depth[0, 0], depth[0, 1], depth[1, 0], depth[1, 1], depth[2, 0], depth[2, 1],
                 depth[3,0], depth[3,1], time[0,0], time[0,1], time[1,0], time[1,1], time[2,0], 
-                time[2,1], time[3,0], time[3,1], c[0], c[1], c[2], c[3],Bmodel[0],Bmodel[1],Bmodel[2],Bmodel[3],subfolder[7]]
+                time[2,1], time[3,0], time[3,1], c[0], c[1], c[2], c[3],Bmodel[0],Bmodel[1],Bmodel[2],Bmodel[3],f,subfolder[7]]
     i += 1
 
 
