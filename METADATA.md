@@ -78,8 +78,8 @@ The following are all time series arrays saved at frequency `save_interval_t`.
     mantle viscosity [Pas]
 + Flux : array
     + Fs Flux[0,:]: surface heat flux [W m^-2]
-    + Fad Flux[1,:]: adiabatic CMB heat flux [W m^-2]
-    + Fcmb Flux[2,:]: CMB heat flux [W m^-2]
+    + Fcmb Flux[1,:]: CMB heat flux [W m^-2]
+    + Fad Flux[2,:]: adiabatic CMB heat flux [W m^-2]
     + Frad Flux[3,:]: mantle radiogenic heat flux [W m^-2]
     + Flid Flux[4,:]: heat flux across base of stagnant lid [W m^-2]
 + Rem : array
