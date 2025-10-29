@@ -31,7 +31,7 @@ def find_temp_depth(tempcool,tempdtlow,tempdtup,t,temp,tempdt):
     """
     # ignore initial slow cooling when 26Al heating is strong
     minage = t[t>7][0]  #10 26Al half-lives
-    rind = np.zeros([5,2],dtype=int)
+    rind = np.zeros([len(tempdtlow),2],dtype=int)
     contour = np.zeros([len(t[t>minage])],dtype=int)
     cr = np.zeros([len(t[t>minage])])
     # find temp contour
@@ -101,3 +101,35 @@ def check_623_cool(rind,tempdtlow,tempdtup,t,temp,tempdt):
         else:
             f = False
     return f, rind
+
+def find_abs_depth(rind,rplot,t,temp,ctemp):
+    """
+    Find depths for each meteorite (upper and lower bounds)
+    Parameters
+    ----------
+    rind : array
+        Indices within the mantle at which the cooling rate matches data
+    rplot : array
+        Radial grid in mantle [km]
+    t : array
+        Model output time [Myr]
+    temp : array
+        Model mantle temperature profile [K]
+    ctemp : float
+        Temperature at which to find cooling rate [K]
+    Returns
+    -------
+    depth : array
+        Depths for each meteorite (upper and lower bounds) [km]
+    time : array
+        Times for each meteorite cooling through fixed cooling rate (upper and lower bounds) [Myr]
+    """
+    n = len(rind[:,0])
+    depth = np.zeros([n,2]) #depths for each meteorite (upper and lower bounds) [km]
+    time = np.zeros([n,2]) #times for each meteorite cooling through fixed cooling rate (upper and lower bounds) [Myr]
+    for i in range(n):
+        for j in range(2):
+            depth[i,j] = rplot[-1] - rplot[rind[i,j]]
+            tval = np.where(temp[:,rind[i,j]]<=ctemp)[0][0] #find first time cool below temp of measured cooling rate
+            time[i,j] = t[tval]
+    return depth, time

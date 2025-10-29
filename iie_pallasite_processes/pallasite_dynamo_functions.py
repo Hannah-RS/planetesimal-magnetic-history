@@ -111,6 +111,55 @@ def dynamo_check(Bdat,rind,t,temp,Rem,Remc,B,tsolid_start,rplot):
         
     return f, depth, tdata, Bmodel, c
 
+def dynamo_status(rind,t,temp,Rem,Remc,B,tsolid_start):
+    """
+    Check if the dynamo is on when each meteorite cools through 593K
+    Parameters
+    ----------
+    rind : array
+        Indices within the mantle for each meteorite
+    t : array
+        Model output time [Myr]
+    temp : array
+        Model mantle temperature profile [K]
+    Rem : array
+        Rolling-averaged Magnetic Reynolds number
+    Remc : float
+        Critical magnetic Reynolds number
+    B : array
+        Rolling-averaged magnetic field strength [muT]
+    tsolid_start : float
+        Onset of core solidification [Myr]
+    Returns
+    -------
+    Bmodel : array
+        Upper and lower bounds on rolling-averaged magnetic field strength for each meteorite [T]
+    c : list
+        List of booleans for each meteorite,
+        True if the core is solidifying when remanence is acquired
+    """
+    c = [] #core solidification check
+    Bmodel = np.zeros([4]) #rolling-averaged magnetic field strength for each meteorite for depth mid point[T]
+    rmid = (rind[:,0]+rind[:,1])/2 #midpoint index for each meteorite
+    for i, rval in enumerate(rmid):
+        rval = int(rval)
+        if np.any(temp[:,rval]<=593): #check if cools below 593K
+            tval = np.where(temp[:,rval]<=593)[0][0] #find first time cool below 593K
+            if (tsolid_start<=t[tval]): #check if core is solidifying
+                c.append(True)
+            else:
+                c.append(False)
+            #record B if Rem is supercritical
+            if (Rem[tval] >= Remc): 
+                    Bmodel[i] = B[tval] #save model B
+            else: #if dynamo criteria fails, save B as 0
+                Bmodel[i] = 0
+        else: #below this depth, no longer cools below 593K
+            Bmodel[i] = 0 
+            c.append(False)               
+    return Bmodel, c
+
+
 def paleo_check(Bmodel,Brel,Brel_err):
     """
     Check if the relative paleointensity of the model data is within the range

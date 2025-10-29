@@ -1,0 +1,2 @@
+run,r,rcr,default,rcmf,eta0,beta,w,etal,alpha_n,Xs_0,Fe0,t_start_m,t_end_m,dr,dt,icfrac,xwater,accrete,status,d1_low,d1_up,d2_low,d2_up,d3_low,d3_up,d4_low,d4_up,t1_low,t1_up,t2_low,t2_up,t3_low,t3_up,t4_low,t4_up,c1,c2,c3,c4,B1,B2,B3,B4,f,subfolder
+,m,,,,Pas,K^-1,K,Pas,,wt %,60Fe/56Fe,Myr,Myr,m,t_cond_core,,wt %,,,km,km,km,km,km,km,km,km,Ma after CAI,Ma after CAI,Ma after CAI,Ma after CAI,Ma after CAI,Ma after CAI,Ma after CAI,Ma after CAI,,,,,T,T,T,T,,
