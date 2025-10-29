@@ -61,11 +61,11 @@ for run in mout['run']:
     Ra = Ra_calc(dTdr_cmb, ri, gc)
     racrit = 1e4 #critical Ra/Rac value
     # check if there is a gap in dynamo generation, f1 = False if not, 
-    if (np.any(Ra/Rac < racrit))&(np.any(Ra/Rac > racrit)): #check there are values above and below critical
-        f1 = True
-    else:
-        f1 = False
-    
+    #if (np.any(Ra/Rac < racrit))&(np.any(Ra/Rac > racrit)): #check there are values above and below critical
+    #    f1 = True
+    #else:
+    #    f1 = False
+    f1 = True #ignore first check
     if f1 == True:
         #find contour for Yang et. al. 2010 data, find depths where cooling rates match
         rind = find_temp_depth(925,edata['cr_yang_low'],edata['cr_yang_up'], t, temp, tempdt)
