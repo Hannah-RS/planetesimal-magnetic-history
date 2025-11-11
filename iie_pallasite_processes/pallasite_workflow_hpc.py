@@ -18,7 +18,7 @@ folder = sys.argv[1]
 subfolder = sys.argv[2]
 mdata = pd.read_csv(f'../Results/{folder}/{subfolder}/auto_params.csv',skiprows=[1]) #model params
 mout = pd.read_csv(f'../Results/{folder}/{subfolder}/run_results.csv',skiprows=[1]) #model outputs
-edata = pd.read_csv('pallasite_data.csv',skiprows=[1]) #experimental data
+edata = pd.read_csv('pallasite_data.csv',skiprows=[1],nrows=5) #experimental data
 Remc = 10 #critical magnetic Reynolds number
 Xs_eutectic=33 #eutectic composition
 #add relative paleointensity column
