@@ -6,7 +6,7 @@ Function for averaging B and Rem, accoutns for a lot of edge cases so quite comp
 import numpy as np
 import pandas as pd
 
-def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
+def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10,Rac=False):
     """
     Average B and Rem values post onset of solidification
 
@@ -26,6 +26,9 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
         Time of solidification onset [Myr]
     Rem_c : float, optional
         Critical Rem value. Default is 10.
+    Rac : bool, optional
+       Whether you are using Rac for dynamo criterion, if so don't set B to 0
+       when Rem<Rem_c. Default is False. 
     
     Returns
     -------
@@ -132,8 +135,10 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
     Bplot = np.concatenate([Bplot,Blate])
     Remplot = np.concatenate([Remplot,Remlate])
     #filter B by Rem
-    Bplot[Remplot<Rem_c]=0
-
+    if Rac==False:
+        Bplot[Remplot<Rem_c]=0
+    else:
+        pass
     return Bplot, Remplot
 
 def average_B_Psyche(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
