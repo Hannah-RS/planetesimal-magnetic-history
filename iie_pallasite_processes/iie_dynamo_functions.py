@@ -83,19 +83,23 @@ def paleo_check(tdatalow,tdataup,t,B,Brel,Brel_err):
         Bmodel[0,i] = B[t>=tlow][0]
         Bmodel[1,i] = B[t>=tup][0]
         i += 1
-    #normalise using max average B
-    Brelmodel = Bmodel/np.max((Bmodel[:,0]+Bmodel[:,1])/2)
-    fcheck = [] #counter for relative paleointensity test
-    i = 0
-    for Brellow, Brelup in zip(Brelmodel[:,0],Brelmodel[:,1]):
-        #one of values must lie in range
-        if ((Brellow >= Brel[i]-Brel_err[i]) & (Brellow <= Brel[i]+Brel_err[i])) \
-            | ((Brelup >= Brel[i]-Brel_err[i]) & (Brelup <= Brel[i]+Brel_err[i])):
-            fcheck.append(True)
-        else:
-            fcheck.append(False)
-    if all(fcheck) == True:
-        f = True
-    else:
+    Bmodelav = (Bmodel[0,:] + Bmodel[1,:])/2
+    if np.any(Bmodelav == 0): #B=0 because  Fcmb < Fad
         f = False
+    else:
+        #normalise using max average B
+        Brelmodel = Bmodel/np.max(Bmodelav)
+        fcheck = [] #counter for relative paleointensity test
+        i = 0
+        for Brellow, Brelup in zip(Brelmodel[:,0],Brelmodel[:,1]):
+            #one of values must lie in range
+            if ((Brellow >= Brel[i]-Brel_err[i]) & (Brellow <= Brel[i]+Brel_err[i])) \
+                | ((Brelup >= Brel[i]-Brel_err[i]) & (Brelup <= Brel[i]+Brel_err[i])):
+                fcheck.append(True)
+            else:
+                fcheck.append(False)
+        if all(fcheck) == True:
+            f = True
+        else:
+            f = False
     return f
