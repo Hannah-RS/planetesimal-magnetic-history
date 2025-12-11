@@ -67,14 +67,18 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10,Rac=False):
     if len(Bdf_med)>0:
         if len(Bdf_med) < wn2: #if less than window width
             wn2 = wn1 #use previous window width
-        if len(Bdf_short)>wn2: #concatenate part of previous array to cover blank space of rolling average
-            Bdf_med = pd.concat([Bdf_short[-wn2:],Bdf_med])
-            Bmed_av = Bdf_med.rolling(window=wn2,center=False).mean() #calculate rolling average
-            Bplot = np.concatenate([Bplot,Bmed_av.values[wn2:]])
-        else: # previous array too small to concatenate
-            Bmed_av = Bdf_med.rolling(window=wn2,center=False).mean()
-            Badd = np.ones([wn2])*np.average(Bdf_med[:wn2]) #average initial window width
-            Bplot = np.concatenate([Bplot,Badd,Bmed_av.values[wn2:]])
+        if len(Bdf_med) < wn1: #shorter than smallest window
+            Badd = np.ones([len(Bdf_med)])*np.average(Bdf_med) #average initial window width
+            Bplot = np.concatenate([Bplot,Badd])
+        else:
+            if len(Bdf_short)>wn2: #concatenate part of previous array to cover blank space of rolling average
+                Bdf_med = pd.concat([Bdf_short[-wn2:],Bdf_med])
+                Bmed_av = Bdf_med.rolling(window=wn2,center=False).mean() #calculate rolling average
+                Bplot = np.concatenate([Bplot,Bmed_av.values[wn2:]])
+            else: # previous array too small to concatenate
+                Bmed_av = Bdf_med.rolling(window=wn2,center=False).mean()
+                Badd = np.ones([wn2])*np.average(Bdf_med[:wn2]) #average initial window width
+                Bplot = np.concatenate([Bplot,Badd,Bmed_av.values[wn2:]])
     if len(Bdf_long)>0:
         if len(Bdf_long) < wn2: #if less than medium window width
             Badd = np.ones([len(Bdf_long)])*np.average(Bdf_long) #average initial window width
@@ -108,14 +112,19 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10,Rac=False):
     if len(Remdf_med)>0:
         if len(Remdf_med) < wn2: #if less than window width
             wn2 = wn1
-        if len(Remdf_short)>wn2: #concatenate part of previous array to cover blank space of rolling average
-            Remdf_med = pd.concat([Remdf_short[-wn2:],Remdf_med])
-            Remmed_av = Remdf_med.rolling(window=wn2,center=False).mean()
-            Remplot = np.concatenate([Remplot,Remmed_av.values[wn2:]])
-        else: # previous array too small to concatenate
-            Remmed_av = Remdf_med.rolling(window=wn2,center=False).mean()
-            Remadd = np.ones([wn2])*np.average(Remdf_med[:wn2])
-            Remplot = np.concatenate([Remplot,Remadd,Remmed_av.values[wn2:]])
+        if len(Remdf_med) < wn1: #shorter than smallest window
+            Remadd = np.ones([len(Remdf_med)])*np.average(Remdf_med) #average initial window width
+            Remplot = np.concatenate([Remplot,Remadd])
+        else:
+            if len(Remdf_short)>wn2: #concatenate part of previous array to cover blank space of rolling average
+                Remdf_med = pd.concat([Remdf_short[-wn2:],Remdf_med])
+                Remmed_av = Remdf_med.rolling(window=wn2,center=False).mean()
+                Remplot = np.concatenate([Remplot,Remmed_av.values[wn2:]])
+            else: # previous array too small to concatenate
+                Remmed_av = Remdf_med.rolling(window=wn2,center=False).mean()
+                Remadd = np.ones([wn2])*np.average(Remdf_med[:wn2])
+                Remplot = np.concatenate([Remplot,Remadd,Remmed_av.values[wn2:]])
+                print(len(Remadd),len(Remdf_med),len(Remmed_av.values[wn2:]))
     if len(Remdf_long)>0:
         if len(Remdf_long) < wn2: #too small for rolling average
             Rem_add = np.ones([len(Remdf_long)])*np.average(Remdf_long)
