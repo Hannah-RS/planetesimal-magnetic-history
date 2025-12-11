@@ -53,9 +53,10 @@ def dynamo_check(Bdat,rind,t,temp,Rem,Remc,B,tsolid_start,rplot):
         frcheck = np.zeros([2]) #counter for either time for remanance working
         if np.any(temp[:,rval]<=593): #check if cools below 593K
             #find shallowest depth for which dynamo is on/off as expected
-            pmax = rind[i,0]-rind[i,-1] #max depth range
+            pmax = rind[i,0]-rind[i,1]+1 #max depth range as can be incremented with indices
             p = 0
             while p<pmax:
+                
                 if np.any(temp[:,rval-p]<=593): #if this depth cools below 593K
                     tval = np.where(temp[:,rval-p]<=593)[0][0] #find first time cool below 593K
                     if ((Rem[tval] >= Remc) & (Bdat[i] > 0)) | ((Rem[tval] < Remc) & (Bdat[i] <=0)): 
@@ -85,6 +86,12 @@ def dynamo_check(Bdat,rind,t,temp,Rem,Remc,B,tsolid_start,rplot):
                     frcheck[1] = 1
                     depth[i,1] = rplot[-1] - rplot[rind[i,1]+p]
                     tdata[i,1] = t[np.where(temp[:,(rind[i,1]+p)]<=593)[0][0]]
+                    if depth[i,1]==depth[i,0]: #if depths are equal range is one grid cell
+                        depth[i,0] = depth[i,0]-(rplot[1]-rplot[0])/2
+                        depth[i,1] = depth[i,1]+(rplot[1]-rplot[0])/2
+                        #time undertainty = 1/2output time step
+                        tdata[i,1] = tdata[i,1]+(t[1]-t[0])/2
+                        tdata[i,0] = tdata[i,0]-(t[1]-t[0])/2
                     Bmodel[i,1] = B[tval] #save model B
                     break
                 else: #go one index higher and repeat
