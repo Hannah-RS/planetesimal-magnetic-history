@@ -26,10 +26,10 @@ def find_593_depth(tdatalow,tdataup,t,temp):
     rind = np.zeros([3,2],dtype=int)
     for i, time in enumerate(tdatalow):
         tind = np.where(t>=time)[0][0]
-        rind[i,0] = np.where(temp[tind,:]<=593)[0][0] #find deepest depth (smallest r)
+        rind[i,0] = np.where(temp[tind,:]<=593)[0][0] #find deepest depth, closest to 593 (smallest r)
     for i, time in enumerate(tdataup):
         tind = np.where(t>=time)[0][0]
-        rind[i,1] = np.where(temp[tind,:]<=593)[0][0] #find deepest depth (smallest r)    
+        rind[i,1] = np.where(temp[tind,:]<=593)[0][0] #find deepest depth, closest to 593 (smallest r)   
     return rind
 
 def find_623_cool(rind,temp,tempdt,cr_low,cr_up,rplot):
@@ -59,18 +59,22 @@ def find_623_cool(rind,temp,tempdt,cr_low,cr_up,rplot):
         upper bounds [km]
     """
     #find time indices of 623K contour using depth midpoints
-    rmidval = (rind[:,0] + rind[:,1])/2
-    tind = np.zeros([3],dtype=int)
-    dTdt = np.zeros([3])
+    rdiff = rind[:,0] - rind[:,1] +1
+    dTdt_check = np.zeros([3],dtype=bool)
     depth = np.zeros([3,2])
-    for i, rmid in enumerate(rmidval):
-        tind[i] = np.where(temp[:,int(rmid)]<=623)[0][0] 
-        dTdt[i] = tempdt[tind[i],int(rmid)] #cooling rate at 623K
-        
-    #check if cooling rate is within bounds
-    comp_up = np.less_equal(dTdt,cr_up)
-    comp_low = np.greater_equal(dTdt,cr_low)
-    if np.all(comp_up == True) and np.all(comp_low == True):
+    for j in range(3): # iterate over meteorites
+        tind = np.zeros([rdiff[j]],dtype=int)
+        dTdt = np.zeros([rdiff[j]])
+        for i in range(rdiff[j]):
+            tind[i] = np.where(temp[:,rind[j,0]+i]<=623)[0][0] 
+            dTdt[i] = tempdt[tind[i],rind[j,0]+i] #cooling rate at 623K
+        #check if cooling rate is within bounds
+        if np.any(dTdt[dTdt <= cr_up[j]]>= cr_low[j]):
+            dTdt_check[j] = True
+            #refine depths to those which work
+            rind[j,1] = rind[j,1] + np.where(dTdt[dTdt <= cr_up[j]]>= cr_low[j])[0][0]
+            rind[j,0] = rind[j,1] + np.where(dTdt[dTdt <= cr_up[j]]>= cr_low[j])[0][-1]
+    if np.all(dTdt_check == True):
         f2 = True
         #find depths
         for i in range(3):
