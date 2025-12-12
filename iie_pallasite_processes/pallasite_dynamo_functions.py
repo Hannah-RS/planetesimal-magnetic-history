@@ -151,21 +151,25 @@ def dynamo_status(rind,t,temp,Rem,Remc,B,tsolid_start,nmet=4):
     Bmodel = np.zeros([nmet]) #rolling-averaged magnetic field strength for each meteorite for depth mid point[T]
     rmid = (rind[:,0]+rind[:,1])/2 #midpoint index for each meteorite
     for i, rval in enumerate(rmid):
-        rval = int(rval)
-        if np.any(temp[:,rval]<=593): #check if cools below 593K
-            tval = np.where(temp[:,rval]<=593)[0][0] #find first time cool below 593K
-            if (tsolid_start<=t[tval]): #check if core is solidifying
-                c.append(True)
-            else:
-                c.append(False)
-            #record B if Rem is supercritical
-            if (Rem[tval] >= Remc): 
-                    Bmodel[i] = B[tval] #save model B
-            else: #if dynamo criteria fails, save B as 0
-                Bmodel[i] = 0
-        else: #below this depth, no longer cools below 593K
-            Bmodel[i] = 0 
-            c.append(False)               
+        if rval == 0: #doesn't cool sufficiently
+            Bmodel[i] = 0
+            c.append(False)
+        else:   
+            rval = int(rval)
+            if np.any(temp[:,rval]<=593): #check if cools below 593K
+                tval = np.where(temp[:,rval]<=593)[0][0] #find first time cool below 593K
+                if (tsolid_start<=t[tval]): #check if core is solidifying
+                    c.append(True)
+                else:
+                    c.append(False)
+                #record B if Rem is supercritical
+                if (Rem[tval] >= Remc): 
+                        Bmodel[i] = B[tval] #save model B
+                else: #if dynamo criteria fails, save B as 0
+                    Bmodel[i] = 0
+            else: #below this depth, no longer cools below 593K
+                Bmodel[i] = 0 
+                c.append(False)               
     return Bmodel, c
 
 
