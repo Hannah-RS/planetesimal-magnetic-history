@@ -118,7 +118,7 @@ def dynamo_check(Bdat,rind,t,temp,Rem,Remc,B,tsolid_start,rplot):
         
     return f, depth, tdata, Bmodel, c
 
-def dynamo_status(rind,t,temp,Rem,Remc,B,tsolid_start):
+def dynamo_status(rind,t,temp,Rem,Remc,B,tsolid_start,nmet=4):
     """
     Check if the dynamo is on when each meteorite cools through 593K
     Parameters
@@ -137,6 +137,8 @@ def dynamo_status(rind,t,temp,Rem,Remc,B,tsolid_start):
         Rolling-averaged magnetic field strength [muT]
     tsolid_start : float
         Onset of core solidification [Myr]
+    nmet : int
+        Number of meteorites, default 4 for Eagle Station
     Returns
     -------
     Bmodel : array
@@ -146,7 +148,7 @@ def dynamo_status(rind,t,temp,Rem,Remc,B,tsolid_start):
         True if the core is solidifying when remanence is acquired
     """
     c = [] #core solidification check
-    Bmodel = np.zeros([4]) #rolling-averaged magnetic field strength for each meteorite for depth mid point[T]
+    Bmodel = np.zeros([nmet]) #rolling-averaged magnetic field strength for each meteorite for depth mid point[T]
     rmid = (rind[:,0]+rind[:,1])/2 #midpoint index for each meteorite
     for i, rval in enumerate(rmid):
         rval = int(rval)
