@@ -306,7 +306,6 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     tsolve_old = tsolve_new
     
     while tsolve_new < tend:
-
         #Step -1. Check for unphysicality
         if f_old > f0:
             raise ValueError("Inner core exceeds core size")
@@ -393,7 +392,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
         
         # Step 4. Is the core solidifying? 
         # is the core solidifying?
-        Tliquidus = round(fe_fes_liquidus_bw(Xs_old,Pc)) #round as Buono & Walker data to nearest integer
+        Tliquidus = fe_fes_liquidus_bw(Xs_old,Pc)
         if T_old_core[-2] < Tliquidus: #core solidifies from outside in- convecting so isothermal beneath CMB
             core_conv = False #core convects but b.l. thickness set by rho not T so use conductive Fcmb
             stratification_new = False #thermal stratification is removed by solidification
