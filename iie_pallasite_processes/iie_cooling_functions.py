@@ -60,15 +60,15 @@ def find_623_cool(rind,temp,tempdt,cr_low,cr_up,rplot):
     """
     #find time indices of 623K contour using depth midpoints
     rdiff = rind[:,0] - rind[:,1] +1
+    rmidval = (rind[:,0] + rind[:,1])/2
     dTdt_check = np.zeros([3],dtype=bool)
     depth = np.zeros([3,2])
     for j in range(3): # iterate over meteorites
         tind = np.zeros([rdiff[j]],dtype=int)
         dTdt = np.zeros([rdiff[j]])
         for i in range(rdiff[j]):
-            tind[i] = np.where(temp[:,rind[j,0]+i]<=623)[0][0] 
-            dTdt[i] = tempdt[tind[i],rind[j,0]+i] #cooling rate at 623K
-        #check if cooling rate is within bounds
+            tind[i] = np.where(temp[:,rind[j,1]+i]<=623)[0][0] #find time when each depth hits 623K
+            dTdt[i] = tempdt[tind[i],rind[j,1]+i] #cooling rate at 623K for each depth at correct time
         if np.any(dTdt[dTdt <= cr_up[j]]>= cr_low[j]):
             dTdt_check[j] = True
             #refine depths to those which work
