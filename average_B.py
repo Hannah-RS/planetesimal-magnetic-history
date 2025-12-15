@@ -124,7 +124,6 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10,Rac=False):
                 Remmed_av = Remdf_med.rolling(window=wn2,center=False).mean()
                 Remadd = np.ones([wn2])*np.average(Remdf_med[:wn2])
                 Remplot = np.concatenate([Remplot,Remadd,Remmed_av.values[wn2:]])
-                print(len(Remadd),len(Remdf_med),len(Remmed_av.values[wn2:]))
     if len(Remdf_long)>0:
         if len(Remdf_long) < wn2: #too small for rolling average
             Rem_add = np.ones([len(Remdf_long)])*np.average(Remdf_long)
