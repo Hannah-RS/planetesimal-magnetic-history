@@ -15,19 +15,23 @@ from average_B import average_B_rem
 
 # Load data
 folder = sys.argv[1]
-subfolder = sys.argv[2]
 mdata = pd.read_csv(f'../Results/{folder}/pallasite_sucess_info.csv',skiprows=[1]) #sucessful model params
+mdata = mdata[mdata['f3']==True] #only keep sucessful runs
 edata = {'cr_yang_low': np.array([2.2, 17.5]),
          'cr_yang_up': np.array([2.8, 19.9]),} #[K/Myr] Yang et. al. 2010 cooling rates at 925K
 Remc = 10 #critical magnetic Reynolds number
 Xs_eutectic=33 #eutectic composition
 #create dataframe to store output
 pdata = pd.DataFrame(columns=['run','gm_dlow','gm_dup','f_dlow','f_dup','gm_tlow','gm_tup','f_tlow','f_tup','gm_mag','f_mag','gm_core_solid','f_core_solid'])
-#%% Loop over runs
+
+#loop over runs
 i = 0 # index for saving to dataframe
-for run in mdata['run']:
+for run in mdata['run']: 
     #navigate to correct subfolder
-    folder_num = int(run*7500/90000) +1
+    if run%12 == 0:
+        folder_num = int(run/12)
+    else:
+        folder_num = int(run/12) +1
     subfolder = f'params_{folder_num}'
     mout = pd.read_csv(f'../Results/{folder}/{subfolder}/run_results.csv',skiprows=[1]) #model outputs
     run = int(run)
