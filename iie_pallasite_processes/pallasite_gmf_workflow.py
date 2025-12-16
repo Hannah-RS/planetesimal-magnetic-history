@@ -104,7 +104,11 @@ for run in mout['run']:
 
         #find out if the dynamo is on/off at 593K for each sample
         Bmodelgm, cgm = dynamo_status(rindgm,t,temp,Rem,Remc,B,tsolid_start)
-    
+    else:
+        depthgm = np.zeros([2,2])
+        timegm = np.zeros([2,2])
+        Bmodelgm = [0,0]
+        cgm = [False,False]
 
     #save to file
      
