@@ -134,6 +134,7 @@ def find_abs_depth(rind,rplot,t,temp,ctemp):
                 time[i,j] = 0
             else:
                 depth[i,j] = rplot[-1] - rplot[rind[i,j]]
-                tval = np.where(temp[:,rind[i,j]]<=ctemp)[0][0] #find first time cool below temp of measured cooling rate
-                time[i,j] = t[tval]
+                if np.any(temp[:,rind[i,j]]<=ctemp): #check cools below temperature
+                    tval = np.where(temp[:,rind[i,j]]<=ctemp)[0][0] #find first time cool below chosen temp
+                    time[i,j] = t[tval]
     return depth, time

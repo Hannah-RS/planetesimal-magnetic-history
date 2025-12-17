@@ -151,7 +151,7 @@ def dynamo_status(rind,t,temp,Rem,Remc,B,tsolid_start,nmet=4):
     Bmodel = np.zeros([nmet]) #rolling-averaged magnetic field strength for each meteorite for depth mid point[T]
     rmid = (rind[:,0]+rind[:,1])/2 #midpoint index for each meteorite
     for i, rval in enumerate(rmid):
-        if rval == 0: #doesn't cool sufficiently
+        if rval == 0: #doesn't cool sufficiently to match cooling rate data
             Bmodel[i] = 0
             c.append(False)
         else:   
