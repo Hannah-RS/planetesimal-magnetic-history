@@ -62,8 +62,8 @@ for run in mdata['run']:
     
     #find contour for Yang et. al. 2010 data, find depths where cooling rates match
     rind = find_temp_depth(925,edata['cr_yang_low'],edata['cr_yang_up'], t, temp, tempdt) 
-    #find depths of each sample
-    depth, time = find_abs_depth(rind,rprof,t,temp,925)
+    #find depths of each sample and time of remanence acquisition
+    depth, time = find_abs_depth(rind,rprof,t,temp,593)
 
     #find out if the dynamo is on/off at 593K for each sample
     Bmodel, c = dynamo_status(rind,t,temp,Rem,Remc,B,tsolid_start)
