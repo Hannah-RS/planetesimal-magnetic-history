@@ -72,9 +72,9 @@ for run in mout['run']: #only do for sucessful runs
         f2 = False
         f3 = False
         depth = np.zeros([3,2])
-
+    
     #save to dataframe
-    iiedata.loc[:,i] = [run, depth[0, 0], depth[0, 1], depth[1, 0], depth[1, 1], depth[2, 0], depth[2, 1], f1, f2, f3, c[0], c[1], c[2]]
+    iiedata.loc[i] = [run, depth[0, 0], depth[0, 1], depth[1, 0], depth[1, 1], depth[2, 0], depth[2, 1], f1, f2, f3, c[0], c[1], c[2]]
     i = i+1
     #close npz file
     npzfile.close()
