@@ -92,7 +92,7 @@ def paleo_check(tdatalow,tdataup,t,B,Brel,Brel_err):
         Brelmodel = Bmodel/np.max(Bmodelav)
         fcheck = [] #counter for relative paleointensity test
         i = 0
-        for Brellow, Brelmid, Brelup in zip(Brelmodel[:,0],Brelmodel[:,1], Brelmodel[:,2]):
+        for Brellow, Brelmid, Brelup in zip(Brelmodel[0,:],Brelmodel[1,:], Brelmodel[2,:]):
             #one of values must lie in range
             if ((Brellow >= Brel[i]-Brel_err[i]) & (Brellow <= Brel[i]+Brel_err[i])) \
                 | ((Brelmid >= Brel[i]-Brel_err[i]) & (Brelmid <= Brel[i]+Brel_err[i])) \
