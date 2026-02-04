@@ -85,7 +85,7 @@ sucesses = pd.merge(mdata, iiedata, on="run") #join together on matching runs
 sucesses.to_csv(f'../Results/{folder}/iie_sucess_info.csv',index=False,mode='a',header=False)
 #count number of failed runs and combine parameters for rerun
 fails = mdata[mdata['status']==0]
-#fails.to_csv(f'../Results/{folder}/iiepallasite_fail_params.csv',index=False,mode='a',header=False)
+fails.to_csv(f'../Results/{folder}/iiepallasite_fail_params.csv',index=False,mode='a',header=False)
 #count number of invalid runs and combine parameters for reference
 invalid = mdata[mdata['status']==-1]
-#invalid.to_csv(f'../Results/{folder}/iiepallasite_inval_params.csv',index=False,mode='a',header=False)
+invalid.to_csv(f'../Results/{folder}/iiepallasite_inval_params.csv',index=False,mode='a',header=False)
