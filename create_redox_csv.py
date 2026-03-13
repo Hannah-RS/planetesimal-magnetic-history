@@ -31,7 +31,7 @@ w = 5 #width of linear region [K]
 beta = 0.0225 #Arrhenius slope
 etal = 10 #liquid viscosity [Pas]
 alpha_n = 30 #melt weakening
-Xs0 = 23 #lowest value valid for whole parameter space
+Xs_0 = 23 #lowest value valid for whole parameter space
 Fe0 = 1e-8 #initial 60Fe/56Fe ratio in accreting material
 t_start_m = 2 #differentiation time [Myr]
 t_end_m = 1500 #maximum end time of simulation [Myr]
@@ -41,15 +41,16 @@ dt = 0.075 #timestep [fraction of core conductive timestep]
 accrete = False #start from differentiation
 #%%
 csv_num = 1
+run = 0
 for i, rval  in enumerate(r):
     for j, rcrval in enumerate(rcr):
         run_info = pd.DataFrame(columns=['run','r','rcr','default','rcmf','eta0','beta','w','etal','alpha_n','Xs_0','Fe0','t_start_m','t_end_m','dr','dt','icfrac','xwater','accrete','status']) #create columns of dataframe
         unit_row = ['','m','','','','Pas','K^-1','K','Pas','','wt %','60Fe/56Fe','Myr','Myr','m','t_cond_core','','wt %','',''] #first row is units
         run_info.loc[len(run_info)] = unit_row
         for k, xwval in enumerate(xwater):
-            run = i*nr*nxwater + j*nxwater + k +1 #calculate run number
+            run = run + 1 #calculate run number
             run_info = pd.concat([run_info, pd.DataFrame({"run":[run],"r":[rval],"rcr":[rcrval],"default":[default],"rcmf":[rcmf],"eta0":[eta0],
-                                                          "beta":[beta],"w":[w],"etal":[etal],"alpha_n":[alpha_n],"Xs_0":[""], "Fe0":[Fe0],
+                                                          "beta":[beta],"w":[w],"etal":[etal],"alpha_n":[alpha_n],"Xs_0":[Xs_0], "Fe0":[Fe0],
                                                             "t_start_m":[t_start_m], "t_end_m":[t_end_m], "dr":[dr],"dt":[dt],"icfrac":[icfrac],
                                                             "xwater":[xwval],"accrete":accrete,"status":""})],ignore_index=True)
         #create csv                     
