@@ -118,7 +118,7 @@ The `Plotting_scripts` directory contains the results of an example run and `Exa
 If you use this model please cite Sanderson et. al. 2025.
 
 ## Issues
-If you have any questions about the code please email hannah.sanderson"at"earth.ox.ac.uk. 
+If you have any questions about the code please email hannah.sanderson"at"geo.uio.no. 
 If there are any issues or bugs in the code please raise an [issue](https://github.com/Hannah-RS/learning-model/issues)
 
 ## References
