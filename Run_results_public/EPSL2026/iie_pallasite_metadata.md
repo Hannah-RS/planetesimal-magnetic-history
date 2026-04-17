@@ -6,8 +6,8 @@ The output files `iie_sucess_info_merged.csv` and `pallasite_sucess_info_merged.
 + c*i* - whether the core is solidifying at the time of remanence acquisition [boolean]
 
 ## For the IIE irons only
-+ f1 - True if the dynamo is active at each meteorite's $^{40}$Ar/$^{39}$Ar age [boolean]
-+ f2 - True if the location cooling through 623K at each meteorite's $^{40}$Ar/$^{39}$Ar age has the correct cooling rate [boolean]
++ f1 - True if the dynamo is active at each meteorite's $`^{40}`$Ar/$`^{39}`$Ar age [boolean]
++ f2 - True if the location cooling through 623K at each meteorite's $`^{40}`$Ar/$`^{39}`$Ar age has the correct cooling rate [boolean]
 + f3 - True if the model and experimental normalised paleointensities agree [boolean]
 
 If (f3 ==True) & (f2==True) then a model run is compatible with the IIE irons' thermal and magnetic history.
