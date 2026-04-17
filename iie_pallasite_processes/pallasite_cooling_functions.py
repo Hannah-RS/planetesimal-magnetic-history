@@ -129,7 +129,12 @@ def find_abs_depth(rind,rplot,t,temp,ctemp):
     time = np.zeros([n,2]) #times for each meteorite cooling through fixed cooling rate (upper and lower bounds) [Myr]
     for i in range(n):
         for j in range(2):
-            depth[i,j] = rplot[-1] - rplot[rind[i,j]]
-            tval = np.where(temp[:,rind[i,j]]<=ctemp)[0][0] #find first time cool below temp of measured cooling rate
-            time[i,j] = t[tval]
+            if rind[i,j]==0: #if no depth found
+                depth[i,j] = 0
+                time[i,j] = 0
+            else:
+                depth[i,j] = rplot[-1] - rplot[rind[i,j]]
+                if np.any(temp[:,rind[i,j]]<=ctemp): #check cools below temperature
+                    tval = np.where(temp[:,rind[i,j]]<=ctemp)[0][0] #find first time cool below chosen temp
+                    time[i,j] = t[tval]
     return depth, time

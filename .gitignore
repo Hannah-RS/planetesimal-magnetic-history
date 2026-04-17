@@ -4,3 +4,4 @@ __pycache__/
 .ipynb_checkpoints
 Results_combined
 Run_params/
+.vscode/

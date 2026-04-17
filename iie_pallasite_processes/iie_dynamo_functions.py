@@ -77,25 +77,32 @@ def paleo_check(tdatalow,tdataup,t,B,Brel,Brel_err):
         range of the experimental data
     """
     #find model B for each radiometric date
-    Bmodel = np.zeros([2,3])
+    Bmodel = np.zeros([3,3])
     i = 0
     for tlow, tup in zip(tdatalow,tdataup):
         Bmodel[0,i] = B[t>=tlow][0]
-        Bmodel[1,i] = B[t>=tup][0]
+        Bmodel[1,i] = B[t>=(tlow+tup)/2][0] #check middle time point too
+        Bmodel[2,i] = B[t<=tup][-1]
         i += 1
-    #normalise using max average B
-    Brelmodel = Bmodel/np.max((Bmodel[:,0]+Bmodel[:,1])/2)
-    fcheck = [] #counter for relative paleointensity test
-    i = 0
-    for Brellow, Brelup in zip(Brelmodel[:,0],Brelmodel[:,1]):
-        #one of values must lie in range
-        if ((Brellow >= Brel[i]-Brel_err[i]) & (Brellow <= Brel[i]+Brel_err[i])) \
-            | ((Brelup >= Brel[i]-Brel_err[i]) & (Brelup <= Brel[i]+Brel_err[i])):
-            fcheck.append(True)
-        else:
-            fcheck.append(False)
-    if all(fcheck) == True:
-        f = True
-    else:
+    Bmodelav = np.mean(Bmodel,axis=0)
+    if np.any(Bmodelav == 0): #B=0 because  Fcmb < Fad
         f = False
+    else:
+        #normalise using max average B
+        Brelmodel = Bmodel/np.max(Bmodelav)
+        fcheck = [] #counter for relative paleointensity test
+        i = 0
+        for Brellow, Brelmid, Brelup in zip(Brelmodel[0,:],Brelmodel[1,:], Brelmodel[2,:]):
+            #one of values must lie in range
+            if ((Brellow >= Brel[i]-Brel_err[i]) & (Brellow <= Brel[i]+Brel_err[i])) \
+                | ((Brelmid >= Brel[i]-Brel_err[i]) & (Brelmid <= Brel[i]+Brel_err[i])) \
+                | ((Brelup >= Brel[i]-Brel_err[i]) & (Brelup <= Brel[i]+Brel_err[i])):
+                fcheck.append(True)
+            else:
+                fcheck.append(False)
+            i += 1
+        if all(fcheck) == True:
+            f = True
+        else:
+            f = False
     return f

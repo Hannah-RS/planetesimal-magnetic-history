@@ -28,7 +28,7 @@ Bmax_err = edata.loc[edata['B_mid'] == Bmax, 'B_err'].values[0]
 edata['Brel'] = edata['B_mid']/edata['B_mid'].max()
 edata['Brel_err'] = np.sqrt((edata['B_err']/Bmax)**2 + (Bmax_err**2*edata['B_mid']**2/Bmax**4))
 #create dataframe to store output
-iiedata = pd.DataFrame(columns=['run','d1_low','d1_up','d2_low','d2_up','d3_low','d3_up','f1','f2','f3','c1','c2','c3','subfolder'])
+iiedata = pd.DataFrame(columns=['run','d1_low','d1_up','d2_low','d2_up','d3_low','d3_up','f1','f2','f3','c1','c2','c3'])
 #%% Loop over runs
 i = 0 # index for building data frames
 for run in mout['run']: #only do for sucessful runs
@@ -72,9 +72,9 @@ for run in mout['run']: #only do for sucessful runs
         f2 = False
         f3 = False
         depth = np.zeros([3,2])
-
+    
     #save to dataframe
-    iiedata.loc[i] = [run, depth[0, 0], depth[0, 1], depth[1, 0], depth[1, 1], depth[2, 0], depth[2, 1], f1, f2, f3, c[0], c[1], c[2],subfolder[7]]
+    iiedata.loc[i] = [run, depth[0, 0], depth[0, 1], depth[1, 0], depth[1, 1], depth[2, 0], depth[2, 1], f1, f2, f3, c[0], c[1], c[2]]
     i = i+1
     #close npz file
     npzfile.close()
@@ -85,9 +85,7 @@ sucesses = pd.merge(mdata, iiedata, on="run") #join together on matching runs
 sucesses.to_csv(f'../Results/{folder}/iie_sucess_info.csv',index=False,mode='a',header=False)
 #count number of failed runs and combine parameters for rerun
 fails = mdata[mdata['status']==0]
-fails['subfolder'] = subfolder[7] #just save folder number
 fails.to_csv(f'../Results/{folder}/iiepallasite_fail_params.csv',index=False,mode='a',header=False)
 #count number of invalid runs and combine parameters for reference
 invalid = mdata[mdata['status']==-1]
-invalid['subfolder'] = subfolder[7] #just save folder number
 invalid.to_csv(f'../Results/{folder}/iiepallasite_inval_params.csv',index=False,mode='a',header=False)

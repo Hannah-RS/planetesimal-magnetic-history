@@ -21,7 +21,7 @@ if automated == True:
     import sys
     folder = sys.argv[1]
 else:
-    folder = 'Results_combined/nc_cc_final/solidus_comparison/' #folder where you want to save the results
+    folder = 'Results_combined/debugging/' #folder where you want to save the results
     ind = None #no index for csv
 #set flag for run started
 if automated == True:
@@ -240,6 +240,7 @@ if therm == True: #process thermal evolution data
     #average post solidification values
     from duration_calc import on_off_test
     from average_B import average_B_rem
+
     if Xs[0]!=Xs_eutectic: #if the core doesn't start at the eutectic composition
         Bav, Remav = average_B_rem(B, Rem, t/Myr, Xs, Xs_eutectic, tsolid_start)
     else: #at eutectic no need to average

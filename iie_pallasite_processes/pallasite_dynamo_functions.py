@@ -53,9 +53,10 @@ def dynamo_check(Bdat,rind,t,temp,Rem,Remc,B,tsolid_start,rplot):
         frcheck = np.zeros([2]) #counter for either time for remanance working
         if np.any(temp[:,rval]<=593): #check if cools below 593K
             #find shallowest depth for which dynamo is on/off as expected
-            pmax = rind[i,0]-rind[i,-1] #max depth range
+            pmax = rind[i,0]-rind[i,1]+1 #max depth range as can be incremented with indices
             p = 0
             while p<pmax:
+                
                 if np.any(temp[:,rval-p]<=593): #if this depth cools below 593K
                     tval = np.where(temp[:,rval-p]<=593)[0][0] #find first time cool below 593K
                     if ((Rem[tval] >= Remc) & (Bdat[i] > 0)) | ((Rem[tval] < Remc) & (Bdat[i] <=0)): 
@@ -85,6 +86,12 @@ def dynamo_check(Bdat,rind,t,temp,Rem,Remc,B,tsolid_start,rplot):
                     frcheck[1] = 1
                     depth[i,1] = rplot[-1] - rplot[rind[i,1]+p]
                     tdata[i,1] = t[np.where(temp[:,(rind[i,1]+p)]<=593)[0][0]]
+                    if depth[i,1]==depth[i,0]: #if depths are equal range is one grid cell
+                        depth[i,0] = depth[i,0]-(rplot[1]-rplot[0])/2
+                        depth[i,1] = depth[i,1]+(rplot[1]-rplot[0])/2
+                        #time undertainty = 1/2output time step
+                        tdata[i,1] = tdata[i,1]+(t[1]-t[0])/2
+                        tdata[i,0] = tdata[i,0]-(t[1]-t[0])/2
                     Bmodel[i,1] = B[tval] #save model B
                     break
                 else: #go one index higher and repeat
@@ -111,7 +118,7 @@ def dynamo_check(Bdat,rind,t,temp,Rem,Remc,B,tsolid_start,rplot):
         
     return f, depth, tdata, Bmodel, c
 
-def dynamo_status(rind,t,temp,Rem,Remc,B,tsolid_start):
+def dynamo_status(rind,t,temp,Rem,Remc,B,tsolid_start,nmet=4):
     """
     Check if the dynamo is on when each meteorite cools through 593K
     Parameters
@@ -130,6 +137,8 @@ def dynamo_status(rind,t,temp,Rem,Remc,B,tsolid_start):
         Rolling-averaged magnetic field strength [muT]
     tsolid_start : float
         Onset of core solidification [Myr]
+    nmet : int
+        Number of meteorites, default 4 for Eagle Station
     Returns
     -------
     Bmodel : array
@@ -139,24 +148,28 @@ def dynamo_status(rind,t,temp,Rem,Remc,B,tsolid_start):
         True if the core is solidifying when remanence is acquired
     """
     c = [] #core solidification check
-    Bmodel = np.zeros([4]) #rolling-averaged magnetic field strength for each meteorite for depth mid point[T]
+    Bmodel = np.zeros([nmet]) #rolling-averaged magnetic field strength for each meteorite for depth mid point[T]
     rmid = (rind[:,0]+rind[:,1])/2 #midpoint index for each meteorite
     for i, rval in enumerate(rmid):
-        rval = int(rval)
-        if np.any(temp[:,rval]<=593): #check if cools below 593K
-            tval = np.where(temp[:,rval]<=593)[0][0] #find first time cool below 593K
-            if (tsolid_start<=t[tval]): #check if core is solidifying
-                c.append(True)
-            else:
-                c.append(False)
-            #record B if Rem is supercritical
-            if (Rem[tval] >= Remc): 
-                    Bmodel[i] = B[tval] #save model B
-            else: #if dynamo criteria fails, save B as 0
-                Bmodel[i] = 0
-        else: #below this depth, no longer cools below 593K
-            Bmodel[i] = 0 
-            c.append(False)               
+        if rval == 0: #doesn't cool sufficiently to match cooling rate data
+            Bmodel[i] = 0
+            c.append(False)
+        else:   
+            rval = int(rval)
+            if np.any(temp[:,rval]<=593): #check if cools below 593K
+                tval = np.where(temp[:,rval]<=593)[0][0] #find first time cool below 593K
+                if (tsolid_start<=t[tval]): #check if core is solidifying
+                    c.append(True)
+                else:
+                    c.append(False)
+                #record B if Rem is supercritical
+                if (Rem[tval] >= Remc): 
+                        Bmodel[i] = B[tval] #save model B
+                else: #if dynamo criteria fails, save B as 0
+                    Bmodel[i] = 0
+            else: #below this depth, no longer cools below 593K
+                Bmodel[i] = 0 
+                c.append(False)               
     return Bmodel, c
 
 

@@ -6,7 +6,7 @@ Function for averaging B and Rem, accoutns for a lot of edge cases so quite comp
 import numpy as np
 import pandas as pd
 
-def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
+def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10,Rac=False):
     """
     Average B and Rem values post onset of solidification
 
@@ -26,6 +26,9 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
         Time of solidification onset [Myr]
     Rem_c : float, optional
         Critical Rem value. Default is 10.
+    Rac : bool, optional
+       Whether you are using Rac for dynamo criterion, if so don't set B to 0
+       when Rem<Rem_c. Default is False. 
     
     Returns
     -------
@@ -64,14 +67,18 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
     if len(Bdf_med)>0:
         if len(Bdf_med) < wn2: #if less than window width
             wn2 = wn1 #use previous window width
-        if len(Bdf_short)>wn2: #concatenate part of previous array to cover blank space of rolling average
-            Bdf_med = pd.concat([Bdf_short[-wn2:],Bdf_med])
-            Bmed_av = Bdf_med.rolling(window=wn2,center=False).mean() #calculate rolling average
-            Bplot = np.concatenate([Bplot,Bmed_av.values[wn2:]])
-        else: # previous array too small to concatenate
-            Bmed_av = Bdf_med.rolling(window=wn2,center=False).mean()
-            Badd = np.ones([wn2])*np.average(Bdf_med[:wn2]) #average initial window width
-            Bplot = np.concatenate([Bplot,Badd,Bmed_av.values[wn2:]])
+        if len(Bdf_med) < wn1: #shorter than smallest window
+            Badd = np.ones([len(Bdf_med)])*np.average(Bdf_med) #average initial window width
+            Bplot = np.concatenate([Bplot,Badd])
+        else:
+            if len(Bdf_short)>wn2: #concatenate part of previous array to cover blank space of rolling average
+                Bdf_med = pd.concat([Bdf_short[-wn2:],Bdf_med])
+                Bmed_av = Bdf_med.rolling(window=wn2,center=False).mean() #calculate rolling average
+                Bplot = np.concatenate([Bplot,Bmed_av.values[wn2:]])
+            else: # previous array too small to concatenate
+                Bmed_av = Bdf_med.rolling(window=wn2,center=False).mean()
+                Badd = np.ones([wn2])*np.average(Bdf_med[:wn2]) #average initial window width
+                Bplot = np.concatenate([Bplot,Badd,Bmed_av.values[wn2:]])
     if len(Bdf_long)>0:
         if len(Bdf_long) < wn2: #if less than medium window width
             Badd = np.ones([len(Bdf_long)])*np.average(Bdf_long) #average initial window width
@@ -105,14 +112,18 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
     if len(Remdf_med)>0:
         if len(Remdf_med) < wn2: #if less than window width
             wn2 = wn1
-        if len(Remdf_short)>wn2: #concatenate part of previous array to cover blank space of rolling average
-            Remdf_med = pd.concat([Remdf_short[-wn2:],Remdf_med])
-            Remmed_av = Remdf_med.rolling(window=wn2,center=False).mean()
-            Remplot = np.concatenate([Remplot,Remmed_av.values[wn2:]])
-        else: # previous array too small to concatenate
-            Remmed_av = Remdf_med.rolling(window=wn2,center=False).mean()
-            Remadd = np.ones([wn2])*np.average(Remdf_med[:wn2])
-            Remplot = np.concatenate([Remplot,Remadd,Remmed_av.values[wn2:]])
+        if len(Remdf_med) < wn1: #shorter than smallest window
+            Remadd = np.ones([len(Remdf_med)])*np.average(Remdf_med) #average initial window width
+            Remplot = np.concatenate([Remplot,Remadd])
+        else:
+            if len(Remdf_short)>wn2: #concatenate part of previous array to cover blank space of rolling average
+                Remdf_med = pd.concat([Remdf_short[-wn2:],Remdf_med])
+                Remmed_av = Remdf_med.rolling(window=wn2,center=False).mean()
+                Remplot = np.concatenate([Remplot,Remmed_av.values[wn2:]])
+            else: # previous array too small to concatenate
+                Remmed_av = Remdf_med.rolling(window=wn2,center=False).mean()
+                Remadd = np.ones([wn2])*np.average(Remdf_med[:wn2])
+                Remplot = np.concatenate([Remplot,Remadd,Remmed_av.values[wn2:]])
     if len(Remdf_long)>0:
         if len(Remdf_long) < wn2: #too small for rolling average
             Rem_add = np.ones([len(Remdf_long)])*np.average(Remdf_long)
@@ -132,8 +143,10 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
     Bplot = np.concatenate([Bplot,Blate])
     Remplot = np.concatenate([Remplot,Remlate])
     #filter B by Rem
-    Bplot[Remplot<Rem_c]=0
-
+    if Rac==False:
+        Bplot[Remplot<Rem_c]=0
+    else:
+        pass
     return Bplot, Remplot
 
 def average_B_Psyche(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10):
