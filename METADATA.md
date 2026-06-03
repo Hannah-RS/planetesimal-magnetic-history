@@ -113,11 +113,13 @@ These files can be loaded using numpy or pandas. The function `load_run_results`
 + alpha_n : melt weakening exponent
 + Xs_0 : initial core sulfur content [wt %] - minimum possible value can be calculated in `Analysis/minimum_xs.py`
 + Fe0 : $^{60}Fe/^{56}Fe$ in accreted material
-+ t_acc_m : accretion time [Ma after CAI formation]
++ t_start_m : model start time (accretion or differentiation depending on value of accrete) [Ma after CAI formation]
 + t_end_m : model end time [Ma after CAI formation] - set this to be long enough for the core to solidify
 + dr : grid spacing [m]
 + dt : time step [core conductive timestep]
 + icfrac : core solidification endmember ($m_{frac}$)
++ xwater : Water content of nominally anhydrous minerals in silicate [wt%]
++ accrete : boolean True = Simulation starts from accretion at t_start_m. Homogeneous initial temperature is the surface temperature. False = Simulation starts from differentiation. Homogeneous initial temperature is the temperature of the critical melt fraction.
 
 ## run_results.csv
 All values in this csv are floats. Units are given in the second row of the csv and must be skipped when reading in the csv.
