@@ -190,7 +190,10 @@ if therm == True: #process thermal evolution data
     tcoremax = t[loc_max2]/Myr
     if np.any(f<f0):
         tsolid_start = t[f<f0][0]/Myr #start of core solidification
-        tsolid = t[-1]/Myr #time of core solidification
+        if (t[-1]+save_interval_t)/Myr < t_end_m: #if core solidifies before end of run
+            tsolid = t[-1]/Myr #time of core solidification
+        else:
+            tsolid = np.nan
     else:
         tsolid_start = np.nan
         tsolid = np.nan
@@ -241,9 +244,9 @@ if therm == True: #process thermal evolution data
     from duration_calc import on_off_test
     from average_B import average_B_rem
 
-    if Xs[0]!=Xs_eutectic: #if the core doesn't start at the eutectic composition
+    if (Xs[0]!=Xs_eutectic)&(np.any(f<f0)): #if the core doesn't start at the eutectic composition and core solidification occurs during the model run.
         Bav, Remav = average_B_rem(B, Rem, t/Myr, Xs, Xs_eutectic, tsolid_start)
-    else: #at eutectic no need to average
+    else: #at eutectic or no solidification no need to average
         Bav = B
         Remav = Rem
     #thermal dynamo
