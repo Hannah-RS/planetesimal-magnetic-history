@@ -17,6 +17,7 @@ Thermal evolution and dynamo generation model for a planetesimal.
     + [Model outputs](#model-outputs)
     + [Example use](#example-use)
 + [Citing the model](#citing-the-model)
++ [Contributing](#contributing)
 + [Issues](#issues)
 + [References](#references)
 
@@ -116,6 +117,9 @@ The `Plotting_scripts` directory contains the results of an example run and `Exa
 
 ## Citing the model
 If you use this model please cite Sanderson et. al. 2025.
+
+## Contributing
+If you would like to contribute to this model please contact Hannah Sanderson via email. Approved contributors are asked to contribute by forking this repository, making changes to a branch in their forked repository, and then creating a pull request from their forked repository back to this base repository for Hannah to review.
 
 ## Issues
 If you have any questions about the code please email hannah.sanderson"at"geo.uio.no. 
