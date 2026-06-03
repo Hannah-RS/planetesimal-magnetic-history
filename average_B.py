@@ -38,12 +38,15 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10,Rac=False):
         Rem values with averaged Rem values post onset of solidification
     """
     #find when core reaches eutectic composition
-    t_eut = t[xs>=xs_eut][0]
+    if np.any(xs>=xs_eut):
+        t_eut = t[xs>=xs_eut][0]
+    else: #if core doesn't reach eutectic composition during model run, set t_eut to end of run so all values after solidification onset are averaged
+        t_eut = t[-1]
     #process B values
     Bplot = B[t<tsolid_start] #before solidification
-    Bdf = pd.Series(B[(t>=tsolid_start)&(t<t_eut)]) # convert to pandas series
-    Blate = B[(t>=t_eut)&(t>=tsolid_start)] #after eutectic and after solidification
-    tsolids = t[(t>=tsolid_start)&(t<t_eut)]
+    Bdf = pd.Series(B[(t>=tsolid_start)&(t<=t_eut)]) # convert to pandas series
+    Blate = B[(t>t_eut)&(t>=tsolid_start)] #after eutectic and after solidification starts
+    tsolids = t[(t>=tsolid_start)&(t<=t_eut)]
     #split into 3 series
     t1 = 10 #first threshold [Myr]
     t2 = 100 # second threshold [Myr]
@@ -96,8 +99,8 @@ def average_B_rem(B,Rem,t,xs,xs_eut,tsolid_start,Rem_c=10,Rac=False):
                 Bplot = np.concatenate([Bplot,Badd,Blong_av.values[wn3:]])  
     #process Rem values
     Remplot = Rem[t<tsolid_start] #before solidification
-    Remdf = pd.Series(Rem[(t>=tsolid_start)&(t<t_eut)]) # convert to pandas series
-    Remlate = Rem[(t>=t_eut)&(t>=tsolid_start)] #after eutectic
+    Remdf = pd.Series(Rem[(t>=tsolid_start)&(t<=t_eut)]) # convert to pandas series
+    Remlate = Rem[(t>t_eut)&(t>=tsolid_start)] #after eutectic
     Remdf_short = Remdf[tsolids < t1]
     Remdf_med = Remdf[(tsolids >=t1)&(tsolids<t2)]
     Remdf_long = Remdf[tsolids>=t2]
