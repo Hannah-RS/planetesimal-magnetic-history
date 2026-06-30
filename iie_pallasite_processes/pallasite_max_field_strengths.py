@@ -63,7 +63,7 @@ for run in mdata['run']:
         #Find Bfield in that time.
         Bsurf = B[(t>=tlow) & (t<=tup)].mean()
         #Scale by distance from the surface
-        Bout[j] = Bsurf*(r/(r-depth))**3
+        Bout[j-3] = Bsurf*(r/(r-depth))**3
     #save to file
     pdata.loc[i] = [run, Bout[0], Bout[1], Bout[2]]
     i += 1
