@@ -4,7 +4,7 @@
 import numpy as np
 from parameters import Ts, Myr, dr, out_interval, save_interval_t, km, kc, alpha_c,\
     r, rc, rhoc, gc, Vm, rhom, As, cpc, Xs_0, default, Xs_eutectic, Acmb, Lc, \
-        Pc, automated, conv_tol, n_cells, temp_tol, rcr, nccells, nmcells
+        Pc, automated, conv_tol, n_cells, nt_cells, temp_tol, rcr
 
 #import required functions
 from temp_cond import Tm_cond_calc, Tc_cond_calc
@@ -128,7 +128,7 @@ def thermal_evolution(tstart,tend,dt,T0,f0,sparse_mat_c,sparse_mat_m):
     dc = np.zeros([m],dtype='float64')
     min_unstable = np.ones([m],dtype=int)*(i_core-1) #smallest index of cells in the core that are convectively unstable - as a minimum it is the one below the CMB
     Ur = np.zeros([m],dtype='float64')
-    Tprofile= np.zeros([m,n_cells],dtype='float64')
+    Tprofile= np.zeros([m,nt_cells],dtype='float64')
     Tc = np.zeros([m],dtype='float64')
     Tc_conv = np.zeros([m],dtype='float64')
     Tcmb = np.zeros([m],dtype='float64')

@@ -47,10 +47,13 @@ if automated == True:
     run = int(auto.loc[ind,'run'])
     t_start_m = auto.loc[ind,'t_start_m']
     t_end_m = auto.loc[ind,'t_end_m']
+    tcrust = auto.loc[ind,'tcrust']
+    dcrust = auto.loc[ind,'dcrust']
     dr = auto.loc[ind,'dr']
     icfrac = auto.loc[ind,'icfrac']
     xwater = auto.loc[ind,'xwater']
     accrete = auto.loc[ind,'accrete']
+    pdiff = auto.loc[ind,'pdiff']
 else: #set manually
     r = 100e3 # radius of asteroid [m]
     rcr = 0.5 #core radius as a fraction of asteroid radius
@@ -67,13 +70,17 @@ else: #set manually
     run = 23
     t_start_m = 2 #start time - accretion time if accrete = True, differentiation time if accrete = False [Myr]
     t_end_m = 1000 # max end time [Myr]
+    tcrust = 5 #Time of late addition of chondritic material [Myr]
+    dcrust = 5e3 #thickness of chondritic crust [m
     icfrac = 0 #fraction of solidified material that forms a passive inner core during solidification
     xwater = 0.05 #water content of mantle [wt %]
     accrete = False #do you want to include accretion to differentiation
+    pdiff = True #Do you want to add chondritic crust at time tcrust
 
 # Size of body
 #rc = rcr*r #radius of core [m]
-n_cells = int(r/dr) +1 #number of cells needed to span the body including one at the centre
+nt_cells = int((r+dcrust)/dr) +1 #number of cells needed to span the differentiated body and crust including one at the centre
+n_cells = int(r/dr) +1 #number of cells needed to span the differentiated body including one at the centre
 nccells = round((n_cells-3)*(rcr))+2 #number of cells needed to span core (inc. centre and CMB)
 nmcells = n_cells - nccells +1 #number of cells needed to span mantle plus one extra for CMB
 rc = (nccells-1)*dr #radius of core [m], subtract one for centre
