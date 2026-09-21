@@ -46,6 +46,8 @@ conda env create -f environment.yml
 ```
 5. The code is now ready to be used.
 
+Cloning the repository should take less than one minute.
+
 ### Example Directory structure
 ```mermaid
 flowchart TD;
@@ -71,6 +73,8 @@ This code was written using Python 3.10.12 but should work for all Python 3 rele
 1. Set `automated=False` in `parameters.py` and change any desired parameters in `parameters.py`. 
 2. Set the `folder` variable in `solver.py` to choose where you want to save your results.
 3. Run `solver.py`. Results will appear in your chosen results directory and run parameters will be saved in `run_info.csv`.
+
+Runtime depends on the chosen end point of the simulation and planetesimal size. For a 500km radius planetesimal, to reach the end of core solidification will take 30-40minutes on a standard desktop,depending on chosen parameters. For a 100km body, to reach the end of core solidification will take 1 to 5 minutes.
 
 ### Automated runs
 An automated series of runs is performed using `multi_run.sh` which iteratively reads in a line of parameters from `auto_params.csv` and runs the model until all parameter lines have been run. The final `status` column in `auto_params.csv` indicates whether a parameter list has been run. `status=1` indicates a completed run with no errors, `status=0` indicates an incompleted run (failed or in progress) and `status=''` indicates the run has not been started. `multi_run.sh` finishes when all rows have `status=1` or `status=0`.
