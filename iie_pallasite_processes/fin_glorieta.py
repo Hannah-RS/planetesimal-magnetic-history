@@ -17,8 +17,8 @@ from average_B import average_B_rem
 folder = sys.argv[1]
 mdata = pd.read_csv(f'../Results/{folder}/pallasite_sucess_info.csv',skiprows=[1]) #sucessful model params
 mdata = mdata[mdata['f3']==True] #only keep sucessful runs
-edata = {'cr_yang_low': np.array([2.2, 17.5]),
-         'cr_yang_up': np.array([2.8, 19.9]),} #[K/Myr] Yang et. al. 2010 cooling rates at 925K
+edata = {'cr_yang_low': np.array([2.2, 9.5]),
+         'cr_yang_up': np.array([2.8, 26.9]),} #[K/Myr] Yang et. al. 2010 cooling rates at 925K
 Remc = 10 #critical magnetic Reynolds number
 Xs_eutectic=33 #eutectic composition
 #create dataframe to store output
